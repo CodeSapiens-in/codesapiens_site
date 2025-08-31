@@ -17,6 +17,7 @@ import Dashboard from './admin/Dashboard';
 import UserProfile from './user/UserProfile';
 import UserDashboard from './user/UserDashboard';
 import UserNavbar from './user/UserNavbar';
+import AnalyticsPage from './admin/AnalyticsPage';
 
 function Root() {
   const session = useSession();
@@ -49,6 +50,7 @@ function Root() {
             <Route path="/admin" element={<Dashboard />} />
             <Route path="/profile" element={<UserProfile />} />
             <Route path="/dashboard" element={<UserDashboard />} />
+            <Route path="/analytics" element={<AnalyticsPage/>} />
           </Routes>
         </Router>
       </main>
