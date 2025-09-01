@@ -26,7 +26,6 @@ const UserProfile = () => {
   const [activeTab, setActiveTab] = useState('Overview');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [userData, setUserData] = useState(null);
-  const [userStats, setUserStats] = useState(null);
   const [userActivity, setUserActivity] = useState([]);
   const [userSkills, setUserSkills] = useState([]);
   const [userAchievements, setUserAchievements] = useState({ badges: [], certificates: [] });
@@ -39,6 +38,7 @@ const UserProfile = () => {
   const [colleges, setColleges] = useState([]);
   const [collegeSearch, setCollegeSearch] = useState('');
   const [collegeLoading, setCollegeLoading] = useState(false);
+  const [collegeError, setCollegeError] = useState(null);
 
   const tabs = ['Overview', 'Skills', 'Achievements', 'Activity'];
 
@@ -100,19 +100,9 @@ const UserProfile = () => {
             emailVerified: data.email_verified || user.email_confirmed_at !== null,
             phoneVerified: data.phone_verified || false,
             adminApproved: data.admin_approved || false,
-            badgesEarned: data.badges_earned || 0,
-            points: data.points || 0,
-            sessionsAttended: data.sessions_attended || 0,
             createdAt: data.created_at,
             updatedAt: data.updated_at
           };
-
-          const stats = [
-            { label: "Points", value: data.points?.toString() || "0", icon: TrendingUp, color: "text-orange-500", bgColor: "bg-orange-50" },
-            { label: "Badges", value: data.badges_earned?.toString() || "0", icon: Award, color: "text-purple-500", bgColor: "bg-purple-50" },
-            { label: "Sessions", value: data.sessions_attended?.toString() || "0", icon: Calendar, color: "text-blue-500", bgColor: "bg-blue-50" },
-            { label: "Rank", value: "#--", icon: Hash, color: "text-green-500", bgColor: "bg-green-50" }
-          ];
 
           let skills = [];
           if (data.skills) {
@@ -130,7 +120,6 @@ const UserProfile = () => {
 
           setUserData(transformedUser);
           setEditedData(transformedUser);
-          setUserStats(stats);
           setUserSkills(skills);
         } else {
           setError("User profile not found");
@@ -153,18 +142,20 @@ const UserProfile = () => {
       if (collegeSearch.length < 3) {
         setColleges([]);
         setCollegeLoading(false);
+        setCollegeError(null);
         return;
       }
       
       try {
         setCollegeLoading(true);
+        setCollegeError(null);
         const response = await fetch('https://colleges-name-api.onrender.com/colleges/search', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'keyword': collegeSearch // Pass input keyword to header
+            'keyword': collegeSearch
           },
-          body: JSON.stringify({}) // Empty body as keyword is now in header
+          body: JSON.stringify({})
         });
         
         if (!response.ok) {
@@ -173,14 +164,14 @@ const UserProfile = () => {
         
         const data = await response.json();
         
-        // Extract only college names from the response
+        // Extract only college names from the response and trim them
         let collegeNames = [];
         if (Array.isArray(data)) {
-          collegeNames = data.map(item => item[2]); // Extract college name from index 2
+          collegeNames = data.map(item => item[2].trim());
         } else if (data.colleges && Array.isArray(data.colleges)) {
-          collegeNames = data.colleges.map(item => item[2]);
+          collegeNames = data.colleges.map(item => item[2].trim());
         } else if (data.data && Array.isArray(data.data)) {
-          collegeNames = data.data.map(item => item[2]);
+          collegeNames = data.data.map(item => item[2].trim());
         } else {
           console.warn('Unexpected API response format:', data);
           collegeNames = [];
@@ -190,7 +181,7 @@ const UserProfile = () => {
       } catch (err) {
         console.error('Error fetching colleges:', err);
         setColleges([]);
-        setError('Failed to fetch colleges. Please try again.');
+        setCollegeError('Failed to fetch colleges. Please try again.');
       } finally {
         setCollegeLoading(false);
       }
@@ -213,16 +204,26 @@ const UserProfile = () => {
   const handleCollegeChange = (e) => {
     const value = e.target.value;
     setCollegeSearch(value);
-    setEditedData((prev) => ({ ...prev, college: value }));
+    setCollegeError(null); // Clear error when typing
   };
 
-  const handleCollegeSelect = (collegeName) => {
-    setEditedData((prev) => ({ ...prev, college: collegeName }));
-    setCollegeSearch(collegeName);
-    setColleges([]);
+  const handleCollegeSelect = (e, collegeName) => {
+    e.preventDefault(); // Prevent event propagation
+    e.stopPropagation(); // Stop event bubbling
+    const trimmedCollegeName = collegeName.trim(); // Remove any trailing spaces
+    setEditedData((prev) => ({ ...prev, college: trimmedCollegeName }));
+    setCollegeSearch(trimmedCollegeName);
+    setColleges([]); // Close dropdown
+    setCollegeError(null);
   };
 
   const handleSave = async () => {
+    // Validate college name
+    if (editedData.college && !colleges.includes(editedData.college) && collegeSearch.length >= 3) {
+      setCollegeError('Please select a college from the dropdown.');
+      return;
+    }
+
     try {
       const updateData = {
         display_name: editedData.displayName,
@@ -244,6 +245,7 @@ const UserProfile = () => {
       setIsEditing(false);
       setColleges([]);
       setCollegeSearch('');
+      setCollegeError(null);
     } catch (err) {
       console.error('Update error:', err);
       setError(err.message);
@@ -255,6 +257,7 @@ const UserProfile = () => {
     setEditedData({ ...userData });
     setColleges([]);
     setCollegeSearch('');
+    setCollegeError(null);
   };
 
   const mockPersonalInfo = userData ? [
@@ -493,28 +496,6 @@ const UserProfile = () => {
           </div>
         </div>
         
-        {/* Stats Grid */}
-        <div className="px-3 sm:px-4 lg:px-6 pb-4 sm:pb-6">
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
-            {userStats && userStats.map((stat, index) => {
-              const IconComponent = stat.icon;
-              return (
-                <div key={index} className="bg-gray-50 rounded-lg p-3 sm:p-4 border hover:shadow-sm transition-shadow">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-xs sm:text-sm font-medium text-gray-600 mb-1">{stat.label}</p>
-                      <p className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900">{stat.value}</p>
-                    </div>
-                    <div className={`p-2 sm:p-2.5 rounded-lg ${stat.bgColor}`}>
-                      <IconComponent className={`w-4 h-4 sm:w-5 sm:h-5 ${stat.color}`} />
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-        
         {/* Tabs */}
         <div className="px-3 sm:px-4 lg:px-6">
           <div className="hidden sm:flex space-x-8">
@@ -568,7 +549,9 @@ const UserProfile = () => {
                                 type="text"
                                 value={collegeSearch}
                                 onChange={handleCollegeChange}
-                                className="text-sm text-gray-900 border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 w-full pr-8"
+                                className={`text-sm text-gray-900 border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 w-full pr-8 ${
+                                  collegeError ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''
+                                }`}
                                 placeholder="Search college (min 3 characters)..."
                               />
                               {collegeLoading && (
@@ -583,8 +566,8 @@ const UserProfile = () => {
                                 <div className="absolute z-20 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto mt-1">
                                   {colleges.map((college, i) => (
                                     <button
-                                      key={i} 
-                                      onClick={() => handleCollegeSelect(college)}
+                                      key={i}
+                                      onClick={(e) => handleCollegeSelect(e, college)}
                                       className="w-full px-4 py-3 text-left text-sm text-gray-900 hover:bg-blue-50 focus:bg-blue-50 focus:outline-none border-b border-gray-100 last:border-b-0"
                                     >
                                       {college}
@@ -596,6 +579,9 @@ const UserProfile = () => {
                                 <div className="absolute z-20 w-full bg-white border border-gray-300 rounded-lg shadow-lg mt-1 p-4 text-center text-sm text-gray-500">
                                   No colleges found
                                 </div>
+                              )}
+                              {collegeError && (
+                                <p className="text-sm text-red-500 mt-1">{collegeError}</p>
                               )}
                             </div>
                           ) : info.type === "number" ? (
@@ -672,30 +658,6 @@ const UserProfile = () => {
                 </div>
               </div>
             </div>
-
-            {/* Recent Activity */}
-            <div className="bg-white rounded-lg shadow-sm border lg:col-span-2">
-              <div className="p-4 sm:p-6 border-b">
-                <h3 className="text-lg font-semibold text-gray-900">Recent Activity</h3>
-              </div>
-              <div className="p-4 sm:p-6">
-                <div className="space-y-4">
-                  {mockRecentActivity.map((activity, index) => (
-                    <div key={index} className="flex items-center space-x-3 py-3 border-b border-gray-100 last:border-b-0">
-                      <div className={`w-2 h-2 rounded-full flex-shrink-0 ${
-                        activity.type === 'achievement' ? 'bg-green-500' :
-                        activity.type === 'project' ? 'bg-blue-500' :
-                        activity.type === 'badge' ? 'bg-purple-500' : 'bg-orange-500'
-                      }`}></div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-gray-900 truncate">{activity.action}</p>
-                        <p className="text-xs text-gray-500">{activity.time}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
           </div>
         )}
 
@@ -757,33 +719,16 @@ const UserProfile = () => {
           <div className="space-y-6">
             <div className="bg-white rounded-lg shadow-sm border">
               <div className="p-4 sm:p-6 border-b">
-                <h3 className="text-lg font-semibold text-gray-900">Earned Badges</h3>
+                <h3 className="text-lg font-semibold text-gray-900">Achievements</h3>
               </div>
               <div className="p-4 sm:p-6">
-                <div className="text-center py-8">
+                <div className="text-center py-12">
                   <Trophy className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                  <h4 className="text-lg font-semibold text-gray-700 mb-2">Achievements Coming Soon!</h4>
                   <p className="text-gray-500 mb-4">
-                    {userStats && userStats[1]?.value !== "0" 
-                      ? `You have earned ${userStats[1]?.value} badges!` 
-                      : "No badges earned yet"}
+                    We're working on an exciting achievements system with badges, certifications, and rewards.
                   </p>
-                  <button className="px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-colors">
-                    {userStats && userStats[1]?.value !== "0" ? "View All Badges" : "Earn Your First Badge"}
-                  </button>
-                </div>
-              </div>
-            </div>
-            <div className="bg-white rounded-lg shadow-sm border">
-              <div className="p-4 sm:p-6 border-b">
-                <h3 className="text-lg font-semibold text-gray-900">Certifications</h3>
-              </div>
-              <div className="p-4 sm:p-6">
-                <div className="text-center py-8">
-                  <Award className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                  <p className="text-gray-500 mb-4">No certifications added yet</p>
-                  <button className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors">
-                    Add Certificate
-                  </button>
+                  <p className="text-sm text-gray-400">Stay tuned for updates!</p>
                 </div>
               </div>
             </div>
@@ -798,8 +743,11 @@ const UserProfile = () => {
             <div className="p-4 sm:p-6">
               <div className="text-center py-12">
                 <Calendar className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                <p className="text-gray-500 mb-4">Activity timeline will be available soon</p>
-                <p className="text-sm text-gray-400">Check back later to see your recent activities</p>
+                <h4 className="text-lg font-semibold text-gray-700 mb-2">Activity Timeline Coming Soon!</h4>
+                <p className="text-gray-500 mb-4">
+                  We're building a comprehensive activity tracking system to show your learning journey.
+                </p>
+                <p className="text-sm text-gray-400">Check back soon for detailed activity insights!</p>
               </div>
             </div>
           </div>

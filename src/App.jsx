@@ -19,6 +19,8 @@ import UserDashboard from './user/UserDashboard';
 import UserNavbar from './user/UserNavbar';
 import AnalyticsPage from './admin/AnalyticsPage';
 import NotFoundPage from './components/ui/NotFoundPage';
+import CodeSapiensHero from './components/CodesapiensHero';
+
 
 function Root() {
   const session = useSession();
@@ -52,7 +54,9 @@ function Root() {
             <Route path="/profile" element={<UserProfile />} />
             <Route path="/" element={<UserDashboard />} />
             <Route path="/analytics" element={<AnalyticsPage/>} />
+            <Route path="/code" element={<CodeSapiensHero/>} />
             <Route path="*" element={<NotFoundPage/>} />
+         
           </Routes>
         </Router>
       </main>

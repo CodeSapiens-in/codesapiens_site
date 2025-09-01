@@ -102,39 +102,6 @@ export default function UserDashboard() {
     fetchUserData();
   }, []);
 
-  const stats = userData
-    ? [
-        {
-          title: "Total Points",
-          value: userData.points?.toString() || "0",
-          icon: <TrendingUp className="w-6 h-6 text-blue-500" />,
-          bgColor: "bg-blue-50",
-          iconBg: "bg-blue-100",
-        },
-        {
-          title: "Sessions Attended",
-          value: userData.sessionsAttended?.toString() || "0",
-          icon: <Calendar className="w-6 h-6 text-green-500" />,
-          bgColor: "bg-green-50",
-          iconBg: "bg-green-100",
-        },
-        {
-          title: "Badges Earned",
-          value: userData.badgesEarned?.toString() || "0",
-          icon: <Trophy className="w-6 h-6 text-purple-500" />,
-          bgColor: "bg-purple-50",
-          iconBg: "bg-purple-100",
-        },
-        {
-          title: "Volunteering Hours",
-          value: userData.volunteeringHours?.toString() || "0",
-          icon: <Users className="w-6 h-6 text-orange-500" />,
-          bgColor: "bg-orange-50",
-          iconBg: "bg-orange-100",
-        },
-      ]
-    : [];
-
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Auth Checking State - Prevents login page flash */}
@@ -205,7 +172,7 @@ export default function UserDashboard() {
                   {userData.displayName ||
                     userData.email?.split("@")[0] ||
                     "Student"}
-                  ! 👋
+                  !
                 </h1>
                 <p className="text-gray-600">
                   Here's what's happening in your student community today.
@@ -235,30 +202,6 @@ export default function UserDashboard() {
                     </>
                   )}
                 </div>
-              </div>
-
-              {/* Stats Grid */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8">
-                {stats.map((stat, index) => (
-                  <div
-                    key={index}
-                    className={`${stat.bgColor} rounded-xl p-4 sm:p-6 border border-gray-200`}
-                  >
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-sm font-medium text-gray-600 mb-2">
-                          {stat.title}
-                        </p>
-                        <p className="text-2xl sm:text-3xl font-bold text-gray-900">
-                          {stat.value}
-                        </p>
-                      </div>
-                      <div className={`${stat.iconBg} p-3 rounded-lg`}>
-                        {stat.icon}
-                      </div>
-                    </div>
-                  </div>
-                ))}
               </div>
 
               {/* Skills Section */}
@@ -299,9 +242,9 @@ export default function UserDashboard() {
               )}
 
               {/* Content Grid */}
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
                 {/* Upcoming Events */}
-                <div className="lg:col-span-2 bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
                   <div className="flex items-center space-x-3 mb-6">
                     <Calendar className="w-6 h-6 text-blue-500" />
                     <h2 className="text-xl font-semibold text-gray-900">
@@ -313,15 +256,13 @@ export default function UserDashboard() {
                     <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
                       <Calendar className="w-8 h-8 text-gray-400" />
                     </div>
-                    <h3 className="text-lg font-medium text-gray-900 mb-2">
-                      No upcoming events
+                    <h3 className="text-lg font-semibold text-gray-700 mb-2">
+                      Events Coming Soon!
                     </h3>
-                    <p className="text-gray-500">
-                      Check back later for new events!
+                    <p className="text-gray-500 mb-4">
+                      We're working on an exciting events system where you can discover and join amazing learning opportunities.
                     </p>
-                    <button className="mt-3 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors duration-200">
-                      Browse Events
-                    </button>
+                    <p className="text-sm text-gray-400">Stay tuned for updates!</p>
                   </div>
                 </div>
 
@@ -330,34 +271,21 @@ export default function UserDashboard() {
                   <div className="flex items-center space-x-3 mb-6">
                     <Trophy className="w-6 h-6 text-purple-500" />
                     <h2 className="text-xl font-semibold text-gray-900">
-                      Recent Badges
+                      Badges & Achievements
                     </h2>
                   </div>
 
-                  <div className="text-center py-8">
+                  <div className="text-center py-12">
                     <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
                       <Trophy className="w-8 h-8 text-gray-400" />
                     </div>
-                    {userData.badgesEarned > 0 ? (
-                      <>
-                        <p className="text-gray-700 mb-2">
-                          You have {userData.badgesEarned} badge
-                          {userData.badgesEarned !== 1 ? "s" : ""}!
-                        </p>
-                        <button className="px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-colors duration-200">
-                          View All Badges
-                        </button>
-                      </>
-                    ) : (
-                      <>
-                        <p className="text-gray-500 text-sm mb-2">
-                          No badges earned yet
-                        </p>
-                        <button className="px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-colors duration-200">
-                          Earn Your First Badge
-                        </button>
-                      </>
-                    )}
+                    <h3 className="text-lg font-semibold text-gray-700 mb-2">
+                      Badges Coming Soon!
+                    </h3>
+                    <p className="text-gray-500 mb-4">
+                      We're creating an exciting badge system to recognize your achievements and progress.
+                    </p>
+                    <p className="text-sm text-gray-400">Get ready to earn your first badge!</p>
                   </div>
                 </div>
               </div>
@@ -366,7 +294,7 @@ export default function UserDashboard() {
               {userData.githubUrl ||
               userData.linkedinUrl ||
               userData.portfolioUrl ? (
-                <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-8">
+                <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
                   <h2 className="text-xl font-semibold text-gray-900 mb-4">
                     Your Links
                   </h2>
@@ -410,7 +338,7 @@ export default function UserDashboard() {
                   </div>
                 </div>
               ) : (
-                <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-8">
+                <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
                   <h2 className="text-xl font-semibold text-gray-900 mb-4">
                     Your Links
                   </h2>
@@ -427,101 +355,6 @@ export default function UserDashboard() {
                   </div>
                 </div>
               )}
-
-              {/* User Info Debug Panel (remove in production) */}
-              <div className="bg-gray-100 rounded-xl p-6 mb-8">
-                <h2 className="text-xl font-semibold text-gray-900 mb-4">
-                  Debug: User Data
-                </h2>
-                <div className="grid grid-cols-2 gap-4 text-sm">
-                  <div>
-                    <strong>Email:</strong> {userData.email || "Not set"}
-                  </div>
-                  <div>
-                    <strong>Display Name:</strong>{" "}
-                    {userData.displayName || "Not set"}
-                  </div>
-                  <div>
-                    <strong>College:</strong> {userData.college || "Not set"}
-                  </div>
-                  <div>
-                    <strong>Bio:</strong> {userData.bio || "Not set"}
-                  </div>
-                  <div>
-                    <strong>Role:</strong> {userData.role}
-                  </div>
-                  <div>
-                    <strong>Email Verified:</strong>{" "}
-                    {userData.emailVerified ? "Yes" : "No"}
-                  </div>
-                  <div>
-                    <strong>Points:</strong> {userData.points}
-                  </div>
-                  <div>
-                    <strong>Badges:</strong> {userData.badgesEarned}
-                  </div>
-                  <div>
-                    <strong>Sessions:</strong> {userData.sessionsAttended}
-                  </div>
-                  <div>
-                    <strong>Volunteer Hours:</strong>{" "}
-                    {userData.volunteeringHours}
-                  </div>
-                  <div>
-                    <strong>Skills Count:</strong>{" "}
-                    {userData.skills?.length || 0}
-                  </div>
-                  <div>
-                    <strong>Admin Approved:</strong>{" "}
-                    {userData.adminApproved ? "Yes" : "No"}
-                  </div>
-                </div>
-              </div>
-
-              {/* Quick Actions */}
-              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                <h2 className="text-xl font-semibold text-gray-900 mb-6">
-                  Quick Actions
-                </h2>
-
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                  <button className="flex flex-col items-center p-4 rounded-lg bg-blue-50 hover:bg-blue-100 transition-colors duration-200">
-                    <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-3">
-                      <Calendar className="w-6 h-6 text-blue-600" />
-                    </div>
-                    <span className="text-sm font-medium text-gray-700">
-                      Join Event
-                    </span>
-                  </button>
-
-                  <button className="flex flex-col items-center p-4 rounded-lg bg-green-50 hover:bg-green-100 transition-colors duration-200">
-                    <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-3">
-                      <Users className="w-6 h-6 text-green-600" />
-                    </div>
-                    <span className="text-sm font-medium text-gray-700">
-                      Find Peers
-                    </span>
-                  </button>
-
-                  <button className="flex flex-col items-center p-4 rounded-lg bg-purple-50 hover:bg-purple-100 transition-colors duration-200">
-                    <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mb-3">
-                      <Trophy className="w-6 h-6 text-purple-600" />
-                    </div>
-                    <span className="text-sm font-medium text-gray-700">
-                      View Badges
-                    </span>
-                  </button>
-
-                  <button className="flex flex-col items-center p-4 rounded-lg bg-orange-50 hover:bg-orange-100 transition-colors duration-200">
-                    <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center mb-3">
-                      <TrendingUp className="w-6 h-6 text-orange-600" />
-                    </div>
-                    <span className="text-sm font-medium text-gray-700">
-                      Progress
-                    </span>
-                  </button>
-                </div>
-              </div>
             </>
           )}
         </main>
