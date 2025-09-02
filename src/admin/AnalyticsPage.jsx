@@ -1,7 +1,7 @@
 import React, { useState, useEffect, Component } from "react";
 import {
-  BarChart,
-  Bar,
+  AreaChart,
+  Area,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -10,30 +10,19 @@ import {
   PieChart,
   Pie,
   Cell,
-  LineChart,
-  Line,
-  Area,
-  AreaChart,
+  BarChart,
+  Bar,
 } from "recharts";
 import {
   Users,
-  TrendingUp,
-  Trophy,
-  Activity,
   School,
   UserCheck,
-  UserX,
-  Clock,
-  Target,
   BookOpen,
-  Award,
   Download,
   Filter,
   RefreshCw,
   AlertCircle,
 } from "lucide-react";
-
-// Import your actual Supabase client
 import { supabase } from "../lib/supabaseClient";
 
 // Error Boundary Component
@@ -80,17 +69,12 @@ export default function AnalyticsPage() {
     overview: {
       totalStudents: 0,
       activeStudents: 0,
-      totalPoints: 0,
-      totalBadges: 0,
-      avgSessionsPerStudent: 0,
-      totalVolunteeringHours: 0,
-      newStudentsThisMonth: 0,
+      previousTotal: 0,
+      previousActive: 0,
     },
     studentGrowth: [],
     collegeDistribution: [],
     skillsPopularity: [],
-    pointsDistribution: [],
-    weeklyActivity: [],
   });
 
   useEffect(() => {
@@ -104,8 +88,11 @@ export default function AnalyticsPage() {
 
       // Calculate date range
       const endDate = new Date();
-      const startDate = new Date();
-      startDate.setDate(startDate.getDate() - parseInt(timeRange));
+      const timeRangeDays = parseInt(timeRange);
+      const startDate = new Date(endDate);
+      startDate.setDate(startDate.getDate() - timeRangeDays);
+      const previousStart = new Date(startDate);
+      previousStart.setDate(previousStart.getDate() - timeRangeDays);
 
       // Fetch all users data
       const { data: users, error: usersError } = await supabase
@@ -114,68 +101,69 @@ export default function AnalyticsPage() {
 
       if (usersError) throw new Error(`Failed to fetch users: ${usersError.message}`);
 
-      // Fetch badges data (assuming you have a badges table)
-      let badges = [];
-      const { data: badgesData, error: badgesError } = await supabase
-        .from("badges")
-        .select("*");
-
-      if (badgesError && !badgesError.message.includes("does not exist")) {
-        console.warn("Badges table error:", badgesError);
-      } else {
-        badges = badgesData || [];
-      }
-
       // Calculate overview metrics
       const totalStudents = users?.length || 0;
+      const previousTotal = users?.filter((user) => new Date(user.created_at) < startDate).length || 0;
+
       const activeStudents = users?.filter((user) => {
         const lastActivity = new Date(user.updated_at || user.created_at);
-        const thirtyDaysAgo = new Date();
-        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-        return lastActivity > thirtyDaysAgo;
+        return lastActivity > startDate;
       }).length || 0;
 
-      const totalPoints = users?.reduce((sum, user) => sum + (user.points || 0), 0) || 0;
-      const totalBadges = users?.reduce((sum, user) => sum + (user.badges_earned || 0), 0) || 0;
-      const totalSessions = users?.reduce((sum, user) => sum + (user.sessions_attended || 0), 0) || 0;
-      const avgSessionsPerStudent = totalStudents > 0 ? totalSessions / totalStudents : 0;
-      const totalVolunteeringHours = users?.reduce(
-        (sum, user) => sum + (user.volunteering_hours || 0),
-        0
-      ) || 0;
-
-      // Calculate new students this month
-      const thisMonth = new Date();
-      thisMonth.setDate(1);
-      thisMonth.setHours(0, 0, 0, 0);
-      const newStudentsThisMonth = users?.filter((user) => {
-        const createdAt = new Date(user.created_at);
-        return createdAt >= thisMonth;
+      const previousActive = users?.filter((user) => {
+        const lastActivity = new Date(user.updated_at || user.created_at);
+        return lastActivity > previousStart && lastActivity <= startDate;
       }).length || 0;
 
-      // Generate student growth data (last 7 months)
-      const studentGrowth = [];
-      for (let i = 6; i >= 0; i--) {
-        const date = new Date();
-        date.setMonth(date.getMonth() - i);
-        const monthName = date.toLocaleDateString("en-US", { month: "short" });
+      // Generate student growth data dynamically
+      let studentGrowth = [];
+      let intervalType = 'month';
+      let numIntervals = 6;
+      if (timeRangeDays <= 7) {
+        intervalType = 'day';
+        numIntervals = timeRangeDays;
+      } else if (timeRangeDays <= 90) {
+        intervalType = 'week';
+        numIntervals = Math.floor(timeRangeDays / 7);
+      } else {
+        intervalType = 'month';
+        numIntervals = Math.floor(timeRangeDays / 30);
+      }
+      numIntervals = Math.max(numIntervals, 1);
+
+      for (let i = numIntervals; i >= 0; i--) {
+        let date = new Date(endDate);
+        let name;
+        if (intervalType === 'day') {
+          date.setDate(date.getDate() - i);
+          name = date.toLocaleDateString("en-US", { weekday: "short" });
+        } else if (intervalType === 'week') {
+          date.setDate(date.getDate() - i * 7);
+          name = `Wk ${numIntervals - i + 1}`;
+        } else {
+          date.setMonth(date.getMonth() - i);
+          name = date.toLocaleDateString("en-US", { month: "short" });
+        }
 
         const studentsUpToThisMonth = users?.filter((user) => {
           const createdAt = new Date(user.created_at);
           return createdAt <= date;
         }).length || 0;
 
+        const activePeriodStart = new Date(date);
+        activePeriodStart.setDate(activePeriodStart.getDate() - 30);
+
         const activeUpToThisMonth = users?.filter((user) => {
           const createdAt = new Date(user.created_at);
           const lastActivity = new Date(user.updated_at || user.created_at);
           return (
             createdAt <= date &&
-            lastActivity > new Date(date.getTime() - 30 * 24 * 60 * 60 * 1000)
+            lastActivity > activePeriodStart
           );
         }).length || 0;
 
         studentGrowth.push({
-          month: monthName,
+          period: name,
           students: studentsUpToThisMonth,
           active: activeUpToThisMonth,
         });
@@ -210,46 +198,16 @@ export default function AnalyticsPage() {
         .sort((a, b) => b.count - a.count)
         .slice(0, 6);
 
-      // Calculate points distribution
-      const pointsRanges = [
-        { range: "0-100", min: 0, max: 100 },
-        { range: "101-500", min: 101, max: 500 },
-        { range: "501-1000", min: 501, max: 1000 },
-        { range: "1001-2000", min: 1001, max: 2000 },
-        { range: "2000+", min: 2001, max: Infinity },
-      ];
-
-      const pointsDistribution = pointsRanges.map((range) => ({
-        range: range.range,
-        count: users?.filter((user) => {
-          const points = user.points || 0;
-          return points >= range.min && points <= range.max;
-        }).length || 0,
-      }));
-
-      // Generate weekly activity data
-      const days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-      const weeklyActivity = days.map((day) => ({
-        day,
-        logins: Math.floor(Math.random() * 40) + 20,
-        events: Math.floor(Math.random() * 5) + 1,
-      }));
-
       setAnalyticsData({
         overview: {
           totalStudents,
           activeStudents,
-          totalPoints,
-          totalBadges,
-          avgSessionsPerStudent: Math.round(avgSessionsPerStudent * 10) / 10,
-          totalVolunteeringHours,
-          newStudentsThisMonth,
+          previousTotal,
+          previousActive,
         },
         studentGrowth,
         collegeDistribution,
         skillsPopularity,
-        pointsDistribution,
-        weeklyActivity,
       });
     } catch (err) {
       setError(
@@ -301,7 +259,7 @@ export default function AnalyticsPage() {
       iconBg: "bg-blue-100",
       change: calculateGrowthPercentage(
         analyticsData.overview.totalStudents,
-        Math.floor(analyticsData.overview.totalStudents * 0.92)
+        analyticsData.overview.previousTotal
       ),
       changeType: "positive",
     },
@@ -313,73 +271,9 @@ export default function AnalyticsPage() {
       iconBg: "bg-green-100",
       change: calculateGrowthPercentage(
         analyticsData.overview.activeStudents,
-        Math.floor(analyticsData.overview.activeStudents * 0.88)
+        analyticsData.overview.previousActive
       ),
-      changeType: "positive",
-    },
-    {
-      title: "Total Points",
-      value: analyticsData.overview.totalPoints.toLocaleString(),
-      icon: <TrendingUp className="w-6 h-6 text-orange-500" />,
-      bgColor: "bg-orange-50",
-      iconBg: "bg-orange-100",
-      change: calculateGrowthPercentage(
-        analyticsData.overview.totalPoints,
-        Math.floor(analyticsData.overview.totalPoints * 0.85)
-      ),
-      changeType: "positive",
-    },
-    {
-      title: "Badges Earned",
-      value: analyticsData.overview.totalBadges.toLocaleString(),
-      icon: <Trophy className="w-6 h-6 text-yellow-500" />,
-      bgColor: "bg-yellow-50",
-      iconBg: "bg-yellow-100",
-      change: calculateGrowthPercentage(
-        analyticsData.overview.totalBadges,
-        Math.floor(analyticsData.overview.totalBadges * 0.82)
-      ),
-      changeType: "positive",
-    },
-    {
-      title: "Avg Sessions",
-      value: analyticsData.overview.avgSessionsPerStudent.toFixed(1),
-      icon: <Activity className="w-6 h-6 text-indigo-500" />,
-      bgColor: "bg-indigo-50",
-      iconBg: "bg-indigo-100",
-      change: calculateGrowthPercentage(
-        analyticsData.overview.avgSessionsPerStudent,
-        analyticsData.overview.avgSessionsPerStudent * 0.97
-      ),
-      changeType: "positive",
-    },
-    {
-      title: "Volunteer Hours",
-      value: analyticsData.overview.totalVolunteeringHours.toLocaleString(),
-      icon: <Clock className="w-6 h-6 text-pink-500" />,
-      bgColor: "bg-pink-50",
-      iconBg: "bg-pink-100",
-      change: calculateGrowthPercentage(
-        analyticsData.overview.totalVolunteeringHours,
-        Math.floor(analyticsData.overview.totalVolunteeringHours * 0.84)
-      ),
-      changeType: "positive",
-    },
-    {
-      title: "New This Month",
-      value: analyticsData.overview.newStudentsThisMonth.toLocaleString(),
-      icon: <UserX className="w-6 h-6 text-red-500" />,
-      bgColor: "bg-red-50",
-      iconBg: "bg-red-100",
-      change: calculateGrowthPercentage(
-        analyticsData.overview.newStudentsThisMonth,
-        Math.floor(analyticsData.overview.newStudentsThisMonth * 1.02)
-      ),
-      changeType:
-        analyticsData.overview.newStudentsThisMonth >
-        Math.floor(analyticsData.overview.newStudentsThisMonth * 1.02)
-          ? "positive"
-          : "negative",
+      changeType: analyticsData.overview.activeStudents >= analyticsData.overview.previousActive ? "positive" : "negative",
     },
   ];
 
@@ -459,7 +353,7 @@ export default function AnalyticsPage() {
             )}
 
             {/* Overview Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 mb-8">
               {overviewCards.map((card, index) => (
                 <div
                   key={index}
@@ -469,13 +363,15 @@ export default function AnalyticsPage() {
                 >
                   <div className="flex items-center justify-between mb-2">
                     <div className={`${card.iconBg} p-3 rounded-lg`}>{card.icon}</div>
-                    <div
-                      className={`text-sm font-medium ${
-                        card.changeType === "positive" ? "text-green-600" : "text-red-600"
-                      }`}
-                    >
-                      {card.change}
-                    </div>
+                    {card.change && (
+                      <div
+                        className={`text-sm font-medium ${
+                          card.changeType === "positive" ? "text-green-600" : "text-red-600"
+                        }`}
+                      >
+                        {card.change}
+                      </div>
+                    )}
                   </div>
                   <div>
                     <p className="text-sm font-medium text-gray-600 mb-1">{card.title}</p>
@@ -493,14 +389,14 @@ export default function AnalyticsPage() {
               <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
                 <div className="flex items-center justify-between mb-6">
                   <h2 className="text-xl font-semibold text-gray-900">Student Growth</h2>
-                  <TrendingUp className="w-5 h-5 text-green-500" />
+                  <UserCheck className="w-5 h-5 text-green-500" />
                 </div>
                 {analyticsData.studentGrowth.length > 0 ? (
                   <div className="h-64">
                     <ResponsiveContainer width="100%" height="100%">
                       <AreaChart data={analyticsData.studentGrowth}>
                         <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="month" />
+                        <XAxis dataKey="period" />
                         <YAxis />
                         <Tooltip
                           contentStyle={{
@@ -609,94 +505,17 @@ export default function AnalyticsPage() {
                     </ResponsiveContainer>
                   </div>
                 ) : (
-                  <div className="h-64 FLEX items-center justify-center text-gray-500">
+                  <div className="h-64 flex items-center justify-center text-gray-500">
                     No skills data available
                   </div>
                 )}
-              </div>
-
-            </div>
-
-            {/* Additional Analytics */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-              {/* Points Distribution */}
-              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-xl font-semibold text-gray-900">
-                    Points Distribution
-                  </h2>
-                  <Target className="w-5 h-5 text-indigo-500" />
-                </div>
-                <div className="space-y-3">
-                  {analyticsData.pointsDistribution.map((item, index) => (
-                    <div key={index} className="flex items-center justify-between">
-                      <span className="text-sm font-medium text-gray-700">{item.range}</span>
-                      <div className="flex items-center space-x-2">
-                        <div className="w-24 bg-gray-200 rounded-full h-2">
-                          <div
-                            className="bg-indigo-500 h-2 rounded-full"
-                            style={{
-                              width: `${
-                                analyticsData.overview.totalStudents > 0
-                                  ? (item.count / analyticsData.overview.totalStudents) * 100
-                                  : 0
-                              }%`,
-                            }}
-                          ></div>
-                        </div>
-                        <span className="text-sm text-gray-600">{item.count}</span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Weekly Activity */}
-              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 lg:col-span-2">
-                <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-xl font-semibold text-gray-900">Weekly Activity</h2>
-                  <Activity className="w-5 h-5 text-green-500" />
-                </div>
-                <div className="h-48">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <LineChart data={analyticsData.weeklyActivity}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="day" />
-                      <YAxis />
-                      <Tooltip
-                        contentStyle={{
-                          backgroundColor: "#fff",
-                          border: "1px solid #e5e7eb",
-                          borderRadius: "8px",
-                        }}
-                      />
-                      <Line
-                        type="monotone"
-                        dataKey="logins"
-                        stroke="#10B981"
-                        strokeWidth={2}
-                        name="Daily Logins"
-                      />
-                      <Line
-                        type="monotone"
-                        dataKey="events"
-                        stroke="#3B82F6"
-                        strokeWidth={2}
-                        name="Events"
-                      />
-                    </LineChart>
-                  </ResponsiveContainer>
-                </div>
-                <p className="text-xs text-yellow-500 mt-2">
-                  *Weekly activity data is simulated - integrate with actual user activity tracking
-                </p>
               </div>
             </div>
 
             {/* Summary Insights */}
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-8">
               <h2 className="text-xl font-semibold text-gray-900 mb-6 flex-casual">
-                <Award className="w-5 h-5 text-yellow-500 mr-2" />
+                <BookOpen className="w-5 h-5 text-yellow-500 mr-2" />
                 Key Insights
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -716,8 +535,7 @@ export default function AnalyticsPage() {
                 <div className="bg-green-50 p-4 rounded-lg">
                   <h3 className="font-semibold text-green-900 mb-2">Community Size</h3>
                   <p className="text-green-700 text-sm">
-                    {analyticsData.overview.totalStudents} total students with{" "}
-                    {analyticsData.overview.newStudentsThisMonth} new members this month
+                    {analyticsData.overview.totalStudents} total students
                   </p>
                 </div>
                 <div className="bg-purple-50 p-4 rounded-lg">
@@ -734,12 +552,11 @@ export default function AnalyticsPage() {
             {/* Data Source Info */}
             <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
               <div className="flex items-start">
-                <Activity className="w-5 h-5 text-yellow-600 mr-2 mt-0.5" />
+                <BookOpen className="w-5 h-5 text-yellow-600 mr-2 mt-0.5" />
                 <div>
                   <h3 className="font-medium text-yellow-800 mb-1">Data Integration Notes</h3>
                   <ul className="text-sm text-yellow-700 space-y-1">
                     <li>• User data is fetched from Supabase users table</li>
-                    <li>• Weekly activity data is simulated (implement user activity tracking)</li>
                     <li>• Growth calculations are based on available data</li>
                   </ul>
                 </div>
