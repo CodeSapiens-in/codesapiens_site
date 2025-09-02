@@ -149,13 +149,7 @@ const CodeSapiensHero = () => {
               </div>
               <span className="text-xl font-light tracking-wider">CodeSapiens</span>
             </div>
-            <div className="hidden md:flex space-x-12 text-sm font-light tracking-wide">
-              <a href="#about" className="hover:text-zinc-600 transition-colors duration-300">About</a>
-              <a href="#events" className="hover:text-zinc-600 transition-colors duration-300">Past Events</a>
-              <a href="#upcoming" className="hover:text-zinc-600 transition-colors duration-300">Upcoming</a>
-              <a href="#collection" className="hover:text-zinc-600 transition-colors duration-300">Our Collection</a>
-              <a href="#contact" className="hover:text-zinc-600 transition-colors duration-300">Contact</a>
-            </div>
+            
           </nav>
         </div>
       </motion.header>

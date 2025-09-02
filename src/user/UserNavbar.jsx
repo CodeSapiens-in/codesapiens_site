@@ -1,17 +1,17 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Bell, Settings, Menu, X, ChevronDown, User, Loader2 } from 'lucide-react';
+import { Bell, Settings, Menu, X, ChevronDown, User, Loader2, Shield, Users, BarChart3 } from 'lucide-react';
 
 // Import your actual Supabase client
 import { supabase } from '../lib/supabaseClient';
 
-// Mock Supabase for demonstration - replace with your actual client
-
-export default function UserNavbar() {
+export default function UnifiedNavbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [authChecking, setAuthChecking] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   
   // Refs for click outside detection
   const profileDropdownRef = useRef(null);
@@ -21,6 +21,7 @@ export default function UserNavbar() {
   useEffect(() => {
     const fetchUserData = async () => {
       try {
+        setAuthChecking(true);
         setLoading(true);
         setError(null);
 
@@ -31,12 +32,19 @@ export default function UserNavbar() {
         } = await supabase.auth.getUser();
 
         if (authError) {
-          throw new Error(`Authentication error: ${authError.message}`);
+          console.error('Auth error:', authError);
+          setIsAuthenticated(false);
+          setAuthChecking(false);
+          return;
         }
 
         if (!user) {
-          throw new Error('No authenticated user found');
+          setIsAuthenticated(false);
+          setAuthChecking(false);
+          return;
         }
+
+        setIsAuthenticated(true);
 
         // Fetch user profile from the users table
         const { data, error: profileError } = await supabase
@@ -60,6 +68,9 @@ export default function UserNavbar() {
           email: data.email || user.email || '',
           avatar: data.avatar || '',
           role: data.role || '',
+          adminApproved: data.admin_approved || false,
+          emailVerified: data.email_verified || user.email_confirmed_at !== null,
+          college: data.college || '',
           initials: (data.display_name || user.email || 'U')
             .split(' ')
             .map(name => name.charAt(0))
@@ -74,17 +85,20 @@ export default function UserNavbar() {
         setError(err.message);
         console.error('Error fetching user data:', err);
         
-        // Fallback user data
+        // Fallback user data for demonstration
         setUserData({
           uid: 'fallback',
           displayName: 'User',
           email: 'user@example.com',
           avatar: '',
           role: 'student',
-          initials: 'U'
+          initials: 'U',
+          emailVerified: false,
+          college: ''
         });
       } finally {
         setLoading(false);
+        setAuthChecking(false);
       }
     };
 
@@ -165,6 +179,9 @@ export default function UserNavbar() {
     }
   };
 
+  const isAdmin = userData?.role === 'admin';
+  const isUser = userData?.role === 'student' || userData?.role === 'user';
+
   const renderUserAvatar = (size = 'w-9 h-9', textSize = 'text-sm') => {
     if (loading) {
       return (
@@ -184,10 +201,14 @@ export default function UserNavbar() {
       );
     }
 
+    const gradientClass = isAdmin 
+      ? 'bg-gradient-to-br from-red-500 to-orange-600' 
+      : 'bg-gradient-to-br from-blue-500 to-purple-600';
+
     return (
-      <div className={`${size} bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center shadow-md`}>
+      <div className={`${size} ${gradientClass} rounded-full flex items-center justify-center shadow-md`}>
         <span className={`text-white font-medium ${textSize}`}>
-          {userData?.initials || 'U'}
+          {userData?.initials || (isAdmin ? 'A' : 'U')}
         </span>
       </div>
     );
@@ -209,55 +230,372 @@ export default function UserNavbar() {
           {userData?.displayName || 'Loading...'}
         </div>
         {showEmail && (
-          <div className="text-sm text-gray-500">
-            {userData?.email || ''}
+          <div className="text-sm text-gray-500 flex items-center space-x-1">
+            {isAdmin ? (
+              <>
+                <Shield className="w-3 h-3 text-red-500" />
+                <span>Admin • {userData?.email || ''}</span>
+              </>
+            ) : (
+              <>
+                <span>{userData?.email || ''}</span>
+                {userData?.emailVerified && (
+                  <span className="text-green-600">✓</span>
+                )}
+                {!userData?.emailVerified && (
+                  <span className="text-yellow-600">⚠</span>
+                )}
+              </>
+            )}
           </div>
         )}
       </div>
     );
   };
 
+  const renderLogo = () => {
+    if (isAdmin) {
+      return (
+        <div className="flex items-center space-x-3 flex-shrink-0">
+          <div className="w-10 h-10 bg-gradient-to-br from-red-500 to-orange-600 rounded-lg flex items-center justify-center shadow-lg">
+            <Shield className="text-white w-5 h-5" />
+          </div>
+          <span className="text-xl font-semibold text-gray-900">CodeSapiens Admin</span>
+        </div>
+      );
+    }
+
+    return (
+      <div className="flex items-center space-x-3 flex-shrink-0">
+        <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center shadow-lg">
+          <span className="text-white font-bold text-lg">CS</span>
+        </div>
+        <span className="text-xl font-semibold text-gray-900">CodeSapiens</span>
+      </div>
+    );
+  };
+
+  const renderDesktopNavigation = () => {
+    const hoverColor = isAdmin ? 'hover:text-red-600' : 'hover:text-blue-600';
+
+    if (isAdmin) {
+      return (
+        <div className="hidden md:flex items-center justify-center flex-1 max-w-md mx-auto">
+          <div className="flex items-center space-x-8">
+            <button 
+              onClick={() => handleNavClick('/admin')}
+              className={`text-gray-700 ${hoverColor} px-3 py-2 rounded-md font-medium transition-colors flex items-center space-x-2`}
+            >
+              <BarChart3 className="w-4 h-4" />
+              <span>Dashboard</span>
+            </button>
+            <button 
+              onClick={() => handleNavClick('/admin/users')}
+              className={`text-gray-700 ${hoverColor} px-3 py-2 rounded-md font-medium transition-colors flex items-center space-x-2`}
+            >
+              <Users className="w-4 h-4" />
+              <span>Users</span>
+            </button>
+            <button 
+              onClick={() => handleNavClick('/admin/events')}
+              className={`text-gray-700 ${hoverColor} px-3 py-2 rounded-md font-medium transition-colors`}
+            >
+              Events
+            </button>
+            <button 
+              onClick={() => handleNavClick('/admin/analytics')}
+              className={`text-gray-700 ${hoverColor} px-3 py-2 rounded-md font-medium transition-colors`}
+            >
+              Analytics
+            </button>
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <div className="hidden md:flex items-center justify-center flex-1 max-w-md mx-auto">
+        <div className="flex items-center space-x-8">
+          <button 
+            onClick={() => handleNavClick('/dashboard')}
+            className={`text-gray-700 ${hoverColor} px-3 py-2 rounded-md font-medium transition-colors`}
+          >
+            Dashboard
+          </button>
+          <button 
+            onClick={() => handleNavClick('/events')}
+            className={`text-gray-700 ${hoverColor} px-3 py-2 rounded-md font-medium transition-colors`}
+          >
+            Events
+          </button>
+          <button 
+            onClick={() => handleNavClick('/community')}
+            className={`text-gray-700 ${hoverColor} px-3 py-2 rounded-md font-medium transition-colors`}
+          >
+            Community
+          </button>
+          <button 
+            onClick={() => handleNavClick('/badges')}
+            className={`text-gray-700 ${hoverColor} px-3 py-2 rounded-md font-medium transition-colors`}
+          >
+            Badges
+          </button>
+        </div>
+      </div>
+    );
+  };
+
+  const renderProfileDropdown = () => {
+    if (!isProfileDropdownOpen || loading) return null;
+
+    return (
+      <div className="absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-lg border border-gray-200 py-2 z-50">
+        <div className="px-4 py-3 border-b border-gray-100">
+          <div className="flex items-center space-x-3">
+            {renderUserAvatar('w-12 h-12', 'text-lg')}
+            <div>
+              {renderUserInfo()}
+              {!isAdmin && userData?.college && (
+                <div className="text-xs text-gray-400 mt-1">
+                  {userData.college}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+        <div className="py-2">
+          {isAdmin ? (
+            <>
+              <button 
+                onClick={() => handleNavClick('/admin/profile')}
+                className="w-full text-left flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+              >
+                <User className="w-4 h-4 mr-2" />
+                Admin Profile
+              </button>
+              <button 
+                onClick={() => handleNavClick('/admin/settings')}
+                className="w-full text-left flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+              >
+                <Settings className="w-4 h-4 mr-2" />
+                Admin Settings
+              </button>
+              <button 
+                onClick={() => handleNavClick('/admin/system')}
+                className="w-full text-left flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+              >
+                <Shield className="w-4 h-4 mr-2" />
+                System Settings
+              </button>
+            </>
+          ) : (
+            <>
+              <button 
+                onClick={() => handleNavClick('/profile')}
+                className="w-full text-left flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+              >
+                <User className="w-4 h-4 mr-2" />
+                Profile
+              </button>
+              <button 
+                onClick={() => handleNavClick('/settings')}
+                className="w-full text-left flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+              >
+                <Settings className="w-4 h-4 mr-2" />
+                Account Preferences
+              </button>
+            </>
+          )}
+          <button 
+            onClick={() => handleNavClick('/help')}
+            className="w-full text-left flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+          >
+            Help & Support
+          </button>
+          <div className="border-t border-gray-100 mt-2 pt-2">
+            <button 
+              onClick={handleSignOut}
+              className="w-full text-left flex items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+            >
+              Sign Out
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  const renderMobileMenu = () => {
+    if (!isMobileMenuOpen) return null;
+
+    const hoverColor = isAdmin ? 'hover:text-red-600' : 'hover:text-blue-600';
+
+    return (
+      <div ref={mobileMenuRef} className="md:hidden border-t border-gray-200 py-4 space-y-2 bg-white">
+        {isAdmin ? (
+          <>
+            <button 
+              onClick={() => handleNavClick('/admin')}
+              className={`w-full text-left block px-4 py-2 text-gray-700 hover:bg-gray-100 ${hoverColor} rounded-md font-medium transition-colors flex items-center space-x-2`}
+            >
+              <BarChart3 className="w-4 h-4" />
+              <span>Dashboard</span>
+            </button>
+            <button 
+              onClick={() => handleNavClick('/admin/users')}
+              className={`w-full text-left block px-4 py-2 text-gray-700 hover:bg-gray-100 ${hoverColor} rounded-md font-medium transition-colors flex items-center space-x-2`}
+            >
+              <Users className="w-4 h-4" />
+              <span>Users</span>
+            </button>
+            <button 
+              onClick={() => handleNavClick('/admin/events')}
+              className={`w-full text-left block px-4 py-2 text-gray-700 hover:bg-gray-100 ${hoverColor} rounded-md font-medium transition-colors`}
+            >
+              Events
+            </button>
+            <button 
+              onClick={() => handleNavClick('/admin/analytics')}
+              className={`w-full text-left block px-4 py-2 text-gray-700 hover:bg-gray-100 ${hoverColor} rounded-md font-medium transition-colors`}
+            >
+              Analytics
+            </button>
+          </>
+        ) : (
+          <>
+            <button 
+              onClick={() => handleNavClick('/dashboard')}
+              className={`w-full text-left block px-4 py-2 text-gray-700 hover:bg-gray-100 ${hoverColor} rounded-md font-medium transition-colors`}
+            >
+              Dashboard
+            </button>
+            <button 
+              onClick={() => handleNavClick('/events')}
+              className={`w-full text-left block px-4 py-2 text-gray-700 hover:bg-gray-100 ${hoverColor} rounded-md font-medium transition-colors`}
+            >
+              Events
+            </button>
+            <button 
+              onClick={() => handleNavClick('/community')}
+              className={`w-full text-left block px-4 py-2 text-gray-700 hover:bg-gray-100 ${hoverColor} rounded-md font-medium transition-colors`}
+            >
+              Community
+            </button>
+            <button 
+              onClick={() => handleNavClick('/badges')}
+              className={`w-full text-left block px-4 py-2 text-gray-700 hover:bg-gray-100 ${hoverColor} rounded-md font-medium transition-colors`}
+            >
+              Badges
+            </button>
+          </>
+        )}
+        
+        {/* Mobile User Info */}
+        <div className="border-t border-gray-200 pt-4 mt-4">
+          <div className="px-4 py-2">
+            <div className="flex items-center space-x-3 mb-3">
+              {renderUserAvatar('w-10 h-10')}
+              <div>
+                {renderUserInfo()}
+              </div>
+            </div>
+            <div className="space-y-2">
+              {isAdmin ? (
+                <>
+                  <button 
+                    onClick={() => handleNavClick('/admin/profile')}
+                    className={`w-full text-left block text-sm text-gray-700 ${hoverColor} py-1`}
+                  >
+                    Admin Profile
+                  </button>
+                  <button 
+                    onClick={() => handleNavClick('/admin/settings')}
+                    className={`w-full text-left block text-sm text-gray-700 ${hoverColor} py-1`}
+                  >
+                    Admin Settings
+                  </button>
+                  <button 
+                    onClick={() => handleNavClick('/admin/system')}
+                    className={`w-full text-left block text-sm text-gray-700 ${hoverColor} py-1`}
+                  >
+                    System Settings
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button 
+                    onClick={() => handleNavClick('/profile')}
+                    className={`w-full text-left block text-sm text-gray-700 ${hoverColor} py-1`}
+                  >
+                    Profile Settings
+                  </button>
+                  <button 
+                    onClick={() => handleNavClick('/settings')}
+                    className={`w-full text-left block text-sm text-gray-700 ${hoverColor} py-1`}
+                  >
+                    Account Preferences
+                  </button>
+                </>
+              )}
+              <button 
+                onClick={() => handleNavClick('/help')}
+                className={`w-full text-left block text-sm text-gray-700 ${hoverColor} py-1`}
+              >
+                Help & Support
+              </button>
+              <button 
+                onClick={handleSignOut}
+                className="w-full text-left block text-sm text-red-600 hover:text-red-700 py-1"
+              >
+                Sign Out
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  // Auth checking state
+  if (authChecking) {
+    return (
+      <nav className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50 w-full">
+        <div className="w-full px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
+            <div className="flex items-center space-x-3 flex-shrink-0">
+              <div className="w-10 h-10 bg-gray-300 rounded-lg animate-pulse"></div>
+              <div className="w-32 h-6 bg-gray-300 rounded animate-pulse"></div>
+            </div>
+            <div className="flex items-center space-x-4">
+              <Loader2 className="w-5 h-5 text-gray-400 animate-spin" />
+            </div>
+          </div>
+        </div>
+      </nav>
+    );
+  }
+
+  // Not authenticated - don't render navbar
+  if (!isAuthenticated) {
+    return null;
+  }
+
+  // Not admin or user - don't render navbar
+  if (!isAdmin && !isUser) {
+    return null;
+  }
+
+  const notificationCount = isAdmin ? 3 : 1;
+
   return (
     <nav className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50 w-full">
       <div className="w-full px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo Section */}
-          <div className="flex items-center space-x-3 flex-shrink-0">
-            <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center shadow-lg">
-              <span className="text-white font-bold text-lg">CS</span>
-            </div>
-            <span className="text-xl font-semibold text-gray-900">CodeSapiens</span>
-          </div>
+          {renderLogo()}
 
           {/* Desktop Navigation - Centered */}
-          <div className="hidden md:flex items-center justify-center flex-1 max-w-md mx-auto">
-            <div className="flex items-center space-x-8">
-              <button 
-                onClick={() => handleNavClick('dashboard')}
-                className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md font-medium transition-colors"
-              >
-                Dashboard
-              </button>
-              <button 
-                onClick={() => handleNavClick('#')}
-                className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md font-medium transition-colors"
-              >
-                Events
-              </button>
-              <button 
-                onClick={() => handleNavClick('#')}
-                className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md font-medium transition-colors"
-              >
-                Community
-              </button>
-              <button 
-                onClick={() => handleNavClick('#')}
-                className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md font-medium transition-colors"
-              >
-                Badges
-              </button>
-            </div>
-          </div>
+         
 
           {/* Right Section */}
           <div className="flex items-center space-x-4 flex-shrink-0">
@@ -266,7 +604,7 @@ export default function UserNavbar() {
               <button className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors">
                 <Bell className="w-5 h-5" />
                 <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center">
-                  <span className="text-white text-xs font-bold">1</span>
+                  <span className="text-white text-xs font-bold">{notificationCount}</span>
                 </span>
               </button>
             </div>
@@ -290,53 +628,12 @@ export default function UserNavbar() {
               </button>
 
               {/* Profile Dropdown */}
-              {isProfileDropdownOpen && !loading && (
-                <div className="absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-lg border border-gray-200 py-2 z-50">
-                  <div className="px-4 py-3 border-b border-gray-100">
-                    <div className="flex items-center space-x-3">
-                      {renderUserAvatar('w-12 h-12', 'text-lg')}
-                      <div>
-                        {renderUserInfo()}
-                      </div>
-                    </div>
-                  </div>
-                  <div className="py-2">
-                    <button 
-                      onClick={() => handleNavClick('profile')}
-                      className="w-full text-left flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                    >
-                      <User className="w-4 h-4 mr-2" />
-                      Profile
-                    </button>
-                    <button 
-                      onClick={() => handleNavClick('#')}
-                      className="w-full text-left flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                    >
-                      <Settings className="w-4 h-4 mr-2" />
-                      Account Preferences
-                    </button>
-                    <button 
-                      onClick={() => handleNavClick('#')}
-                      className="w-full text-left flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                    >
-                      Help & Support
-                    </button>
-                    <div className="border-t border-gray-100 mt-2 pt-2">
-                      <button 
-                        onClick={handleSignOut}
-                        className="w-full text-left flex items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50"
-                      >
-                        Sign Out
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              )}
+              {renderProfileDropdown()}
             </div>
 
             {/* Settings Icon */}
             <button 
-              onClick={() => handleNavClick('#')}
+              onClick={() => handleNavClick(isAdmin ? '/admin/settings' : '/settings')}
               className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
             >
               <Settings className="w-5 h-5" />
@@ -357,72 +654,7 @@ export default function UserNavbar() {
         </div>
 
         {/* Mobile Navigation Menu */}
-        {isMobileMenuOpen && (
-          <div ref={mobileMenuRef} className="md:hidden border-t border-gray-200 py-4 space-y-2 bg-white">
-            <button 
-              onClick={() => handleNavClick('dashboard')}
-              className="w-full text-left block px-4 py-2 text-gray-700 hover:bg-gray-100 hover:text-blue-600 rounded-md font-medium transition-colors"
-            >
-              Dashboard
-            </button>
-            <button 
-              onClick={() => handleNavClick('#')}
-              className="w-full text-left block px-4 py-2 text-gray-700 hover:bg-gray-100 hover:text-blue-600 rounded-md font-medium transition-colors"
-            >
-              Events
-            </button>
-            <button 
-              onClick={() => handleNavClick('#')}
-              className="w-full text-left block px-4 py-2 text-gray-700 hover:bg-gray-100 hover:text-blue-600 rounded-md font-medium transition-colors"
-            >
-              Community
-            </button>
-            <button 
-              onClick={() => handleNavClick('#')}
-              className="w-full text-left block px-4 py-2 text-gray-700 hover:bg-gray-100 hover:text-blue-600 rounded-md font-medium transition-colors"
-            >
-              Badges
-            </button>
-            
-            {/* Mobile User Info */}
-            <div className="border-t border-gray-200 pt-4 mt-4">
-              <div className="px-4 py-2">
-                <div className="flex items-center space-x-3 mb-3">
-                  {renderUserAvatar('w-10 h-10')}
-                  <div>
-                    {renderUserInfo()}
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <button 
-                    onClick={() => handleNavClick('profile')}
-                    className="w-full text-left block text-sm text-gray-700 hover:text-blue-600 py-1"
-                  >
-                    Profile Settings
-                  </button>
-                  <button 
-                    onClick={() => handleNavClick('#')}
-                    className="w-full text-left block text-sm text-gray-700 hover:text-blue-600 py-1"
-                  >
-                    Account Preferences
-                  </button>
-                  <button 
-                    onClick={() => handleNavClick('#')}
-                    className="w-full text-left block text-sm text-gray-700 hover:text-blue-600 py-1"
-                  >
-                    Help & Support
-                  </button>
-                  <button 
-                    onClick={handleSignOut}
-                    className="w-full text-left block text-sm text-red-600 hover:text-red-700 py-1"
-                  >
-                    Sign Out
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
+        {renderMobileMenu()}
       </div>
 
       {/* Error Display */}

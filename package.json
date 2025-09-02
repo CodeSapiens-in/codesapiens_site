@@ -10,6 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@heroicons/react": "^2.2.0",
     "@supabase/auth-helpers-react": "^0.5.0",
     "@supabase/supabase-js": "^2.56.0",
     "@supabase/ui": "^0.36.5",
