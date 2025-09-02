@@ -35,14 +35,18 @@ function Root() {
   }
 
   if (!session) {
-    return (
-      <div className="flex flex-col min-h-screen">
-        <main className="flex-grow flex items-center justify-center">
-          <AuthForm />
-        </main>
-      </div>
-    );
-  }
+  return (
+    <div className="flex flex-col min-h-screen">
+      <Router>
+        <Routes>
+          <Route path="/" element={<CodeSapiensHero />} />
+          <Route path="/auth" element={<AuthForm />} />
+        </Routes>
+      </Router>
+    </div>
+  );
+}
+
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -54,7 +58,7 @@ function Root() {
             <Route path="/profile" element={<UserProfile />} />
             <Route path="/" element={<UserDashboard />} />
             <Route path="/analytics" element={<AnalyticsPage/>} />
-            <Route path="/code" element={<CodeSapiensHero/>} />
+           
             <Route path="*" element={<NotFoundPage/>} />
          
           </Routes>

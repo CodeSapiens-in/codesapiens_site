@@ -2,41 +2,43 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronDown, Github, Instagram, Linkedin, Twitter, Calendar, Users, Code, Award, Mail, Phone, MapPin, Clock, UserPlus, ArrowRight } from 'lucide-react';
 
+import { useNavigate } from 'react-router-dom';
+
 const CodeSapiensHero = () => {
   const [isVisible, setIsVisible] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-
+  const navigate = useNavigate();
   // Updated past events data from bento.me and web sources
   const pastEvents = [
     { 
       id: 1, 
-      title: "July Meetup 2024", 
-      image: "https://images.unsplash.com/photo-1517077304055-6e89abbf09b0?w=800&h=600&fit=crop", 
-      date: "July 2024", 
+      title: "August Meetup 2025", 
+      image: "https://creatorspace.imgix.net/users/cme79i2lk00qls401ar5qxqnc/tYvYry0ll1qJY9Cr-sZlcWmpyKLCEVr3R-WhatsApp%252520Image%2525202025-08-10%252520at%25252015.15.02_25567a3d.jpg?w=750&h=750", 
+      date: "August 2025", 
       description: "A 3-hour mini hackathon with mentors, developers, and certificates for participants.",
       participants: 75
     },
     { 
       id: 2, 
-      title: "Intro to Security Through Google Hacking and CTF's", 
-      image: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=800&h=600&fit=crop", 
-      date: "2024", 
+      title: "July Meetup 2025", 
+      image: "https://creatorspace.imgix.net/users/cme79i2lk00qls401ar5qxqnc/dC8c5AeuyLulrDlu-WhatsApp%2520Image%25202025-08-18%2520at%252017.57.10_1135c6f6.jpg?w=750&h=750", 
+      date: "July 2025", 
       description: "Online session introducing security concepts via Google hacking and CTFs.",
       participants: 44
     },
     { 
       id: 3, 
-      title: "Where to Start to Build AI Accelerators (VLSI, RTL Coding)", 
-      image: "https://images.unsplash.com/photo-1515187029135-18ee286d815b?w=800&h=600&fit=crop", 
-      date: "2024", 
+      title: "Summer of code 2024", 
+      image: "https://creatorspace.imgix.net/users/cme79i2lk00qls401ar5qxqnc/Elth5VQLAvoEm02T-1UTOfxIl6lQsvPuA-Image_Editor%252520(5).png?w=750&h=750", 
+      date: "Summer 2024", 
       description: "Session on building AI accelerators using VLSI and RTL coding.",
       participants: 50
     },
     { 
       id: 4, 
-      title: "Summer of Code 2024", 
-      image: "https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=800&h=600&fit=crop", 
-      date: "Summer 2024", 
+      title: "Mentorship Programme 2024", 
+      image: "https://creatorspace.imgix.net/users/cme79i2lk00qls401ar5qxqnc/sHoKIUM22yN6cHBX-nO7EHUY6fAHtfxrH-Image_Editor%252520(2).png?w=750&h=750", 
+      date: "2024", 
       description: "Student-run program for contributing to open-source projects.",
       participants: 100
     }
@@ -100,10 +102,8 @@ const CodeSapiensHero = () => {
 
   // Updated stats based on real data
   const stats = [
-    { icon: Users, number: "1200+", label: "Active Members" },
-    { icon: Code, number: "100+", label: "Projects Contributed" },
-    { icon: Calendar, number: "20+", label: "Events Hosted" },
-    { icon: Award, number: "10+", label: "Community Awards" }
+    { icon: Users, number: "1500+", label: "Active Members" },
+    { icon: Calendar, number: "7+", label: "Events Hosted" }
   ];
 
   useEffect(() => {
@@ -187,22 +187,22 @@ const CodeSapiensHero = () => {
             <div className="mb-16">
               <div className="mb-8">
                 <h1 className="text-6xl sm:text-7xl lg:text-8xl xl:text-9xl font-extralight tracking-wider text-zinc-900 mb-4 leading-none">
-                  Heritage In
+                  Codesapiens
                 </h1>
-                <h1 className="text-6xl sm:text-7xl lg:text-8xl xl:text-9xl font-light tracking-wider text-zinc-700 mb-8 leading-none italic">
-                  Code
+                <h1 className="text-6xl sm:text-7xl lg:text-4xl xl:text-5xl font-light tracking-wider text-zinc-700 mb-8 leading-none italic">
+                  A Student community
                 </h1>
               </div>
               
               <p className="text-lg sm:text-xl lg:text-2xl font-light text-zinc-600 mb-12 max-w-3xl mx-auto leading-relaxed tracking-wide">
-                A student-run community in Tamil Nadu fostering technical excellence through events, hackathons, and mentorship.
+                A student-run community in Tamil Nadu fostering technical excellence through events, meetups, and mentorship.
               </p>
 
               <button 
-                onClick={() => scrollToSection('collection')}
+                onClick={() => navigate('/auth')}
                 className="group inline-flex items-center space-x-3 px-8 py-4 border border-zinc-300 text-zinc-700 font-light tracking-widest uppercase text-sm hover:bg-zinc-900 hover:text-zinc-50 hover:border-zinc-900 transition-all duration-500"
               >
-                <span>View Collection</span>
+                <span>Login</span>
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" />
               </button>
             </div>
@@ -245,7 +245,7 @@ const CodeSapiensHero = () => {
                 </h2>
               </div>
               <p className="text-lg font-light text-zinc-600 leading-relaxed mb-8">
-                Founded by Thiyaga B., CodeSapiens is a vibrant student community in Tamil Nadu with over 1,200 members, organizing technical events and hackathons led by a 10-member student team.
+                Founded by Thiyaga B., CodeSapiens is a vibrant student community in Tamil Nadu with over 1,200 members, organizing technical meetups and webinars led by a 10-member student team.
               </p>
               <button 
                 onClick={() => scrollToSection('events')}
@@ -262,7 +262,7 @@ const CodeSapiensHero = () => {
               transition={{ duration: 1 }}
             >
               <img
-                src="https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=600&h=400&fit=crop"
+                src="https://res.cloudinary.com/dqudvximt/image/upload/v1756797708/WhatsApp_Image_2025-09-02_at_12.45.18_b15791ea_rnlwrz.jpg"
                 alt="Coding workspace"
                 className="w-full h-auto rounded-lg shadow-xl"
               />
@@ -293,9 +293,7 @@ const CodeSapiensHero = () => {
             <div className="text-lg font-light text-zinc-300 mb-12">
               Timeless <span className="italic">Masterpieces</span>
             </div>
-            <p className="text-zinc-400 font-light max-w-2xl mx-auto">
-              Each project and event at CodeSapiens embodies the spirit of computational art and community collaboration.
-            </p>
+            
           </motion.div>
 
           <motion.div 
@@ -364,31 +362,31 @@ const CodeSapiensHero = () => {
           </div>
 
           {/* Grid Gallery with hover effects and stagger */}
-          <motion.div 
-            className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 lg:gap-4"
-            variants={staggerVariants}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
-          >
-            {pastEvents.concat(pastEvents).map((event, index) => (
-              <motion.div
-                key={index}
-                variants={childVariants}
-                className="group cursor-pointer transform transition-all duration-700 hover:scale-105"
-                onClick={() => setCurrentImageIndex(index % pastEvents.length)}
-              >
-                <div className="relative overflow-hidden bg-zinc-100 rounded-md shadow-md">
-                  <img
-                    src={event.image}
-                    alt={event.title}
-                    className="w-full aspect-square object-cover group-hover:scale-110 transition-transform duration-700"
-                  />
-                  <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                </div>
-              </motion.div>
-            ))}
-          </motion.div>
+         <motion.div 
+  className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 lg:gap-4"
+  variants={staggerVariants}
+  initial="hidden"
+  whileInView="visible"
+  viewport={{ once: true }}
+>
+  {pastEvents.map((event, index) => (
+    <motion.div
+      key={index}
+      variants={childVariants}
+      className="group cursor-pointer transform transition-all duration-700 hover:scale-105"
+      onClick={() => setCurrentImageIndex(index)}
+    >
+      <div className="relative overflow-hidden bg-zinc-100 rounded-md shadow-md">
+        <img
+          src={event.image}
+          alt={event.title}
+          className="w-full aspect-square object-cover group-hover:scale-110 transition-transform duration-700"
+        />
+        <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+      </div>
+    </motion.div>
+  ))}
+</motion.div>
         </div>
       </motion.section>
 
