@@ -21,7 +21,7 @@ const CodeSapiensHero = () => {
     { 
       id: 2, 
       title: "July Meetup 2025", 
-      image: "https://creatorspace.imgix.net/users/cme79i2lk00qls401ar5qxqnc/dC8c5AeuyLulrDlu-WhatsApp%2520Image%25202025-08-18%2520at%25252017.57.10_1135c6f6.jpg?w=750&h=750", 
+      image: "https://creatorspace.imgix.net/users/cme79i2lk00qls401ar5qxqnc/dC8c5AeuyLulrDlu-WhatsApp%2520Image%25202025-08-18%2520at%252017.57.10_1135c6f6.jpg?w=750&h=750", 
       date: "July 2025", 
       description: "Online session introducing security concepts via Google hacking and CTFs.",
       participants: 44
