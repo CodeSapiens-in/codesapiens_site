@@ -330,7 +330,7 @@ const Dashboard = () => {
                       {filteredStudents.length}
                     </span>
                   </div>
-                  <button className="bg-blue-600 text-white px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium hover:bg-blue-700 transition-colors w-full sm:w-auto">
+                  <button className="bg-blue-600 text-white px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium hover:bg-blue-700 transition-colors w-full sm:w-auto" onClick={()=> navigate('/user-list')}>
                     + View All Students
                   </button>
                 </div>

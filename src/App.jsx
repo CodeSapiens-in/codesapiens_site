@@ -20,6 +20,7 @@ import UserNavbar from './user/UserNavbar';
 import AnalyticsPage from './admin/AnalyticsPage';
 import NotFoundPage from './components/ui/NotFoundPage';
 import CodeSapiensHero from './components/CodesapiensHero';
+import AllUserList from './admin/AllUserList';
 
 
 function Root() {
@@ -58,6 +59,7 @@ function Root() {
             <Route path="/profile" element={<UserProfile />} />
             <Route path="/" element={<UserDashboard />} />
             <Route path="/analytics" element={<AnalyticsPage/>} />
+            <Route path="/user-list" element={<AllUserList/>} />
            
             <Route path="*" element={<NotFoundPage/>} />
          
