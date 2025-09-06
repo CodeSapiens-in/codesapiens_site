@@ -110,7 +110,7 @@ const AllUserList = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
         <div className="text-center">
           <Loader2 className="w-12 h-12 animate-spin text-blue-500 mx-auto mb-4" />
           <p className="text-gray-600">Loading users...</p>
@@ -121,7 +121,7 @@ const AllUserList = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
         <div className="text-center">
           <X className="w-16 h-16 text-red-500 mx-auto mb-4" />
           <h2 className="text-xl font-semibold text-gray-900 mb-2">Error Loading Users</h2>
@@ -138,69 +138,178 @@ const AllUserList = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 px-4 sm:px-6 lg:px-8 py-8 flex flex-col">
+    <div className="min-h-screen bg-gray-50 px-4 sm:px-6 lg:px-8 py-4 sm:py-8 flex flex-col">
       {/* Header and Search */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">All Users</h1>
-        <p className="text-gray-600 mt-2">Browse through the list of all registered users</p>
-        <div className="mt-4 relative">
+      <div className="mb-6 sm:mb-8">
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">All Users</h1>
+        <p className="text-gray-600 mt-1 sm:mt-2 text-sm sm:text-base">Browse through the list of all registered users</p>
+        <div className="mt-3 sm:mt-4 relative">
           <input
             type="text"
             placeholder="Search by name or email..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full p-3 pl-10 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+            className="w-full p-2 sm:p-3 pl-8 sm:pl-10 text-sm sm:text-base border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
           />
-          <Search className="w-5 h-5 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" />
+          <Search className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 absolute left-2 sm:left-3 top-1/2 transform -translate-y-1/2" />
         </div>
       </div>
 
-      {/* User Table */}
-      <div className="flex-1 overflow-auto">
-        <div className="bg-white rounded-lg shadow-sm border">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50 sticky top-0 z-20">
-              <tr>
-                <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
-                <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
-                <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">College</th>
-                <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Skills</th>
-                <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {filteredUsers.map((user, index) => (
-                <tr 
-                  key={user.uid} 
-                  className={`${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'} hover:bg-gray-100 transition-colors duration-200`}
+      {/* Mobile Card View */}
+      <div className="flex-1 block md:hidden">
+        <div className="space-y-4">
+          {filteredUsers.map((user) => (
+            <div 
+              key={user.uid}
+              className="bg-white rounded-lg shadow-sm border p-4"
+            >
+              <div className="flex items-start space-x-3">
+                <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-blue-600 rounded-full flex items-center justify-center">
+                  {user.avatar ? (
+                    <img 
+                      src={user.avatar} 
+                      alt={user.displayName}
+                      className="w-full h-full rounded-full object-cover"
+                    />
+                  ) : (
+                    <span className="text-white font-bold text-lg">
+                      {user.displayName?.charAt(0).toUpperCase() || 'U'}
+                    </span>
+                  )}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-lg font-semibold text-gray-900 truncate">{user.displayName}</h3>
+                  <p className="text-sm text-gray-500 truncate">{user.email}</p>
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    <span className="inline-block bg-blue-50 text-blue-700 text-xs px-2 py-1 rounded-full">
+                      {user.role}
+                    </span>
+                    <span className="inline-block bg-green-50 text-green-700 text-xs px-2 py-1 rounded-full">
+                      {user.college}
+                    </span>
+                  </div>
+                  <div className="mt-2">
+                    <p className="text-xs text-gray-600">
+                      Skills: {user.skills.length > 0 ? user.skills.slice(0, 2).join(', ') + (user.skills.length > 2 ? '...' : '') : 'No skills'}
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div className="mt-4">
+                <button
+                  onClick={() => handleViewDetails(user)}
+                  className="w-full bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium py-2 px-4 rounded-lg transition-colors duration-200"
                 >
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 text-center">{user.displayName}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">{user.email}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">{user.role}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">{user.college}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">
-                    {user.skills.length > 0 ? user.skills.slice(0, 3).join(', ') + (user.skills.length > 3 ? '...' : '') : 'No skills'}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-center">
+                  View Details
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Desktop Table View */}
+      <div className="flex-1 overflow-auto hidden md:block">
+        <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
+          {/* Mobile Table View */}
+          <div className="block sm:hidden">
+            <div className="divide-y divide-gray-200">
+              {filteredUsers.map((user) => (
+                <div key={user.uid} className="p-4 hover:bg-gray-50">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-blue-600 rounded-full flex items-center justify-center">
+                        {user.avatar ? (
+                          <img 
+                            src={user.avatar} 
+                            alt={user.displayName}
+                            className="w-full h-full rounded-full object-cover"
+                          />
+                        ) : (
+                          <span className="text-white font-bold text-sm">
+                            {user.displayName?.charAt(0).toUpperCase() || 'U'}
+                          </span>
+                        )}
+                      </div>
+                      <div>
+                        <h3 className="font-medium text-gray-900 text-sm">{user.displayName}</h3>
+                        <p className="text-xs text-gray-500">{user.role}</p>
+                      </div>
+                    </div>
                     <button
                       onClick={() => handleViewDetails(user)}
-                      className="text-blue-600 hover:text-blue-800 font-medium transition-colors duration-200"
+                      className="text-blue-600 hover:text-blue-800 text-xs font-medium"
                     >
-                      More Details
+                      Details
                     </button>
-                  </td>
-                </tr>
+                  </div>
+                  <div className="space-y-2 text-xs">
+                    <div className="flex justify-between">
+                      <span className="text-gray-500">Email:</span>
+                      <span className="text-gray-900 truncate ml-2">{user.email}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-500">College:</span>
+                      <span className="text-gray-900 truncate ml-2">{user.college}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-500">Skills:</span>
+                      <span className="text-gray-900 truncate ml-2">
+                        {user.skills.length > 0 ? user.skills.slice(0, 2).join(', ') + (user.skills.length > 2 ? '...' : '') : 'No skills'}
+                      </span>
+                    </div>
+                  </div>
+                </div>
               ))}
-            </tbody>
-          </table>
+            </div>
+          </div>
+
+          {/* Desktop Table View */}
+          <div className="hidden sm:block overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50 sticky top-0 z-20">
+                <tr>
+                  <th className="px-3 sm:px-4 lg:px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                  <th className="px-3 sm:px-4 lg:px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                  <th className="px-3 sm:px-4 lg:px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
+                  <th className="px-3 sm:px-4 lg:px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">College</th>
+                  <th className="px-3 sm:px-4 lg:px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Skills</th>
+                  <th className="px-3 sm:px-4 lg:px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {filteredUsers.map((user, index) => (
+                  <tr 
+                    key={user.uid} 
+                    className={`${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'} hover:bg-gray-100 transition-colors duration-200`}
+                  >
+                    <td className="px-3 sm:px-4 lg:px-6 py-4 whitespace-nowrap text-xs sm:text-sm font-medium text-gray-900 text-center">{user.displayName}</td>
+                    <td className="px-3 sm:px-4 lg:px-6 py-4 whitespace-nowrap text-xs sm:text-sm text-gray-500 text-center">{user.email}</td>
+                    <td className="px-3 sm:px-4 lg:px-6 py-4 whitespace-nowrap text-xs sm:text-sm text-gray-500 text-center">{user.role}</td>
+                    <td className="px-3 sm:px-4 lg:px-6 py-4 whitespace-nowrap text-xs sm:text-sm text-gray-500 text-center">{user.college}</td>
+                    <td className="px-3 sm:px-4 lg:px-6 py-4 whitespace-nowrap text-xs sm:text-sm text-gray-500 text-center">
+                      {user.skills.length > 0 ? user.skills.slice(0, 3).join(', ') + (user.skills.length > 3 ? '...' : '') : 'No skills'}
+                    </td>
+                    <td className="px-3 sm:px-4 lg:px-6 py-4 whitespace-nowrap text-xs sm:text-sm text-center">
+                      <button
+                        onClick={() => handleViewDetails(user)}
+                        className="text-blue-600 hover:text-blue-800 font-medium transition-colors duration-200"
+                      >
+                        More Details
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
 
       {/* Details Panel */}
       {isDetailsOpen && (
         <>
-          {/* Overlay - Fixed with better visibility */}
+          {/* Overlay */}
           <div 
             className="fixed inset-0 bg-gray-800 bg-opacity-50 backdrop-blur-md z-40 transition-all duration-300 ease-in-out"
             onClick={handleCloseDetails}
@@ -214,21 +323,23 @@ const AllUserList = () => {
             {selectedUser && (
               <>
                 {/* Header */}
-                <div className="p-6 border-b border-gray-200 flex justify-between items-center sticky top-0 bg-white z-10">
-                  <h2 className="text-2xl font-bold text-gray-900">{selectedUser.displayName}'s Profile</h2>
+                <div className="p-4 sm:p-6 border-b border-gray-200 flex justify-between items-center sticky top-0 bg-white z-10">
+                  <h2 className="text-xl sm:text-2xl font-bold text-gray-900 truncate pr-2">
+                    {selectedUser.displayName}'s Profile
+                  </h2>
                   <button
                     onClick={handleCloseDetails}
-                    className="p-2 hover:bg-gray-100 rounded-full transition-colors duration-200"
+                    className="p-2 hover:bg-gray-100 rounded-full transition-colors duration-200 flex-shrink-0"
                     title="Close"
                   >
                     <X className="w-6 h-6 text-gray-500 hover:text-gray-700" />
                   </button>
                 </div>
 
-                <div className="p-6 space-y-6">
+                <div className="p-4 sm:p-6 space-y-6">
                   {/* User Info */}
-                  <div className="flex flex-col items-start space-y-4">
-                    <div className="w-20 h-20 bg-gradient-to-br from-purple-500 to-blue-600 rounded-full flex items-center justify-center">
+                  <div className="flex flex-col sm:flex-row items-start space-y-4 sm:space-y-0 sm:space-x-6">
+                    <div className="w-20 h-20 sm:w-24 sm:h-24 bg-gradient-to-br from-purple-500 to-blue-600 rounded-full flex items-center justify-center flex-shrink-0">
                       {selectedUser.avatar ? (
                         <img 
                           src={selectedUser.avatar} 
@@ -236,29 +347,29 @@ const AllUserList = () => {
                           className="w-full h-full rounded-full object-cover"
                         />
                       ) : (
-                        <span className="text-white font-bold text-2xl">
+                        <span className="text-white font-bold text-2xl sm:text-3xl">
                           {selectedUser.displayName?.charAt(0).toUpperCase() || 'U'}
                         </span>
                       )}
                     </div>
-                    <div className="flex-1">
-                      <div className="flex items-center space-x-3 mb-2">
-                        <h3 className="text-2xl font-bold text-gray-900">{selectedUser.displayName}</h3>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-3 mb-3">
+                        <h3 className="text-xl sm:text-2xl font-bold text-gray-900">{selectedUser.displayName}</h3>
                         {selectedUser.emailVerified && (
-                          <span className="text-green-500 text-sm bg-green-50 px-2 py-1 rounded-full">
+                          <span className="text-green-500 text-sm bg-green-50 px-2 py-1 rounded-full w-fit">
                             ✓ Verified
                           </span>
                         )}
                       </div>
-                      <p className="text-base text-gray-600 mb-4">{selectedUser.bio}</p>
+                      <p className="text-sm sm:text-base text-gray-600 mb-4">{selectedUser.bio}</p>
                       <div className="space-y-2 text-sm text-gray-600">
                         <div className="flex items-center space-x-2">
-                          <Mail className="w-4 h-4 text-gray-400" />
+                          <Mail className="w-4 h-4 text-gray-400 flex-shrink-0" />
                           <span className="truncate">{selectedUser.email}</span>
                         </div>
                         {selectedUser.phoneNumber && (
                           <div className="flex items-center space-x-2">
-                            <Phone className="w-4 h-4 text-gray-400" />
+                            <Phone className="w-4 h-4 text-gray-400 flex-shrink-0" />
                             <span>{selectedUser.phoneNumber}</span>
                           </div>
                         )}
@@ -268,20 +379,20 @@ const AllUserList = () => {
 
                   {/* Personal Information */}
                   <div className="bg-white rounded-lg shadow-sm border">
-                    <div className="p-4 border-b">
-                      <h3 className="text-lg font-semibold text-gray-900">Personal Information</h3>
+                    <div className="p-3 sm:p-4 border-b">
+                      <h3 className="text-base sm:text-lg font-semibold text-gray-900">Personal Information</h3>
                     </div>
-                    <div className="p-4 space-y-4">
-                      <div className="flex justify-between py-2">
-                        <span className="text-sm font-medium text-gray-600">College</span>
+                    <div className="p-3 sm:p-4 space-y-3 sm:space-y-4">
+                      <div className="flex flex-col sm:flex-row sm:justify-between py-2">
+                        <span className="text-sm font-medium text-gray-600 mb-1 sm:mb-0">College</span>
                         <span className="text-sm text-gray-900">{selectedUser.college}</span>
                       </div>
-                      <div className="flex justify-between py-2">
-                        <span className="text-sm font-medium text-gray-600">Role</span>
+                      <div className="flex flex-col sm:flex-row sm:justify-between py-2">
+                        <span className="text-sm font-medium text-gray-600 mb-1 sm:mb-0">Role</span>
                         <span className="text-sm text-gray-900">{selectedUser.role}</span>
                       </div>
-                      <div className="flex justify-between py-2">
-                        <span className="text-sm font-medium text-gray-600">Volunteering Hours</span>
+                      <div className="flex flex-col sm:flex-row sm:justify-between py-2">
+                        <span className="text-sm font-medium text-gray-600 mb-1 sm:mb-0">Volunteering Hours</span>
                         <span className="text-sm text-gray-900">{selectedUser.volunteeringHours}</span>
                       </div>
                     </div>
@@ -289,10 +400,10 @@ const AllUserList = () => {
 
                   {/* Social Links */}
                   <div className="bg-white rounded-lg shadow-sm border">
-                    <div className="p-4 border-b">
-                      <h3 className="text-lg font-semibold text-gray-900">Social Links</h3>
+                    <div className="p-3 sm:p-4 border-b">
+                      <h3 className="text-base sm:text-lg font-semibold text-gray-900">Social Links</h3>
                     </div>
-                    <div className="p-4 space-y-4">
+                    <div className="p-3 sm:p-4 space-y-3 sm:space-y-4">
                       {socialLinks.map((link, index) => {
                         const IconComponent = link.icon;
                         return (
@@ -323,10 +434,10 @@ const AllUserList = () => {
 
                   {/* Technical Skills */}
                   <div className="bg-white rounded-lg shadow-sm border">
-                    <div className="p-4 border-b">
-                      <h3 className="text-lg font-semibold text-gray-900">Technical Skills</h3>
+                    <div className="p-3 sm:p-4 border-b">
+                      <h3 className="text-base sm:text-lg font-semibold text-gray-900">Technical Skills</h3>
                     </div>
-                    <div className="p-4 space-y-4">
+                    <div className="p-3 sm:p-4 space-y-3 sm:space-y-4">
                       {selectedUser.skills.length > 0 ? (
                         technicalSkills.map((item, index) => (
                           <div key={index} className="space-y-2">
@@ -343,31 +454,32 @@ const AllUserList = () => {
                           </div>
                         ))
                       ) : (
-                        <div className="text-center py-8">
-                          <p className="text-gray-500">No technical skills added yet</p>
+                        <div className="text-center py-6 sm:py-8">
+                          <p className="text-gray-500 text-sm">No technical skills added yet</p>
                         </div>
                       )}
                     </div>
                   </div>
 
-                  {/* Placeholder for Achievements and Activity */}
+                  {/* Achievements */}
                   <div className="bg-white rounded-lg shadow-sm border">
-                    <div className="p-4 border-b">
-                      <h3 className="text-lg font-semibold text-gray-900">Achievements</h3>
+                    <div className="p-3 sm:p-4 border-b">
+                      <h3 className="text-base sm:text-lg font-semibold text-gray-900">Achievements</h3>
                     </div>
-                    <div className="p-4 text-center">
-                      <Trophy className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                      <p className="text-gray-500">No achievements available</p>
+                    <div className="p-3 sm:p-4 text-center">
+                      <Trophy className="w-12 h-12 sm:w-16 sm:h-16 text-gray-400 mx-auto mb-3 sm:mb-4" />
+                      <p className="text-gray-500 text-sm">No achievements available</p>
                     </div>
                   </div>
                   
+                  {/* Activity Timeline */}
                   <div className="bg-white rounded-lg shadow-sm border">
-                    <div className="p-4 border-b">
-                      <h3 className="text-lg font-semibold text-gray-900">Activity Timeline</h3>
+                    <div className="p-3 sm:p-4 border-b">
+                      <h3 className="text-base sm:text-lg font-semibold text-gray-900">Activity Timeline</h3>
                     </div>
-                    <div className="p-4 text-center">
-                      <Calendar className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                      <p className="text-gray-500">No activity available</p>
+                    <div className="p-3 sm:p-4 text-center">
+                      <Calendar className="w-12 h-12 sm:w-16 sm:h-16 text-gray-400 mx-auto mb-3 sm:mb-4" />
+                      <p className="text-gray-500 text-sm">No activity available</p>
                     </div>
                   </div>
                 </div>
