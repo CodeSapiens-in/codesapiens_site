@@ -105,7 +105,10 @@ const UserProfile = () => {
             phoneVerified: data.phone_verified || false,
             adminApproved: data.admin_approved || false,
             createdAt: data.created_at,
-            updatedAt: data.updated_at
+            updatedAt: data.updated_at,
+            year: data.year || 'Not specified',
+            major: data.major || 'Not specified',
+            department: data.department || 'Not specified'
           };
 
           let skills = [];
@@ -295,7 +298,10 @@ const UserProfile = () => {
         github_url: editedData.githubUrl,
         linkedin_url: editedData.linkedinUrl,
         portfolio_url: editedData.portfolioUrl,
-        volunteering_hours: parseInt(editedData.volunteeringHours, 10) || 0
+        volunteering_hours: parseInt(editedData.volunteeringHours, 10) || 0,
+        year: editedData.year,
+        major: editedData.major,
+        department: editedData.department
       };
       const { error } = await supabase
         .from('users')
@@ -328,7 +334,10 @@ const UserProfile = () => {
   const personalInfo = userData ? [
     { label: "College", value: userData.college, editable: true, type: "college" },
     { label: "Role", value: userData.role, editable: true, type: "text" },
-    { label: "Volunteering Hours", value: userData.volunteeringHours?.toString() || "0", editable: true, type: "number" }
+    { label: "Volunteering Hours", value: userData.volunteeringHours?.toString() || "0", editable: true, type: "number" },
+    { label: "Year", value: userData.year, editable: true, type: "text" },
+    { label: "Major", value: userData.major, editable: true, type: "text" },
+    { label: "Department", value: userData.department, editable: true, type: "text" }
   ] : [];
 
   const socialLinks = userData ? [
@@ -629,11 +638,11 @@ const UserProfile = () => {
                           ) : (
                             <input 
                               type="text"
-                              name="role"
-                              value={editedData.role}
+                              name={info.label.toLowerCase()}
+                              value={editedData[info.label.toLowerCase()]}
                               onChange={handleInputChange}
                               className="text-sm text-gray-900 border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 w-full"
-                              placeholder="Role"
+                              placeholder={info.label}
                             />
                           )}
                         </div>
