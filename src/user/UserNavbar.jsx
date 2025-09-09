@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Bell, Settings, Menu, X, ChevronDown, User, Loader2, Shield, Users, BarChart3 } from 'lucide-react';
+import { Bell, Settings, Menu, X, ChevronDown, User, Loader2, Shield, Users, BarChart3, TextSearch} from 'lucide-react';
 
 // Import your actual Supabase client
 import { supabase } from '../lib/supabaseClient';
@@ -308,28 +308,17 @@ export default function UnifiedNavbar() {
       return (
         <div className="hidden md:flex items-center justify-center flex-1 max-w-md mx-auto">
           <div className="flex items-center space-x-8">
+            
             <button 
-              onClick={() => handleNavClick('/admin')}
-              className={`text-gray-700 ${hoverColor} px-3 py-2 rounded-md font-medium transition-colors flex items-center space-x-2`}
-            >
-              <BarChart3 className="w-4 h-4" />
-              <span>Dashboard</span>
-            </button>
-            <button 
-              onClick={() => handleNavClick('/admin/users')}
+              onClick={() => handleNavClick('/user-list')}
               className={`text-gray-700 ${hoverColor} px-3 py-2 rounded-md font-medium transition-colors flex items-center space-x-2`}
             >
               <Users className="w-4 h-4" />
               <span>Users</span>
             </button>
+           
             <button 
-              onClick={() => handleNavClick('/admin/events')}
-              className={`text-gray-700 ${hoverColor} px-3 py-2 rounded-md font-medium transition-colors`}
-            >
-              Events
-            </button>
-            <button 
-              onClick={() => handleNavClick('/admin/analytics')}
+              onClick={() => handleNavClick('/analytics')}
               className={`text-gray-700 ${hoverColor} px-3 py-2 rounded-md font-medium transition-colors`}
             >
               Analytics
@@ -339,36 +328,7 @@ export default function UnifiedNavbar() {
       );
     }
 
-    return (
-      <div className="hidden md:flex items-center justify-center flex-1 max-w-md mx-auto">
-        <div className="flex items-center space-x-8">
-          <button 
-            onClick={() => handleNavClick('/dashboard')}
-            className={`text-gray-700 ${hoverColor} px-3 py-2 rounded-md font-medium transition-colors`}
-          >
-            Dashboard
-          </button>
-          <button 
-            onClick={() => handleNavClick('/events')}
-            className={`text-gray-700 ${hoverColor} px-3 py-2 rounded-md font-medium transition-colors`}
-          >
-            Events
-          </button>
-          <button 
-            onClick={() => handleNavClick('/community')}
-            className={`text-gray-700 ${hoverColor} px-3 py-2 rounded-md font-medium transition-colors`}
-          >
-            Community
-          </button>
-          <button 
-            onClick={() => handleNavClick('/badges')}
-            className={`text-gray-700 ${hoverColor} px-3 py-2 rounded-md font-medium transition-colors`}
-          >
-            Badges
-          </button>
-        </div>
-      </div>
-    );
+    
   };
 
   const renderProfileDropdown = () => {
@@ -392,26 +352,13 @@ export default function UnifiedNavbar() {
         <div className="py-2">
           {isAdmin ? (
             <>
+             
               <button 
-                onClick={() => handleNavClick('/admin/profile')}
+                onClick={() => handleNavClick('/analytics')}
                 className="w-full text-left flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
               >
-                <User className="w-4 h-4 mr-2" />
-                Admin Profile
-              </button>
-              <button 
-                onClick={() => handleNavClick('/admin/settings')}
-                className="w-full text-left flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-              >
-                <Settings className="w-4 h-4 mr-2" />
-                Admin Settings
-              </button>
-              <button 
-                onClick={() => handleNavClick('/admin/system')}
-                className="w-full text-left flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-              >
-                <Shield className="w-4 h-4 mr-2" />
-                System Settings
+                <TextSearch className="w-4 h-4 mr-2" />
+                View Analytics
               </button>
             </>
           ) : (
@@ -454,28 +401,17 @@ export default function UnifiedNavbar() {
       <div ref={mobileMenuRef} className="md:hidden border-t border-gray-200 py-4 space-y-2 bg-white">
         {isAdmin ? (
           <>
+           
             <button 
-              onClick={() => handleNavClick('/admin')}
-              className={`w-full text-left block px-4 py-2 text-gray-700 hover:bg-gray-100 ${hoverColor} rounded-md font-medium transition-colors flex items-center space-x-2`}
-            >
-              <BarChart3 className="w-4 h-4" />
-              <span>Dashboard</span>
-            </button>
-            <button 
-              onClick={() => handleNavClick('/admin/users')}
+              onClick={() => handleNavClick('/user-list')}
               className={`w-full text-left block px-4 py-2 text-gray-700 hover:bg-gray-100 ${hoverColor} rounded-md font-medium transition-colors flex items-center space-x-2`}
             >
               <Users className="w-4 h-4" />
               <span>Users</span>
             </button>
+           
             <button 
-              onClick={() => handleNavClick('/admin/events')}
-              className={`w-full text-left block px-4 py-2 text-gray-700 hover:bg-gray-100 ${hoverColor} rounded-md font-medium transition-colors`}
-            >
-              Events
-            </button>
-            <button 
-              onClick={() => handleNavClick('/admin/analytics')}
+              onClick={() => handleNavClick('/analytics')}
               className={`w-full text-left block px-4 py-2 text-gray-700 hover:bg-gray-100 ${hoverColor} rounded-md font-medium transition-colors`}
             >
               Analytics
@@ -483,30 +419,8 @@ export default function UnifiedNavbar() {
           </>
         ) : (
           <>
-            <button 
-              onClick={() => handleNavClick('/dashboard')}
-              className={`w-full text-left block px-4 py-2 text-gray-700 hover:bg-gray-100 ${hoverColor} rounded-md font-medium transition-colors`}
-            >
-              Dashboard
-            </button>
-            <button 
-              onClick={() => handleNavClick('/events')}
-              className={`w-full text-left block px-4 py-2 text-gray-700 hover:bg-gray-100 ${hoverColor} rounded-md font-medium transition-colors`}
-            >
-              Events
-            </button>
-            <button 
-              onClick={() => handleNavClick('/community')}
-              className={`w-full text-left block px-4 py-2 text-gray-700 hover:bg-gray-100 ${hoverColor} rounded-md font-medium transition-colors`}
-            >
-              Community
-            </button>
-            <button 
-              onClick={() => handleNavClick('/badges')}
-              className={`w-full text-left block px-4 py-2 text-gray-700 hover:bg-gray-100 ${hoverColor} rounded-md font-medium transition-colors`}
-            >
-              Badges
-            </button>
+           
+          
           </>
         )}
         
@@ -522,7 +436,7 @@ export default function UnifiedNavbar() {
             <div className="space-y-2">
               {isAdmin ? (
                 <>
-                  <button 
+                  {/* <button 
                     onClick={() => handleNavClick('/admin/profile')}
                     className={`w-full text-left block text-sm text-gray-700 ${hoverColor} py-1`}
                   >
@@ -539,11 +453,11 @@ export default function UnifiedNavbar() {
                     className={`w-full text-left block text-sm text-gray-700 ${hoverColor} py-1`}
                   >
                     System Settings
-                  </button>
+                  </button> */}
                 </>
               ) : (
                 <>
-                  <button 
+                  {/* <button 
                     onClick={() => handleNavClick('/profile')}
                     className={`w-full text-left block text-sm text-gray-700 ${hoverColor} py-1`}
                   >
@@ -554,15 +468,15 @@ export default function UnifiedNavbar() {
                     className={`w-full text-left block text-sm text-gray-700 ${hoverColor} py-1`}
                   >
                     Account Preferences
-                  </button>
+                  </button> */}
                 </>
               )}
-              <button 
+              {/* <button 
                 onClick={() => handleNavClick('/help')}
                 className={`w-full text-left block text-sm text-gray-700 ${hoverColor} py-1`}
               >
                 Help & Support
-              </button>
+              </button> */}
               <button 
                 onClick={handleSignOut}
                 className="w-full text-left block text-sm text-red-600 hover:text-red-700 py-1"
