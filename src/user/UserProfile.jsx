@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   ArrowLeft, 
   Edit, 
@@ -44,8 +44,12 @@ const UserProfile = () => {
   const [collegeSearch, setCollegeSearch] = useState('');
   const [collegeLoading, setCollegeLoading] = useState(false);
   const [collegeError, setCollegeError] = useState(null);
+  const [showCollegeDropdown, setShowCollegeDropdown] = useState(false);
+  const [lastSelectedCollege, setLastSelectedCollege] = useState('');
   const [showSkillDropdown, setShowSkillDropdown] = useState(false);
   const [showEditSkillDropdown, setShowEditSkillDropdown] = useState(false);
+  const collegeInputRef = useRef(null);
+  const collegeDropdownRef = useRef(null);
 
   const tabs = ['Overview', 'Skills', 'Achievements', 'Activity'];
 
@@ -74,11 +78,7 @@ const UserProfile = () => {
 
         setIsAuthenticated(true);
 
-        const { data, error: profileError } = await supabase
-          .from('users')
-          .select('*')
-          .eq('uid', user.id)
-          .single();
+        const { data, error: profileError } = await supabase.auth.getUser(); 
 
         console.log('Fetched profile:', data, profileError);
 
@@ -144,19 +144,38 @@ const UserProfile = () => {
     fetchUserData();
   }, []);
 
+  // Handle clicks outside college dropdown
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (collegeInputRef.current && !collegeInputRef.current.contains(event.target) &&
+          (!collegeDropdownRef.current || !collegeDropdownRef.current.contains(event.target))) {
+        setShowCollegeDropdown(false);
+        setColleges([]);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
   // Fetch colleges from API
   useEffect(() => {
+    if (collegeSearch.length < 3 || collegeSearch === lastSelectedCollege) {
+      setShowCollegeDropdown(false);
+      setColleges([]);
+      setCollegeLoading(false);
+      setCollegeError(null);
+      return;
+    }
+
+    setShowCollegeDropdown(true);
+    setCollegeLoading(true);
+    setCollegeError(null);
+
     const fetchColleges = async () => {
-      if (collegeSearch.length < 3) {
-        setColleges([]);
-        setCollegeLoading(false);
-        setCollegeError(null);
-        return;
-      }
-      
       try {
-        setCollegeLoading(true);
-        setCollegeError(null);
         const response = await fetch('https://colleges-name-api.onrender.com/colleges/search', {
           method: 'POST',
           headers: {
@@ -196,11 +215,13 @@ const UserProfile = () => {
 
     const timeoutId = setTimeout(fetchColleges, 300);
     return () => clearTimeout(timeoutId);
-  }, [collegeSearch]);
+  }, [collegeSearch, lastSelectedCollege]);
 
   const handleEditStart = () => {
     setIsEditing(true);
     setCollegeSearch(editedData.college || '');
+    setLastSelectedCollege(editedData.college || '');
+    setShowCollegeDropdown(false);
   };
 
   const handleInputChange = (e) => {
@@ -211,6 +232,7 @@ const UserProfile = () => {
   const handleCollegeChange = (e) => {
     const value = e.target.value;
     setCollegeSearch(value);
+    setEditedData((prev) => ({ ...prev, college: value }));
     setCollegeError(null);
   };
 
@@ -220,8 +242,13 @@ const UserProfile = () => {
     const trimmedCollegeName = collegeName.trim();
     setEditedData((prev) => ({ ...prev, college: trimmedCollegeName }));
     setCollegeSearch(trimmedCollegeName);
+    setLastSelectedCollege(trimmedCollegeName);
     setColleges([]);
+    setShowCollegeDropdown(false);
     setCollegeError(null);
+    if (collegeInputRef.current) {
+      collegeInputRef.current.blur();
+    }
   };
 
   const handleAddSkill = async () => {
@@ -284,7 +311,8 @@ const UserProfile = () => {
   };
 
   const handleSave = async () => {
-    if (editedData.college && !colleges.includes(editedData.college) && collegeSearch.length >= 3) {
+    const finalCollege = editedData.college?.trim() || '';
+    if (finalCollege.length >= 3 && finalCollege !== lastSelectedCollege) {
       setCollegeError('Please select a college from the dropdown.');
       return;
     }
@@ -294,7 +322,7 @@ const UserProfile = () => {
         display_name: editedData.displayName,
         phone_number: editedData.phoneNumber,
         bio: editedData.bio,
-        college: editedData.college,
+        college: finalCollege,
         role: editedData.role,
         github_url: editedData.githubUrl,
         linkedin_url: editedData.linkedinUrl,
@@ -309,11 +337,19 @@ const UserProfile = () => {
         .update(updateData)
         .eq('uid', editedData.uid);
       if (error) throw error;
-      setUserData(editedData);
+
+      const updatedUserData = {
+        ...editedData,
+        college: finalCollege
+      };
+      setUserData(updatedUserData);
+      setEditedData(updatedUserData);
       setIsEditing(false);
       setColleges([]);
       setCollegeSearch('');
+      setShowCollegeDropdown(false);
       setCollegeError(null);
+      setLastSelectedCollege(finalCollege);
     } catch (err) {
       console.error('Update error:', err);
       setError(err.message);
@@ -325,7 +361,9 @@ const UserProfile = () => {
     setEditedData({ ...userData });
     setColleges([]);
     setCollegeSearch('');
+    setShowCollegeDropdown(false);
     setCollegeError(null);
+    setLastSelectedCollege('');
     setEditingSkillIndex(null);
     setEditingSkillValue('');
     setShowSkillDropdown(false);
@@ -586,8 +624,9 @@ const UserProfile = () => {
                       {isEditing && info.editable ? (
                         <div className="sm:text-right sm:max-w-xs w-full relative">
                           {info.type === "college" ? (
-                            <div className="relative">
+                            <div className="relative" ref={collegeInputRef}>
                               <input 
+                                ref={(el) => { if (el) collegeInputRef.current = el; }}
                                 type="text"
                                 value={collegeSearch}
                                 onChange={handleCollegeChange}
@@ -601,26 +640,27 @@ const UserProfile = () => {
                                   <Loader2 className="w-4 h-4 animate-spin text-gray-400" />
                                 </div>
                               )}
-                              {!collegeLoading && collegeSearch.length >= 3 && (
+                              {!collegeLoading && collegeSearch.length >= 3 && !showCollegeDropdown && (
                                 <ChevronDown className="absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
                               )}
-                              {colleges.length > 0 && (
-                                <div className="absolute z-20 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto mt-1">
-                                  {colleges.map((college, i) => (
-                                    <button
-                                      key={i}
-                                      onClick={(e) => handleCollegeSelect(e, college)}
-                                      className="w-full px-4 py-3 text-left text-sm text-gray-900 hover:bg-blue-50 focus:bg-blue-50 focus:outline-none border-b border-gray-100 last:border-b-0"
-                                    >
-                                      {college}
-                                    </button>
-                                  ))}
-                                </div>
-                              )}
-                              {collegeSearch.length >= 3 && colleges.length === 0 && !collegeLoading && (
-                                <div className="absolute z-20 w-full bg-white border border-gray-300 rounded-lg shadow-lg mt-1 p-4 text-center text-sm text-gray-500">
-                                  No colleges found
-                                </div>
+                              {showCollegeDropdown && collegeSearch.length >= 3 && (
+                                colleges.length > 0 ? (
+                                  <div ref={collegeDropdownRef} className="absolute z-20 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto mt-1">
+                                    {colleges.map((college, i) => (
+                                      <button
+                                        key={i}
+                                        onClick={(e) => handleCollegeSelect(e, college)}
+                                        className="w-full px-4 py-3 text-left text-sm text-gray-900 hover:bg-blue-50 focus:bg-blue-50 focus:outline-none border-b border-gray-100 last:border-b-0"
+                                      >
+                                        {college}
+                                      </button>
+                                    ))}
+                                  </div>
+                                ) : !collegeLoading ? (
+                                  <div ref={collegeDropdownRef} className="absolute z-20 w-full bg-white border border-gray-300 rounded-lg shadow-lg mt-1 p-4 text-center text-sm text-gray-500">
+                                    No colleges found
+                                  </div>
+                                ) : null
                               )}
                               {collegeError && (
                                 <p className="text-sm text-red-500 mt-1">{collegeError}</p>

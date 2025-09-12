@@ -20,9 +20,7 @@ export default function UnifiedNavbar() {
   // Function to fetch all user emails
   const fetchAllUserEmails = async () => {
     try {
-      const { data, error } = await supabase
-        .from('users')
-        .select('email');
+      const { data, error } = await supabase.auth.getUser();
 
       if (error) {
         console.error('Error fetching user emails:', error.message);

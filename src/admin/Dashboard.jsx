@@ -45,11 +45,7 @@ const Dashboard = () => {
         }
 
         // Fetch admin profile
-        const { data: profileData, error: profileError } = await supabase
-          .from('users')
-          .select('*')
-          .eq('uid', user.id)
-          .single();
+        const { data: profileData, error: profileError } = await supabase.auth.getUser();
 
         if (profileError) {
           console.error('Error fetching profile:', profileError);

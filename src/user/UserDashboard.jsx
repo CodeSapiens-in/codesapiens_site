@@ -40,11 +40,7 @@ export default function UserDashboard() {
         setIsAuthenticated(true);
 
         // Fetch user profile from the users table
-        const { data, error: profileError } = await supabase
-          .from('users')
-          .select('*')
-          .eq('uid', user.id)
-          .single();
+        const { data, error: profileError } = await supabase.auth.getUser();
 
         console.log('Fetched profile:', data, profileError);
 
