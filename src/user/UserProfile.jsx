@@ -157,7 +157,7 @@ const UserProfile = () => {
       try {
         setCollegeLoading(true);
         setCollegeError(null);
-        const response = await fetch('https://colleges-name-api.vercel.app/colleges/search', {
+        const response = await fetch('https://colleges-name-api.onrender.com/colleges/search', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

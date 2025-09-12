@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Calendar, Globe, Github, Building, Eye, EyeOff, User, Phone, School, Mail, Lock } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
 import { useNavigate } from 'react-router-dom';
+import HCaptcha from '@hcaptcha/react-hcaptcha';
 
 export default function CodeSapiensPlatform() {
   const [mode, setMode] = useState('signIn'); // 'signIn' | 'signUp'
@@ -16,39 +17,38 @@ export default function CodeSapiensPlatform() {
     password: '',
   });
   const [profile, setProfile] = useState(null);
+  const [token, setToken] = useState(null); // Changed to null for stricter validation
   const navigate = useNavigate();
+  const captchaRef = useRef(null); // Reference to hCaptcha component
 
- useEffect(() => {
-  const fetchProfile = async () => {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+  useEffect(() => {
+    const fetchProfile = async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
 
-    if (!user) {
-      setProfile(null);
-      return;
-    }
-    const { data, error } = await supabase
-      .from('users')
-      .select('*')
-      .eq('uid', user.id)  // <-- make sure this matches your table's PK
-      .single();
+      if (!user) {
+        setProfile(null);
+        return;
+      }
+
+      const { data, error } = await supabase
+        .from('users')
+        .select('*')
+        .eq('uid', user.id)
+        .single();
 
       console.log('Fetched profile:', data, error);
 
-    if (error) {
-      console.error('Error fetching profile:', error);
-    } else {
-      setProfile(data);
-    }
-    
-  };
+      if (error) {
+        console.error('Error fetching profile:', error);
+      } else {
+        setProfile(data);
+      }
+    };
 
-  fetchProfile();
-}, [mode, loading]);
-
-
- 
+    fetchProfile();
+  }, [mode, loading]);
 
   const handleInputChange = (e) => {
     setFormData({
@@ -61,10 +61,21 @@ export default function CodeSapiensPlatform() {
     setShowPassword(!showPassword);
   };
 
+  const handleVerify = (token) => {
+    setToken(token); // Set hCaptcha token when verified
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setMessage(null);
+
+    // Check if hCaptcha token exists
+    if (!token) {
+      setMessage('❌ Please complete the CAPTCHA verification.');
+      setLoading(false);
+      return;
+    }
 
     try {
       if (mode === 'signUp') {
@@ -77,21 +88,31 @@ export default function CodeSapiensPlatform() {
               phone: formData.phone,
               college: formData.college,
             },
+            captchaToken: token, // Pass hCaptcha token
           },
         });
         if (error) throw error;
         setMessage('✅ Check your inbox for a confirmation email.');
       } else {
+        console.log('Signing in with token:', token);
         const { error } = await supabase.auth.signInWithPassword({
           email: formData.email,
           password: formData.password,
+          options: {
+            captchaToken: token, // Pass hCaptcha token
+          },
         });
         if (error) throw error;
-        navigate('/'); 
+        navigate('/');
         setMessage('✅ Signed in!');
       }
     } catch (err) {
       setMessage(`❌ ${err.message}`);
+      // Reset hCaptcha on error to allow re-verification
+      if (captchaRef.current) {
+        captchaRef.current.resetCaptcha();
+      }
+      setToken(null); // Clear token after error
     } finally {
       setLoading(false);
     }
@@ -100,6 +121,10 @@ export default function CodeSapiensPlatform() {
   const toggleMode = () => {
     setMode(mode === 'signUp' ? 'signIn' : 'signUp');
     setMessage(null);
+    setToken(null); // Reset token when toggling mode
+    if (captchaRef.current) {
+      captchaRef.current.resetCaptcha(); // Reset hCaptcha widget
+    }
   };
 
   const features = [
@@ -133,7 +158,6 @@ export default function CodeSapiensPlatform() {
     },
   ];
 
-  // Conditional rendering for admin / user
   const renderContent = () => {
     if (!profile) return null;
 
@@ -319,10 +343,19 @@ export default function CodeSapiensPlatform() {
               </div>
             </div>
 
+            {/* hCaptcha */}
+            <div>
+              <HCaptcha
+                sitekey="a2888bb4-ecf2-4f6a-8e7a-14586d084e96"
+                onVerify={handleVerify}
+                ref={captchaRef}
+              />
+            </div>
+
             {/* Submit Button */}
             <button
               type="submit"
-              disabled={loading}
+              disabled={loading || !token} // Disable button if no token
               className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-2 sm:py-3 px-4 rounded-lg font-medium hover:from-blue-700 hover:to-purple-700 transition-all duration-200 transform hover:scale-[1.02] disabled:opacity-50 disabled:transform-none text-sm sm:text-base"
             >
               {loading
