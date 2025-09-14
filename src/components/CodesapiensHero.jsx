@@ -95,7 +95,7 @@ const CodeSapiensHero = () => {
       link: "https://www.linkedin.com/in/pranav-vikraman-322020242"
     },
     {
-      photo: "https://res.cloudinary.com/dqudvximt/image/upload/v1756997856/JWz1OvtKurqSRsC7-WhatsApp202025-08-312011.22.52_bff7c8bd_mrok7q.jpg",
+      photo: "https://res.cloudinary.com/dqudvximt/image/upload/v1756997855/JWz1OvtKurqSRsC7-WhatsApp202025-08-312011.22.52_bff7c8bd_mrok7q.jpg",
       name: "Vignesh R",
       link: "https://www.linkedin.com/in/vignesh-r-7727582b7"
     },
@@ -471,6 +471,55 @@ const CodeSapiensHero = () => {
         </div>
       </motion.section>
 
+      {/* Founder Section */}
+      <motion.section 
+        variants={sectionVariants}
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true }}
+        className="py-32 bg-zinc-50"
+      >
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-20">
+            <span className="text-sm font-light tracking-widest uppercase text-zinc-400 mb-8 block">Leadership</span>
+            <h2 className="text-4xl lg:text-5xl xl:text-6xl font-extralight text-zinc-900 mb-12 leading-tight">
+              Our <span className="italic font-light">Founder</span>
+            </h2>
+          </div>
+
+          <div className="flex justify-center">
+            <motion.div
+              variants={childVariants}
+              className="transform transition-all duration-700 hover:scale-105 cursor-pointer flex flex-col items-center text-center"
+              onClick={() => window.open('https://www.linkedin.com/in/thiyagab/', '_blank')}
+            >
+              <div className="relative group mb-4 w-full max-w-[200px] md:max-w-[300px]">
+                <div className="aspect-square overflow-hidden rounded-full shadow-xl">
+                  <img
+                    src="https://res.cloudinary.com/dqudvximt/image/upload/v1757828688/1679197646322_n1svjq.jpg"
+                    alt="Thiyaga B"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <Linkedin 
+                  className="absolute bottom-2 right-2 w-6 h-6 md:w-8 md:h-8 text-white bg-blue-700 rounded-full p-1 md:p-2 opacity-80 group-hover:opacity-100 transition-opacity duration-300"
+                />
+              </div>
+              <p className="text-lg md:text-2xl font-light text-zinc-900 mt-2">Thiyaga B</p>
+              <p className="text-md md:text-lg text-zinc-500 italic">Founder</p>
+              <a 
+                href="https://www.linkedin.com/in/thiyagab/" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-sm md:text-md text-zinc-500 hover:text-zinc-700 transition-colors mt-2"
+              >
+                View LinkedIn
+              </a>
+            </motion.div>
+          </div>
+        </div>
+      </motion.section>
+
       {/* Our Members Section - Grid animation */}
       <motion.section 
         variants={sectionVariants}
@@ -488,7 +537,7 @@ const CodeSapiensHero = () => {
           </div>
 
           <motion.div 
-            className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-4 max-w-6xl mx-auto"
+            className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-4 max-w-6xl mx-auto"
             variants={staggerVariants}
             initial="hidden"
             whileInView="visible"
@@ -498,11 +547,11 @@ const CodeSapiensHero = () => {
               <motion.div
                 key={index}
                 variants={childVariants}
-                className="transform transition-all duration-700 hover:scale-105 cursor-pointer flex flex-col items-center"
+                className="transform transition-all duration-700 hover:scale-105 cursor-pointer flex flex-col items-center text-center"
                 onClick={() => window.open(volunteer.link, '_blank')}
               >
-                <div className="relative group mb-2">
-                  <div className="aspect-square overflow-hidden rounded-full shadow-md w-full max-w-[150px]">
+                <div className="relative group mb-2 w-full max-w-[120px] sm:max-w-[150px]">
+                  <div className="aspect-square overflow-hidden rounded-full shadow-md w-full">
                     <img
                       src={volunteer.photo}
                       alt={volunteer.name}
@@ -510,15 +559,18 @@ const CodeSapiensHero = () => {
                     />
                   </div>
                   <Linkedin 
-                    className="absolute bottom-1 right-1 w-5 h-5 sm:w-6 sm:h-6 text-white bg-blue-700 rounded-full p-1 opacity-80 group-hover:opacity-100 transition-opacity duration-300"
+                    className="absolute bottom-1 right-1 w-4 h-4 sm:w-5 sm:h-5 text-white bg-blue-700 rounded-full p-0.5 sm:p-1 opacity-80 group-hover:opacity-100 transition-opacity duration-300"
                   />
                 </div>
-                <p className="text-center text-sm font-light text-zinc-900 mt-1">{volunteer.name}</p>
+                <p className="text-xs sm:text-sm font-light text-zinc-900 mt-1 line-clamp-2">{volunteer.name}</p>
+                {volunteer.position && (
+                  <p className="text-xs text-zinc-500 italic">{volunteer.position}</p>
+                )}
                 <a 
                   href={volunteer.link} 
                   target="_blank" 
                   rel="noopener noreferrer"
-                  className="text-xs text-zinc-500 hover:text-zinc-700 transition-colors"
+                  className="text-xs text-zinc-500 hover:text-zinc-700 transition-colors mt-1 hidden sm:block"
                 >
                   View LinkedIn
                 </a>
