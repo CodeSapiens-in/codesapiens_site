@@ -176,7 +176,7 @@ const UserProfile = () => {
 
     const fetchColleges = async () => {
       try {
-        const response = await fetch('https://colleges-name-api.onrender.com/colleges/search', {
+        const response = await fetch('https://colleges-name-api.vercel.app/colleges/search', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

@@ -65,6 +65,33 @@ export default function CodeSapiensPlatform() {
     setToken(token); // Set hCaptcha token when verified
   };
 
+  // Function to verify hCaptcha token using your Express server
+  const verifyCaptcha = async (token) => {
+    try {
+      const res = await fetch('https://colleges-name-api.vercel.app/verify-hcaptcha', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token }),
+      });
+
+      if (!res.ok) {
+        throw new Error(`Server error: ${res.status}`);
+      }
+
+      const data = await res.json();
+      console.log('hCaptcha verification response:', data);
+
+      if (data.success) {
+        return true;
+      } else {
+        throw new Error(data.message || 'Captcha verification failed');
+      }
+    } catch (err) {
+      console.error('hCaptcha verification error:', err);
+      throw err;
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -78,6 +105,9 @@ export default function CodeSapiensPlatform() {
     }
 
     try {
+      // Verify hCaptcha token using your server first
+      await verifyCaptcha(token);
+
       if (mode === 'signUp') {
         const { error } = await supabase.auth.signUp({
           email: formData.email,
@@ -88,18 +118,19 @@ export default function CodeSapiensPlatform() {
               phone: formData.phone,
               college: formData.college,
             },
-            captchaToken: token, // Pass hCaptcha token
+            captchaToken: token, // Optional: Pass to Supabase if supported
           },
         });
+        
         if (error) throw error;
         setMessage('✅ Check your inbox for a confirmation email.');
       } else {
-        console.log('Signing in with token:', token);
+        console.log('Signing in with verified token');
         const { error } = await supabase.auth.signInWithPassword({
           email: formData.email,
           password: formData.password,
           options: {
-            captchaToken: token, // Pass hCaptcha token
+            captchaToken: token, // Optional: Pass to Supabase if supported
           },
         });
         if (error) throw error;
