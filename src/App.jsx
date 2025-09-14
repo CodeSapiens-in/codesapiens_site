@@ -26,6 +26,7 @@ import AllUserList from './admin/AllUserList';
 function Root() {
   const session = useSession();
   const { isLoading } = useSessionContext();
+  console.log('Current session:');
 
   if (isLoading) {
     return (
@@ -57,7 +58,7 @@ function Root() {
           <Routes>
             <Route path="/admin" element={<Dashboard />} />
             <Route path="/profile" element={<UserProfile />} />
-            <Route path="/" element={<UserDashboard />} />
+            <Route path="/dashboard" element={<UserDashboard />} />
             <Route path="/analytics" element={<AnalyticsPage/>} />
             <Route path="/user-list" element={<AllUserList/>} />
            

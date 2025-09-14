@@ -3,6 +3,7 @@ import { Bell, Settings, Menu, X, ChevronDown, User, Loader2, Shield, Users, Bar
 
 // Import your actual Supabase client
 import { supabase } from '../lib/supabaseClient';
+import { useNavigate } from 'react-router-dom';
 
 export default function UnifiedNavbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -12,6 +13,7 @@ export default function UnifiedNavbar() {
   const [error, setError] = useState(null);
   const [authChecking, setAuthChecking] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const navigate = useNavigate();
   
   // Refs for click outside detection
   const profileDropdownRef = useRef(null);
@@ -198,7 +200,7 @@ export default function UnifiedNavbar() {
       setIsProfileDropdownOpen(false);
       
       // Redirect to login or home page
-      window.location.href = '/';
+      navigate('/');
     } catch (err) {
       console.error('Sign out error:', err);
     }
@@ -309,7 +311,7 @@ export default function UnifiedNavbar() {
           <div className="flex items-center space-x-8">
             
             <button 
-              onClick={() => handleNavClick('/user-list')}
+              onClick={() => navigate('/user-list')}
               className={`text-gray-700 ${hoverColor} px-3 py-2 rounded-md font-medium transition-colors flex items-center space-x-2`}
             >
               <Users className="w-4 h-4" />
@@ -317,7 +319,7 @@ export default function UnifiedNavbar() {
             </button>
            
             <button 
-              onClick={() => handleNavClick('/analytics')}
+              onClick={() => navigate('/analytics')}
               className={`text-gray-700 ${hoverColor} px-3 py-2 rounded-md font-medium transition-colors`}
             >
               Analytics
@@ -353,7 +355,7 @@ export default function UnifiedNavbar() {
             <>
              
               <button 
-                onClick={() => handleNavClick('/analytics')}
+                onClick={() => navigate('/analytics')}
                 className="w-full text-left flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
               >
                 <TextSearch className="w-4 h-4 mr-2" />
@@ -363,7 +365,7 @@ export default function UnifiedNavbar() {
           ) : (
             <>
               <button 
-                onClick={() => handleNavClick('/profile')}
+                onClick={() => navigate('/profile')}
                 className="w-full text-left flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
               >
                 <User className="w-4 h-4 mr-2" />
@@ -402,7 +404,7 @@ export default function UnifiedNavbar() {
           <>
            
             <button 
-              onClick={() => handleNavClick('/user-list')}
+              onClick={() => navigate('/user-list')}
               className={`w-full text-left block px-4 py-2 text-gray-700 hover:bg-gray-100 ${hoverColor} rounded-md font-medium transition-colors flex items-center space-x-2`}
             >
               <Users className="w-4 h-4" />

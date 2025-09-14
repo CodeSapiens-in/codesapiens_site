@@ -60,7 +60,7 @@ const Dashboard = () => {
         // Check if user is admin
         if (profileData?.role !== 'admin') {
           // Redirect non-admin users to student dashboard
-          window.location.href = '/';
+          navigate('/dashboard');
           return;
         }
 
