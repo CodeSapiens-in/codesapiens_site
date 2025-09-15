@@ -79,18 +79,25 @@ export default function CodeSapiensPlatform() {
     setLoading(true);
     setMessage(null);
 
-    if (mode !== 'forgotPassword' && !token) {
-      setMessage('❌ Please complete the CAPTCHA verification.');
-      setLoading(false);
-      return;
-    }
-
     try {
       if (mode === 'forgotPassword') {
-        const { error } = await supabase.auth.resetPasswordForEmail(formData.email);
+        const redirectTo =
+          process.env.NODE_ENV === 'production'
+            ? 'https://codesapiens-management-website.vercel.app/reset-password'
+            : `${window.location.origin}/reset-password`;
+
+        const { error } = await supabase.auth.resetPasswordForEmail(formData.email, { redirectTo });
         if (error) throw error;
         setMessage('✅ Password reset link has been sent to your email!');
+        setTimeout(() => {
+          navigate('/?type=signIn');
+        }, 2000);
       } else {
+        if (!token) {
+          setMessage('❌ Please complete the CAPTCHA verification.');
+          setLoading(false);
+          return;
+        }
         await verifyCaptcha(token);
         if (mode === 'signUp') {
           const { error } = await supabase.auth.signUp({
@@ -242,186 +249,221 @@ export default function CodeSapiensPlatform() {
 
         {/* Right Panel - Auth Form */}
         <div className="w-full lg:w-96 bg-white border-t lg:border-t-0 lg:border-l border-gray-200 px-4 sm:px-8 py-8 sm:py-12">
-          <div className="mb-6 sm:mb-8">
-            <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">
-              {mode === 'signUp' ? 'Join Our Community' : mode === 'forgotPassword' ? 'Reset Password' : 'Welcome Back'}
-            </h2>
-            <p className="text-sm sm:text-base text-gray-600">
-              {mode === 'signUp' ? 'Create your account to get started' : mode === 'forgotPassword' ? 'Enter your email to reset your password' : 'Sign in to your account'}
-            </p>
-          </div>
-
-          <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
-            {mode === 'signUp' && (
-              <>
+          {mode === 'forgotPassword' ? (
+            <div className="w-full">
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">Reset Password</h2>
+              <p className="text-sm sm:text-base text-gray-600 mb-6">
+                Enter your email to receive a password reset link
+              </p>
+              <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1 sm:mb-2">Full Name</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
                   <div className="relative">
-                    <User className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 absolute left-3 top-2.5 sm:top-3" />
+                    <Mail className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 absolute left-3 top-2.5 sm:top-3" />
                     <input
-                      type="text"
-                      name="fullName"
-                      value={formData.fullName}
+                      type="email"
+                      name="email"
+                      required
+                      value={formData.email}
                       onChange={handleInputChange}
                       disabled={loading}
                       className="w-full pl-10 sm:pl-11 pr-4 py-2 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none disabled:opacity-50 text-sm sm:text-base"
-                      placeholder="Enter your full name"
+                      placeholder="admin@example.com"
                     />
                   </div>
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1 sm:mb-2">Phone Number</label>
-                  <div className="relative">
-                    <Phone className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 absolute left-3 top-2.5 sm:top-3" />
-                    <input
-                      type="tel"
-                      name="phone"
-                      value={formData.phone}
-                      onChange={handleInputChange}
-                      disabled={loading}
-                      className="w-full pl-10 sm:pl-11 pr-4 py-2 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none disabled:opacity-50 text-sm sm:text-base"
-                      placeholder="Enter your phone number"
-                    />
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1 sm:mb-2">College/University</label>
-                  <div className="relative">
-                    <School className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 absolute left-3 top-2.5 sm:top-3" />
-                    <input
-                      type="text"
-                      name="college"
-                      value={formData.college}
-                      onChange={handleInputChange}
-                      disabled={loading}
-                      className="w-full pl-10 sm:pl-11 pr-4 py-2 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none disabled:opacity-50 text-sm sm:text-base"
-                      placeholder="Enter your college name"
-                    />
-                  </div>
-                </div>
-              </>
-            )}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1 sm:mb-2">Email Address</label>
-              <div className="relative">
-                <Mail className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 absolute left-3 top-2.5 sm:top-3" />
-                <input
-                  type="email"
-                  name="email"
-                  required
-                  value={formData.email}
-                  onChange={handleInputChange}
+                <button
+                  type="submit"
                   disabled={loading}
-                  className="w-full pl-10 sm:pl-11 pr-4 py-2 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none disabled:opacity-50 text-sm sm:text-base"
-                  placeholder="admin@example.com"
-                />
-              </div>
-            </div>
-            {mode !== 'forgotPassword' && (
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1 sm:mb-2">Password</label>
-                <div className="relative">
-                  <Lock className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 absolute left-3 top-2.5 sm:top-3" />
-                  <input
-                    type={showPassword ? 'text' : 'password'}
-                    name="password"
-                    required
-                    minLength={6}
-                    value={formData.password}
-                    onChange={handleInputChange}
-                    disabled={loading}
-                    className="w-full pl-10 sm:pl-11 pr-10 sm:pr-12 py-2 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none disabled:opacity-50 text-sm sm:text-base"
-                    placeholder="••••••••"
-                  />
-                  <button
-                    type="button"
-                    onClick={togglePasswordVisibility}
-                    className="absolute right-3 top-2.5 sm:top-3 text-gray-400 hover:text-gray-600"
-                  >
-                    {showPassword ? <EyeOff className="w-4 h-4 sm:w-5 sm:h-5" /> : <Eye className="w-4 h-4 sm:w-5 sm:h-5" />}
-                  </button>
+                  className="w-full bg-blue-600 text-white py-2 sm:py-3 px-4 rounded-lg hover:bg-blue-700 disabled:opacity-50 text-sm sm:text-base"
+                >
+                  {loading ? 'Sending…' : 'Send Reset Link'}
+                </button>
+                <div className="text-center">
+                  <p className="text-sm sm:text-base text-gray-600">
+                    Back to{' '}
+                    <button
+                      type="button"
+                      onClick={() => toggleMode('signIn')}
+                      disabled={loading}
+                      className="text-blue-600 hover:text-blue-700 font-medium disabled:opacity-50"
+                    >
+                      Sign In
+                    </button>
+                  </p>
                 </div>
-              </div>
-            )}
-            {mode !== 'forgotPassword' && (
-              <div>
-                <HCaptcha
-                  sitekey="a2888bb4-ecf2-4f6a-8e7a-14586d084e96"
-                  onVerify={handleVerify}
-                  ref={captchaRef}
-                />
-              </div>
-            )}
-            <button
-              type="submit"
-              disabled={loading || (mode !== 'forgotPassword' && !token)}
-              className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-2 sm:py-3 px-4 rounded-lg font-medium hover:from-blue-700 hover:to-purple-700 transition-all duration-200 transform hover:scale-[1.02] disabled:opacity-50 disabled:transform-none text-sm sm:text-base"
-            >
-              {loading
-                ? mode === 'signUp'
-                  ? 'Creating…'
-                  : mode === 'forgotPassword'
-                  ? 'Sending…'
-                  : 'Signing…'
-                : mode === 'signUp'
-                ? 'Sign Up'
-                : mode === 'forgotPassword'
-                ? 'Send Reset Link'
-                : 'Sign In'}
-            </button>
-            <div className="text-center space-y-2">
-              {mode !== 'forgotPassword' ? (
-                <p className="text-sm sm:text-base text-gray-600">
-                  {mode === 'signUp' ? 'Already have an account? ' : 'No account yet? '}
-                  <button
-                    type="button"
-                    onClick={() => toggleMode(mode === 'signUp' ? 'signIn' : 'signUp')}
-                    disabled={loading}
-                    className="text-blue-600 hover:text-blue-700 font-medium disabled:opacity-50"
+                {message && (
+                  <div
+                    className={`p-2 sm:p-3 rounded-lg text-xs sm:text-sm ${
+                      message.startsWith('✅')
+                        ? 'bg-green-50 text-green-800 border border-green-200'
+                        : 'bg-red-50 text-red-800 border border-red-200'
+                    }`}
                   >
-                    {mode === 'signUp' ? 'Sign In' : 'Sign Up'}
-                  </button>
-                </p>
-              ) : null}
-              {mode !== 'forgotPassword' ? (
-                <p className="text-sm sm:text-base text-gray-600">
-                  Forgot your password?{' '}
-                  <button
-                    type="button"
-                    onClick={() => toggleMode('forgotPassword')}
-                    disabled={loading}
-                    className="text-blue-600 hover:text-blue-700 font-medium disabled:opacity-50"
-                  >
-                    Reset Password
-                  </button>
-                </p>
-              ) : (
-                <p className="text-sm sm:text-base text-gray-600">
-                  Back to{' '}
-                  <button
-                    type="button"
-                    onClick={() => toggleMode('signIn')}
-                    disabled={loading}
-                    className="text-blue-600 hover:text-blue-700 font-medium disabled:opacity-50"
-                  >
-                    Sign In
-                  </button>
-                </p>
-              )}
+                    {message}
+                  </div>
+                )}
+              </form>
             </div>
-            {message && (
-              <div
-                className={`p-2 sm:p-3 rounded-lg text-xs sm:text-sm ${
-                  message.startsWith('✅')
-                    ? 'bg-green-50 text-green-800 border border-green-200'
-                    : 'bg-red-50 text-red-800 border border-red-200'
-                }`}
-              >
-                {message}
+          ) : (
+            <>
+              <div className="mb-6 sm:mb-8">
+                <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">
+                  {mode === 'signUp' ? 'Join Our Community' : 'Welcome Back'}
+                </h2>
+                <p className="text-sm sm:text-base text-gray-600">
+                  {mode === 'signUp' ? 'Create your account to get started' : 'Sign in to your account'}
+                </p>
               </div>
-            )}
-          </form>
-          {profile && renderContent()}
+              <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
+                {mode === 'signUp' && (
+                  <>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1 sm:mb-2">Full Name</label>
+                      <div className="relative">
+                        <User className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 absolute left-3 top-2.5 sm:top-3" />
+                        <input
+                          type="text"
+                          name="fullName"
+                          value={formData.fullName}
+                          onChange={handleInputChange}
+                          disabled={loading}
+                          className="w-full pl-10 sm:pl-11 pr-4 py-2 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none disabled:opacity-50 text-sm sm:text-base"
+                          placeholder="Enter your full name"
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1 sm:mb-2">Phone Number</label>
+                      <div className="relative">
+                        <Phone className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 absolute left-3 top-2.5 sm:top-3" />
+                        <input
+                          type="tel"
+                          name="phone"
+                          value={formData.phone}
+                          onChange={handleInputChange}
+                          disabled={loading}
+                          className="w-full pl-10 sm:pl-11 pr-4 py-2 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none disabled:opacity-50 text-sm sm:text-base"
+                          placeholder="Enter your phone number"
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1 sm:mb-2">College/University</label>
+                      <div className="relative">
+                        <School className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 absolute left-3 top-2.5 sm:top-3" />
+                        <input
+                          type="text"
+                          name="college"
+                          value={formData.college}
+                          onChange={handleInputChange}
+                          disabled={loading}
+                          className="w-full pl-10 sm:pl-11 pr-4 py-2 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none disabled:opacity-50 text-sm sm:text-base"
+                          placeholder="Enter your college name"
+                        />
+                      </div>
+                    </div>
+                  </>
+                )}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1 sm:mb-2">Email Address</label>
+                  <div className="relative">
+                    <Mail className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 absolute left-3 top-2.5 sm:top-3" />
+                    <input
+                      type="email"
+                      name="email"
+                      required
+                      value={formData.email}
+                      onChange={handleInputChange}
+                      disabled={loading}
+                      className="w-full pl-10 sm:pl-11 pr-4 py-2 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none disabled:opacity-50 text-sm sm:text-base"
+                      placeholder="admin@example.com"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1 sm:mb-2">Password</label>
+                  <div className="relative">
+                    <Lock className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 absolute left-3 top-2.5 sm:top-3" />
+                    <input
+                      type={showPassword ? 'text' : 'password'}
+                      name="password"
+                      required
+                      minLength={6}
+                      value={formData.password}
+                      onChange={handleInputChange}
+                      disabled={loading}
+                      className="w-full pl-10 sm:pl-11 pr-10 sm:pr-12 py-2 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none disabled:opacity-50 text-sm sm:text-base"
+                      placeholder="••••••••"
+                    />
+                    <button
+                      type="button"
+                      onClick={togglePasswordVisibility}
+                      className="absolute right-3 top-2.5 sm:top-3 text-gray-400 hover:text-gray-600"
+                    >
+                      {showPassword ? <EyeOff className="w-4 h-4 sm:w-5 sm:h-5" /> : <Eye className="w-4 h-4 sm:w-5 sm:h-5" />}
+                    </button>
+                  </div>
+                </div>
+                <div>
+                  <HCaptcha
+                    sitekey="a2888bb4-ecf2-4f6a-8e7a-14586d084e96"
+                    onVerify={handleVerify}
+                    ref={captchaRef}
+                  />
+                </div>
+                <button
+                  type="submit"
+                  disabled={loading || !token}
+                  className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-2 sm:py-3 px-4 rounded-lg font-medium hover:from-blue-700 hover:to-purple-700 transition-all duration-200 transform hover:scale-[1.02] disabled:opacity-50 disabled:transform-none text-sm sm:text-base"
+                >
+                  {loading
+                    ? mode === 'signUp'
+                      ? 'Creating…'
+                      : 'Signing…'
+                    : mode === 'signUp'
+                    ? 'Sign Up'
+                    : 'Sign In'}
+                </button>
+                <div className="text-center space-y-2">
+                  <p className="text-sm sm:text-base text-gray-600">
+                    {mode === 'signUp' ? 'Already have an account? ' : 'No account yet? '}
+                    <button
+                      type="button"
+                      onClick={() => toggleMode(mode === 'signUp' ? 'signIn' : 'signUp')}
+                      disabled={loading}
+                      className="text-blue-600 hover:text-blue-700 font-medium disabled:opacity-50"
+                    >
+                      {mode === 'signUp' ? 'Sign In' : 'Sign Up'}
+                    </button>
+                  </p>
+                  <p className="text-sm sm:text-base text-gray-600">
+                    Forgot your password?{' '}
+                    <button
+                      type="button"
+                      onClick={() => toggleMode('forgotPassword')}
+                      disabled={loading}
+                      className="text-blue-600 hover:text-blue-700 font-medium disabled:opacity-50"
+                    >
+                      Reset Password
+                    </button>
+                  </p>
+                </div>
+                {message && (
+                  <div
+                    className={`p-2 sm:p-3 rounded-lg text-xs sm:text-sm ${
+                      message.startsWith('✅')
+                        ? 'bg-green-50 text-green-800 border border-green-200'
+                        : 'bg-red-50 text-red-800 border border-red-200'
+                    }`}
+                  >
+                    {message}
+                  </div>
+                )}
+              </form>
+              {profile && renderContent()}
+            </>
+          )}
         </div>
       </div>
     </div>
