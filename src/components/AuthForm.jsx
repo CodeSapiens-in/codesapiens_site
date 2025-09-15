@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import HCaptcha from '@hcaptcha/react-hcaptcha';
 
 export default function CodeSapiensPlatform() {
-  const [mode, setMode] = useState('signIn'); // 'signIn' | 'signUp'
+  const [mode, setMode] = useState('signIn'); // 'signIn' | 'signUp' | 'forgotPassword'
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState(null);
@@ -17,36 +17,28 @@ export default function CodeSapiensPlatform() {
     password: '',
   });
   const [profile, setProfile] = useState(null);
-  const [token, setToken] = useState(null); // Changed to null for stricter validation
+  const [token, setToken] = useState(null);
   const navigate = useNavigate();
-  const captchaRef = useRef(null); // Reference to hCaptcha component
+  const captchaRef = useRef(null);
 
   useEffect(() => {
     const fetchProfile = async () => {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-
+      const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
         setProfile(null);
         return;
       }
-
       const { data, error } = await supabase
         .from('users')
         .select('*')
         .eq('uid', user.id)
         .single();
-
-      console.log('Fetched profile:', data, error);
-
       if (error) {
         console.error('Error fetching profile:', error);
       } else {
         setProfile(data);
       }
     };
-
     fetchProfile();
   }, [mode, loading]);
 
@@ -62,10 +54,9 @@ export default function CodeSapiensPlatform() {
   };
 
   const handleVerify = (token) => {
-    setToken(token); // Set hCaptcha token when verified
+    setToken(token);
   };
 
-  // Function to verify hCaptcha token using your Express server
   const verifyCaptcha = async (token) => {
     try {
       const res = await fetch('https://colleges-name-api.vercel.app/verify-hcaptcha', {
@@ -73,19 +64,10 @@ export default function CodeSapiensPlatform() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ token }),
       });
-
-      if (!res.ok) {
-        throw new Error(`Server error: ${res.status}`);
-      }
-
+      if (!res.ok) throw new Error(`Server error: ${res.status}`);
       const data = await res.json();
-      console.log('hCaptcha verification response:', data);
-
-      if (data.success) {
-        return true;
-      } else {
-        throw new Error(data.message || 'Captcha verification failed');
-      }
+      if (data.success) return true;
+      throw new Error(data.message || 'Captcha verification failed');
     } catch (err) {
       console.error('hCaptcha verification error:', err);
       throw err;
@@ -97,64 +79,65 @@ export default function CodeSapiensPlatform() {
     setLoading(true);
     setMessage(null);
 
-    // Check if hCaptcha token exists
-    if (!token) {
+    if (mode !== 'forgotPassword' && !token) {
       setMessage('❌ Please complete the CAPTCHA verification.');
       setLoading(false);
       return;
     }
 
     try {
-      // Verify hCaptcha token using your server first
-      await verifyCaptcha(token);
-
-      if (mode === 'signUp') {
-        const { error } = await supabase.auth.signUp({
-          email: formData.email,
-          password: formData.password,
-          options: {
-            data: {
-              full_name: formData.fullName,
-              phone: formData.phone,
-              college: formData.college,
-            },
-            captchaToken: token, // Optional: Pass to Supabase if supported
-          },
-        });
-        
+      if (mode === 'forgotPassword') {
+        const { error } = await supabase.auth.resetPasswordForEmail(formData.email);
         if (error) throw error;
-        setMessage('✅ Check your inbox for a confirmation email.');
+        setMessage('✅ Password reset link has been sent to your email!');
       } else {
-        console.log('Signing in with verified token');
-        const { error } = await supabase.auth.signInWithPassword({
-          email: formData.email,
-          password: formData.password,
-          options: {
-            captchaToken: token, // Optional: Pass to Supabase if supported
-          },
-        });
-        if (error) throw error;
-        navigate('/');
-        setMessage('✅ Signed in!');
+        await verifyCaptcha(token);
+        if (mode === 'signUp') {
+          const { error } = await supabase.auth.signUp({
+            email: formData.email,
+            password: formData.password,
+            options: {
+              data: {
+                full_name: formData.fullName,
+                phone: formData.phone,
+                college: formData.college,
+              },
+              captchaToken: token,
+            },
+          });
+          if (error) throw error;
+          setMessage('✅ Check your inbox for a confirmation email.');
+        } else {
+          const { error } = await supabase.auth.signInWithPassword({
+            email: formData.email,
+            password: formData.password,
+            options: { captchaToken: token },
+          });
+          if (error) throw error;
+          navigate('/');
+          setMessage('✅ Signed in!');
+        }
       }
     } catch (err) {
       setMessage(`❌ ${err.message}`);
-      // Reset hCaptcha on error to allow re-verification
       if (captchaRef.current) {
         captchaRef.current.resetCaptcha();
       }
-      setToken(null); // Clear token after error
+      setToken(null);
     } finally {
       setLoading(false);
     }
   };
 
-  const toggleMode = () => {
-    setMode(mode === 'signUp' ? 'signIn' : 'signUp');
+  const toggleMode = (newMode) => {
+    setMode(newMode);
     setMessage(null);
-    setToken(null); // Reset token when toggling mode
+    setToken(null);
     if (captchaRef.current) {
-      captchaRef.current.resetCaptcha(); // Reset hCaptcha widget
+      captchaRef.current.resetCaptcha();
+    }
+    if (newMode === 'forgotPassword') {
+      setFormData({ ...formData, password: '', fullName: '', phone: '', college: '' });
     }
   };
 
@@ -191,7 +174,6 @@ export default function CodeSapiensPlatform() {
 
   const renderContent = () => {
     if (!profile) return null;
-
     if (profile.role === 'admin') {
       return (
         <div className="p-4 bg-yellow-50 border border-yellow-300 rounded-lg mt-4">
@@ -199,14 +181,13 @@ export default function CodeSapiensPlatform() {
           <p>Welcome, {profile.full_name}! You can manage users and content here.</p>
         </div>
       );
-    } else {
-      return (
-        <div className="p-4 bg-green-50 border border-green-300 rounded-lg mt-4">
-          <h2 className="font-bold text-lg mb-2">Student Dashboard</h2>
-          <p>Welcome, {profile.full_name}! Explore workshops, earn badges, and connect.</p>
-        </div>
-      );
     }
+    return (
+      <div className="p-4 bg-green-50 border border-green-300 rounded-lg mt-4">
+        <h2 className="font-bold text-lg mb-2">Student Dashboard</h2>
+        <p>Welcome, {profile.full_name}! Explore workshops, earn badges, and connect.</p>
+      </div>
+    );
   };
 
   return (
@@ -237,8 +218,6 @@ export default function CodeSapiensPlatform() {
               Connect, learn, and grow with fellow students. Attend workshops, earn badges, and build
               your professional network in one comprehensive platform.
             </p>
-
-            {/* Feature Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
               {features.map((feature, index) => {
                 const IconComponent = feature.icon;
@@ -265,17 +244,16 @@ export default function CodeSapiensPlatform() {
         <div className="w-full lg:w-96 bg-white border-t lg:border-t-0 lg:border-l border-gray-200 px-4 sm:px-8 py-8 sm:py-12">
           <div className="mb-6 sm:mb-8">
             <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">
-              {mode === 'signUp' ? 'Join Our Community' : 'Welcome Back'}
+              {mode === 'signUp' ? 'Join Our Community' : mode === 'forgotPassword' ? 'Reset Password' : 'Welcome Back'}
             </h2>
             <p className="text-sm sm:text-base text-gray-600">
-              {mode === 'signUp' ? 'Create your account to get started' : 'Sign in to your account'}
+              {mode === 'signUp' ? 'Create your account to get started' : mode === 'forgotPassword' ? 'Enter your email to reset your password' : 'Sign in to your account'}
             </p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
             {mode === 'signUp' && (
               <>
-                {/* Full Name */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1 sm:mb-2">Full Name</label>
                   <div className="relative">
@@ -291,8 +269,6 @@ export default function CodeSapiensPlatform() {
                     />
                   </div>
                 </div>
-
-                {/* Phone Number */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1 sm:mb-2">Phone Number</label>
                   <div className="relative">
@@ -308,12 +284,8 @@ export default function CodeSapiensPlatform() {
                     />
                   </div>
                 </div>
-
-                {/* College/University */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1 sm:mb-2">
-                    College/University
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1 sm:mb-2">College/University</label>
                   <div className="relative">
                     <School className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 absolute left-3 top-2.5 sm:top-3" />
                     <input
@@ -329,8 +301,6 @@ export default function CodeSapiensPlatform() {
                 </div>
               </>
             )}
-
-            {/* Email */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1 sm:mb-2">Email Address</label>
               <div className="relative">
@@ -347,73 +317,98 @@ export default function CodeSapiensPlatform() {
                 />
               </div>
             </div>
-
-            {/* Password */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1 sm:mb-2">Password</label>
-              <div className="relative">
-                <Lock className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 absolute left-3 top-2.5 sm:top-3" />
-                <input
-                  type={showPassword ? 'text' : 'password'}
-                  name="password"
-                  required
-                  minLength={6}
-                  value={formData.password}
-                  onChange={handleInputChange}
-                  disabled={loading}
-                  className="w-full pl-10 sm:pl-11 pr-10 sm:pr-12 py-2 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none disabled:opacity-50 text-sm sm:text-base"
-                  placeholder="••••••••"
-                />
-                <button
-                  type="button"
-                  onClick={togglePasswordVisibility}
-                  className="absolute right-3 top-2.5 sm:top-3 text-gray-400 hover:text-gray-600"
-                >
-                  {showPassword ? <EyeOff className="w-4 h-4 sm:w-5 sm:h-5" /> : <Eye className="w-4 h-4 sm:w-5 sm:h-5" />}
-                </button>
+            {mode !== 'forgotPassword' && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1 sm:mb-2">Password</label>
+                <div className="relative">
+                  <Lock className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 absolute left-3 top-2.5 sm:top-3" />
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    name="password"
+                    required
+                    minLength={6}
+                    value={formData.password}
+                    onChange={handleInputChange}
+                    disabled={loading}
+                    className="w-full pl-10 sm:pl-11 pr-10 sm:pr-12 py-2 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none disabled:opacity-50 text-sm sm:text-base"
+                    placeholder="••••••••"
+                  />
+                  <button
+                    type="button"
+                    onClick={togglePasswordVisibility}
+                    className="absolute right-3 top-2.5 sm:top-3 text-gray-400 hover:text-gray-600"
+                  >
+                    {showPassword ? <EyeOff className="w-4 h-4 sm:w-5 sm:h-5" /> : <Eye className="w-4 h-4 sm:w-5 sm:h-5" />}
+                  </button>
+                </div>
               </div>
-            </div>
-
-            {/* hCaptcha */}
-            <div>
-              <HCaptcha
-                sitekey="a2888bb4-ecf2-4f6a-8e7a-14586d084e96"
-                onVerify={handleVerify}
-                ref={captchaRef}
-              />
-            </div>
-
-            {/* Submit Button */}
+            )}
+            {mode !== 'forgotPassword' && (
+              <div>
+                <HCaptcha
+                  sitekey="a2888bb4-ecf2-4f6a-8e7a-14586d084e96"
+                  onVerify={handleVerify}
+                  ref={captchaRef}
+                />
+              </div>
+            )}
             <button
               type="submit"
-              disabled={loading || !token} // Disable button if no token
+              disabled={loading || (mode !== 'forgotPassword' && !token)}
               className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-2 sm:py-3 px-4 rounded-lg font-medium hover:from-blue-700 hover:to-purple-700 transition-all duration-200 transform hover:scale-[1.02] disabled:opacity-50 disabled:transform-none text-sm sm:text-base"
             >
               {loading
                 ? mode === 'signUp'
                   ? 'Creating…'
+                  : mode === 'forgotPassword'
+                  ? 'Sending…'
                   : 'Signing…'
                 : mode === 'signUp'
                 ? 'Sign Up'
+                : mode === 'forgotPassword'
+                ? 'Send Reset Link'
                 : 'Sign In'}
             </button>
-
-            {/* Toggle Sign In / Sign Up */}
-            <div className="text-center">
-              <p className="text-sm sm:text-base text-gray-600">
-                {mode === 'signUp' ? 'Already have an account? ' : 'No account yet? '}
-                <button
-                  type="button"
-                  onClick={toggleMode}
-                  disabled={loading}
-                  className="text-blue-600 hover:text-blue-700 font-medium disabled:opacity-50"
-                >
-                  {mode === 'signUp' ? 'Sign In' : 'Sign Up'}
-                </button>
-              </p>
+            <div className="text-center space-y-2">
+              {mode !== 'forgotPassword' ? (
+                <p className="text-sm sm:text-base text-gray-600">
+                  {mode === 'signUp' ? 'Already have an account? ' : 'No account yet? '}
+                  <button
+                    type="button"
+                    onClick={() => toggleMode(mode === 'signUp' ? 'signIn' : 'signUp')}
+                    disabled={loading}
+                    className="text-blue-600 hover:text-blue-700 font-medium disabled:opacity-50"
+                  >
+                    {mode === 'signUp' ? 'Sign In' : 'Sign Up'}
+                  </button>
+                </p>
+              ) : null}
+              {mode !== 'forgotPassword' ? (
+                <p className="text-sm sm:text-base text-gray-600">
+                  Forgot your password?{' '}
+                  <button
+                    type="button"
+                    onClick={() => toggleMode('forgotPassword')}
+                    disabled={loading}
+                    className="text-blue-600 hover:text-blue-700 font-medium disabled:opacity-50"
+                  >
+                    Reset Password
+                  </button>
+                </p>
+              ) : (
+                <p className="text-sm sm:text-base text-gray-600">
+                  Back to{' '}
+                  <button
+                    type="button"
+                    onClick={() => toggleMode('signIn')}
+                    disabled={loading}
+                    className="text-blue-600 hover:text-blue-700 font-medium disabled:opacity-50"
+                  >
+                    Sign In
+                  </button>
+                </p>
+              )}
             </div>
-
-            {/* Message */}
             {message && (
               <div
                 className={`p-2 sm:p-3 rounded-lg text-xs sm:text-sm ${
@@ -426,8 +421,6 @@ export default function CodeSapiensPlatform() {
               </div>
             )}
           </form>
-
-          {/* Render Dashboard if logged in */}
           {profile && renderContent()}
         </div>
       </div>

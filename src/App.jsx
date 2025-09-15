@@ -21,6 +21,7 @@ import AnalyticsPage from './admin/AnalyticsPage';
 import NotFoundPage from './components/ui/NotFoundPage';
 import CodeSapiensHero from './components/CodesapiensHero';
 import AllUserList from './admin/AllUserList';
+import ResetPassword from './components/ResetPassword';
 
 
 function Root() {
@@ -61,6 +62,7 @@ function Root() {
             <Route path="/" element={<UserDashboard />} />
             <Route path="/analytics" element={<AnalyticsPage/>} />
             <Route path="/user-list" element={<AllUserList/>} />
+            <Route path="/reset-password" element={<ResetPassword/>} />
            
             <Route path="*" element={<NotFoundPage/>} />
          
