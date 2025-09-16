@@ -90,7 +90,7 @@ export default function CodeSapiensPlatform() {
         if (error) throw error;
         setMessage('✅ Password reset link has been sent to your email!');
         setTimeout(() => {
-          navigate('/login');
+          navigate('/auth');
         }, 2000);
       } else {
         // if (!token) {
