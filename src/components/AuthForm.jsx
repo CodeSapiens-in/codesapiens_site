@@ -1,8 +1,7 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Calendar, Globe, Github, Building, Eye, EyeOff, User, Phone, School, Mail, Lock } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Calendar, Globe, Github, Building, Eye, EyeOff, Mail, Lock } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
 import { useNavigate } from 'react-router-dom';
-// import HCaptcha from '@hcaptcha/react-hcaptcha'; // Commented out: HCaptcha import for CAPTCHA verification
 
 export default function CodeSapiensPlatform() {
   const [mode, setMode] = useState('signIn'); // 'signIn' | 'signUp' | 'forgotPassword'
@@ -10,16 +9,11 @@ export default function CodeSapiensPlatform() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState(null);
   const [formData, setFormData] = useState({
-    fullName: '',
-    phone: '',
-    college: '',
     email: '',
     password: '',
   });
   const [profile, setProfile] = useState(null);
-  // const [token, setToken] = useState(null); // Commented out: State for storing CAPTCHA token
   const navigate = useNavigate();
-  // const captchaRef = useRef(null); // Commented out: Reference for HCaptcha component
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -53,27 +47,6 @@ export default function CodeSapiensPlatform() {
     setShowPassword(!showPassword);
   };
 
-  // const handleVerify = (token) => {
-  //   setToken(token); // Commented out: Function to handle CAPTCHA token verification
-  // };
-
-  // const verifyCaptcha = async (token) => {
-  //   try {
-  //     const res = await fetch('https://colleges-name-api.vercel.app/verify-hcaptcha', {
-  //       method: 'POST',
-  //       headers: { 'Content-Type': 'application/json' },
-  //       body: JSON.stringify({ token }),
-  //     });
-  //     if (!res.ok) throw new Error(`Server error: ${res.status}`);
-  //     const data = await res.json();
-  //     if (data.success) return true;
-  //     throw new Error(data.message || 'Captcha verification failed');
-  //   } catch (err) {
-  //     console.error('hCaptcha verification error:', err);
-  //     throw err;
-  //   }
-  // }; // Commented out: Function to verify CAPTCHA token via external API
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -91,46 +64,28 @@ export default function CodeSapiensPlatform() {
         setMessage('✅ Password reset link has been sent to your email!');
         setTimeout(() => {
           navigate('/auth');
+          setMode('signIn');
+          setFormData({ email: '', password: '' });
         }, 2000);
+      } else if (mode === 'signUp') {
+        const { error } = await supabase.auth.signUp({
+          email: formData.email,
+          password: formData.password,
+        });
+        if (error) throw error;
+        setMessage('✅ Check your inbox for a confirmation email.');
+        setFormData({ email: '', password: '' });
       } else {
-        // if (!token) {
-        //   setMessage('❌ Please complete the CAPTCHA verification.');
-        //   setLoading(false);
-        //   return;
-        // } // Commented out: Check for CAPTCHA token before proceeding with sign-in or sign-up
-        // await verifyCaptcha(token); // Commented out: CAPTCHA verification call
-        if (mode === 'signUp') {
-          const { error } = await supabase.auth.signUp({
-            email: formData.email,
-            password: formData.password,
-            options: {
-              data: {
-                full_name: formData.fullName,
-                phone: formData.phone,
-                college: formData.college,
-              },
-              // captchaToken: token, // Commented out: CAPTCHA token for sign-up
-            },
-          });
-          if (error) throw error;
-          setMessage('✅ Check your inbox for a confirmation email.');
-        } else {
-          const { error } = await supabase.auth.signInWithPassword({
-            email: formData.email,
-            password: formData.password,
-            // options: { captchaToken: token }, // Commented out: CAPTCHA token for sign-in
-          });
-          if (error) throw error;
-          navigate('/');
-          setMessage('✅ Signed in!');
-        }
+        const { error } = await supabase.auth.signInWithPassword({
+          email: formData.email,
+          password: formData.password,
+        });
+        if (error) throw error;
+        navigate('/');
+        setMessage('✅ Signed in!');
       }
     } catch (err) {
       setMessage(`❌ ${err.message}`);
-      // if (captchaRef.current) {
-      //   captchaRef.current.resetCaptcha();
-      // } // Commented out: Reset CAPTCHA on error
-      // setToken(null); // Commented out: Clear CAPTCHA token on error
     } finally {
       setLoading(false);
     }
@@ -139,13 +94,7 @@ export default function CodeSapiensPlatform() {
   const toggleMode = (newMode) => {
     setMode(newMode);
     setMessage(null);
-    // setToken(null); // Commented out: Clear CAPTCHA token when switching modes
-    // if (captchaRef.current) {
-    //   captchaRef.current.resetCaptcha();
-    // } // Commented out: Reset CAPTCHA when switching modes
-    if (newMode === 'forgotPassword') {
-      setFormData({ ...formData, password: '', fullName: '', phone: '', college: '' });
-    }
+    setFormData({ email: '', password: '' });
   };
 
   const features = [
@@ -185,14 +134,14 @@ export default function CodeSapiensPlatform() {
       return (
         <div className="p-4 bg-yellow-50 border border-yellow-300 rounded-lg mt-4">
           <h2 className="font-bold text-lg mb-2">Admin Dashboard</h2>
-          <p>Welcome, {profile.full_name}! You can manage users and content here.</p>
+          <p>Welcome, {profile.display_name || 'Admin'}! You can manage users and content here.</p>
         </div>
       );
     }
     return (
       <div className="p-4 bg-green-50 border border-green-300 rounded-lg mt-4">
         <h2 className="font-bold text-lg mb-2">Student Dashboard</h2>
-        <p>Welcome, {profile.full_name}! Explore workshops, earn badges, and connect.</p>
+        <p>Welcome, {profile.display_name || 'Student'}! Explore workshops, earn badges, and connect.</p>
       </div>
     );
   };
@@ -203,8 +152,12 @@ export default function CodeSapiensPlatform() {
       <header className="bg-white border-b border-gray-200 px-4 sm:px-6 py-4">
         <div className="flex flex-col sm:flex-row items-center justify-between max-w-7xl mx-auto">
           <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 sm:w-10 sm:h-10 bg-blue-600 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-base sm:text-lg">CS</span>
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg overflow-hidden flex items-center justify-center">
+              <img
+                src="https://res.cloudinary.com/dqudvximt/image/upload/v1756797708/WhatsApp_Image_2025-09-02_at_12.45.18_b15791ea_rnlwrz.jpg"
+                alt="CodeSapiens Logo"
+                className="w-full h-full object-cover"
+              />
             </div>
             <span className="text-lg sm:text-xl font-semibold text-gray-900">CodeSapiens</span>
           </div>
@@ -231,7 +184,7 @@ export default function CodeSapiensPlatform() {
                 return (
                   <div
                     key={index}
-                    className="bg-white p-4 sm:p-6 rounded-xl border border-gray-200 hover:shadow-md transition-shadow"
+                    className="bg-white p-4 sm:p-6 rounded-xl border border-gray-200 hover:shadow-md transition-shadow duration-300"
                   >
                     <div
                       className={`w-10 h-10 sm:w-12 sm:h-12 ${feature.bgColor} rounded-lg flex items-center justify-center mb-4`}
@@ -275,7 +228,7 @@ export default function CodeSapiensPlatform() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full bg-blue-600 text-white py-2 sm:py-3 px-4 rounded-lg hover:bg-blue-700 disabled:opacity-50 text-sm sm:text-base"
+                  className="w-full bg-blue-600 text-white py-2 sm:py-3 px-4 rounded-lg hover:bg-blue-700 disabled:opacity-50 text-sm sm:text-base transition-all duration-200"
                 >
                   {loading ? 'Sending…' : 'Send Reset Link'}
                 </button>
@@ -316,55 +269,6 @@ export default function CodeSapiensPlatform() {
                 </p>
               </div>
               <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
-                {mode === 'signUp' && (
-                  <>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1 sm:mb-2">Full Name</label>
-                      <div className="relative">
-                        <User className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 absolute left-3 top-2.5 sm:top-3" />
-                        <input
-                          type="text"
-                          name="fullName"
-                          value={formData.fullName}
-                          onChange={handleInputChange}
-                          disabled={loading}
-                          className="w-full pl-10 sm:pl-11 pr-4 py-2 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none disabled:opacity-50 text-sm sm:text-base"
-                          placeholder="Enter your full name"
-                        />
-                      </div>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1 sm:mb-2">Phone Number</label>
-                      <div className="relative">
-                        <Phone className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 absolute left-3 top-2.5 sm:top-3" />
-                        <input
-                          type="tel"
-                          name="phone"
-                          value={formData.phone}
-                          onChange={handleInputChange}
-                          disabled={loading}
-                          className="w-full pl-10 sm:pl-11 pr-4 py-2 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none disabled:opacity-50 text-sm sm:text-base"
-                          placeholder="Enter your phone number"
-                        />
-                      </div>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1 sm:mb-2">College/University</label>
-                      <div className="relative">
-                        <School className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 absolute left-3 top-2.5 sm:top-3" />
-                        <input
-                          type="text"
-                          name="college"
-                          value={formData.college}
-                          onChange={handleInputChange}
-                          disabled={loading}
-                          className="w-full pl-10 sm:pl-11 pr-4 py-2 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none disabled:opacity-50 text-sm sm:text-base"
-                          placeholder="Enter your college name"
-                        />
-                      </div>
-                    </div>
-                  </>
-                )}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1 sm:mb-2">Email Address</label>
                   <div className="relative">
@@ -399,22 +303,15 @@ export default function CodeSapiensPlatform() {
                     <button
                       type="button"
                       onClick={togglePasswordVisibility}
-                      className="absolute right-3 top-2.5 sm:top-3 text-gray-400 hover:text-gray-600"
+                      className="absolute right-3 top-2.5 sm:top-3 text-gray-400 hover:text-gray-600 transition-colors"
                     >
                       {showPassword ? <EyeOff className="w-4 h-4 sm:w-5 sm:h-5" /> : <Eye className="w-4 h-4 sm:w-5 sm:h-5" />}
                     </button>
                   </div>
                 </div>
-                {/* <div>
-                  <HCaptcha
-                    sitekey="a2888bb4-ecf2-4f6a-8e7a-14586d084e96"
-                    onVerify={handleVerify}
-                    ref={captchaRef}
-                  />
-                </div> */} {/* Commented out: HCaptcha component for user verification */}
                 <button
                   type="submit"
-                  disabled={loading /* || !token */} /* Commented out: Disable button if CAPTCHA token is missing */
+                  disabled={loading}
                   className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-2 sm:py-3 px-4 rounded-lg font-medium hover:from-blue-700 hover:to-purple-700 transition-all duration-200 transform hover:scale-[1.02] disabled:opacity-50 disabled:transform-none text-sm sm:text-base"
                 >
                   {loading
