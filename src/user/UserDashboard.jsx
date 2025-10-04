@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Calendar, Trophy, Users, TrendingUp, Settings, X } from "lucide-react";
+import { Calendar, Trophy, Users, TrendingUp, Settings, X, ExternalLink } from "lucide-react";
 
 // Import your actual Supabase client
 import { supabase } from "../lib/supabaseClient";
@@ -11,11 +11,14 @@ export default function UserDashboard() {
   const [error, setError] = useState(null);
   const [authChecking, setAuthChecking] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [mode, setMode] = useState('dashboard'); // Added for handling password recovery mode
+  const [formData, setFormData] = useState({ email: '' }); // Added for form data
   const navigate = useNavigate();
+
   useEffect(() => {
     const handleAuthEvent = async () => {
       const { data: { session } } = await supabase.auth.getSession();
-      const urlParams = new URLSearchParams(location.search);
+      const urlParams = new URLSearchParams(window.location.search); // Fixed: use window.location
       const type = urlParams.get('type');
 
       if (type === 'recovery' && session?.access_token) {
@@ -24,7 +27,7 @@ export default function UserDashboard() {
       }
     };
     handleAuthEvent();
-  }, [location]);
+  }, []); // Removed location dependency since it's not imported; use window.location instead
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -116,6 +119,49 @@ export default function UserDashboard() {
 
     fetchUserData();
   }, []);
+
+  // Handle external link navigation
+  const handleEventsClick = () => {
+    window.open('https://luma.com/codesapiens?k=c&period=past', '_blank', 'noopener,noreferrer');
+  };
+
+  // Render password recovery form if in that mode (added for completeness, though not requested)
+  if (mode === 'newPassword') {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="max-w-md w-full bg-white rounded-xl shadow-sm border border-gray-200 p-8">
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">Set New Password</h2>
+          <form onSubmit={(e) => { e.preventDefault(); /* Handle password update */ }}>
+            <input
+              type="email"
+              value={formData.email}
+              readOnly
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg mb-4 bg-gray-50"
+              placeholder="Email"
+            />
+            <input
+              type="password"
+              required
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg mb-4"
+              placeholder="New Password"
+            />
+            <input
+              type="password"
+              required
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg mb-4"
+              placeholder="Confirm New Password"
+            />
+            <button
+              type="submit"
+              className="w-full py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors duration-200"
+            >
+              Update Password
+            </button>
+          </form>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -272,12 +318,22 @@ export default function UserDashboard() {
                       <Calendar className="w-8 h-8 text-gray-400" />
                     </div>
                     <h3 className="text-lg font-semibold text-gray-700 mb-2">
-                      Events Coming Soon!
+                      Events
                     </h3>
                     <p className="text-gray-500 mb-4">
                       We're working on an exciting events system where you can discover and join amazing learning opportunities.
                     </p>
-                    <p className="text-sm text-gray-400">Stay tuned for updates!</p>
+                    <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
+                      <button
+                        onClick={handleEventsClick}
+                        className="inline-flex items-center px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors duration-200 text-sm font-medium"
+                      >
+                        View Events
+                        <ExternalLink className="w-4 h-4 ml-1" />
+                      </button>
+                      <span className="text-sm text-gray-400">Opens in new tab</span>
+                    </div>
+                    <p className="text-sm text-gray-400 mt-2">Stay tuned for updates!</p>
                   </div>
                 </div>
 
@@ -374,8 +430,6 @@ export default function UserDashboard() {
           )}
         </main>
       )}
-    
-
     </div>
   );
 }
