@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from "react";
 import {
   ArrowLeft,
   Edit,
@@ -19,21 +19,23 @@ import {
   XCircle,
   ChevronDown,
   Plus,
-  Trash2
-} from 'lucide-react';
-import { supabase } from '../lib/supabaseClient';
-import skillsList from '../assets/skills.json';
-import academicData from '../assets/academic.json';
+  Trash2,
+  Download,
+  Upload,
+  Eye,
+} from "lucide-react";
+import { supabase } from "../lib/supabaseClient";
+import skillsList from "../assets/skills.json";
+import academicData from "../assets/academic.json";
 
 const UserProfile = () => {
-  const [activeTab, setActiveTab] = useState('Overview');
+  const [activeTab, setActiveTab] = useState("Overview");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [userData, setUserData] = useState(null);
   const [userSkills, setUserSkills] = useState([]);
-  const [newSkill, setNewSkill] = useState('');
+  const [newSkill, setNewSkill] = useState("");
   const [editingSkillIndex, setEditingSkillIndex] = useState(null);
-  const [editingSkillValue, setEditingSkillValue] = useState('');
-  const [userAchievements, setUserAchievements] = useState({ badges: [], certificates: [] });
+  const [editingSkillValue, setEditingSkillValue] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [authChecking, setAuthChecking] = useState(true);
@@ -41,18 +43,24 @@ const UserProfile = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [editedData, setEditedData] = useState(null);
   const [colleges, setColleges] = useState([]);
-  const [collegeSearch, setCollegeSearch] = useState('');
+  const [collegeSearch, setCollegeSearch] = useState("");
   const [collegeLoading, setCollegeLoading] = useState(false);
   const [collegeError, setCollegeError] = useState(null);
   const [showCollegeDropdown, setShowCollegeDropdown] = useState(false);
-  const [lastSelectedCollege, setLastSelectedCollege] = useState('');
+  const [lastSelectedCollege, setLastSelectedCollege] = useState("");
   const [showSkillDropdown, setShowSkillDropdown] = useState(false);
   const [showEditSkillDropdown, setShowEditSkillDropdown] = useState(false);
   const [saveError, setSaveError] = useState(null);
+  const [resumeFile, setResumeFile] = useState(null);
+  const [resumeUrl, setResumeUrl] = useState(null);
+  const [uploadingResume, setUploadingResume] = useState(false);
+  const [resumeError, setResumeError] = useState(null);
+  const [dragActive, setDragActive] = useState(false);
+  const resumeDropRef = useRef(null);
   const collegeInputRef = useRef(null);
   const collegeDropdownRef = useRef(null);
 
-  const tabs = ['Overview', 'Skills', 'Achievements', 'Activity'];
+  const tabs = ["Overview", "Skills", "Achievements", "Activity"];
 
   // Fetch user data from Supabase
   useEffect(() => {
@@ -62,10 +70,13 @@ const UserProfile = () => {
         setLoading(true);
         setError(null);
 
-        const { data: { user }, error: authError } = await supabase.auth.getUser();
+        const {
+          data: { user },
+          error: authError,
+        } = await supabase.auth.getUser();
 
         if (authError) {
-          console.error('Auth error:', authError);
+          console.error("[Frontend] : Auth error:", authError.message);
           setIsAuthenticated(false);
           setAuthChecking(false);
           return;
@@ -80,15 +91,15 @@ const UserProfile = () => {
         setIsAuthenticated(true);
 
         const { data, error: profileError } = await supabase
-          .from('users')
-          .select('*')
-          .eq('uid', user.id)
+          .from("users")
+          .select("*")
+          .eq("uid", user.id)
           .single();
 
-        console.log('Fetched profile:', data, profileError);
+        console.log("[Frontend] : Fetched profile:", data, "Error:", profileError);
 
         if (profileError) {
-          console.error('Error fetching profile:', profileError);
+          console.error("[Frontend] : Error fetching profile:", profileError.message);
           setError(profileError.message);
           return;
         }
@@ -96,36 +107,38 @@ const UserProfile = () => {
         if (data) {
           const transformedUser = {
             uid: data.uid,
-            displayName: data.display_name || 'User',
-            email: data.email || user.email || '',
-            phoneNumber: data.phone_number || '',
-            avatar: data.avatar || '',
-            bio: data.bio || 'No bio available',
-            college: data.college || 'Not specified',
-            githubUrl: data.github_url || '',
-            linkedinUrl: data.linkedin_url || '',
-            portfolioUrl: data.portfolio_url || '',
+            displayName: data.display_name || "User",
+            email: data.email || user.email || "",
+            phoneNumber: data.phone_number || "",
+            avatar: data.avatar || "",
+            bio: data.bio || "No bio available",
+            college: data.college || "Not specified",
+            githubUrl: data.github_url || "",
+            linkedinUrl: data.linkedin_url || "",
+            portfolioUrl: data.portfolio_url || "",
+            resumeUrl: data.resume_url || null,
             emailVerified: data.email_verified || user.email_confirmed_at !== null,
             phoneVerified: data.phone_verified || false,
             adminApproved: data.admin_approved || false,
             createdAt: data.created_at,
             updatedAt: data.updated_at,
             year: data.year ? parseInt(data.year, 10) : null,
-            major: data.major || 'Not specified',
-            department: data.department || 'Not specified'
+            major: data.major || "Not specified",
+            department: data.department || "Not specified",
           };
 
+          setResumeUrl(transformedUser.resumeUrl);
           let skills = [];
           if (data.skills) {
             try {
               if (Array.isArray(data.skills)) {
                 skills = data.skills;
-              } else if (typeof data.skills === 'string') {
+              } else if (typeof data.skills === "string") {
                 skills = JSON.parse(data.skills);
               }
             } catch (e) {
-              console.error('Error parsing skills:', e);
-              skills = typeof data.skills === 'string' ? [data.skills] : [];
+              console.error("[Frontend] : Error parsing skills:", e.message);
+              skills = typeof data.skills === "string" ? [data.skills] : [];
             }
           }
 
@@ -137,7 +150,7 @@ const UserProfile = () => {
         }
       } catch (err) {
         setError(err.message);
-        console.error('Error fetching user data:', err);
+        console.error("[Frontend] : Error fetching user data:", err.message);
       } finally {
         setLoading(false);
         setAuthChecking(false);
@@ -150,16 +163,19 @@ const UserProfile = () => {
   // Handle clicks outside college dropdown
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (collegeInputRef.current && !collegeInputRef.current.contains(event.target) &&
-          (!collegeDropdownRef.current || !collegeDropdownRef.current.contains(event.target))) {
+      if (
+        collegeInputRef.current &&
+        !collegeInputRef.current.contains(event.target) &&
+        (!collegeDropdownRef.current || !collegeDropdownRef.current.contains(event.target))
+      ) {
         setShowCollegeDropdown(false);
         setColleges([]);
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
 
@@ -179,38 +195,40 @@ const UserProfile = () => {
 
     const fetchColleges = async () => {
       try {
-        const response = await fetch('https://colleges-name-api.vercel.app/colleges/search', {
-          method: 'POST',
+        console.log("[Frontend] : Fetching colleges with keyword:", collegeSearch);
+        const response = await fetch("http://localhost:3000/colleges/search", {
+          method: "POST",
           headers: {
-            'Content-Type': 'application/json',
-            'keyword': collegeSearch
+            "Content-Type": "application/json",
+            keyword: collegeSearch, // Send keyword in headers
           },
-          body: JSON.stringify({})
         });
 
         if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
+          const errorData = await response.json();
+          throw new Error(`HTTP error! Status: ${response.status}, Message: ${errorData.error || "Unknown error"}`);
         }
 
         const data = await response.json();
+        console.log("[Frontend] : Colleges fetched:", data);
 
         let collegeNames = [];
         if (Array.isArray(data)) {
-          collegeNames = data.map(item => item[2].trim());
+          collegeNames = data.map((item) => item[2]?.trim()).filter(Boolean);
         } else if (data.colleges && Array.isArray(data.colleges)) {
-          collegeNames = data.colleges.map(item => item[2].trim());
+          collegeNames = data.colleges.map((item) => item[2]?.trim()).filter(Boolean);
         } else if (data.data && Array.isArray(data.data)) {
-          collegeNames = data.data.map(item => item[2].trim());
+          collegeNames = data.data.map((item) => item[2]?.trim()).filter(Boolean);
         } else {
-          console.warn('Unexpected API response format:', data);
+          console.warn("[Frontend] : Unexpected API response format:", data);
           collegeNames = [];
         }
 
         setColleges(collegeNames);
       } catch (err) {
-        console.error('Error fetching colleges:', err);
+        console.error("[Frontend] : Error fetching colleges:", err.message);
         setColleges([]);
-        setCollegeError('Failed to fetch colleges. Please try again.');
+        setCollegeError(err.message || "Failed to fetch colleges. Please try again.");
       } finally {
         setCollegeLoading(false);
       }
@@ -220,10 +238,150 @@ const UserProfile = () => {
     return () => clearTimeout(timeoutId);
   }, [collegeSearch, lastSelectedCollege]);
 
+  // Resume upload handlers
+  const handleDrag = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.type === "dragenter" || e.type === "dragover") {
+      setDragActive(true);
+    } else if (e.type === "dragleave") {
+      setDragActive(false);
+    }
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(false);
+
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      handleFileSelect(e.dataTransfer.files[0]);
+    }
+  };
+
+  const handleFileSelect = (file) => {
+    setResumeError(null);
+    if (!file) return;
+
+    // Validate file type (PDF or DOCX)
+    if (!["application/pdf", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"].includes(file.type)) {
+      setResumeError("Please select a PDF or DOCX file.");
+      return;
+    }
+
+    // Validate size < 2MB
+    if (file.size > 2 * 1024 * 1024) {
+      setResumeError("File size must be under 2MB.");
+      return;
+    }
+
+    setResumeFile(file);
+    uploadResume(file);
+  };
+
+  const uploadResume = async (file) => {
+    if (!file || !userData?.uid) {
+      setResumeError("Missing file or user data.");
+      return;
+    }
+
+    setUploadingResume(true);
+    setResumeError(null);
+
+    try {
+      console.log("[Frontend] : Uploading resume for userId:", userData.uid, "Filename:", file.name);
+      const { data: { user } } = await supabase.auth.getUser();
+      console.log("[Frontend] : Auth user ID:", user?.id);
+
+      // Create FormData for backend
+      const formData = new FormData();
+      formData.append("resume", file);
+      formData.append("userId", userData.uid);
+
+      // Upload to backend
+      const response = await fetch("http://localhost:3000/upload-resume", {
+        method: "POST",
+        body: formData,
+      });
+
+      const result = await response.json();
+      console.log("[Frontend] : Upload response:", result);
+
+      if (!response.ok || !result.success) {
+        throw new Error(result.error || "Failed to upload resume to backend.");
+      }
+
+      // Update user profile in Supabase with the returned URL
+      const { error: updateError } = await supabase
+        .from("users")
+        .update({ resume_url: result.url })
+        .eq("uid", userData.uid);
+
+      if (updateError) {
+        console.error("[Frontend] : DB update error:", updateError.message);
+        throw new Error(`Database update failed: ${updateError.message}`);
+      }
+
+      setResumeUrl(result.url);
+      setResumeFile(null);
+      console.log("[Frontend] : Resume uploaded successfully:", result.url);
+    } catch (err) {
+      console.error("[Frontend] : Full upload error:", err.message);
+      setResumeError(err.message || "Failed to upload resume. Please try again.");
+    } finally {
+      setUploadingResume(false);
+    }
+  };
+
+  const handleRemoveResume = async () => {
+    if (!resumeUrl || !userData?.uid) {
+      setResumeError("No resume or user data available.");
+      return;
+    }
+
+    setResumeError(null);
+
+    try {
+      console.log("[Frontend] : Starting resume removal for userId:", userData.uid, "Resume URL:", resumeUrl);
+      const response = await fetch("http://localhost:3000/delete-resume", {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ userId: userData.uid }),
+      });
+
+      const result = await response.json();
+      console.log("[Frontend] : Delete response:", result);
+
+      if (!response.ok || !result.success) {
+        throw new Error(result.error || "Failed to delete resume from backend.");
+      }
+
+      // Update Supabase to remove resume URL
+      const { error: updateError } = await supabase
+        .from("users")
+        .update({ resume_url: null })
+        .eq("uid", userData.uid);
+
+      if (updateError) {
+        console.error("[Frontend] : DB update error:", updateError.message);
+        throw new Error("Storage file deleted, but database update failed.");
+      }
+
+      setResumeUrl(null);
+      console.log("[Frontend] : Resume removed successfully.");
+    } catch (err) {
+      console.error("[Frontend] : Error removing resume:", err.message);
+      setResumeError(err.message || "Failed to remove resume.");
+    }
+  };
+
+  // Rest of the component (unchanged)
   const handleEditStart = () => {
     setIsEditing(true);
-    setCollegeSearch(editedData.college || '');
-    setLastSelectedCollege(editedData.college || '');
+    setCollegeSearch(editedData.college || "");
+    setLastSelectedCollege(editedData.college || "");
     setShowCollegeDropdown(false);
     setSaveError(null);
   };
@@ -263,15 +421,15 @@ const UserProfile = () => {
     const updatedSkills = [...userSkills, newSkill.trim()];
     try {
       const { error } = await supabase
-        .from('users')
+        .from("users")
         .update({ skills: updatedSkills })
-        .eq('uid', userData.uid);
+        .eq("uid", userData.uid);
       if (error) throw error;
       setUserSkills(updatedSkills);
-      setNewSkill('');
+      setNewSkill("");
       setShowSkillDropdown(false);
     } catch (err) {
-      console.error('Error adding skill:', err);
+      console.error("[Frontend] : Error adding skill:", err.message);
       setError(err.message);
     }
   };
@@ -288,16 +446,16 @@ const UserProfile = () => {
     updatedSkills[index] = editingSkillValue.trim();
     try {
       const { error } = await supabase
-        .from('users')
+        .from("users")
         .update({ skills: updatedSkills })
-        .eq('uid', userData.uid);
+        .eq("uid", userData.uid);
       if (error) throw error;
       setUserSkills(updatedSkills);
       setEditingSkillIndex(null);
-      setEditingSkillValue('');
+      setEditingSkillValue("");
       setShowEditSkillDropdown(false);
     } catch (err) {
-      console.error('Error updating skill:', err);
+      console.error("[Frontend] : Error updating skill:", err.message);
       setError(err.message);
     }
   };
@@ -306,68 +464,68 @@ const UserProfile = () => {
     const updatedSkills = userSkills.filter((_, i) => i !== index);
     try {
       const { error } = await supabase
-        .from('users')
+        .from("users")
         .update({ skills: updatedSkills })
-        .eq('uid', userData.uid);
+        .eq("uid", userData.uid);
       if (error) throw error;
       setUserSkills(updatedSkills);
     } catch (err) {
-      console.error('Error deleting skill:', err);
+      console.error("[Frontend] : Error deleting skill:", err.message);
       setError(err.message);
     }
   };
 
   const handleSave = async () => {
     setSaveError(null);
-    const finalCollege = editedData.college?.trim() || 'Not specified';
+    const finalCollege = editedData.college?.trim() || "Not specified";
 
     if (finalCollege.length >= 3 && finalCollege !== lastSelectedCollege && !colleges.includes(finalCollege)) {
-      setCollegeError('Please select a valid college from the dropdown.');
-      setSaveError('Invalid college selection.');
+      setCollegeError("Please select a valid college from the dropdown.");
+      setSaveError("Invalid college selection.");
       return;
     }
 
     try {
       const updateData = {
-        display_name: editedData.displayName?.trim() || 'User',
-        phone_number: editedData.phoneNumber?.trim() || '',
-        bio: editedData.bio?.trim() || 'No bio available',
+        display_name: editedData.displayName?.trim() || "User",
+        phone_number: editedData.phoneNumber?.trim() || "",
+        bio: editedData.bio?.trim() || "No bio available",
         college: finalCollege,
-        github_url: editedData.githubUrl?.trim() || '',
-        linkedin_url: editedData.linkedinUrl?.trim() || '',
-        portfolio_url: editedData.portfolioUrl?.trim() || '',
-        year: editedData.year && editedData.year !== 'Not specified' ? parseInt(editedData.year, 10) : null,
-        major: editedData.major?.trim() || 'Not specified',
-        department: editedData.department?.trim() || 'Not specified'
+        github_url: editedData.githubUrl?.trim() || "",
+        linkedin_url: editedData.linkedinUrl?.trim() || "",
+        portfolio_url: editedData.portfolioUrl?.trim() || "",
+        year: editedData.year && editedData.year !== "Not specified" ? parseInt(editedData.year, 10) : null,
+        major: editedData.major?.trim() || "Not specified",
+        department: editedData.department?.trim() || "Not specified",
       };
 
-      console.log('Updating user data:', updateData);
+      console.log("[Frontend] : Updating user data:", updateData);
 
       const { error } = await supabase
-        .from('users')
+        .from("users")
         .update(updateData)
-        .eq('uid', editedData.uid);
+        .eq("uid", editedData.uid);
 
       if (error) {
-        console.error('Supabase update error:', error);
+        console.error("[Frontend] : Supabase update error:", error.message);
         throw new Error(`Failed to save profile: ${error.message}`);
       }
 
       const updatedUserData = {
         ...editedData,
-        ...updateData
+        ...updateData,
       };
       setUserData(updatedUserData);
       setEditedData(updatedUserData);
       setIsEditing(false);
       setColleges([]);
-      setCollegeSearch('');
+      setCollegeSearch("");
       setShowCollegeDropdown(false);
       setCollegeError(null);
       setLastSelectedCollege(finalCollege);
     } catch (err) {
-      console.error('Save error:', err);
-      setSaveError(err.message || 'Failed to save profile. Please try again.');
+      console.error("[Frontend] : Save error:", err.message);
+      setSaveError(err.message || "Failed to save profile. Please try again.");
     }
   };
 
@@ -375,37 +533,42 @@ const UserProfile = () => {
     setIsEditing(false);
     setEditedData({ ...userData });
     setColleges([]);
-    setCollegeSearch('');
+    setCollegeSearch("");
     setShowCollegeDropdown(false);
     setCollegeError(null);
     setSaveError(null);
-    setLastSelectedCollege('');
+    setLastSelectedCollege("");
     setEditingSkillIndex(null);
-    setEditingSkillValue('');
+    setEditingSkillValue("");
     setShowSkillDropdown(false);
     setShowEditSkillDropdown(false);
   };
 
-  const personalInfo = userData ? [
-    { label: "College", value: userData.college, editable: true, type: "college" },
-    { label: "Graduating Year", value: userData.year || 'Not specified', editable: true, type: "number" },
-    { label: "Major", value: userData.major, editable: true, type: "dropdown", options: academicData.majors },
-    { label: "Department", value: userData.department, editable: true, type: "dropdown", options: academicData.departments }
-  ] : [];
+  const personalInfo = userData
+    ? [
+        { label: "College", value: userData.college, editable: true, type: "college" },
+        { label: "Graduating Year", value: userData.year || "Not specified", editable: true, type: "number" },
+        { label: "Major", value: userData.major, editable: true, type: "dropdown", options: academicData.majors },
+        { label: "Department", value: userData.department, editable: true, type: "dropdown", options: academicData.departments },
+      ]
+    : [];
 
-  const socialLinks = userData ? [
-    { label: "GitHub Profile", icon: Github, href: userData.githubUrl || "#", available: !!userData.githubUrl, name: "githubUrl" },
-    { label: "LinkedIn Profile", icon: Linkedin, href: userData.linkedinUrl || "#", available: !!userData.linkedinUrl, name: "linkedinUrl" },
-    { label: "Portfolio Website", icon: Globe, href: userData.portfolioUrl || "#", available: !!userData.portfolioUrl, name: "portfolioUrl" }
-  ] : [];
+  const socialLinks = userData
+    ? [
+        { label: "GitHub Profile", icon: Github, href: userData.githubUrl || "#", available: !!userData.githubUrl, name: "githubUrl" },
+        { label: "LinkedIn Profile", icon: Linkedin, href: userData.linkedinUrl || "#", available: !!userData.linkedinUrl, name: "linkedinUrl" },
+        { label: "Portfolio Website", icon: Globe, href: userData.portfolioUrl || "#", available: !!userData.portfolioUrl, name: "portfolioUrl" },
+      ]
+    : [];
 
-  const technicalSkills = userSkills.length > 0 ?
-    userSkills.slice(0, 5).map((skill, index) => ({
-      skill,
-      level: 90 - (index * 5),
-      color: ["bg-yellow-500", "bg-blue-500", "bg-green-500", "bg-green-600", "bg-purple-500"][index] || "bg-gray-500"
-    })) :
-    [{ skill: "No skills added", level: 0, color: "bg-gray-300" }];
+  const technicalSkills =
+    userSkills.length > 0
+      ? userSkills.slice(0, 5).map((skill, index) => ({
+          skill,
+          level: 90 - index * 5,
+          color: ["bg-yellow-500", "bg-blue-500", "bg-green-500", "bg-green-600", "bg-purple-500"][index] || "bg-gray-500",
+        }))
+      : [{ skill: "No skills added", level: 0, color: "bg-gray-300" }];
 
   if (authChecking) {
     return (
@@ -426,7 +589,7 @@ const UserProfile = () => {
           <h2 className="text-xl font-semibold text-gray-900 mb-2">Authentication Required</h2>
           <p className="text-gray-600 mb-4">Please log in to view this profile.</p>
           <button
-            onClick={() => window.location.href = '/login'}
+            onClick={() => (window.location.href = "/login")}
             className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors duration-200"
           >
             Go to Login
@@ -438,12 +601,10 @@ const UserProfile = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50">
-        <div className="flex items-center justify-center min-h-screen">
-          <div className="text-center">
-            <Loader2 className="w-12 h-12 animate-spin text-blue-500 mx-auto mb-4" />
-            <p className="text-gray-600">Loading profile data...</p>
-          </div>
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="w-12 h-12 animate-spin text-blue-500 mx-auto mb-4" />
+          <p className="text-gray-600">Loading profile data...</p>
         </div>
       </div>
     );
@@ -451,19 +612,17 @@ const UserProfile = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-50">
-        <div className="flex items-center justify-center min-h-screen">
-          <div className="text-center">
-            <X className="w-16 h-16 text-red-500 mx-auto mb-4" />
-            <h2 className="text-xl font-semibold text-gray-900 mb-2">Error Loading Profile</h2>
-            <p className="text-gray-600 mb-4">{error}</p>
-            <button
-              onClick={() => window.location.reload()}
-              className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors duration-200"
-            >
-              Try Again
-            </button>
-          </div>
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <X className="w-16 h-16 text-red-500 mx-auto mb-4" />
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">Error Loading Profile</h2>
+          <p className="text-gray-600 mb-4">{error}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors duration-200"
+          >
+            Try Again
+          </button>
         </div>
       </div>
     );
@@ -480,14 +639,10 @@ const UserProfile = () => {
             {/* Avatar */}
             <div className="w-16 h-16 sm:w-20 sm:h-20 lg:w-24 lg:h-24 bg-gradient-to-br from-purple-500 to-blue-600 rounded-full flex items-center justify-center flex-shrink-0 shadow-lg">
               {userData.avatar ? (
-                <img
-                  src={userData.avatar}
-                  alt={userData.displayName}
-                  className="w-full h-full rounded-full object-cover"
-                />
+                <img src={userData.avatar} alt={userData.displayName} className="w-full h-full rounded-full object-cover" />
               ) : (
                 <span className="text-white font-bold text-xl sm:text-2xl lg:text-3xl">
-                  {userData.displayName?.charAt(0).toUpperCase() || 'U'}
+                  {userData.displayName?.charAt(0).toUpperCase() || "U"}
                 </span>
               )}
             </div>
@@ -500,20 +655,16 @@ const UserProfile = () => {
                     <input
                       type="text"
                       name="displayName"
-                      value={editedData.displayName || ''}
+                      value={editedData.displayName || ""}
                       onChange={handleInputChange}
                       className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 border-b-2 border-gray-300 focus:outline-none focus:border-blue-500 bg-transparent flex-1 min-w-0"
                       placeholder="Enter display name"
                     />
                   ) : (
-                    <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 truncate">
-                      {userData.displayName}
-                    </h1>
+                    <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 truncate">{userData.displayName}</h1>
                   )}
                   {userData.emailVerified && (
-                    <span className="text-green-500 text-sm bg-green-50 px-2 py-1 rounded-full flex-shrink-0">
-                      ✓ Verified
-                    </span>
+                    <span className="text-green-500 text-sm bg-green-50 px-2 py-1 rounded-full flex-shrink-0">✓ Verified</span>
                   )}
                 </div>
                 <div className="flex items-center space-x-2 sm:space-x-3">
@@ -553,16 +704,14 @@ const UserProfile = () => {
               {isEditing ? (
                 <textarea
                   name="bio"
-                  value={editedData.bio || ''}
+                  value={editedData.bio || ""}
                   onChange={handleInputChange}
                   className="text-sm sm:text-base text-gray-600 mb-4 leading-relaxed w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                   rows="3"
                   placeholder="Tell us about yourself..."
                 />
               ) : (
-                <p className="text-sm sm:text-base text-gray-600 mb-4 leading-relaxed">
-                  {userData.bio}
-                </p>
+                <p className="text-sm sm:text-base text-gray-600 mb-4 leading-relaxed">{userData.bio}</p>
               )}
 
               {/* Contact Info */}
@@ -577,24 +726,24 @@ const UserProfile = () => {
                     <input
                       type="tel"
                       name="phoneNumber"
-                      value={editedData.phoneNumber || ''}
+                      value={editedData.phoneNumber || ""}
                       onChange={handleInputChange}
                       className="border-b border-gray-300 focus:outline-none focus:border-blue-500 bg-transparent flex-1"
                       placeholder="Phone number"
                     />
                   </div>
-                ) : userData.phoneNumber && (
-                  <div className="flex items-center space-x-2">
-                    <Phone className="w-4 h-4 text-gray-400 flex-shrink-0" />
-                    <span>{userData.phoneNumber}</span>
-                  </div>
+                ) : (
+                  userData.phoneNumber && (
+                    <div className="flex items-center space-x-2">
+                      <Phone className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                      <span>{userData.phoneNumber}</span>
+                    </div>
+                  )
                 )}
               </div>
 
               {/* Save Error Display */}
-              {saveError && (
-                <p className="text-sm text-red-500 mt-2">{saveError}</p>
-              )}
+              {saveError && <p className="text-sm text-red-500 mt-2">{saveError}</p>}
             </div>
           </div>
         </div>
@@ -607,9 +756,7 @@ const UserProfile = () => {
                 key={tab}
                 onClick={() => setActiveTab(tab)}
                 className={`pb-3 text-sm font-medium border-b-2 transition-colors ${
-                  activeTab === tab
-                    ? 'text-blue-600 border-blue-600'
-                    : 'text-gray-500 border-transparent hover:text-gray-700'
+                  activeTab === tab ? "text-blue-600 border-blue-600" : "text-gray-500 border-transparent hover:text-gray-700"
                 }`}
               >
                 {tab}
@@ -623,7 +770,9 @@ const UserProfile = () => {
               className="w-full p-3 border border-gray-300 rounded-lg text-sm bg-white"
             >
               {tabs.map((tab) => (
-                <option key={tab} value={tab}>{tab}</option>
+                <option key={tab} value={tab}>
+                  {tab}
+                </option>
               ))}
             </select>
           </div>
@@ -632,7 +781,7 @@ const UserProfile = () => {
 
       {/* Main Content */}
       <main className="px-3 sm:px-4 lg:px-6 py-4 sm:py-6 lg:py-8">
-        {activeTab === 'Overview' && (
+        {activeTab === "Overview" && (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
             {/* Personal Information */}
             <div className="bg-white rounded-lg shadow-sm border">
@@ -649,12 +798,14 @@ const UserProfile = () => {
                           {info.type === "college" ? (
                             <div className="relative" ref={collegeInputRef}>
                               <input
-                                ref={(el) => { if (el) collegeInputRef.current = el; }}
+                                ref={(el) => {
+                                  if (el) collegeInputRef.current = el;
+                                }}
                                 type="text"
                                 value={collegeSearch}
                                 onChange={handleCollegeChange}
                                 className={`text-sm text-gray-900 border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 w-full pr-8 ${
-                                  collegeError ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''
+                                  collegeError ? "border-red-500 focus:border-red-500 focus:ring-red-500" : ""
                                 }`}
                                 placeholder="Search college (min 3 characters)..."
                               />
@@ -663,12 +814,15 @@ const UserProfile = () => {
                                   <Loader2 className="w-4 h-4 animate-spin text-gray-400" />
                                 </div>
                               )}
-                              {!collegeLoading && collegeSearch.length >= 3 && !showCollegeDropdown && (
+                              {!collegeLoading && collegeSearch.length >= 3 && (
                                 <ChevronDown className="absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
                               )}
                               {showCollegeDropdown && collegeSearch.length >= 3 && (
                                 colleges.length > 0 ? (
-                                  <div ref={collegeDropdownRef} className="absolute z-20 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto mt-1">
+                                  <div
+                                    ref={collegeDropdownRef}
+                                    className="absolute z-20 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto mt-1"
+                                  >
                                     {colleges.map((college, i) => (
                                       <button
                                         key={i}
@@ -680,20 +834,21 @@ const UserProfile = () => {
                                     ))}
                                   </div>
                                 ) : !collegeLoading ? (
-                                  <div ref={collegeDropdownRef} className="absolute z-20 w-full bg-white border border-gray-300 rounded-lg shadow-lg mt-1 p-4 text-center text-sm text-gray-500">
+                                  <div
+                                    ref={collegeDropdownRef}
+                                    className="absolute z-20 w-full bg-white border border-gray-300 rounded-lg shadow-lg mt-1 p-4 text-center text-sm text-gray-500"
+                                  >
                                     No colleges found
                                   </div>
                                 ) : null
                               )}
-                              {collegeError && (
-                                <p className="text-sm text-red-500 mt-1">{collegeError}</p>
-                              )}
+                              {collegeError && <p className="text-sm text-red-500 mt-1">{collegeError}</p>}
                             </div>
                           ) : info.type === "number" ? (
                             <input
                               type="number"
-                              name={info.label.toLowerCase()}
-                              value={editedData[info.label.toLowerCase()] || ''}
+                              name={info.label.toLowerCase().replace(" ", "")}
+                              value={editedData[info.label.toLowerCase().replace(" ", "")] || ""}
                               onChange={handleInputChange}
                               className="text-sm text-gray-900 border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 w-full"
                               placeholder={info.label}
@@ -703,14 +858,16 @@ const UserProfile = () => {
                           ) : info.type === "dropdown" ? (
                             <div className="relative">
                               <select
-                                name={info.label.toLowerCase()}
-                                value={editedData[info.label.toLowerCase()] || 'Not specified'}
+                                name={info.label.toLowerCase().replace(" ", "")}
+                                value={editedData[info.label.toLowerCase().replace(" ", "")] || "Not specified"}
                                 onChange={handleInputChange}
                                 className="text-sm text-gray-900 border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 w-full pr-8 appearance-none"
                               >
                                 <option value="Not specified">Select {info.label}</option>
                                 {info.options.map((option, i) => (
-                                  <option key={i} value={option}>{option}</option>
+                                  <option key={i} value={option}>
+                                    {option}
+                                  </option>
                                 ))}
                               </select>
                               <ChevronDown className="absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
@@ -718,8 +875,8 @@ const UserProfile = () => {
                           ) : (
                             <input
                               type="text"
-                              name={info.label.toLowerCase()}
-                              value={editedData[info.label.toLowerCase()] || ''}
+                              name={info.label.toLowerCase().replace(" ", "")}
+                              value={editedData[info.label.toLowerCase().replace(" ", "")] || ""}
                               onChange={handleInputChange}
                               className="text-sm text-gray-900 border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 w-full"
                               placeholder={info.label}
@@ -728,7 +885,7 @@ const UserProfile = () => {
                         </div>
                       ) : (
                         <span className="text-sm text-gray-900 sm:text-right sm:max-w-xs">
-                          {info.label === "Year" && !info.value ? 'Not specified' : info.value}
+                          {info.label === "Year" && !info.value ? "Not specified" : info.value}
                         </span>
                       )}
                     </div>
@@ -758,7 +915,7 @@ const UserProfile = () => {
                           <input
                             type="url"
                             name={link.name}
-                            value={editedData[link.name] || ''}
+                            value={editedData[link.name] || ""}
                             onChange={handleInputChange}
                             className="text-sm text-gray-900 border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 max-w-xs"
                             placeholder="https://..."
@@ -781,10 +938,114 @@ const UserProfile = () => {
                 </div>
               </div>
             </div>
+
+            {/* Resume Section */}
+            <div className="bg-white rounded-lg shadow-sm border lg:col-span-2">
+              <div className="p-4 sm:p-6 border-b">
+                <h3 className="text-lg font-semibold text-gray-900 flex items-center space-x-2">
+                  <Upload className="w-5 h-5" />
+                  <span>Resume</span>
+                </h3>
+              </div>
+              <div className="p-4 sm:p-6">
+                {resumeUrl ? (
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-700">Current Resume:</span>
+                      <div className="flex items-center space-x-2">
+                        <a
+                          href={resumeUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center space-x-1 text-blue-600 hover:text-blue-800 text-sm font-medium hover:underline"
+                        >
+                          <Eye className="w-4 h-4" />
+                          <span>View Resume</span>
+                        </a>
+                        <a
+                          href={resumeUrl}
+                          download
+                          className="flex items-center space-x-1 text-green-600 hover:text-green-800 text-sm font-medium hover:underline"
+                        >
+                          <Download className="w-4 h-4" />
+                          <span>Download</span>
+                        </a>
+                        <button
+                          onClick={handleRemoveResume}
+                          className="text-red-500 hover:text-red-700 text-sm font-medium"
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    </div>
+                    <div className="border-t pt-4">
+                      <p className="text-sm text-red-600 mb-4 font-medium">
+                        There is already a resume uploaded. Uploading a new one will delete the existing resume.
+                      </p>
+                      <input
+                        type="file"
+                        id="resume-upload"
+                        accept=".pdf,.docx"
+                        onChange={(e) => handleFileSelect(e.target.files[0])}
+                        className="hidden"
+                      />
+                      <label
+                        htmlFor="resume-upload"
+                        className="block w-full p-4 border-2 border-dashed border-gray-300 rounded-lg text-center cursor-pointer hover:border-blue-400 transition-colors"
+                      >
+                        <Upload className="w-8 h-8 mx-auto mb-2 text-gray-400" />
+                        <p className="text-sm font-medium text-gray-700">Click to select new resume (will replace current)</p>
+                        <p className="text-xs text-gray-500 mt-1">PDF or DOCX, max 2MB</p>
+                      </label>
+                    </div>
+                    {resumeError && <p className="text-sm text-red-500 mt-2">{resumeError}</p>}
+                  </div>
+                ) : (
+                  <div className="text-center py-8">
+                    <Upload className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                    <p className="text-gray-600 mb-2">No resume uploaded yet</p>
+                    <p className="text-sm text-gray-500 mb-6">Upload your resume to showcase your experience</p>
+                    <div
+                      ref={resumeDropRef}
+                      onDragEnter={handleDrag}
+                      onDragLeave={handleDrag}
+                      onDragOver={handleDrag}
+                      onDrop={handleDrop}
+                      className={`relative border-2 border-dashed rounded-lg p-6 cursor-pointer transition-colors ${
+                        dragActive ? "border-blue-400 bg-blue-50" : "border-gray-300 hover:border-gray-400"
+                      }`}
+                    >
+                      {uploadingResume ? (
+                        <div className="flex flex-col items-center space-y-2">
+                          <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
+                          <p className="text-sm text-blue-600">Uploading...</p>
+                        </div>
+                      ) : (
+                        <>
+                          <Upload className="w-8 h-8 mx-auto mb-2 text-gray-400" />
+                          <input
+                            type="file"
+                            id="resume-drop"
+                            accept=".pdf,.docx"
+                            onChange={(e) => handleFileSelect(e.target.files[0])}
+                            className="hidden"
+                          />
+                          <label htmlFor="resume-drop" className="cursor-pointer block">
+                            <p className="text-sm font-medium text-gray-700">Drag & drop your resume here, or click to select</p>
+                            <p className="text-xs text-gray-500 mt-1">PDF or DOCX, max 2MB</p>
+                          </label>
+                        </>
+                      )}
+                      {resumeError && <p className="text-sm text-red-500 mt-2 absolute -bottom-6 left-0 right-0">{resumeError}</p>}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
         )}
 
-        {activeTab === 'Skills' && (
+        {activeTab === "Skills" && (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Technical Skills */}
             <div className="bg-white rounded-lg shadow-sm border">
@@ -807,11 +1068,13 @@ const UserProfile = () => {
                               >
                                 <option value="">Select a skill</option>
                                 {skillsList.skills.map((skill, i) => (
-                                  <option key={i} value={skill}>{skill}</option>
+                                  <option key={i} value={skill}>
+                                    {skill}
+                                  </option>
                                 ))}
                               </select>
                               {showEditSkillDropdown && (
-                                <ChevronDown className="absolute right-10 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                                <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
                               )}
                               <button
                                 onClick={() => handleSaveSkill(index)}
@@ -854,10 +1117,7 @@ const UserProfile = () => {
                           )}
                         </div>
                         <div className="w-full bg-gray-200 rounded-full h-2">
-                          <div
-                            className={`h-2 rounded-full ${item.color} transition-all duration-300`}
-                            style={{ width: `${item.level}%` }}
-                          ></div>
+                          <div className={`h-2 rounded-full ${item.color} transition-all duration-300`} style={{ width: `${item.level}%` }}></div>
                         </div>
                       </div>
                     ))}
@@ -877,12 +1137,12 @@ const UserProfile = () => {
                   >
                     <option value="">Select a skill</option>
                     {skillsList.skills.map((skill, i) => (
-                      <option key={i} value={skill}>{skill}</option>
+                      <option key={i} value={skill}>
+                        {skill}
+                      </option>
                     ))}
                   </select>
-                  {showSkillDropdown && (
-                    <ChevronDown className="absolute right-10 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-                  )}
+                  {showSkillDropdown && <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />}
                   <button
                     onClick={handleAddSkill}
                     className="p-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors flex items-center"
@@ -896,7 +1156,7 @@ const UserProfile = () => {
           </div>
         )}
 
-        {activeTab === 'Achievements' && (
+        {activeTab === "Achievements" && (
           <div className="space-y-6">
             <div className="bg-white rounded-lg shadow-sm border">
               <div className="p-4 sm:p-6 border-b">
@@ -906,9 +1166,7 @@ const UserProfile = () => {
                 <div className="text-center py-12">
                   <Trophy className="w-16 h-16 text-gray-400 mx-auto mb-4" />
                   <h4 className="text-lg font-semibold text-gray-700 mb-2">Achievements Coming Soon!</h4>
-                  <p className="text-gray-500 mb-4">
-                    We're working on an exciting achievements system with badges, certifications, and rewards.
-                  </p>
+                  <p className="text-gray-500 mb-4">We're working on an exciting achievements system with badges, certifications, and rewards.</p>
                   <p className="text-sm text-gray-400">Stay tuned for updates!</p>
                 </div>
               </div>
@@ -916,7 +1174,7 @@ const UserProfile = () => {
           </div>
         )}
 
-        {activeTab === 'Activity' && (
+        {activeTab === "Activity" && (
           <div className="bg-white rounded-lg shadow-sm border">
             <div className="p-4 sm:p-6 border-b">
               <h3 className="text-lg font-semibold text-gray-900">Activity Timeline</h3>
@@ -925,9 +1183,7 @@ const UserProfile = () => {
               <div className="text-center py-12">
                 <Calendar className="w-16 h-16 text-gray-400 mx-auto mb-4" />
                 <h4 className="text-lg font-semibold text-gray-700 mb-2">Activity Timeline Coming Soon!</h4>
-                <p className="text-gray-500 mb-4">
-                  We're building a comprehensive activity tracking system to show your learning journey.
-                </p>
+                <p className="text-gray-500 mb-4">We're building a comprehensive activity tracking system to show your learning journey.</p>
                 <p className="text-sm text-gray-400">Check back soon for detailed activity insights!</p>
               </div>
             </div>
@@ -946,7 +1202,7 @@ const UserProfile = () => {
                 key={tab}
                 onClick={() => setActiveTab(tab)}
                 className={`flex flex-col items-center space-y-1 py-2 px-3 rounded-lg transition-colors ${
-                  activeTab === tab ? 'text-blue-600 bg-blue-50' : 'text-gray-600'
+                  activeTab === tab ? "text-blue-600 bg-blue-50" : "text-gray-600"
                 }`}
               >
                 <IconComponent className="w-5 h-5" />

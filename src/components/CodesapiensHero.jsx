@@ -13,15 +13,15 @@ const CodeSapiensHero = () => {
     { 
       id: 1, 
       title: "August Meetup 2025", 
-      image: "https://creatorspace.imgix.net/users/cme79i2lk00qls401ar5qxqnc/tYvYry0ll1qJY9Cr-sZlcWmpyKLCEVr3R-WhatsApp%252520Image%2525202025-08-10%252520at%25252015.15.02_25567a3d.jpg?w=750&h=750", 
+      image: "https://res.cloudinary.com/dqudvximt/image/upload/v1759741375/users_cme79i2lk00qls401ar5qxqnc_tYvYry0ll1qJY9Cr-sZlcWmpyKLCEVr3R-WhatsApp25202025-08-10252015.15.02_25567a3d_c0frk5.jpg", 
       date: "August 2025", 
       description: "A 3-hour mini hackathon with mentors, developers, and certificates for participants.",
       participants: 75
     },
     { 
       id: 2,
-      title: "July Meetup 2025", 
-      image: "https://creatorspace.imgix.net/users/cme79i2lk00qls401ar5qxqnc/dC8c5AeuyLulrDlu-WhatsApp%2520Image%25202025-08-18%2520at%252017.57.10_1135c6f6.jpg?w=750&h=750", 
+      title: "July Meetup 2024", 
+      image: "https://res.cloudinary.com/dqudvximt/image/upload/v1759740764/width_800_pmtms3.webp", 
       date: "July 2025", 
       description: "Online session introducing security concepts via Google hacking and CTFs.",
       participants: 44
@@ -29,7 +29,7 @@ const CodeSapiensHero = () => {
     { 
       id: 3,
       title: "Summer of code 2024",
-      image: "https://creatorspace.imgix.net/users/cme79i2lk00qls401ar5qxqnc/Elth5VQLAvoEm02T-1UTOfxIl6lQsvPuA-Image_Editor%252520(5).png?w=750&h=750", 
+      image: "https://res.cloudinary.com/dqudvximt/image/upload/v1759741257/codesapiens_3_md0nvd.png", 
       date: "Summer 2024", 
       description: "Session on building AI accelerators using VLSI and RTL coding.",
       participants: 50
@@ -37,7 +37,7 @@ const CodeSapiensHero = () => {
     { 
       id: 4,
       title: "Mentorship Programme 2024", 
-      image: "https://creatorspace.imgix.net/users/cme79i2lk00qls401ar5qxqnc/sHoKIUM22yN6cHBX-nO7EHUY6fAHtfxrH-Image_Editor%252520(2).png?w=750&h=750", 
+      image: "https://res.cloudinary.com/dqudvximt/image/upload/v1759741182/codesapiens_2_mqadi2.png", 
       date: "2024", 
       description: "Student-run program for contributing to open-source projects.",
       participants: 100
@@ -45,10 +45,26 @@ const CodeSapiensHero = () => {
     {
       id: 5,
       title: "September Meetup 2025",
-      image: "https://res.cloudinary.com/dqudvximt/image/upload/v1756808600/WhatsApp_Image_2025-08-31_at_07.50.01_b61d2154_jymwvs.jpg",
+      image: "https://res.cloudinary.com/dqudvximt/image/upload/v1759740834/users_cme79i2lk00qls401ar5qxqnc_OadwAYSr5ySuegEn-IMG-20250914-WA0012_gvyeye.jpg",
       date: "September 2025",
       description: "Exciting meetup filled with tech talks, networking, and hands-on workshops at ContentStack, Velachery, Chennai.",
       participants: 80
+    },
+    {
+      id: 6,
+      title: "June Meetup 2024",
+      image: "https://res.cloudinary.com/dqudvximt/image/upload/v1759736573/width_800_pcvbvj.jpg",
+      date: "September 2025",
+      description: "Exciting meetup filled with tech talks, networking, and hands-on workshops at ContentStack, Velachery, Chennai.",
+      participants: 80
+    },
+    {
+      id: 6,
+      title: "Github Contest",
+      image: "https://res.cloudinary.com/dqudvximt/image/upload/v1759741580/1753106111524_wqepam.jpg",
+      date: "July 2025",
+      description: "Exciting meetup filled with tech talks, networking, and hands-on workshops at ContentStack, Velachery, Chennai.",
+      participants: 100
     }
   ];
 

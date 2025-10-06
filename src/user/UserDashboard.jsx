@@ -163,6 +163,25 @@ export default function UserDashboard() {
     );
   }
 
+  // Generate personalized welcome message
+  const getPersonalizedWelcomeMessage = () => {
+    if (!userData) return "Welcome back, Student!";
+    const name = userData.displayName || userData.email?.split("@")[0] || "Student";
+    const role = userData.role ? userData.role.charAt(0).toUpperCase() + userData.role.slice(1) : "Member";
+    const hasSkills = userData.skills && userData.skills.length > 0;
+    const hasBadges = userData.badgesEarned > 0;
+    
+    if (hasBadges && hasSkills) {
+      return `Welcome back, ${name}! As a ${role} with ${userData.badgesEarned} badge${userData.badgesEarned > 1 ? 's' : ''} and skills like ${userData.skills[0]}, you're making waves in our community!`;
+    } else if (hasBadges) {
+      return `Welcome back, ${name}! Your ${userData.badgesEarned} badge${userData.badgesEarned > 1 ? 's' : ''} as a ${role} show your dedication—keep shining!`;
+    } else if (hasSkills) {
+      return `Welcome back, ${name}! Your skills like ${userData.skills[0]} make you a standout ${role} in our community!`;
+    } else {
+      return `Welcome back, ${name}! Excited to see you grow as a ${role} in our community!`;
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Auth Checking State - Prevents login page flash */}
@@ -229,11 +248,7 @@ export default function UserDashboard() {
               {/* Welcome Section */}
               <div className="mb-8">
                 <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
-                  Welcome back,{" "}
-                  {userData.displayName ||
-                    userData.email?.split("@")[0] ||
-                    "Student"}
-                  !
+                  {getPersonalizedWelcomeMessage()}
                 </h1>
                 <p className="text-gray-600">
                   Here's what's happening in your student community today.
@@ -295,7 +310,7 @@ export default function UserDashboard() {
                       No skills added yet. Add your skills to help others find
                       you!
                     </p>
-                    <button className="mt-3 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors duration-200" onClick={()=> navigate('/profile')}>
+                    <button className="mt-3 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors duration-200" onClick={() => navigate('/profile')}>
                       Add Skills
                     </button>
                   </div>
@@ -420,7 +435,7 @@ export default function UserDashboard() {
                     <p className="text-gray-500 mb-2">
                       No profile links added yet
                     </p>
-                    <button className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors duration-200" onClick={()=> navigate('/profile')}>
+                    <button className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors duration-200" onClick={() => navigate('/profile')}>
                       Add Profile Links
                     </button>
                   </div>
