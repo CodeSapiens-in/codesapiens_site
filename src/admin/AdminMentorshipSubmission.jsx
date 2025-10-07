@@ -1,6 +1,16 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { supabase } from "../lib/supabaseClient"; // Adjust path to your Supabase client
 import { Loader2, X, Mail, Info } from "lucide-react";
+
+// Helper component for consistent detail rows
+const DetailRow = ({ label, value }) => (
+  <div className="flex flex-col sm:flex-row sm:justify-between py-2">
+    <span className="text-sm font-medium text-gray-600 mb-1 sm:mb-0">{label}</span>
+    <span className="text-sm text-gray-900 max-w-md break-words">
+      {value || "Not specified"}
+    </span>
+  </div>
+);
 
 const AdminMentorshipSubmission = () => {
   const [users, setUsers] = useState([]);
@@ -61,16 +71,27 @@ const AdminMentorshipSubmission = () => {
   }, [searchQuery, users]);
 
   // Handle view details
-  const handleViewDetails = (user) => {
+  const handleViewDetails = useCallback((user) => {
     setSelectedUser(user);
     setIsDetailsOpen(true);
-  };
+    document.body.style.overflow = "hidden"; // Prevent body scroll
+  }, []);
 
   // Handle close details
-  const handleCloseDetails = () => {
+  const handleCloseDetails = useCallback(() => {
     setIsDetailsOpen(false);
-    setTimeout(() => setSelectedUser(null), 300); // Delay to allow animation
-  };
+    setTimeout(() => setSelectedUser(null), 300);
+    document.body.style.overflow = "unset"; // Restore body scroll
+  }, []);
+
+  // Close on Escape key
+  useEffect(() => {
+    const handleEscape = (e) => {
+      if (e.key === "Escape") handleCloseDetails();
+    };
+    if (isDetailsOpen) document.addEventListener("keydown", handleEscape);
+    return () => document.removeEventListener("keydown", handleEscape);
+  }, [isDetailsOpen, handleCloseDetails]);
 
   if (loading) {
     return (
@@ -104,245 +125,228 @@ const AdminMentorshipSubmission = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 px-4 sm:px-6 lg:px-8 py-4 sm:py-8 flex flex-col">
-      {/* Header and Search */}
-      <div className="mb-6 sm:mb-8">
-        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
-          Mentorship Submissions
-        </h1>
-        <p className="text-gray-600 mt-1 sm:mt-2 text-sm sm:text-base">
-          Browse through all mentorship request submissions
-        </p>
-        <div className="mt-3 sm:mt-4 relative">
-          <input
-            type="text"
-            placeholder="Search by name or email..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full p-2 sm:p-3 pl-8 sm:pl-10 text-sm sm:text-base border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-          />
-          <Info className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 absolute left-2 sm:left-3 top-1/2 transform -translate-y-1/2" />
+    <>
+      <div className="min-h-screen bg-gray-50 px-4 sm:px-6 lg:px-8 py-4 sm:py-8 flex flex-col relative z-0">
+        {/* Header and Search */}
+        <div className="mb-6 sm:mb-8 relative z-10">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
+            Mentorship Submissions
+          </h1>
+          <p className="text-gray-600 mt-1 sm:mt-2 text-sm sm:text-base">
+            Browse through all mentorship request submissions
+          </p>
+          <div className="mt-3 sm:mt-4 relative">
+            <input
+              type="text"
+              placeholder="Search by name or email..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full p-2 sm:p-3 pl-8 sm:pl-10 text-sm sm:text-base border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+            />
+            <Info className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 absolute left-2 sm:left-3 top-1/2 transform -translate-y-1/2" />
+          </div>
         </div>
-      </div>
 
-      {/* Mobile Card View */}
-      <div className="flex-1 block md:hidden">
-        <div className="space-y-4">
-          {filteredUsers.map((user) => (
-            <div key={user.uid} className="bg-white rounded-lg shadow-sm border p-4">
-              <div className="flex items-start space-x-3">
-                <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-blue-600 rounded-full flex items-center justify-center">
-                  <span className="text-white font-bold text-lg">
-                    {user.displayName?.charAt(0).toUpperCase() || "U"}
-                  </span>
-                </div>
-                <div className="flex-1 min-w-0">
-                  <h3 className="text-lg font-semibold text-gray-900 truncate">
-                    {user.displayName}
-                  </h3>
-                  <p className="text-sm text-gray-500 truncate">{user.email}</p>
-                  <div className="mt-2 flex flex-wrap gap-2">
-                    <span className="inline-block bg-blue-50 text-blue-700 text-xs px-2 py-1 rounded-full">
-                      {user.mentorshipRequest.domain || "Not specified"}
-                    </span>
-                    <span className="inline-block bg-green-50 text-green-700 text-xs px-2 py-1 rounded-full">
-                      {user.mentorshipRequest.skillsToDevelop?.slice(0, 2).join(", ") ||
-                        "No skills"}
+        {/* Mobile Card View */}
+        <div className="flex-1 block md:hidden">
+          <div className="space-y-4">
+            {filteredUsers.map((user) => (
+              <div key={user.uid} className="bg-white rounded-lg shadow-sm border p-4">
+                <div className="flex items-start space-x-3">
+                  <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-blue-600 rounded-full flex items-center justify-center">
+                    <span className="text-white font-bold text-lg">
+                      {user.displayName?.charAt(0).toUpperCase() || "U"}
                     </span>
                   </div>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="text-lg font-semibold text-gray-900 truncate">
+                      {user.displayName}
+                    </h3>
+                    <p className="text-sm text-gray-500 truncate">{user.email}</p>
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      <span className="inline-block bg-blue-50 text-blue-700 text-xs px-2 py-1 rounded-full">
+                        {user.mentorshipRequest.domain || "Not specified"}
+                      </span>
+                      <span className="inline-block bg-green-50 text-green-700 text-xs px-2 py-1 rounded-full">
+                        {user.mentorshipRequest.skillsToDevelop?.slice(0, 2).join(", ") ||
+                          "No skills"}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+                <div className="mt-4">
+                  <button
+                    onClick={() => handleViewDetails(user)}
+                    className="w-full bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium py-2 px-4 rounded-lg transition-colors duration-200"
+                  >
+                    View Details
+                  </button>
                 </div>
               </div>
-              <div className="mt-4">
-                <button
-                  onClick={() => handleViewDetails(user)}
-                  className="w-full bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium py-2 px-4 rounded-lg transition-colors duration-200"
-                >
-                  View Details
-                </button>
-              </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
-      </div>
 
-      {/* Desktop Table View */}
-      <div className="flex-1 overflow-auto hidden md:block">
-        <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50 sticky top-0 z-20">
-              <tr>
-                <th className="px-3 sm:px-4 lg:px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Name
-                </th>
-                <th className="px-3 sm:px-4 lg:px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Email
-                </th>
-                <th className="px-3 sm:px-4 lg:px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Domain
-                </th>
-                <th className="px-3 sm:px-4 lg:px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Skills
-                </th>
-                <th className="px-3 sm:px-4 lg:px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {filteredUsers.map((user, index) => (
-                <tr
-                  key={user.uid}
-                  className={`${
-                    index % 2 === 0 ? "bg-white" : "bg-gray-50"
-                  } hover:bg-gray-100 transition-colors duration-200`}
-                >
-                  <td className="px-3 sm:px-4 lg:px-6 py-4 whitespace-nowrap text-xs sm:text-sm font-medium text-gray-900 text-center">
-                    {user.displayName}
-                  </td>
-                  <td className="px-3 sm:px-4 lg:px-6 py-4 whitespace-nowrap text-xs sm:text-sm text-gray-500 text-center">
-                    {user.email}
-                  </td>
-                  <td className="px-3 sm:px-4 lg:px-6 py-4 whitespace-nowrap text-xs sm:text-sm text-gray-500 text-center">
-                    {user.mentorshipRequest.domain || "Not specified"}
-                  </td>
-                  <td className="px-3 sm:px-4 lg:px-6 py-4 whitespace-nowrap text-xs sm:text-sm text-gray-500 text-center">
-                    {user.mentorshipRequest.skillsToDevelop?.slice(0, 3).join(", ") ||
-                      "No skills"}
-                  </td>
-                  <td className="px-3 sm:px-4 lg:px-6 py-4 whitespace-nowrap text-xs sm:text-sm text-center">
-                    <button
-                      onClick={() => handleViewDetails(user)}
-                      className="text-blue-600 hover:text-blue-800 font-medium transition-colors duration-200"
-                    >
-                      More Details
-                    </button>
-                  </td>
+        {/* Desktop Table View */}
+        <div className="flex-1 overflow-auto hidden md:block">
+          <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50 sticky top-0 z-20">
+                <tr>
+                  <th className="px-3 sm:px-4 lg:px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Name
+                  </th>
+                  <th className="px-3 sm:px-4 lg:px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Email
+                  </th>
+                  <th className="px-3 sm:px-4 lg:px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Domain
+                  </th>
+                  <th className="px-3 sm:px-4 lg:px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Skills
+                  </th>
+                  <th className="px-3 sm:px-4 lg:px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Actions
+                  </th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {filteredUsers.map((user, index) => (
+                  <tr
+                    key={user.uid}
+                    className={`${
+                      index % 2 === 0 ? "bg-white" : "bg-gray-50"
+                    } hover:bg-gray-100 transition-colors duration-200`}
+                  >
+                    <td className="px-3 sm:px-4 lg:px-6 py-4 whitespace-nowrap text-xs sm:text-sm font-medium text-gray-900 text-center">
+                      {user.displayName}
+                    </td>
+                    <td className="px-3 sm:px-4 lg:px-6 py-4 whitespace-nowrap text-xs sm:text-sm text-gray-500 text-center">
+                      {user.email}
+                    </td>
+                    <td className="px-3 sm:px-4 lg:px-6 py-4 whitespace-nowrap text-xs sm:text-sm text-gray-500 text-center">
+                      {user.mentorshipRequest.domain || "Not specified"}
+                    </td>
+                    <td className="px-3 sm:px-4 lg:px-6 py-4 whitespace-nowrap text-xs sm:text-sm text-gray-500 text-center">
+                      {user.mentorshipRequest.skillsToDevelop?.slice(0, 3).join(", ") ||
+                        "No skills"}
+                    </td>
+                    <td className="px-3 sm:px-4 lg:px-6 py-4 whitespace-nowrap text-xs sm:text-sm text-center">
+                      <button
+                        onClick={() => handleViewDetails(user)}
+                        className="text-blue-600 hover:text-blue-800 font-medium transition-colors duration-200"
+                      >
+                        More Details
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
 
-      {/* Details Panel */}
-      {isDetailsOpen && (
+      {/* Full-Screen Details Modal */}
+      {isDetailsOpen && selectedUser && (
         <>
           {/* Overlay */}
           <div
-            className="fixed inset-0 bg-gray-800 bg-opacity-50 backdrop-blur-md z-40 transition-all duration-300 ease-in-out"
+            className="fixed inset-0 bg-gray-800 bg-opacity-50 backdrop-blur-sm z-40 transition-opacity duration-300"
             onClick={handleCloseDetails}
           />
 
-          {/* Details Panel */}
+          {/* Modal Content */}
           <div
-            className={`fixed top-0 right-0 h-full w-full md:w-1/2 bg-white shadow-2xl transform transition-all duration-300 ease-in-out overflow-y-auto z-50 ${
-              isDetailsOpen ? "translate-x-0 opacity-100" : "translate-x-full opacity-0"
+            className={`fixed inset-0 z-50 transition-all duration-300 ease-out overflow-y-auto ${
+              isDetailsOpen
+                ? "opacity-100"
+                : "opacity-0 pointer-events-none"
             }`}
           >
-            {selectedUser && (
-              <>
-                {/* Header */}
-                <div className="p-4 sm:p-6 border-b border-gray-200 flex justify-between items-center sticky top-0 bg-white z-10">
-                  <h2 className="text-xl sm:text-2xl font-bold text-gray-900 truncate pr-2">
-                    {selectedUser.displayName}'s Mentorship Request
-                  </h2>
-                  <button
-                    onClick={handleCloseDetails}
-                    className="p-2 hover:bg-gray-100 rounded-full transition-colors duration-200 flex-shrink-0"
-                    title="Close"
-                  >
-                    <X className="w-6 h-6 text-gray-500 hover:text-gray-700" />
-                  </button>
-                </div>
+            <div
+              className={`min-h-full bg-white ${
+                isDetailsOpen
+                  ? "translate-y-0"
+                  : "translate-y-full md:translate-y-0 md:scale-95"
+              }`}
+            >
+              {/* Header */}
+              <div className="sticky top-0 z-10 bg-white border-b border-gray-200 p-4 sm:p-6 flex justify-between items-center">
+                <h2 className="text-xl sm:text-2xl font-bold text-gray-900 truncate pr-2">
+                  {selectedUser.displayName}'s Mentorship Request
+                </h2>
+                <button
+                  onClick={handleCloseDetails}
+                  className="p-2 hover:bg-gray-100 rounded-full transition-colors duration-200"
+                  title="Close"
+                >
+                  <X className="w-6 h-6 text-gray-500 hover:text-gray-700" />
+                </button>
+              </div>
 
-                <div className="p-4 sm:p-6 space-y-6">
-                  {/* User Info */}
-                  <div className="flex flex-col sm:flex-row items-start space-y-4 sm:space-y-0 sm:space-x-6">
-                    <div className="w-20 h-20 sm:w-24 sm:h-24 bg-gradient-to-br from-purple-500 to-blue-600 rounded-full flex items-center justify-center flex-shrink-0">
-                      <span className="text-white font-bold text-2xl sm:text-3xl">
-                        {selectedUser.displayName?.charAt(0).toUpperCase() || "U"}
-                      </span>
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <h3 className="text-xl sm:text-2xl font-bold text-gray-900">
-                        {selectedUser.displayName}
-                      </h3>
-                      <div className="space-y-2 text-sm text-gray-600 mt-2">
-                        <div className="flex items-center space-x-2">
-                          <Mail className="w-4 h-4 text-gray-400 flex-shrink-0" />
-                          <span className="truncate">{selectedUser.email}</span>
-                        </div>
-                      </div>
-                    </div>
+              {/* Content */}
+              <div className="p-4 sm:p-6 space-y-6">
+                {/* User Info */}
+                <div className="flex flex-col sm:flex-row items-start space-y-4 sm:space-y-0 sm:space-x-6">
+                  <div className="w-20 h-20 sm:w-24 sm:h-24 bg-gradient-to-br from-purple-500 to-blue-600 rounded-full flex items-center justify-center flex-shrink-0">
+                    <span className="text-white font-bold text-2xl sm:text-3xl">
+                      {selectedUser.displayName?.charAt(0).toUpperCase() || "U"}
+                    </span>
                   </div>
-
-                  {/* Mentorship Request Details */}
-                  <div className="bg-white rounded-lg shadow-sm border">
-                    <div className="p-3 sm:p-4 border-b">
-                      <h3 className="text-base sm:text-lg font-semibold text-gray-900">
-                        Mentorship Request Details
-                      </h3>
-                    </div>
-                    <div className="p-3 sm:p-4 space-y-3 sm:space-y-4">
-                      <div className="flex flex-col sm:flex-row sm:justify-between py-2">
-                        <span className="text-sm font-medium text-gray-600 mb-1 sm:mb-0">
-                          Reason for Mentorship
-                        </span>
-                        <span className="text-sm text-gray-900">
-                          {selectedUser.mentorshipRequest.reasonForMentorship || "Not specified"}
-                        </span>
-                      </div>
-                      <div className="flex flex-col sm:flex-row sm:justify-between py-2">
-                        <span className="text-sm font-medium text-gray-600 mb-1 sm:mb-0">
-                          Skills to Develop
-                        </span>
-                        <span className="text-sm text-gray-900">
-                          {selectedUser.mentorshipRequest.skillsToDevelop?.join(", ") ||
-                            "No skills specified"}
-                        </span>
-                      </div>
-                      <div className="flex flex-col sm:flex-row sm:justify-between py-2">
-                        <span className="text-sm font-medium text-gray-600 mb-1 sm:mb-0">
-                          Domain
-                        </span>
-                        <span className="text-sm text-gray-900">
-                          {selectedUser.mentorshipRequest.domain || "Not specified"}
-                        </span>
-                      </div>
-                      <div className="flex flex-col sm:flex-row sm:justify-between py-2">
-                        <span className="text-sm font-medium text-gray-600 mb-1 sm:mb-0">
-                          Topics Interested In
-                        </span>
-                        <span className="text-sm text-gray-900">
-                          {selectedUser.mentorshipRequest.topicsInterested?.join(", ") ||
-                            "No topics specified"}
-                        </span>
-                      </div>
-                      <div className="flex flex-col sm:flex-row sm:justify-between py-2">
-                        <span className="text-sm font-medium text-gray-600 mb-1 sm:mb-0">
-                          Expectations
-                        </span>
-                        <span className="text-sm text-gray-900">
-                          {selectedUser.mentorshipRequest.expectations || "Not specified"}
-                        </span>
-                      </div>
-                      <div className="flex flex-col sm:flex-row sm:justify-between py-2">
-                        <span className="text-sm font-medium text-gray-600 mb-1 sm:mb-0">
-                          Previous Projects
-                        </span>
-                        <span className="text-sm text-gray-900">
-                          {selectedUser.mentorshipRequest.previousProjects || "Not specified"}
-                        </span>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="text-xl sm:text-2xl font-bold text-gray-900">
+                      {selectedUser.displayName}
+                    </h3>
+                    <div className="space-y-2 text-sm text-gray-600 mt-2">
+                      <div className="flex items-center space-x-2">
+                        <Mail className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                        <span className="truncate">{selectedUser.email}</span>
                       </div>
                     </div>
                   </div>
                 </div>
-              </>
-            )}
+
+                {/* Mentorship Request Details */}
+                <div className="bg-gray-50 rounded-lg border">
+                  <div className="p-3 sm:p-4 border-b border-gray-200">
+                    <h3 className="text-base sm:text-lg font-semibold text-gray-900">
+                      Mentorship Request Details
+                    </h3>
+                  </div>
+                  <div className="p-3 sm:p-4 space-y-3 sm:space-y-4">
+                    <DetailRow
+                      label="Reason for Mentorship"
+                      value={selectedUser.mentorshipRequest.reasonForMentorship}
+                    />
+                    <DetailRow
+                      label="Skills to Develop"
+                      value={selectedUser.mentorshipRequest.skillsToDevelop?.join(", ")}
+                    />
+                    <DetailRow
+                      label="Domain"
+                      value={selectedUser.mentorshipRequest.domain}
+                    />
+                    <DetailRow
+                      label="Topics Interested In"
+                      value={selectedUser.mentorshipRequest.topicsInterested?.join(", ")}
+                    />
+                    <DetailRow
+                      label="Expectations"
+                      value={selectedUser.mentorshipRequest.expectations}
+                    />
+                    <DetailRow
+                      label="Previous Projects"
+                      value={selectedUser.mentorshipRequest.previousProjects}
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </>
       )}
-    </div>
+    </>
   );
 };
 
