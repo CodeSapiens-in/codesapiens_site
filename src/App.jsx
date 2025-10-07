@@ -28,6 +28,7 @@ import UserResource from './user/UserResource';
 import UserResumeBuilder from './user/UserResumeBuilder';
 import UserMentorshipForm from './user/UserMentorshipForm';
 import AdminMentorshipSubmission from './admin/AdminMentorshipSubmission';
+import PublicProfile from './components/PublicProfile';
 
 
 
@@ -51,6 +52,7 @@ function Root() {
         <Routes>
           <Route path="/" element={<CodeSapiensHero />} />
           <Route path="/auth" element={<AuthForm />} />
+          <Route path="/profile/:username" element={<PublicProfile/>} />
 
             <Route path="/forgot-password" element={<ResetPassword/>} />
             <Route path="/reset-password" element={<ResetPasswordConfirm/>} />
@@ -79,6 +81,7 @@ function Root() {
             <Route path="/resume" element={<UserResumeBuilder/>} />
             <Route path="/mentorship" element={<UserMentorshipForm/>} />
             <Route path="/mentorship-form" element={<AdminMentorshipSubmission/>} />
+             <Route path="/profile/:username" element={<PublicProfile/>} />
          
           
 
