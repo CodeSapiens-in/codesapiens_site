@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Bell, Settings, Menu, X, ChevronDown, User, Loader2, Shield, Users, BarChart3, TextSearch, BookPlus , CalendarSearch ,FileCheck2 } from 'lucide-react';
+import { Bell, Settings, Menu, X, ChevronDown, User, Loader2, Shield, Users, BarChart3, TextSearch, BookPlus , CalendarSearch ,FileCheck2, Computer } from 'lucide-react';
 
 // Import your actual Supabase client
 import { supabase } from '../lib/supabaseClient';
@@ -384,6 +384,13 @@ export default function UnifiedNavbar() {
               >
                 <FileCheck2 className="w-4 h-4 mr-2" />
                 Resume Builder(Beta)
+              </button>
+              <button
+                onClick={() =>navigate('/mentorship')}
+                className="w-full text-left flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+              >
+                <Computer className="w-4 h-4 mr-2" />
+                Mentorship
               </button>
               <button
                 onClick={() => window.open("https://luma.com/codesapiens?k=c&period=past", "_blank")}
