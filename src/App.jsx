@@ -25,6 +25,7 @@ import ResetPassword from './components/ResetPassword';
 import ResetPasswordConfirm from './components/ResetPasswordConfirm'
 import UserEvents from './user/UserEvents';
 import UserResource from './user/UserResource';
+import UserResumeBuilder from './user/UserResumeBuilder';
 
 
 
@@ -73,6 +74,7 @@ function Root() {
             <Route path="/reset-password" element={<ResetPasswordConfirm/>} />
             <Route path="/events" element={<UserEvents/>} />
             <Route path="/resource" element={<UserResource/>} />
+            <Route path="/resume" element={<UserResumeBuilder/>} />
           
 
            
