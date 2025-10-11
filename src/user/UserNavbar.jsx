@@ -1,9 +1,8 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Bell, Settings, Menu, X, ChevronDown, User, Loader2, Shield, Users, BarChart3, TextSearch, BookPlus , CalendarSearch ,FileCheck2, Computer, BrainCircuit  } from 'lucide-react';
 
-// Import your actual Supabase client
+import React, { useState, useEffect, useRef } from 'react';
+import { Bell, Settings, Menu, X, ChevronDown, User, Loader2, Shield, Users, BarChart3, TextSearch, BookPlus, CalendarSearch, FileCheck2, Computer, BrainCircuit } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabaseClient';
-import { href, useNavigate } from 'react-router-dom';
 
 export default function UnifiedNavbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -309,7 +308,6 @@ export default function UnifiedNavbar() {
       return (
         <div className="hidden md:flex items-center justify-center flex-1 max-w-md mx-auto">
           <div className="flex items-center space-x-8">
-
             <button
               onClick={() => navigate('/user-list')}
               className={`text-gray-700 ${hoverColor} px-3 py-2 rounded-md font-medium transition-colors flex items-center space-x-2`}
@@ -317,7 +315,6 @@ export default function UnifiedNavbar() {
               <Users className="w-4 h-4" />
               <span>Users</span>
             </button>
-
             <button
               onClick={() => navigate('/analytics')}
               className={`text-gray-700 ${hoverColor} px-3 py-2 rounded-md font-medium transition-colors`}
@@ -335,7 +332,7 @@ export default function UnifiedNavbar() {
       );
     }
 
-
+    return null;
   };
 
   const renderProfileDropdown = () => {
@@ -359,16 +356,21 @@ export default function UnifiedNavbar() {
         <div className="py-2">
           {isAdmin ? (
             <>
-
               <button
-                onClick={() => navigate('/analytics')}
+                onClick={() => {
+                  setIsProfileDropdownOpen(false);
+                  navigate('/analytics');
+                }}
                 className="w-full text-left flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
               >
                 <TextSearch className="w-4 h-4 mr-2" />
                 View Analytics
               </button>
               <button
-                onClick={() => navigate('/mentorship-form')}
+                onClick={() => {
+                  setIsProfileDropdownOpen(false);
+                  navigate('/mentorship-form');
+                }}
                 className="w-full text-left flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
               >
                 <BrainCircuit className="w-4 h-4 mr-2" />
@@ -378,53 +380,63 @@ export default function UnifiedNavbar() {
           ) : (
             <>
               <button
-                onClick={() => navigate('/profile')}
+                onClick={() => {
+                  setIsProfileDropdownOpen(false);
+                  navigate('/profile');
+                }}
                 className="w-full text-left flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
               >
                 <User className="w-4 h-4 mr-2" />
                 Profile
               </button>
               <button
-                onClick={() =>navigate('/resource')}
+                onClick={() => {
+                  setIsProfileDropdownOpen(false);
+                  navigate('/resource');
+                }}
                 className="w-full text-left flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
               >
                 <BookPlus className="w-4 h-4 mr-2" />
                 Resources
               </button>
               <button
-                onClick={() =>navigate('/resume')}
+                onClick={() => {
+                  setIsProfileDropdownOpen(false);
+                  navigate('/resume');
+                }}
                 className="w-full text-left flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
               >
                 <FileCheck2 className="w-4 h-4 mr-2" />
                 Resume Builder(Beta)
               </button>
               <button
-                onClick={() =>navigate('/mentorship')}
+                onClick={() => {
+                  setIsProfileDropdownOpen(false);
+                  navigate('/mentorship');
+                }}
                 className="w-full text-left flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
               >
                 <Computer className="w-4 h-4 mr-2" />
                 Mentorship
               </button>
               <button
-                onClick={() => window.open("https://luma.com/codesapiens?k=c&period=past", "_blank")}
+                onClick={() => {
+                  setIsProfileDropdownOpen(false);
+                  window.open("https://luma.com/codesapiens?k=c&period=past", "_blank");
+                }}
                 className="w-full text-left flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
               >
                 <CalendarSearch className="w-4 h-4 mr-2" />
                 Events
               </button>
-
-
             </>
           )}
-          {/* <button 
-            onClick={() => handleNavClick('/help')}
-            className="w-full text-left flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-          >
-            Help & Support
-          </button> */}
           <div className="border-t border-gray-100 mt-2 pt-2">
             <button
-              onClick={handleSignOut}
+              onClick={() => {
+                setIsProfileDropdownOpen(false);
+                handleSignOut();
+              }}
               className="w-full text-left flex items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50"
             >
               Sign Out
@@ -444,7 +456,6 @@ export default function UnifiedNavbar() {
       <div ref={mobileMenuRef} className="md:hidden border-t border-gray-200 py-4 space-y-2 bg-white">
         {isAdmin ? (
           <>
-
             <button
               onClick={() => navigate('/user-list')}
               className={`w-full text-left block px-4 py-2 text-gray-700 hover:bg-gray-100 ${hoverColor} rounded-md font-medium transition-colors flex items-center space-x-2`}
@@ -452,7 +463,6 @@ export default function UnifiedNavbar() {
               <Users className="w-4 h-4" />
               <span>Users</span>
             </button>
-
             <button
               onClick={() => handleNavClick('/analytics')}
               className={`w-full text-left block px-4 py-2 text-gray-700 hover:bg-gray-100 ${hoverColor} rounded-md font-medium transition-colors`}
@@ -462,8 +472,6 @@ export default function UnifiedNavbar() {
           </>
         ) : (
           <>
-
-
           </>
         )}
 
@@ -479,47 +487,11 @@ export default function UnifiedNavbar() {
             <div className="space-y-2">
               {isAdmin ? (
                 <>
-                  {/* <button 
-                    onClick={() => handleNavClick('/admin/profile')}
-                    className={`w-full text-left block text-sm text-gray-700 ${hoverColor} py-1`}
-                  >
-                    Admin Profile
-                  </button>
-                  <button 
-                    onClick={() => handleNavClick('/admin/settings')}
-                    className={`w-full text-left block text-sm text-gray-700 ${hoverColor} py-1`}
-                  >
-                    Admin Settings
-                  </button>
-                  <button 
-                    onClick={() => handleNavClick('/admin/system')}
-                    className={`w-full text-left block text-sm text-gray-700 ${hoverColor} py-1`}
-                  >
-                    System Settings
-                  </button> */}
                 </>
               ) : (
                 <>
-                  {/* <button 
-                    onClick={() => handleNavClick('/profile')}
-                    className={`w-full text-left block text-sm text-gray-700 ${hoverColor} py-1`}
-                  >
-                    Profile Settings
-                  </button>
-                  <button 
-                    onClick={() => handleNavClick('/settings')}
-                    className={`w-full text-left block text-sm text-gray-700 ${hoverColor} py-1`}
-                  >
-                    Account Preferences
-                  </button> */}
                 </>
               )}
-              {/* <button 
-                onClick={() => handleNavClick('/help')}
-                className={`w-full text-left block text-sm text-gray-700 ${hoverColor} py-1`}
-              >
-                Help & Support
-              </button> */}
               <button
                 onClick={handleSignOut}
                 className="w-full text-left block text-sm text-red-600 hover:text-red-700 py-1"
@@ -578,12 +550,6 @@ export default function UnifiedNavbar() {
           <div className="flex items-center space-x-4 flex-shrink-0">
             {/* Notification Bell */}
             <div className="relative">
-              {/* <button className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors">
-                <Bell className="w-5 h-5" />
-                <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center">
-                  <span className="text-white text-xs font-bold">{notificationCount}</span>
-                </span>
-              </button> */}
             </div>
 
             {/* User Profile Section */}
@@ -595,25 +561,14 @@ export default function UnifiedNavbar() {
               >
                 {renderUserAvatar()}
                 <div className="hidden lg:flex items-center space-x-1">
-                  <div className="text-left">
-                    {renderUserInfo()}
-                  </div>
-                  <ChevronDown className={`w-4 h-4 text-gray-500 ml-1 transition-transform ${isProfileDropdownOpen ? 'rotate-180' : ''
-                    }`} />
+                  {renderUserInfo()}
+                  <ChevronDown className={`w-4 h-4 text-gray-500 ml-1 transition-transform ${isProfileDropdownOpen ? 'rotate-180' : ''}`} />
                 </div>
               </button>
 
               {/* Profile Dropdown */}
               {renderProfileDropdown()}
             </div>
-
-            {/* Settings Icon
-            <button 
-              onClick={() => handleNavClick(isAdmin ? '/admin/settings' : '/settings')}
-              className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
-            >
-              <Settings className="w-5 h-5" />
-            </button> */}
 
             {/* Mobile Menu Button */}
             <button
