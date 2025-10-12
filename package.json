@@ -19,6 +19,7 @@
     "flowbite-react": "^0.12.7",
     "framer-motion": "^12.23.12",
     "lucide-react": "^0.540.0",
+    "monaco-editor": "^0.54.0",
     "nodemon": "^3.1.10",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",

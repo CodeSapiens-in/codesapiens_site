@@ -29,6 +29,7 @@ import UserResumeBuilder from './user/UserResumeBuilder';
 import UserMentorshipForm from './user/UserMentorshipForm';
 import AdminMentorshipSubmission from './admin/AdminMentorshipSubmission';
 import PublicProfile from './components/PublicProfile';
+import UserPlayGround from './user/UserPlayGround';
 
 
 
@@ -83,6 +84,7 @@ function Root() {
             <Route path="/mentorship" element={<UserMentorshipForm/>} />
             <Route path="/mentorship-form" element={<AdminMentorshipSubmission/>} />
              <Route path="/profile/:username" element={<PublicProfile/>} />
+             <Route path="/playground" element={<UserPlayGround/>} />
          
           
 

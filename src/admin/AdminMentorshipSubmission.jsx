@@ -13,8 +13,8 @@ const DetailRow = ({ label, value }) => (
 );
 
 const AdminMentorshipSubmission = () => {
-  const [users, setUsers] = useState([]);
-  const [filteredUsers, setFilteredUsers] = useState([]);
+  const [submissions, setSubmissions] = useState([]);
+  const [filteredSubmissions, setFilteredSubmissions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedUser, setSelectedUser] = useState(null);
@@ -39,15 +39,20 @@ const AdminMentorshipSubmission = () => {
           return;
         }
 
-        const transformedUsers = data.map((user) => ({
-          uid: user.uid,
-          displayName: user.display_name || "User",
-          email: user.email || "",
-          mentorshipRequest: user.mentorship_request || {},
-        }));
+        // Transform data to create a flat list of submissions
+        const transformedSubmissions = data.flatMap((user) =>
+          Array.isArray(user.mentorship_request)
+            ? user.mentorship_request.map((request) => ({
+                uid: user.uid,
+                displayName: user.display_name || "User",
+                email: user.email || "",
+                mentorshipRequest: request,
+              }))
+            : []
+        );
 
-        setUsers(transformedUsers);
-        setFilteredUsers(transformedUsers);
+        setSubmissions(transformedSubmissions);
+        setFilteredSubmissions(transformedSubmissions);
       } catch (err) {
         console.error("[Frontend] : Error fetching users:", err);
         setError(err.message || "Failed to fetch mentorship submissions.");
@@ -62,20 +67,34 @@ const AdminMentorshipSubmission = () => {
   // Handle search
   useEffect(() => {
     const lowerQuery = searchQuery.toLowerCase();
-    const filtered = users.filter(
-      (user) =>
-        user.displayName.toLowerCase().includes(lowerQuery) ||
-        user.email.toLowerCase().includes(lowerQuery)
+    const filtered = submissions.filter(
+      (submission) =>
+        submission.displayName.toLowerCase().includes(lowerQuery) ||
+        submission.email.toLowerCase().includes(lowerQuery) ||
+        submission.mentorshipRequest.domain?.toLowerCase().includes(lowerQuery) ||
+        submission.mentorshipRequest.skillsToDevelop?.some((skill) =>
+          skill.toLowerCase().includes(lowerQuery)
+        ) ||
+        submission.mentorshipRequest.topicsInterested?.some((topic) =>
+          topic.toLowerCase().includes(lowerQuery)
+        )
     );
-    setFilteredUsers(filtered);
-  }, [searchQuery, users]);
+    setFilteredSubmissions(filtered);
+  }, [searchQuery, submissions]);
 
   // Handle view details
-  const handleViewDetails = useCallback((user) => {
-    setSelectedUser(user);
+  const handleViewDetails = useCallback((submission) => {
+    // Find all submissions for the same user
+    const userSubmissions = submissions.filter((s) => s.uid === submission.uid);
+    setSelectedUser({
+      uid: submission.uid,
+      displayName: submission.displayName,
+      email: submission.email,
+      mentorshipRequests: userSubmissions.map((s) => s.mentorshipRequest),
+    });
     setIsDetailsOpen(true);
     document.body.style.overflow = "hidden"; // Prevent body scroll
-  }, []);
+  }, [submissions]);
 
   // Handle close details
   const handleCloseDetails = useCallback(() => {
@@ -138,7 +157,7 @@ const AdminMentorshipSubmission = () => {
           <div className="mt-3 sm:mt-4 relative">
             <input
               type="text"
-              placeholder="Search by name or email..."
+              placeholder="Search by name, email, domain, or skills..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full p-2 sm:p-3 pl-8 sm:pl-10 text-sm sm:text-base border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
@@ -150,25 +169,28 @@ const AdminMentorshipSubmission = () => {
         {/* Mobile Card View */}
         <div className="flex-1 block md:hidden">
           <div className="space-y-4">
-            {filteredUsers.map((user) => (
-              <div key={user.uid} className="bg-white rounded-lg shadow-sm border p-4">
+            {filteredSubmissions.map((submission, index) => (
+              <div key={`${submission.uid}-${index}`} className="bg-white rounded-lg shadow-sm border p-4">
                 <div className="flex items-start space-x-3">
                   <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-blue-600 rounded-full flex items-center justify-center">
                     <span className="text-white font-bold text-lg">
-                      {user.displayName?.charAt(0).toUpperCase() || "U"}
+                      {submission.displayName?.charAt(0).toUpperCase() || "U"}
                     </span>
                   </div>
                   <div className="flex-1 min-w-0">
                     <h3 className="text-lg font-semibold text-gray-900 truncate">
-                      {user.displayName}
+                      {submission.displayName}
                     </h3>
-                    <p className="text-sm text-gray-500 truncate">{user.email}</p>
+                    <p className="text-sm text-gray-500 truncate">{submission.email}</p>
+                    <p className="text-sm text-gray-500">
+                      Submitted: {new Date(submission.mentorshipRequest.created_at).toLocaleString()}
+                    </p>
                     <div className="mt-2 flex flex-wrap gap-2">
                       <span className="inline-block bg-blue-50 text-blue-700 text-xs px-2 py-1 rounded-full">
-                        {user.mentorshipRequest.domain || "Not specified"}
+                        {submission.mentorshipRequest.domain || "Not specified"}
                       </span>
                       <span className="inline-block bg-green-50 text-green-700 text-xs px-2 py-1 rounded-full">
-                        {user.mentorshipRequest.skillsToDevelop?.slice(0, 2).join(", ") ||
+                        {submission.mentorshipRequest.skillsToDevelop?.slice(0, 2).join(", ") ||
                           "No skills"}
                       </span>
                     </div>
@@ -176,7 +198,7 @@ const AdminMentorshipSubmission = () => {
                 </div>
                 <div className="mt-4">
                   <button
-                    onClick={() => handleViewDetails(user)}
+                    onClick={() => handleViewDetails(submission)}
                     className="w-full bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium py-2 px-4 rounded-lg transition-colors duration-200"
                   >
                     View Details
@@ -200,6 +222,9 @@ const AdminMentorshipSubmission = () => {
                     Email
                   </th>
                   <th className="px-3 sm:px-4 lg:px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Submitted At
+                  </th>
+                  <th className="px-3 sm:px-4 lg:px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Domain
                   </th>
                   <th className="px-3 sm:px-4 lg:px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -211,29 +236,32 @@ const AdminMentorshipSubmission = () => {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {filteredUsers.map((user, index) => (
+                {filteredSubmissions.map((submission, index) => (
                   <tr
-                    key={user.uid}
+                    key={`${submission.uid}-${index}`}
                     className={`${
                       index % 2 === 0 ? "bg-white" : "bg-gray-50"
                     } hover:bg-gray-100 transition-colors duration-200`}
                   >
                     <td className="px-3 sm:px-4 lg:px-6 py-4 whitespace-nowrap text-xs sm:text-sm font-medium text-gray-900 text-center">
-                      {user.displayName}
+                      {submission.displayName}
                     </td>
                     <td className="px-3 sm:px-4 lg:px-6 py-4 whitespace-nowrap text-xs sm:text-sm text-gray-500 text-center">
-                      {user.email}
+                      {submission.email}
                     </td>
                     <td className="px-3 sm:px-4 lg:px-6 py-4 whitespace-nowrap text-xs sm:text-sm text-gray-500 text-center">
-                      {user.mentorshipRequest.domain || "Not specified"}
+                      {new Date(submission.mentorshipRequest.created_at).toLocaleString()}
                     </td>
                     <td className="px-3 sm:px-4 lg:px-6 py-4 whitespace-nowrap text-xs sm:text-sm text-gray-500 text-center">
-                      {user.mentorshipRequest.skillsToDevelop?.slice(0, 3).join(", ") ||
+                      {submission.mentorshipRequest.domain || "Not specified"}
+                    </td>
+                    <td className="px-3 sm:px-4 lg:px-6 py-4 whitespace-nowrap text-xs sm:text-sm text-gray-500 text-center">
+                      {submission.mentorshipRequest.skillsToDevelop?.slice(0, 3).join(", ") ||
                         "No skills"}
                     </td>
                     <td className="px-3 sm:px-4 lg:px-6 py-4 whitespace-nowrap text-xs sm:text-sm text-center">
                       <button
-                        onClick={() => handleViewDetails(user)}
+                        onClick={() => handleViewDetails(submission)}
                         className="text-blue-600 hover:text-blue-800 font-medium transition-colors duration-200"
                       >
                         More Details
@@ -274,7 +302,7 @@ const AdminMentorshipSubmission = () => {
               {/* Header */}
               <div className="sticky top-0 z-10 bg-white border-b border-gray-200 p-4 sm:p-6 flex justify-between items-center">
                 <h2 className="text-xl sm:text-2xl font-bold text-gray-900 truncate pr-2">
-                  {selectedUser.displayName}'s Mentorship Request
+                  {selectedUser.displayName}'s Mentorship Requests
                 </h2>
                 <button
                   onClick={handleCloseDetails}
@@ -307,40 +335,42 @@ const AdminMentorshipSubmission = () => {
                   </div>
                 </div>
 
-                {/* Mentorship Request Details */}
-                <div className="bg-gray-50 rounded-lg border">
-                  <div className="p-3 sm:p-4 border-b border-gray-200">
-                    <h3 className="text-base sm:text-lg font-semibold text-gray-900">
-                      Mentorship Request Details
-                    </h3>
+                {/* Mentorship Requests */}
+                {selectedUser.mentorshipRequests.map((request, index) => (
+                  <div key={`${selectedUser.uid}-${index}`} className="bg-gray-50 rounded-lg border">
+                    <div className="p-3 sm:p-4 border-b border-gray-200">
+                      <h3 className="text-base sm:text-lg font-semibold text-gray-900">
+                        Mentorship Request #{index + 1} (Submitted: {new Date(request.created_at).toLocaleString()})
+                      </h3>
+                    </div>
+                    <div className="p-3 sm:p-4 space-y-3 sm:space-y-4">
+                      <DetailRow
+                        label="Reason for Mentorship"
+                        value={request.reasonForMentorship}
+                      />
+                      <DetailRow
+                        label="Skills to Develop"
+                        value={request.skillsToDevelop?.join(", ")}
+                      />
+                      <DetailRow
+                        label="Domain"
+                        value={request.domain}
+                      />
+                      <DetailRow
+                        label="Topics Interested In"
+                        value={request.topicsInterested?.join(", ")}
+                      />
+                      <DetailRow
+                        label="Expectations"
+                        value={request.expectations}
+                      />
+                      <DetailRow
+                        label="Previous Projects"
+                        value={request.previousProjects}
+                      />
+                    </div>
                   </div>
-                  <div className="p-3 sm:p-4 space-y-3 sm:space-y-4">
-                    <DetailRow
-                      label="Reason for Mentorship"
-                      value={selectedUser.mentorshipRequest.reasonForMentorship}
-                    />
-                    <DetailRow
-                      label="Skills to Develop"
-                      value={selectedUser.mentorshipRequest.skillsToDevelop?.join(", ")}
-                    />
-                    <DetailRow
-                      label="Domain"
-                      value={selectedUser.mentorshipRequest.domain}
-                    />
-                    <DetailRow
-                      label="Topics Interested In"
-                      value={selectedUser.mentorshipRequest.topicsInterested?.join(", ")}
-                    />
-                    <DetailRow
-                      label="Expectations"
-                      value={selectedUser.mentorshipRequest.expectations}
-                    />
-                    <DetailRow
-                      label="Previous Projects"
-                      value={selectedUser.mentorshipRequest.previousProjects}
-                    />
-                  </div>
-                </div>
+                ))}
               </div>
             </div>
           </div>

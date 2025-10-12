@@ -17,7 +17,25 @@ const UserMentorshipForm = () => {
   const [success, setSuccess] = useState(null);
   const [authChecking, setAuthChecking] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [hasExistingData, setHasExistingData] = useState(false);
+  const [lastSubmissionTime, setLastSubmissionTime] = useState(null);
+  const [countdown, setCountdown] = useState(null);
+  const [showCountdown, setShowCountdown] = useState(false);
+
+  // Format countdown seconds into days, hours, minutes, seconds
+  const formatCountdown = (seconds) => {
+    const days = Math.floor(seconds / (24 * 3600));
+    seconds %= 24 * 3600;
+    const hours = Math.floor(seconds / 3600);
+    seconds %= 3600;
+    const minutes = Math.floor(seconds / 60);
+    seconds %= 60;
+    const parts = [];
+    if (days > 0) parts.push(`${days} day${days !== 1 ? "s" : ""}`);
+    if (hours > 0) parts.push(`${hours} hour${hours !== 1 ? "s" : ""}`);
+    if (minutes > 0) parts.push(`${minutes} minute${minutes !== 1 ? "s" : ""}`);
+    if (seconds > 0 || parts.length === 0) parts.push(`${seconds} second${seconds !== 1 ? "s" : ""}`);
+    return parts.join(", ");
+  };
 
   // Check authentication status and fetch existing mentorship data
   useEffect(() => {
@@ -40,23 +58,42 @@ const UserMentorshipForm = () => {
         setIsAuthenticated(true);
         setFormData((prev) => ({ ...prev, email: user.email || "" }));
 
-        // Fetch existing mentorship request data
-        const { data, error: fetchError } = await supabase
+        // Ensure user exists in users table
+        const { data: userData, error: userError } = await supabase
           .from("users")
           .select("mentorship_request")
           .eq("uid", user.id)
           .single();
 
-        if (fetchError) {
-          console.error("[Frontend] : Error fetching mentorship data:", fetchError);
-          setError("Failed to fetch existing data. Please try again.");
+        if (userError && userError.code === "PGRST116") {
+          // User doesn't exist, create a new row
+          const { error: insertError } = await supabase
+            .from("users")
+            .insert({ uid: user.id, email: user.email || "unknown@example.com" });
+          if (insertError) {
+            console.error("[Frontend] : Error creating user:", insertError);
+            setError("Failed to initialize user data. Please try again.");
+            return;
+          }
+        } else if (userError) {
+          console.error("[Frontend] : Error fetching user data:", userError);
+          setError("Failed to fetch user data. Please try again.");
           return;
         }
 
-        if (data && data.mentorship_request) {
-          setHasExistingData(true);
-        } else {
-          setHasExistingData(false);
+        // Fetch latest submission time from mentorship_request array
+        if (userData && userData.mentorship_request && Array.isArray(userData.mentorship_request)) {
+          const latestRequest = userData.mentorship_request.reduce((latest, request) => {
+            return !latest || new Date(request.created_at) > new Date(latest.created_at) ? request : latest;
+          }, null);
+          if (latestRequest) {
+            setLastSubmissionTime(latestRequest.created_at);
+            const timePassed = Math.floor((Date.now() - new Date(latestRequest.created_at)) / 1000);
+            if (timePassed < 15) {
+              setCountdown(15 - timePassed);
+              setShowCountdown(true);
+            }
+          }
         }
       } catch (err) {
         console.error("[Frontend] : Error checking auth or fetching data:", err);
@@ -75,6 +112,23 @@ const UserMentorshipForm = () => {
       return () => clearTimeout(timer);
     }
   }, [success]);
+
+  // Countdown timer for submission lockout
+  useEffect(() => {
+    if (lastSubmissionTime && countdown > 0) {
+      const timer = setInterval(() => {
+        const timePassed = Math.floor((Date.now() - new Date(lastSubmissionTime)) / 1000);
+        const remaining = 15 - timePassed;
+        if (remaining <= 0) {
+          setCountdown(null);
+          setShowCountdown(false);
+        } else {
+          setCountdown(remaining);
+        }
+      }, 1000);
+      return () => clearInterval(timer);
+    }
+  }, [lastSubmissionTime, countdown]);
 
   // Handle input changes
   const handleInputChange = (e) => {
@@ -103,6 +157,18 @@ const UserMentorshipForm = () => {
         throw new Error("User email not available. Please ensure your account has an email.");
       }
 
+      // Check if 15 seconds have passed since last submission
+      if (lastSubmissionTime) {
+        const timePassed = Math.floor((Date.now() - new Date(lastSubmissionTime)) / 1000);
+        if (timePassed < 15) {
+          setCountdown(15 - timePassed);
+          setShowCountdown(true);
+          setError(`Please wait ${formatCountdown(15 - timePassed)} before submitting again.`);
+          setLoading(false);
+          return;
+        }
+      }
+
       const mentorshipRequest = {
         reasonForMentorship: formData.reasonForMentorship.trim(),
         skillsToDevelop: formData.skillsToDevelop.split(",").map((s) => s.trim()).filter(Boolean),
@@ -110,21 +176,36 @@ const UserMentorshipForm = () => {
         topicsInterested: formData.topicsInterested.split(",").map((t) => t.trim()).filter(Boolean),
         expectations: formData.expectations.trim(),
         previousProjects: formData.previousProjects.trim(),
+        created_at: new Date().toISOString(),
       };
 
       console.log("[Frontend] : Submitting mentorship request for user:", user.id, "Email:", user.email, "Data:", mentorshipRequest);
 
+      // Fetch existing mentorship_request array
+      const { data: existingData, error: fetchError } = await supabase
+        .from("users")
+        .select("mentorship_request")
+        .eq("uid", user.id)
+        .single();
+
+      if (fetchError) {
+        console.error("[Frontend] : Error fetching existing data:", fetchError);
+        throw new Error("Failed to fetch existing data. Please try again.");
+      }
+
+      // Append new request to existing array or create new array
+      const updatedMentorshipRequest = Array.isArray(existingData.mentorship_request)
+        ? [...existingData.mentorship_request, mentorshipRequest]
+        : [mentorshipRequest];
+
+      // Update the users table with the new mentorship_request array
       const { data, error } = await supabase
         .from("users")
-        .upsert(
-          {
-            uid: user.id,
-            email: user.email, // Include email to satisfy NOT NULL constraint
-            mentorship_request: mentorshipRequest,
-            updated_at: new Date().toISOString(),
-          },
-          { onConflict: "uid" }
-        )
+        .update({
+          mentorship_request: updatedMentorshipRequest,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("uid", user.id)
         .select("*")
         .single();
 
@@ -143,7 +224,9 @@ const UserMentorshipForm = () => {
 
       console.log("[Frontend] : Mentorship request saved:", data);
       setSuccess("Mentorship request submitted successfully!");
-      setHasExistingData(true); // Update state to show message and hide form
+      setLastSubmissionTime(mentorshipRequest.created_at);
+      setCountdown(15);
+      setShowCountdown(true);
       setFormData({
         email: user.email || "",
         reasonForMentorship: "",
@@ -156,49 +239,6 @@ const UserMentorshipForm = () => {
     } catch (err) {
       console.error("[Frontend] : Submission error:", err);
       setError(err.message || "Failed to submit form. Please try again.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Handle deletion of mentorship request data
-  const handleDelete = async () => {
-    setLoading(true);
-    setError(null);
-    setSuccess(null);
-
-    try {
-      const { data: { user }, error: authError } = await supabase.auth.getUser();
-      if (authError || !user) {
-        throw new Error("User not authenticated. Please log in.");
-      }
-
-      console.log("[Frontend] : Deleting mentorship request for user:", user.id);
-
-      const { data, error } = await supabase
-        .from("users")
-        .update({ mentorship_request: null, updated_at: new Date().toISOString() })
-        .eq("uid", user.id)
-        .select("*")
-        .single();
-
-      if (error) {
-        console.error("[Frontend] : Error deleting mentorship request:", error);
-        throw new Error(
-          error.code === "42501"
-            ? "Permission denied. Check RLS policies for the 'users' table."
-            : error.code === "42P01"
-            ? "Table 'users' does not exist or 'mentorship_request' column is missing."
-            : error.message || "Failed to delete mentorship request."
-        );
-      }
-
-      console.log("[Frontend] : Mentorship request deleted:", data);
-      setSuccess("Mentorship request deleted successfully!");
-      setHasExistingData(false); // Show form again after deletion
-    } catch (err) {
-      console.error("[Frontend] : Deletion error:", err);
-      setError(err.message || "Failed to delete data. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -233,35 +273,15 @@ const UserMentorshipForm = () => {
     );
   }
 
-  if (hasExistingData) {
+  if (showCountdown) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center max-w-lg p-4 bg-white rounded-xl shadow-md relative">
-          {/* Loading Bar */}
-          {loading && (
-            <div className="absolute top-0 left-0 w-full h-1 bg-blue-500 animate-pulse" />
-          )}
           {error && <p className="text-sm text-red-500 mb-4">{error}</p>}
           {success && <p className="text-sm text-green-500 mb-4">{success}</p>}
           <p className="text-sm text-blue-500 mb-4">
-            You have already submitted a mentorship request.
+            Please wait {formatCountdown(countdown)} before submitting another request.
           </p>
-          <button
-            onClick={handleDelete}
-            disabled={loading}
-            className={`px-6 py-2 rounded-md text-white transition ${
-              loading ? "bg-red-400 cursor-not-allowed" : "bg-red-500 hover:bg-red-600"
-            }`}
-          >
-            {loading ? (
-              <div className="flex items-center justify-center">
-                <Loader2 className="w-5 h-5 animate-spin mr-2" />
-                Deleting...
-              </div>
-            ) : (
-              "Delete All Data"
-            )}
-          </button>
         </div>
       </div>
     );

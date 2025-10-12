@@ -199,7 +199,7 @@ const UserProfile = () => {
     const fetchColleges = async () => {
       try {
         console.log("[Frontend] : Fetching colleges with keyword:", collegeSearch);
-        const response = await fetch("http://localhost:3000/colleges/search", {
+        const response = await fetch("https://colleges-name-api.vercel.app/colleges/search", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
