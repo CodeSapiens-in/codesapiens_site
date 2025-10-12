@@ -633,7 +633,7 @@ export default function AnalyticsPage() {
                         </PieChart>
                       </ResponsiveContainer>
                     </div>
-                    {renderDistributionLegend(analyticsData.yearDistribution, "Years (Total: " + totalStudents.toLocaleString() + ")")}
+                    {renderDistributionLegend(analyticsData.yearDistribution, "Graudating year (Total: " + totalStudents.toLocaleString() + ")")}
                   </>
                 ) : (
                   <div className="h-64 flex items-center justify-center text-gray-500">

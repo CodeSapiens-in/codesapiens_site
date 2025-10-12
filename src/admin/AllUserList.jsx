@@ -405,7 +405,7 @@ const AllUserList = () => {
                         <span className="text-sm text-gray-900">{selectedUser.department}</span>
                       </div>
                       <div className="flex flex-col sm:flex-row sm:justify-between py-2">
-                        <span className="text-sm font-medium text-gray-600 mb-1 sm:mb-0">Year</span>
+                        <span className="text-sm font-medium text-gray-600 mb-1 sm:mb-0">Graudating Year</span>
                         <span className="text-sm text-gray-900">{selectedUser.year}</span>
                       </div>
                       <div className="flex flex-col sm:flex-row sm:justify-between py-2">

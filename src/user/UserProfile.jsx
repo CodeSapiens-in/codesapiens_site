@@ -341,7 +341,7 @@ const UserProfile = () => {
 
     try {
       console.log("[Frontend] : Starting resume removal for userId:", userData.uid, "Resume URL:", resumeUrl);
-      const response = await fetch("http://localhost:3000/delete-resume", {
+      const response = await fetch("https://colleges-name-api.vercel.app/delete-resume", {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
