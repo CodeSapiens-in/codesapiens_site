@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { supabase } from "../lib/supabaseClient"; // Adjust path to your Supabase client
-import { Loader2, X, Mail, Info } from "lucide-react";
+import { Loader2, X, Mail, Info, ChevronLeft, ChevronRight } from "lucide-react";
 
 // Helper component for consistent detail rows
 const DetailRow = ({ label, value }) => (
@@ -20,6 +20,9 @@ const AdminMentorshipSubmission = () => {
   const [selectedUser, setSelectedUser] = useState(null);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [timeFilter, setTimeFilter] = useState("all"); // Default to "All Time"
+  const submissionsPerPage = 10;
 
   // Fetch users with mentorship requests from Supabase
   useEffect(() => {
@@ -53,6 +56,7 @@ const AdminMentorshipSubmission = () => {
 
         setSubmissions(transformedSubmissions);
         setFilteredSubmissions(transformedSubmissions);
+        setCurrentPage(1); // Reset to first page when submissions are fetched
       } catch (err) {
         console.error("[Frontend] : Error fetching users:", err);
         setError(err.message || "Failed to fetch mentorship submissions.");
@@ -64,11 +68,42 @@ const AdminMentorshipSubmission = () => {
     fetchUsers();
   }, []);
 
-  // Handle search
+  // Handle search and time filter
   useEffect(() => {
     const lowerQuery = searchQuery.toLowerCase();
-    const filtered = submissions.filter(
-      (submission) =>
+    const now = new Date();
+    let timeThreshold;
+
+    switch (timeFilter) {
+      case "1hour":
+        timeThreshold = new Date(now.getTime() - 1 * 60 * 60 * 1000);
+        break;
+      case "1day":
+        timeThreshold = new Date(now.getTime() - 1 * 24 * 60 * 60 * 1000);
+        break;
+      case "2days":
+        timeThreshold = new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000);
+        break;
+      case "5days":
+        timeThreshold = new Date(now.getTime() - 5 * 24 * 60 * 60 * 1000);
+        break;
+      case "7days":
+        timeThreshold = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+        break;
+      case "1month":
+        timeThreshold = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+        break;
+      case "1year":
+        timeThreshold = new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000);
+        break;
+      case "all":
+      default:
+        timeThreshold = null; // No time filter for "All Time"
+        break;
+    }
+
+    const filtered = submissions.filter((submission) => {
+      const matchesSearch =
         submission.displayName.toLowerCase().includes(lowerQuery) ||
         submission.email.toLowerCase().includes(lowerQuery) ||
         submission.mentorshipRequest.domain?.toLowerCase().includes(lowerQuery) ||
@@ -77,10 +112,40 @@ const AdminMentorshipSubmission = () => {
         ) ||
         submission.mentorshipRequest.topicsInterested?.some((topic) =>
           topic.toLowerCase().includes(lowerQuery)
-        )
-    );
+        );
+
+      const matchesTime = timeThreshold
+        ? new Date(submission.mentorshipRequest.created_at) >= timeThreshold
+        : true;
+
+      return matchesSearch && matchesTime;
+    });
+
     setFilteredSubmissions(filtered);
-  }, [searchQuery, submissions]);
+    setCurrentPage(1); // Reset to first page when search or time filter changes
+  }, [searchQuery, submissions, timeFilter]);
+
+  // Pagination logic
+  const indexOfLastSubmission = currentPage * submissionsPerPage;
+  const indexOfFirstSubmission = indexOfLastSubmission - submissionsPerPage;
+  const currentSubmissions = filteredSubmissions.slice(indexOfFirstSubmission, indexOfLastSubmission);
+  const totalPages = Math.ceil(filteredSubmissions.length / submissionsPerPage);
+
+  const handlePageChange = (pageNumber) => {
+    setCurrentPage(pageNumber);
+  };
+
+  const handlePrevPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+
+  const handleNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
 
   // Handle view details
   const handleViewDetails = useCallback((submission) => {
@@ -146,7 +211,7 @@ const AdminMentorshipSubmission = () => {
   return (
     <>
       <div className="min-h-screen bg-gray-50 px-4 sm:px-6 lg:px-8 py-4 sm:py-8 flex flex-col relative z-0">
-        {/* Header and Search */}
+        {/* Header, Submission Count, Search, and Time Filter */}
         <div className="mb-6 sm:mb-8 relative z-10">
           <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
             Mentorship Submissions
@@ -154,22 +219,50 @@ const AdminMentorshipSubmission = () => {
           <p className="text-gray-600 mt-1 sm:mt-2 text-sm sm:text-base">
             Browse through all mentorship request submissions
           </p>
-          <div className="mt-3 sm:mt-4 relative">
-            <input
-              type="text"
-              placeholder="Search by name, email, domain, or skills..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full p-2 sm:p-3 pl-8 sm:pl-10 text-sm sm:text-base border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-            />
-            <Info className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 absolute left-2 sm:left-3 top-1/2 transform -translate-y-1/2" />
+          <p className="text-gray-600 text-sm sm:text-base">
+            Total Submissions: {filteredSubmissions.length}
+          </p>
+          <div className="mt-3 sm:mt-4 flex flex-col sm:flex-row sm:items-center sm:space-x-4 space-y-3 sm:space-y-0">
+            <div className="relative flex-1">
+              <input
+                type="text"
+                placeholder="Search by name, email, domain, or skills..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full p-2 sm:p-3 pl-8 sm:pl-10 text-sm sm:text-base border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+              />
+              <Info className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 absolute left-2 sm:left-3 top-1/2 transform -translate-y-1/2" />
+            </div>
+            <select
+              value={timeFilter}
+              onChange={(e) => setTimeFilter(e.target.value)}
+              className="p-2 sm:p-3 text-sm sm:text-base border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+            >
+              <option value="all">All Time</option>
+              <option value="1hour">Last 1 Hour</option>
+              <option value="1day">Last 1 Day</option>
+              <option value="2days">Last 2 Days</option>
+              <option value="5days">Last 5 Days</option>
+              <option value="7days">Last 7 Days</option>
+              <option value="1month">Last 1 Month</option>
+              <option value="1year">Last 1 Year</option>
+            </select>
           </div>
         </div>
+
+        {/* No Submissions Message */}
+        {filteredSubmissions.length === 0 && (
+          <div className="text-center py-6 sm:py-8">
+            <p className="text-gray-500 text-sm sm:text-base">
+              No submissions found for the selected time range or search query.
+            </p>
+          </div>
+        )}
 
         {/* Mobile Card View */}
         <div className="flex-1 block md:hidden">
           <div className="space-y-4">
-            {filteredSubmissions.map((submission, index) => (
+            {currentSubmissions.map((submission, index) => (
               <div key={`${submission.uid}-${index}`} className="bg-white rounded-lg shadow-sm border p-4">
                 <div className="flex items-start space-x-3">
                   <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-blue-600 rounded-full flex items-center justify-center">
@@ -236,7 +329,7 @@ const AdminMentorshipSubmission = () => {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {filteredSubmissions.map((submission, index) => (
+                {currentSubmissions.map((submission, index) => (
                   <tr
                     key={`${submission.uid}-${index}`}
                     className={`${
@@ -273,6 +366,46 @@ const AdminMentorshipSubmission = () => {
             </table>
           </div>
         </div>
+
+        {/* Pagination Controls */}
+        {totalPages > 1 && (
+          <div className="mt-6 flex flex-col sm:flex-row items-center justify-between space-y-4 sm:space-y-0">
+            <div className="text-sm text-gray-600">
+              Showing {indexOfFirstSubmission + 1} to {Math.min(indexOfLastSubmission, filteredSubmissions.length)} of {filteredSubmissions.length} submissions
+            </div>
+            <div className="flex items-center space-x-2">
+              <button
+                onClick={handlePrevPage}
+                disabled={currentPage === 1}
+                className={`p-2 rounded-full ${currentPage === 1 ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-blue-100 text-blue-600 hover:bg-blue-200'} transition-colors duration-200`}
+              >
+                <ChevronLeft className="w-5 h-5" />
+              </button>
+              <div className="flex space-x-1">
+                {Array.from({ length: totalPages }, (_, index) => (
+                  <button
+                    key={index + 1}
+                    onClick={() => handlePageChange(index + 1)}
+                    className={`px-3 py-1 rounded-lg text-sm font-medium ${
+                      currentPage === index + 1
+                        ? 'bg-blue-500 text-white'
+                        : 'bg-white text-gray-600 hover:bg-gray-100'
+                    } transition-colors duration-200 border border-gray-200`}
+                  >
+                    {index + 1}
+                  </button>
+                ))}
+              </div>
+              <button
+                onClick={handleNextPage}
+                disabled={currentPage === totalPages}
+                className={`p-2 rounded-full ${currentPage === totalPages ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-blue-100 text-blue-600 hover:bg-blue-200'} transition-colors duration-200`}
+              >
+                <ChevronRight className="w-5 h-5" />
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Full-Screen Details Modal */}

@@ -23,6 +23,7 @@ import {
   Download,
   Upload,
   Eye,
+  Check, // <-- added for copy animation
 } from "lucide-react";
 import { supabase } from "../lib/supabaseClient";
 import skillsList from "../assets/skills.json";
@@ -66,13 +67,17 @@ const UserProfile = () => {
   const [resumeError, setResumeError] = useState(null);
   const [dragActive, setDragActive] = useState(false);
   const [usernameError, setUsernameError] = useState(null);
+  const [isCopied, setIsCopied] = useState(false); // <-- new state for copy animation
+
   const resumeDropRef = useRef(null);
   const collegeInputRef = useRef(null);
   const collegeDropdownRef = useRef(null);
 
   const tabs = ["Overview", "Skills", "Achievements", "Activity"];
 
+  // -----------------------------------------------------------------------
   // Fetch user data from Supabase
+  // -----------------------------------------------------------------------
   useEffect(() => {
     const fetchUserData = async () => {
       try {
@@ -172,7 +177,9 @@ const UserProfile = () => {
     fetchUserData();
   }, []);
 
-  // Handle clicks outside college dropdown
+  // -----------------------------------------------------------------------
+  // Click-outside handling for college dropdown
+  // -----------------------------------------------------------------------
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (
@@ -191,7 +198,9 @@ const UserProfile = () => {
     };
   }, []);
 
-  // Check username availability with debounce
+  // -----------------------------------------------------------------------
+  // Username availability check (debounced)
+  // -----------------------------------------------------------------------
   useEffect(() => {
     if (!isEditing || !editedData?.username) {
       setUsernameError(null);
@@ -235,7 +244,9 @@ const UserProfile = () => {
     checkUsername();
   }, [editedData?.username, isEditing, userData?.uid]);
 
-  // Fetch colleges from API
+  // -----------------------------------------------------------------------
+  // College search API
+  // -----------------------------------------------------------------------
   useEffect(() => {
     if (collegeSearch.length < 3 || collegeSearch === lastSelectedCollege) {
       setShowCollegeDropdown(false);
@@ -294,7 +305,9 @@ const UserProfile = () => {
     return () => clearTimeout(timeoutId);
   }, [collegeSearch, lastSelectedCollege]);
 
-  // Resume upload handlers
+  // -----------------------------------------------------------------------
+  // Resume drag-and-drop helpers
+  // -----------------------------------------------------------------------
   const handleDrag = (e) => {
     e.preventDefault();
     e.stopPropagation();
@@ -427,6 +440,9 @@ const UserProfile = () => {
     }
   };
 
+  // -----------------------------------------------------------------------
+  // Editing helpers
+  // -----------------------------------------------------------------------
   const handleEditStart = () => {
     setIsEditing(true);
     setCollegeSearch(editedData.college || "");
@@ -469,6 +485,9 @@ const UserProfile = () => {
     }
   };
 
+  // -----------------------------------------------------------------------
+  // Skills helpers
+  // -----------------------------------------------------------------------
   const handleAddSkill = async () => {
     if (!newSkill.trim() || !skillsList.skills.includes(newSkill.trim())) return;
     const updatedSkills = [...userSkills, newSkill.trim()];
@@ -528,6 +547,9 @@ const UserProfile = () => {
     }
   };
 
+  // -----------------------------------------------------------------------
+  // Save profile
+  // -----------------------------------------------------------------------
   const handleSave = async () => {
     setSaveError(null);
     setUsernameError(null);
@@ -640,6 +662,9 @@ const UserProfile = () => {
     setShowEditSkillDropdown(false);
   };
 
+  // -----------------------------------------------------------------------
+  // Data for UI sections
+  // -----------------------------------------------------------------------
   const personalInfo = userData
     ? [
         { label: "Username", value: userData.username || "Not set", editable: true, type: "text" },
@@ -667,6 +692,9 @@ const UserProfile = () => {
         }))
       : [{ skill: "No skills added", level: 0, color: "bg-gray-300" }];
 
+  // -----------------------------------------------------------------------
+  // Render loading / auth states
+  // -----------------------------------------------------------------------
   if (authChecking) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -727,11 +755,16 @@ const UserProfile = () => {
 
   if (!userData) return null;
 
+  // -----------------------------------------------------------------------
+  // Main JSX
+  // -----------------------------------------------------------------------
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Header */}
       <div className="bg-white border-b">
         <div className="px-3 sm:px-4 lg:px-6 py-4 sm:py-6 lg:py-8">
           <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-4 sm:space-y-0 sm:space-x-6">
+            {/* Avatar */}
             <div className="w-16 h-16 sm:w-20 sm:h-20 lg:w-24 lg:h-24 bg-gradient-to-br from-purple-500 to-blue-600 rounded-full flex items-center justify-center flex-shrink-0 shadow-lg">
               {userData.avatar ? (
                 <img src={userData.avatar} alt={userData.displayName} className="w-full h-full rounded-full object-cover" />
@@ -741,6 +774,8 @@ const UserProfile = () => {
                 </span>
               )}
             </div>
+
+            {/* Name, bio, contact */}
             <div className="flex-1 min-w-0">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-3 mb-2">
                 <div className="flex items-center space-x-3 flex-1 min-w-0">
@@ -759,9 +794,11 @@ const UserProfile = () => {
                     </h1>
                   )}
                   {userData.emailVerified && (
-                    <span className="text-green-500 text-sm bg-green-50 px-2 py-1 rounded-full flex-shrink-0">✓ Verified</span>
+                    <span className="text-green-500 text-sm bg-green-50 px-2 py-1 rounded-full flex-shrink-0">Verified</span>
                   )}
                 </div>
+
+                {/* Action buttons */}
                 <div className="flex items-center space-x-2 sm:space-x-3">
                   {!isEditing ? (
                     <>
@@ -773,14 +810,32 @@ const UserProfile = () => {
                         <Edit className="w-5 h-5" />
                         <span>Edit Profile</span>
                       </button>
+
+                      {/* SHARE PROFILE BUTTON WITH COPY ANIMATION */}
                       {userData.isPublic && userData.username && (
                         <button
-                          onClick={() => navigator.clipboard.writeText(`${window.location.origin}/profile/${userData.username}`)}
-                          className="flex items-center space-x-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors duration-200 text-sm font-medium"
+                          onClick={() => {
+                            const profileUrl = `${window.location.origin}/profile/${userData.username}`;
+                            navigator.clipboard.writeText(profileUrl);
+                            setIsCopied(true);
+                            setTimeout(() => setIsCopied(false), 2000);
+                          }}
+                          className={`flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 ${
+                            isCopied ? "bg-green-600 text-white" : "bg-green-500 text-white hover:bg-green-600"
+                          }`}
                           title="Share public profile"
                         >
-                          <Globe className="w-5 h-5" />
-                          <span>Share Profile</span>
+                          {isCopied ? (
+                            <>
+                              <Check className="w-5 h-5" />
+                              <span>Copied!</span>
+                            </>
+                          ) : (
+                            <>
+                              <Globe className="w-5 h-5" />
+                              <span>Share Profile</span>
+                            </>
+                          )}
                         </button>
                       )}
                     </>
@@ -809,6 +864,8 @@ const UserProfile = () => {
                   )}
                 </div>
               </div>
+
+              {/* Bio */}
               {isEditing ? (
                 <textarea
                   name="bio"
@@ -821,6 +878,8 @@ const UserProfile = () => {
               ) : (
                 <p className="text-sm sm:text-base text-gray-600 mb-4 leading-relaxed">{userData.bio}</p>
               )}
+
+              {/* Email / Phone */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-4 text-xs sm:text-sm text-gray-600">
                 <div className="flex items-center space-x-2">
                   <Mail className="w-4 h-4 text-gray-400 flex-shrink-0" />
@@ -847,6 +906,8 @@ const UserProfile = () => {
                   )
                 )}
               </div>
+
+              {/* Public toggle */}
               {isEditing && (
                 <div className="mt-4 flex items-center space-x-2">
                   <input
@@ -861,10 +922,14 @@ const UserProfile = () => {
                   </label>
                 </div>
               )}
+
+              {/* Save error */}
               {saveError && <p className="text-sm text-red-500 mt-2">{saveError}</p>}
             </div>
           </div>
         </div>
+
+        {/* Tabs */}
         <div className="px-3 sm:px-4 lg:px-6">
           <div className="hidden sm:flex space-x-8">
             {tabs.map((tab) => (
@@ -894,9 +959,13 @@ const UserProfile = () => {
           </div>
         </div>
       </div>
+
+      {/* Main content */}
       <main className="px-3 sm:px-4 lg:px-6 py-4 sm:py-6 lg:py-8">
+        {/* Overview Tab */}
         {activeTab === "Overview" && (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
+            {/* Personal Information */}
             <div className="bg-white rounded-lg shadow-sm border">
               <div className="p-4 sm:p-6 border-b">
                 <h3 className="text-lg font-semibold text-gray-900">Personal Information</h3>
@@ -908,6 +977,7 @@ const UserProfile = () => {
                       <span className="text-sm font-medium text-gray-600 mb-1 sm:mb-0">{info.label}</span>
                       {isEditing && info.editable ? (
                         <div className="sm:text-right sm:max-w-xs w-full relative">
+                          {/* College input with dropdown */}
                           {info.type === "college" ? (
                             <div className="relative" ref={collegeInputRef}>
                               <input
@@ -1013,6 +1083,8 @@ const UserProfile = () => {
                 </div>
               </div>
             </div>
+
+            {/* Social Links */}
             <div className="bg-white rounded-lg shadow-sm border">
               <div className="p-4 sm:p-6 border-b">
                 <h3 className="text-lg font-semibold text-gray-900">Social Links</h3>
@@ -1056,6 +1128,8 @@ const UserProfile = () => {
                 </div>
               </div>
             </div>
+
+            {/* Resume */}
             <div className="bg-white rounded-lg shadow-sm border lg:col-span-2">
               <div className="p-4 sm:p-6 border-b">
                 <h3 className="text-lg font-semibold text-gray-900 flex items-center space-x-2">
@@ -1160,6 +1234,8 @@ const UserProfile = () => {
             </div>
           </div>
         )}
+
+        {/* Skills Tab */}
         {activeTab === "Skills" && (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div className="bg-white rounded-lg shadow-sm border">
@@ -1274,6 +1350,8 @@ const UserProfile = () => {
             </div>
           </div>
         )}
+
+        {/* Achievements Tab */}
         {activeTab === "Achievements" && (
           <div className="space-y-6">
             <div className="bg-white rounded-lg shadow-sm border">
@@ -1291,6 +1369,8 @@ const UserProfile = () => {
             </div>
           </div>
         )}
+
+        {/* Activity Tab */}
         {activeTab === "Activity" && (
           <div className="bg-white rounded-lg shadow-sm border">
             <div className="p-4 sm:p-6 border-b">
@@ -1307,6 +1387,8 @@ const UserProfile = () => {
           </div>
         )}
       </main>
+
+      {/* Mobile bottom navigation */}
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t px-3 py-2 sm:hidden z-40">
         <div className="flex justify-around">
           {tabs.map((tab, index) => {

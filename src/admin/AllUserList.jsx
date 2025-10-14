@@ -10,8 +10,11 @@ import {
   Trophy, 
   Calendar,
   Search,
-  Eye, // Add Eye icon for view resume
-  Download // Add Download icon for download resume
+  Eye,
+  Download,
+  Clock,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
 
@@ -23,6 +26,20 @@ const AllUserList = () => {
   const [selectedUser, setSelectedUser] = useState(null);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const usersPerPage = 10;
+
+  // Format date function
+  const formatDate = (dateString) => {
+    if (!dateString) return 'Not available';
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
 
   // Fetch all users from Supabase
   useEffect(() => {
@@ -63,11 +80,12 @@ const AllUserList = () => {
           department: user.department || 'Not specified',
           year: user.year || 'Not specified',
           skills: Array.isArray(user.skills) ? user.skills : typeof user.skills === 'string' ? JSON.parse(user.skills) : [],
-          resumeUrl: user.resume_url || null // Add resume_url to user data
+          resumeUrl: user.resume_url || null
         }));
 
         setUsers(transformedUsers);
         setFilteredUsers(transformedUsers);
+        setCurrentPage(1); // Reset to first page when users are fetched
       } catch (err) {
         console.error('Error fetching users:', err);
         setError(err.message);
@@ -87,7 +105,30 @@ const AllUserList = () => {
       user.email.toLowerCase().includes(lowerQuery)
     );
     setFilteredUsers(filtered);
+    setCurrentPage(1); // Reset to first page when search changes
   }, [searchQuery, users]);
+
+  // Pagination logic
+  const indexOfLastUser = currentPage * usersPerPage;
+  const indexOfFirstUser = indexOfLastUser - usersPerPage;
+  const currentUsers = filteredUsers.slice(indexOfFirstUser, indexOfLastUser);
+  const totalPages = Math.ceil(filteredUsers.length / usersPerPage);
+
+  const handlePageChange = (pageNumber) => {
+    setCurrentPage(pageNumber);
+  };
+
+  const handlePrevPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+
+  const handleNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
 
   const handleViewDetails = (user) => {
     setSelectedUser(user);
@@ -163,7 +204,7 @@ const AllUserList = () => {
       {/* Mobile Card View */}
       <div className="flex-1 block md:hidden">
         <div className="space-y-4">
-          {filteredUsers.map((user) => (
+          {currentUsers.map((user) => (
             <div 
               key={user.uid}
               className="bg-white rounded-lg shadow-sm border p-4"
@@ -219,7 +260,7 @@ const AllUserList = () => {
           {/* Mobile Table View */}
           <div className="block sm:hidden">
             <div className="divide-y divide-gray-200">
-              {filteredUsers.map((user) => (
+              {currentUsers.map((user) => (
                 <div key={user.uid} className="p-4 hover:bg-gray-50">
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center space-x-3">
@@ -283,7 +324,7 @@ const AllUserList = () => {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {filteredUsers.map((user, index) => (
+                {currentUsers.map((user, index) => (
                   <tr 
                     key={user.uid} 
                     className={`${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'} hover:bg-gray-100 transition-colors duration-200`}
@@ -310,6 +351,46 @@ const AllUserList = () => {
           </div>
         </div>
       </div>
+
+      {/* Pagination Controls */}
+      {totalPages > 1 && (
+        <div className="mt-6 flex flex-col sm:flex-row items-center justify-between space-y-4 sm:space-y-0">
+          <div className="text-sm text-gray-600">
+            Showing {indexOfFirstUser + 1} to {Math.min(indexOfLastUser, filteredUsers.length)} of {filteredUsers.length} users
+          </div>
+          <div className="flex items-center space-x-2">
+            <button
+              onClick={handlePrevPage}
+              disabled={currentPage === 1}
+              className={`p-2 rounded-full ${currentPage === 1 ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-blue-100 text-blue-600 hover:bg-blue-200'} transition-colors duration-200`}
+            >
+              <ChevronLeft className="w-5 h-5" />
+            </button>
+            <div className="flex space-x-1">
+              {Array.from({ length: totalPages }, (_, index) => (
+                <button
+                  key={index + 1}
+                  onClick={() => handlePageChange(index + 1)}
+                  className={`px-3 py-1 rounded-lg text-sm font-medium ${
+                    currentPage === index + 1
+                      ? 'bg-blue-500 text-white'
+                      : 'bg-white text-gray-600 hover:bg-gray-100'
+                  } transition-colors duration-200 border border-gray-200`}
+                >
+                  {index + 1}
+                </button>
+              ))}
+            </div>
+            <button
+              onClick={handleNextPage}
+              disabled={currentPage === totalPages}
+              className={`p-2 rounded-full ${currentPage === totalPages ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-blue-100 text-blue-600 hover:bg-blue-200'} transition-colors duration-200`}
+            >
+              <ChevronRight className="w-5 h-5" />
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Details Panel */}
       {isDetailsOpen && (
@@ -382,6 +463,24 @@ const AllUserList = () => {
                     </div>
                   </div>
 
+                  {/* Account Information */}
+                  <div className="bg-white rounded-lg shadow-sm border">
+                    <div className="p-3 sm:p-4 border-b flex items-center space-x-2">
+                      <Clock className="w-5 h-5 text-gray-500" />
+                      <h3 className="text-base sm:text-lg font-semibold text-gray-900">Account Information</h3>
+                    </div>
+                    <div className="p-3 sm:p-4 space-y-3 sm:space-y-4">
+                      <div className="flex flex-col sm:flex-row sm:justify-between py-2">
+                        <span className="text-sm font-medium text-gray-600 mb-1 sm:mb-0">Account Created</span>
+                        <span className="text-sm text-gray-900">{formatDate(selectedUser.createdAt)}</span>
+                      </div>
+                      <div className="flex flex-col sm:flex-row sm:justify-between py-2">
+                        <span className="text-sm font-medium text-gray-600 mb-1 sm:mb-0">Profile Updated</span>
+                        <span className="text-sm text-gray-900">{formatDate(selectedUser.updatedAt)}</span>
+                      </div>
+                    </div>
+                  </div>
+
                   {/* Personal Information */}
                   <div className="bg-white rounded-lg shadow-sm border">
                     <div className="p-3 sm:p-4 border-b">
@@ -405,7 +504,7 @@ const AllUserList = () => {
                         <span className="text-sm text-gray-900">{selectedUser.department}</span>
                       </div>
                       <div className="flex flex-col sm:flex-row sm:justify-between py-2">
-                        <span className="text-sm font-medium text-gray-600 mb-1 sm:mb-0">Graudating Year</span>
+                        <span className="text-sm font-medium text-gray-600 mb-1 sm:mb-0">Graduating Year</span>
                         <span className="text-sm text-gray-900">{selectedUser.year}</span>
                       </div>
                       <div className="flex flex-col sm:flex-row sm:justify-between py-2">

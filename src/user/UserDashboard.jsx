@@ -433,7 +433,7 @@ export default function UserDashboard() {
                       <Settings className="w-8 h-8 text-gray-400" />
                     </div>
                     <p className="text-gray-500 mb-2">
-                      No profile links added yet
+                     Add Profile Links
                     </p>
                     <button className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors duration-200" onClick={() => navigate('/profile')}>
                       Add Profile Links
