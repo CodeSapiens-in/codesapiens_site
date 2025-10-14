@@ -23,7 +23,7 @@ import {
   Download,
   Upload,
   Eye,
-  Check, // <-- added for copy animation
+  Check,
 } from "lucide-react";
 import { supabase } from "../lib/supabaseClient";
 import skillsList from "../assets/skills.json";
@@ -67,13 +67,16 @@ const UserProfile = () => {
   const [resumeError, setResumeError] = useState(null);
   const [dragActive, setDragActive] = useState(false);
   const [usernameError, setUsernameError] = useState(null);
-  const [isCopied, setIsCopied] = useState(false); // <-- new state for copy animation
+  const [isCopied, setIsCopied] = useState(false);
 
   const resumeDropRef = useRef(null);
   const collegeInputRef = useRef(null);
   const collegeDropdownRef = useRef(null);
 
   const tabs = ["Overview", "Skills", "Achievements", "Activity"];
+
+  // Generate years from 2020 to 2040 for the dropdown
+  const graduationYears = Array.from({ length: 2040 - 2020 + 1 }, (_, i) => (2020 + i).toString());
 
   // -----------------------------------------------------------------------
   // Fetch user data from Supabase
@@ -669,7 +672,13 @@ const UserProfile = () => {
     ? [
         { label: "Username", value: userData.username || "Not set", editable: true, type: "text" },
         { label: "College", value: userData.college, editable: true, type: "college" },
-        { label: "Graduating Year", value: userData.year || "Not specified", editable: true, type: "number" },
+        {
+          label: "Graduating Year",
+          value: userData.year ? userData.year.toString() : "Not specified",
+          editable: true,
+          type: "dropdown",
+          options: graduationYears,
+        },
         { label: "Major", value: userData.major, editable: true, type: "dropdown", options: academicData.majors },
         { label: "Department", value: userData.department, editable: true, type: "dropdown", options: academicData.departments },
       ]
@@ -811,7 +820,6 @@ const UserProfile = () => {
                         <span>Edit Profile</span>
                       </button>
 
-                      {/* SHARE PROFILE BUTTON WITH COPY ANIMATION */}
                       {userData.isPublic && userData.username && (
                         <button
                           onClick={() => {
@@ -865,7 +873,6 @@ const UserProfile = () => {
                 </div>
               </div>
 
-              {/* Bio */}
               {isEditing ? (
                 <textarea
                   name="bio"
@@ -879,7 +886,6 @@ const UserProfile = () => {
                 <p className="text-sm sm:text-base text-gray-600 mb-4 leading-relaxed">{userData.bio}</p>
               )}
 
-              {/* Email / Phone */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-4 text-xs sm:text-sm text-gray-600">
                 <div className="flex items-center space-x-2">
                   <Mail className="w-4 h-4 text-gray-400 flex-shrink-0" />
@@ -907,7 +913,6 @@ const UserProfile = () => {
                 )}
               </div>
 
-              {/* Public toggle */}
               {isEditing && (
                 <div className="mt-4 flex items-center space-x-2">
                   <input
@@ -923,13 +928,11 @@ const UserProfile = () => {
                 </div>
               )}
 
-              {/* Save error */}
               {saveError && <p className="text-sm text-red-500 mt-2">{saveError}</p>}
             </div>
           </div>
         </div>
 
-        {/* Tabs */}
         <div className="px-3 sm:px-4 lg:px-6">
           <div className="hidden sm:flex space-x-8">
             {tabs.map((tab) => (
@@ -977,7 +980,6 @@ const UserProfile = () => {
                       <span className="text-sm font-medium text-gray-600 mb-1 sm:mb-0">{info.label}</span>
                       {isEditing && info.editable ? (
                         <div className="sm:text-right sm:max-w-xs w-full relative">
-                          {/* College input with dropdown */}
                           {info.type === "college" ? (
                             <div className="relative" ref={collegeInputRef}>
                               <input
@@ -1027,17 +1029,6 @@ const UserProfile = () => {
                               )}
                               {collegeError && <p className="text-sm text-red-500 mt-1">{collegeError}</p>}
                             </div>
-                          ) : info.type === "number" ? (
-                            <input
-                              type="number"
-                              name={info.label.toLowerCase().replace(" ", "")}
-                              value={editedData[info.label.toLowerCase().replace(" ", "")] || ""}
-                              onChange={handleInputChange}
-                              className="text-sm text-gray-900 border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 w-full"
-                              placeholder={info.label}
-                              min="1900"
-                              max="2100"
-                            />
                           ) : info.type === "dropdown" ? (
                             <div className="relative">
                               <select
@@ -1075,7 +1066,7 @@ const UserProfile = () => {
                         </div>
                       ) : (
                         <span className="text-sm text-gray-900 sm:text-right sm:max-w-xs">
-                          {info.label === "Year" && !info.value ? "Not specified" : info.value}
+                          {info.label === "Graduating Year" && !info.value ? "Not specified" : info.value}
                         </span>
                       )}
                     </div>
