@@ -78,6 +78,12 @@ const UserProfile = () => {
   // Generate years from 2020 to 2040 for the dropdown
   const graduationYears = Array.from({ length: 2040 - 2020 + 1 }, (_, i) => (2020 + i).toString());
 
+  // Utility function to validate and normalize URLs
+  const validateUrl = (url) => {
+    if (!url) return "";
+    return url.startsWith("http") ? url : `https://${url}`;
+  };
+
   // -----------------------------------------------------------------------
   // Fetch user data from Supabase
   // -----------------------------------------------------------------------
@@ -605,9 +611,9 @@ const UserProfile = () => {
         phone_number: editedData.phoneNumber?.trim() || "",
         bio: editedData.bio?.trim() || "No bio available",
         college: finalCollege,
-        github_url: editedData.githubUrl?.trim() || "",
-        linkedin_url: editedData.linkedinUrl?.trim() || "",
-        portfolio_url: editedData.portfolioUrl?.trim() || "",
+        github_url: validateUrl(editedData.githubUrl?.trim()),
+        linkedin_url: validateUrl(editedData.linkedinUrl?.trim()),
+        portfolio_url: validateUrl(editedData.portfolioUrl?.trim()),
         year: editedData.year && editedData.year !== "Not specified" ? parseInt(editedData.year, 10) : null,
         major: editedData.major?.trim() || "Not specified",
         department: editedData.department?.trim() || "Not specified",
@@ -686,10 +692,10 @@ const UserProfile = () => {
 
   const socialLinks = userData
     ? [
-        { label: "GitHub Profile", icon: Github, href: userData.githubUrl, available: !!userData.githubUrl, name: "githubUrl" },
-        { label: "LinkedIn Profile", icon: Linkedin, href: userData.linkedinUrl, available: !!userData.linkedinUrl, name: "linkedinUrl" },
-        { label: "Portfolio Website", icon: Globe, href: userData.portfolioUrl, available: !!userData.portfolioUrl, name: "portfolioUrl" },
-      ].filter(link => link.available) // Only include links with valid URLs
+        { label: "GitHub Profile", icon: Github, href: userData.githubUrl || "#", available: !!userData.githubUrl, name: "githubUrl" },
+        { label: "LinkedIn Profile", icon: Linkedin, href: userData.linkedinUrl || "#", available: !!userData.linkedinUrl, name: "linkedinUrl" },
+        { label: "Portfolio Website", icon: Globe, href: userData.portfolioUrl || "#", available: !!userData.portfolioUrl, name: "portfolioUrl" },
+      ]
     : [];
 
   const technicalSkills =
@@ -1082,49 +1088,44 @@ const UserProfile = () => {
               </div>
               <div className="p-4 sm:p-6">
                 <div className="space-y-4">
-                  {isEditing ? (
-                    socialLinks.map((link, index) => (
+                  {socialLinks.map((link, index) => {
+                    const IconComponent = link.icon;
+                    // Ensure the href is a valid URL with protocol
+                    const validHref = link.href && !link.href.startsWith("http") ? `https://${link.href}` : link.href;
+                    return (
                       <div key={index} className="flex items-center justify-between py-2">
                         <div className="flex items-center space-x-3">
                           <div className="p-2 bg-gray-100 rounded-lg">
-                            <link.icon className="w-4 h-4 text-gray-600" />
+                            <IconComponent className="w-4 h-4 text-gray-600" />
                           </div>
                           <span className="text-sm font-medium text-gray-700">{link.label}</span>
                         </div>
-                        <input
-                          type="url"
-                          name={link.name}
-                          value={editedData[link.name] || ""}
-                          onChange={handleInputChange}
-                          className="text-sm text-gray-900 border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 max-w-xs"
-                          placeholder="https://..."
-                        />
+                        {isEditing ? (
+                          <input
+                            type="url"
+                            name={link.name}
+                            value={editedData[link.name] || ""}
+                            onChange={handleInputChange}
+                            className="text-sm text-gray-900 border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 max-w-xs"
+                            placeholder="https://..."
+                          />
+                        ) : link.available ? (
+                          <a
+                            href={validHref}
+                            onClick={(e) => {
+                              e.preventDefault();
+                              window.open(validHref, "_blank", "noopener,noreferrer");
+                            }}
+                            className="text-blue-600 hover:text-blue-800 text-sm font-medium hover:underline"
+                          >
+                            View
+                          </a>
+                        ) : (
+                          <span className="text-gray-400 text-sm">Not set</span>
+                        )}
                       </div>
-                    ))
-                  ) : socialLinks.length > 0 ? (
-                    socialLinks.map((link, index) => (
-                      <div key={index} className="flex items-center justify-between py-2">
-                        <div className="flex items-center space-x-3">
-                          <div className="p-2 bg-gray-100 rounded-lg">
-                            <link.icon className="w-4 h-4 text-gray-600" />
-                          </div>
-                          <span className="text-sm font-medium text-gray-700">{link.label}</span>
-                        </div>
-                        <a
-                          href={link.href}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-blue-600 hover:text-blue-800 text-sm font-medium hover:underline"
-                        >
-                          View
-                        </a>
-                      </div>
-                    ))
-                  ) : (
-                    <div className="text-center py-4">
-                      <p className="text-gray-500">No social links available</p>
-                    </div>
-                  )}
+                    );
+                  })}
                 </div>
               </div>
             </div>
