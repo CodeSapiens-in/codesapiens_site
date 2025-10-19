@@ -686,10 +686,10 @@ const UserProfile = () => {
 
   const socialLinks = userData
     ? [
-        { label: "GitHub Profile", icon: Github, href: userData.githubUrl || "#", available: !!userData.githubUrl, name: "githubUrl" },
-        { label: "LinkedIn Profile", icon: Linkedin, href: userData.linkedinUrl || "#", available: !!userData.linkedinUrl, name: "linkedinUrl" },
-        { label: "Portfolio Website", icon: Globe, href: userData.portfolioUrl || "#", available: !!userData.portfolioUrl, name: "portfolioUrl" },
-      ]
+        { label: "GitHub Profile", icon: Github, href: userData.githubUrl, available: !!userData.githubUrl, name: "githubUrl" },
+        { label: "LinkedIn Profile", icon: Linkedin, href: userData.linkedinUrl, available: !!userData.linkedinUrl, name: "linkedinUrl" },
+        { label: "Portfolio Website", icon: Globe, href: userData.portfolioUrl, available: !!userData.portfolioUrl, name: "portfolioUrl" },
+      ].filter(link => link.available) // Only include links with valid URLs
     : [];
 
   const technicalSkills =
@@ -1082,40 +1082,49 @@ const UserProfile = () => {
               </div>
               <div className="p-4 sm:p-6">
                 <div className="space-y-4">
-                  {socialLinks.map((link, index) => {
-                    const IconComponent = link.icon;
-                    return (
+                  {isEditing ? (
+                    socialLinks.map((link, index) => (
                       <div key={index} className="flex items-center justify-between py-2">
                         <div className="flex items-center space-x-3">
                           <div className="p-2 bg-gray-100 rounded-lg">
-                            <IconComponent className="w-4 h-4 text-gray-600" />
+                            <link.icon className="w-4 h-4 text-gray-600" />
                           </div>
                           <span className="text-sm font-medium text-gray-700">{link.label}</span>
                         </div>
-                        {isEditing ? (
-                          <input
-                            type="url"
-                            name={link.name}
-                            value={editedData[link.name] || ""}
-                            onChange={handleInputChange}
-                            className="text-sm text-gray-900 border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 max-w-xs"
-                            placeholder="https://..."
-                          />
-                        ) : link.available ? (
-                          <a
-                            href={link.href}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-blue-600 hover:text-blue-800 text-sm font-medium hover:underline"
-                          >
-                            View
-                          </a>
-                        ) : (
-                          <span className="text-gray-400 text-sm">Not set</span>
-                        )}
+                        <input
+                          type="url"
+                          name={link.name}
+                          value={editedData[link.name] || ""}
+                          onChange={handleInputChange}
+                          className="text-sm text-gray-900 border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 max-w-xs"
+                          placeholder="https://..."
+                        />
                       </div>
-                    );
-                  })}
+                    ))
+                  ) : socialLinks.length > 0 ? (
+                    socialLinks.map((link, index) => (
+                      <div key={index} className="flex items-center justify-between py-2">
+                        <div className="flex items-center space-x-3">
+                          <div className="p-2 bg-gray-100 rounded-lg">
+                            <link.icon className="w-4 h-4 text-gray-600" />
+                          </div>
+                          <span className="text-sm font-medium text-gray-700">{link.label}</span>
+                        </div>
+                        <a
+                          href={link.href}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-600 hover:text-blue-800 text-sm font-medium hover:underline"
+                        >
+                          View
+                        </a>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="text-center py-4">
+                      <p className="text-gray-500">No social links available</p>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
