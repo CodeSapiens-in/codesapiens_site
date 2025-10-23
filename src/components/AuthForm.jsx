@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Calendar, Globe, Github, Building, Eye, EyeOff, Mail, Lock } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
 import { useNavigate } from 'react-router-dom';
@@ -13,8 +13,95 @@ export default function CodeSapiensPlatform() {
     password: '',
   });
   const [profile, setProfile] = useState(null);
+  const [turnstileToken, setTurnstileToken] = useState(null);
+  const turnstileRef = useRef(null);
   const navigate = useNavigate();
 
+  // Load Cloudflare Turnstile script only once
+  useEffect(() => {
+    const scriptId = 'turnstile-script';
+    if (document.getElementById(scriptId)) {
+      console.log('[CodeSapiens] Turnstile script already loaded');
+      return;
+    }
+
+    const script = document.createElement('script');
+    script.id = scriptId;
+    script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js';
+    script.async = true;
+    script.defer = true;
+    script.onload = () => console.log('[CodeSapiens] Turnstile script loaded successfully');
+    script.onerror = () => {
+      console.error('[CodeSapiens] Failed to load Turnstile script');
+      setMessage('❌ Failed to load CAPTCHA script');
+    };
+    document.body.appendChild(script);
+
+    return () => {
+      const existingScript = document.getElementById(scriptId);
+      if (existingScript && document.body.contains(existingScript)) {
+        document.body.removeChild(existingScript);
+      }
+    };
+  }, []); // Empty dependency array ensures this runs only once
+
+  // Render Turnstile widget
+  useEffect(() => {
+    if (!window.turnstile || !turnstileRef.current) {
+      console.warn('[CodeSapiens] Turnstile not ready or container missing');
+      return;
+    }
+
+    // Use hardcoded sitekey with fallback to environment variable
+    const sitekey = process.env.REACT_APP_TURNSTILE_SITE_KEY || '0x4AAAAAAB8LVUdoo8-C9TDo';
+    console.log('[CodeSapiens] Turnstile sitekey:', sitekey, 'Type:', typeof sitekey);
+
+    // Strict validation
+    if (!sitekey || typeof sitekey !== 'string' || sitekey.trim() === '') {
+      console.error('[CodeSapiens] Invalid sitekey:', { sitekey, type: typeof sitekey });
+      setMessage('❌ Invalid CAPTCHA sitekey. Contact support.');
+      return;
+    }
+
+    try {
+      const widgetId = window.turnstile.render(turnstileRef.current, {
+        sitekey: sitekey.trim(),
+        callback: (token) => {
+          console.log('[CodeSapiens] Turnstile token received:', token);
+          setTurnstileToken(token);
+          setMessage(null);
+        },
+        'error-callback': (errorCode) => {
+          console.error('[CodeSapiens] Turnstile error:', errorCode);
+          setMessage(`❌ CAPTCHA error: ${errorCode}`);
+          setTurnstileToken(null);
+        },
+        'expired-callback': () => {
+          console.log('[CodeSapiens] Turnstile token expired');
+          setMessage('❌ CAPTCHA expired, please try again.');
+          setTurnstileToken(null);
+          if (window.turnstile && turnstileRef.current) {
+            window.turnstile.reset(turnstileRef.current);
+          }
+        },
+      });
+
+      return () => {
+        if (window.turnstile && widgetId) {
+          try {
+            window.turnstile.remove(widgetId);
+          } catch (e) {
+            console.warn('[CodeSapiens] Error removing Turnstile widget:', e);
+          }
+        }
+      };
+    } catch (error) {
+      console.error('[CodeSapiens] Failed to render Turnstile:', error);
+      setMessage(`❌ Failed to initialize CAPTCHA: ${error.message}`);
+    }
+  }, [mode]); // Re-render widget on mode change
+
+  // Fetch user profile
   useEffect(() => {
     const fetchProfile = async () => {
       const { data: { user } } = await supabase.auth.getUser();
@@ -28,7 +115,7 @@ export default function CodeSapiensPlatform() {
         .eq('uid', user.id)
         .single();
       if (error) {
-        console.error('Error fetching profile:', error);
+        console.error('[CodeSapiens] Error fetching profile:', error);
       } else {
         setProfile(data);
       }
@@ -52,7 +139,28 @@ export default function CodeSapiensPlatform() {
     setLoading(true);
     setMessage(null);
 
+    // Verify Turnstile token
+    if (!turnstileToken) {
+      setMessage('❌ Please complete the CAPTCHA.');
+      setLoading(false);
+      return;
+    }
+
     try {
+      // Verify Turnstile token with backend
+      const verifyResponse = await fetch('https://colleges-name-api.vercel.app/verify-turnstile', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token: turnstileToken }),
+      });
+
+      const verifyResult = await verifyResponse.json();
+      console.log('[CodeSapiens] Turnstile verification result:', verifyResult);
+      if (!verifyResult.success) {
+        throw new Error(verifyResult.error || 'CAPTCHA verification failed');
+      }
+
+      // Proceed with authentication
       if (mode === 'forgotPassword') {
         const redirectTo =
           process.env.NODE_ENV === 'production'
@@ -66,6 +174,10 @@ export default function CodeSapiensPlatform() {
           navigate('/auth');
           setMode('signIn');
           setFormData({ email: '', password: '' });
+          setTurnstileToken(null);
+          if (window.turnstile && turnstileRef.current) {
+            window.turnstile.reset(turnstileRef.current);
+          }
         }, 2000);
       } else if (mode === 'signUp') {
         const { error } = await supabase.auth.signUp({
@@ -75,6 +187,10 @@ export default function CodeSapiensPlatform() {
         if (error) throw error;
         setMessage('✅ Check your inbox for a confirmation email.');
         setFormData({ email: '', password: '' });
+        setTurnstileToken(null);
+        if (window.turnstile && turnstileRef.current) {
+          window.turnstile.reset(turnstileRef.current);
+        }
       } else {
         const { error } = await supabase.auth.signInWithPassword({
           email: formData.email,
@@ -83,8 +199,13 @@ export default function CodeSapiensPlatform() {
         if (error) throw error;
         navigate('/');
         setMessage('✅ Signed in!');
+        setTurnstileToken(null);
+        if (window.turnstile && turnstileRef.current) {
+          window.turnstile.reset(turnstileRef.current);
+        }
       }
     } catch (err) {
+      console.error('[CodeSapiens] Submission error:', err);
       setMessage(`❌ ${err.message}`);
     } finally {
       setLoading(false);
@@ -95,6 +216,10 @@ export default function CodeSapiensPlatform() {
     setMode(newMode);
     setMessage(null);
     setFormData({ email: '', password: '' });
+    setTurnstileToken(null);
+    if (window.turnstile && turnstileRef.current) {
+      window.turnstile.reset(turnstileRef.current);
+    }
   };
 
   const features = [
@@ -225,9 +350,12 @@ export default function CodeSapiensPlatform() {
                     />
                   </div>
                 </div>
+                <div className="my-4">
+                  <div ref={turnstileRef} className="cf-turnstile" data-sitekey="0x4AAAAAAB8LVUdoo8-C9TDo" />
+                </div>
                 <button
                   type="submit"
-                  disabled={loading}
+                  disabled={loading || !turnstileToken}
                   className="w-full bg-blue-600 text-white py-2 sm:py-3 px-4 rounded-lg hover:bg-blue-700 disabled:opacity-50 text-sm sm:text-base transition-all duration-200"
                 >
                   {loading ? 'Sending…' : 'Send Reset Link'}
@@ -309,9 +437,12 @@ export default function CodeSapiensPlatform() {
                     </button>
                   </div>
                 </div>
+                <div className="my-4">
+                  <div ref={turnstileRef} className="cf-turnstile" data-sitekey="0x4AAAAAAB8LVUdoo8-C9TDo" />
+                </div>
                 <button
                   type="submit"
-                  disabled={loading}
+                  disabled={loading || !turnstileToken}
                   className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-2 sm:py-3 px-4 rounded-lg font-medium hover:from-blue-700 hover:to-purple-700 transition-all duration-200 transform hover:scale-[1.02] disabled:opacity-50 disabled:transform-none text-sm sm:text-base"
                 >
                   {loading
