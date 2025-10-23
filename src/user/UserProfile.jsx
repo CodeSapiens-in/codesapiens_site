@@ -84,9 +84,7 @@ const UserProfile = () => {
     return url.startsWith("http") ? url : `https://${url}`;
   };
 
-  // -----------------------------------------------------------------------
   // Fetch user data from Supabase
-  // -----------------------------------------------------------------------
   useEffect(() => {
     const fetchUserData = async () => {
       try {
@@ -186,9 +184,7 @@ const UserProfile = () => {
     fetchUserData();
   }, []);
 
-  // -----------------------------------------------------------------------
   // Click-outside handling for college dropdown
-  // -----------------------------------------------------------------------
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (
@@ -207,9 +203,7 @@ const UserProfile = () => {
     };
   }, []);
 
-  // -----------------------------------------------------------------------
   // Username availability check (debounced)
-  // -----------------------------------------------------------------------
   useEffect(() => {
     if (!isEditing || !editedData?.username) {
       setUsernameError(null);
@@ -236,7 +230,7 @@ const UserProfile = () => {
           .from("users")
           .select("username")
           .eq("username", username)
-          .neq("uid", userData.uid) // Exclude current user
+          .neq("uid", userData.uid)
           .single();
 
         if (existingUser) {
@@ -253,9 +247,7 @@ const UserProfile = () => {
     checkUsername();
   }, [editedData?.username, isEditing, userData?.uid]);
 
-  // -----------------------------------------------------------------------
   // College search API
-  // -----------------------------------------------------------------------
   useEffect(() => {
     if (collegeSearch.length < 3 || collegeSearch === lastSelectedCollege) {
       setShowCollegeDropdown(false);
@@ -300,7 +292,6 @@ const UserProfile = () => {
           collegeNames = [];
         }
 
-        // Clean college names by removing trailing IDs (e.g., "(ID:123)", "(Id", "(ID:)")
         collegeNames = collegeNames.map((name) => name.replace(/\s*\(ID?:[^)]*\)$/, "").trim());
 
         setColleges(collegeNames);
@@ -317,9 +308,7 @@ const UserProfile = () => {
     return () => clearTimeout(timeoutId);
   }, [collegeSearch, lastSelectedCollege]);
 
-  // -----------------------------------------------------------------------
   // Resume drag-and-drop helpers
-  // -----------------------------------------------------------------------
   const handleDrag = (e) => {
     e.preventDefault();
     e.stopPropagation();
@@ -452,9 +441,7 @@ const UserProfile = () => {
     }
   };
 
-  // -----------------------------------------------------------------------
   // Editing helpers
-  // -----------------------------------------------------------------------
   const handleEditStart = () => {
     setIsEditing(true);
     setCollegeSearch(editedData.college || "");
@@ -469,7 +456,7 @@ const UserProfile = () => {
     setEditedData((prev) => ({ ...prev, [name]: value }));
     setSaveError(null);
     if (name === "username") {
-      setUsernameError(null); // Reset error while typing
+      setUsernameError(null);
     }
   };
 
@@ -497,9 +484,7 @@ const UserProfile = () => {
     }
   };
 
-  // -----------------------------------------------------------------------
   // Skills helpers
-  // -----------------------------------------------------------------------
   const handleAddSkill = async () => {
     if (!newSkill.trim() || !skillsList.skills.includes(newSkill.trim())) return;
     const updatedSkills = [...userSkills, newSkill.trim()];
@@ -559,9 +544,7 @@ const UserProfile = () => {
     }
   };
 
-  // -----------------------------------------------------------------------
   // Save profile
-  // -----------------------------------------------------------------------
   const handleSave = async () => {
     setSaveError(null);
     setUsernameError(null);
@@ -581,13 +564,12 @@ const UserProfile = () => {
       return;
     }
 
-    // Check username availability
     try {
       const { data: existingUser } = await supabase
         .from("users")
         .select("username")
         .eq("username", username)
-        .neq("uid", userData.uid) // Exclude current user
+        .neq("uid", userData.uid)
         .single();
 
       if (existingUser) {
@@ -674,9 +656,7 @@ const UserProfile = () => {
     setShowEditSkillDropdown(false);
   };
 
-  // -----------------------------------------------------------------------
   // Data for UI sections
-  // -----------------------------------------------------------------------
   const personalInfo = userData
     ? [
         { label: "Username", value: userData.username || "Not set", editable: true, type: "text" },
@@ -693,12 +673,13 @@ const UserProfile = () => {
       ]
     : [];
 
+  // Updated socialLinks to include all links without filtering
   const socialLinks = userData
     ? [
-        { label: "GitHub Profile", icon: Github, href: userData.githubUrl, available: !!userData.githubUrl, name: "githubUrl" },
-        { label: "LinkedIn Profile", icon: Linkedin, href: userData.linkedinUrl, available: !!userData.linkedinUrl, name: "linkedinUrl" },
-        { label: "Portfolio Website", icon: Globe, href: userData.portfolioUrl, available: !!userData.portfolioUrl, name: "portfolioUrl" },
-      ].filter(link => link.available) // Only include links with valid URLs
+        { label: "GitHub Profile", icon: Github, href: userData.githubUrl, name: "githubUrl" },
+        { label: "LinkedIn Profile", icon: Linkedin, href: userData.linkedinUrl, name: "linkedinUrl" },
+        { label: "Portfolio Website", icon: Globe, href: userData.portfolioUrl, name: "portfolioUrl" },
+      ]
     : [];
 
   const technicalSkills =
@@ -710,9 +691,7 @@ const UserProfile = () => {
         }))
       : [{ skill: "No skills added", level: 0, color: "bg-gray-300" }];
 
-  // -----------------------------------------------------------------------
   // Render loading / auth states
-  // -----------------------------------------------------------------------
   if (authChecking) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -773,9 +752,7 @@ const UserProfile = () => {
 
   if (!userData) return null;
 
-  // -----------------------------------------------------------------------
   // Main JSX
-  // -----------------------------------------------------------------------
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -1097,7 +1074,7 @@ const UserProfile = () => {
                       <div key={index} className="flex items-center justify-between py-2">
                         <div className="flex items-center space-x-3">
                           <div className="p-2 bg-gray-100 rounded-lg">
-                            <link.icon className="w-4 h-4 text-gray-600" />
+                            <IconComponent className="w-4 h-4 text-gray-600" />
                           </div>
                           <span className="text-sm font-medium text-gray-700">{link.label}</span>
                         </div>
@@ -1110,7 +1087,7 @@ const UserProfile = () => {
                             className="text-sm text-gray-900 border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 max-w-xs"
                             placeholder="https://..."
                           />
-                        ) : link.available ? (
+                        ) : link.href ? (
                           <a
                             href={link.href}
                             target="_blank"
