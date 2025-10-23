@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState, useRef } from "react";
 import {
   ArrowLeft,
@@ -81,7 +82,14 @@ const UserProfile = () => {
   // Utility function to validate and normalize URLs
   const validateUrl = (url) => {
     if (!url) return "";
-    return url.startsWith("http") ? url : `https://${url}`;
+    // Basic URL validation
+    try {
+      new URL(url.startsWith("http") ? url : `https://${url}`);
+      return url.startsWith("http") ? url : `https://${url}`;
+    } catch (e) {
+      console.warn(`[Frontend] : Invalid URL detected: ${url}`);
+      return "";
+    }
   };
 
   // Fetch user data from Supabase
@@ -165,6 +173,13 @@ const UserProfile = () => {
               skills = typeof data.skills === "string" ? [data.skills] : [];
             }
           }
+
+          // Log social links for debugging
+          console.log("[Frontend] : Social links fetched:", {
+            githubUrl: transformedUser.githubUrl,
+            linkedinUrl: transformedUser.linkedinUrl,
+            portfolioUrl: transformedUser.portfolioUrl,
+          });
 
           setUserData(transformedUser);
           setEditedData(transformedUser);
@@ -673,7 +688,7 @@ const UserProfile = () => {
       ]
     : [];
 
-  // Updated socialLinks to include all links without filtering
+  // Social links
   const socialLinks = userData
     ? [
         { label: "GitHub Profile", icon: Github, href: userData.githubUrl, name: "githubUrl" },
@@ -1070,6 +1085,12 @@ const UserProfile = () => {
                 <div className="space-y-4">
                   {socialLinks.map((link, index) => {
                     const IconComponent = link.icon;
+                    // Validate URL for display
+                    const isValidUrl = link.href && validateUrl(link.href) === link.href;
+                    console.log(`[Frontend] : Rendering social link - ${link.label}:`, {
+                      href: link.href,
+                      isValid: isValidUrl,
+                    });
                     return (
                       <div key={index} className="flex items-center justify-between py-2">
                         <div className="flex items-center space-x-3">
@@ -1087,12 +1108,13 @@ const UserProfile = () => {
                             className="text-sm text-gray-900 border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 max-w-xs"
                             placeholder="https://..."
                           />
-                        ) : link.href ? (
+                        ) : isValidUrl ? (
                           <a
                             href={link.href}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="text-blue-600 hover:text-blue-800 text-sm font-medium hover:underline"
+                            onClick={() => console.log(`[Frontend] : Navigating to ${link.label}: ${link.href}`)}
                           >
                             View
                           </a>
