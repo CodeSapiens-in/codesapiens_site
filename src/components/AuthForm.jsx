@@ -4,7 +4,7 @@ import { supabase } from '../lib/supabaseClient';
 import { useNavigate } from 'react-router-dom';
 
 // API Configuration - Change this to your backend URL
-const API_BASE_URL = 'http://localhost:3000';
+const API_BASE_URL = 'https://colleges-name-api.vercel.app';
 
 export default function CodeSapiensPlatform() {
   const [mode, setMode] = useState('signIn');
