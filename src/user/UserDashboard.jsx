@@ -187,6 +187,27 @@ export default function UserDashboard() {
     }
   };
 
+   const handleSignOut = async () => {
+      try {
+        // Sign out from Supabase
+        const { error } = await supabase.auth.signOut();
+  
+        if (error) {
+          console.error('Error signing out:', error);
+        }
+  
+        // Clear any local state and redirect
+        setUserData(null);
+        setIsMobileMenuOpen(false);
+        setIsProfileDropdownOpen(false);
+  
+        // Redirect to login or home page
+        navigate('/');
+      } catch (err) {
+        console.error('Sign out error:', err);
+      }
+    };
+
   return (
     <div className="min-h-screen bg-gray-50">
       {authChecking && (
@@ -205,7 +226,7 @@ export default function UserDashboard() {
             <h2 className="text-xl font-semibold text-gray-900 mb-2">Authentication Required</h2>
             <p className="text-gray-600 mb-4">Please log in to access your dashboard.</p>
             <button
-              onClick={() => (window.location.href = "/login")}
+              onClick={() => handleSignOut()}
               className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors duration-200"
             >
               Go to Login
