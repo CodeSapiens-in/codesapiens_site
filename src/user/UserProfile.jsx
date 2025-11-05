@@ -173,7 +173,14 @@ const UserProfile = () => {
             adminApproved: data.admin_approved || false,
             createdAt: data.created_at,
             updatedAt: data.updated_at,
-            year: data.year ? parseInt(data.year, 10) : null,
+            year: data.year === "Already Graduated" 
+              ? "Already Graduated"
+              : data.year 
+                ? parseInt(data.year, 10) 
+                : null,
+            graduatingyear: data.year === "Already Graduated"
+              ? "Already Graduated"
+              : data.year?.toString() || "Not specified",
             major: data.major || "Not specified",
             department: data.department || "Not specified",
             username: data.username || "",
@@ -635,7 +642,12 @@ const UserProfile = () => {
         github_url: validateUrl(editedData.githubUrl?.trim()),
         linkedin_url: validateUrl(editedData.linkedinUrl?.trim()),
         portfolio_url: validateUrl(editedData.portfolioUrl?.trim()),
-        year: editedData.year && editedData.year !== "Not specified" ? parseInt(editedData.year, 10) : null,
+        // Fix the year handling here
+        year: editedData.graduatingyear === "Already Graduated" 
+          ? "Already Graduated"
+          : editedData.graduatingyear 
+            ? parseInt(editedData.graduatingyear, 10) 
+            : null,
         major: editedData.major?.trim() || "Not specified",
         department: editedData.department?.trim() || "Not specified",
         username,
@@ -699,10 +711,13 @@ const UserProfile = () => {
         { label: "College", value: userData.college, editable: true, type: "college" },
         {
           label: "Graduating Year",
-          value: userData.year ? userData.year.toString() : "Not specified",
+          value: userData.year === "Already Graduated" 
+            ? "Already Graduated" 
+            : userData.year?.toString() || "Not specified",
           editable: true,
           type: "dropdown",
           options: graduationYears,
+          name: "graduatingyear" // Add this to match the state property
         },
         { label: "Major", value: userData.major, editable: true, type: "dropdown", options: academicData.majors },
         { label: "Department", value: userData.department, editable: true, type: "dropdown", options: academicData.departments },
@@ -1068,8 +1083,8 @@ const UserProfile = () => {
                           ) : info.type === "dropdown" ? (
                             <div className="relative">
                               <select
-                                name={info.label.toLowerCase().replace(" ", "")}
-                                value={editedData[info.label.toLowerCase().replace(" ", "")] || "Not specified"}
+                                name={info.name || info.label.toLowerCase().replace(" ", "")}
+                                value={editedData[info.name || info.label.toLowerCase().replace(" ", "")] || "Not specified"}
                                 onChange={handleInputChange}
                                 className="text-sm text-gray-900 border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 w-full pr-8 appearance-none"
                               >
