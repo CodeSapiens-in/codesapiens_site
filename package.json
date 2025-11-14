@@ -19,6 +19,7 @@
     "@vercel/blob": "^2.0.0",
     "flowbite-react": "^0.12.7",
     "framer-motion": "^12.23.12",
+    "html5-qrcode": "^2.3.8",
     "lodash": "^4.17.21",
     "lucide-react": "^0.540.0",
     "monaco-editor": "^0.54.0",
