@@ -32,6 +32,7 @@ import PublicProfile from './components/PublicProfile';
 import UserPlayGround from './user/UserPlayGround';
 import UserMentorshipFormList from './user/UserMentorshipFormList';
 import UserCodingPlatform from './user/UserCodingPlatform';
+import AdminScannerMeetup from './admin/AdminScannerMeetup';
 
 
 
@@ -89,6 +90,7 @@ function Root() {
              <Route path="/playground" element={<UserPlayGround/>} />
              <Route path="/mentorship-list" element={<UserMentorshipFormList/>} />
              <Route path="/code" element={<UserCodingPlatform/>} />
+             <Route path="/scanner" element={<AdminScannerMeetup/>} />
          
           
 
