@@ -150,6 +150,7 @@ Codesapiens_management_website/
 └── vite.config.js (529 bytes)
 
 ---
+```
 
 ## 📋 Prerequisites
 
