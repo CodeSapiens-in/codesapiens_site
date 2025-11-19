@@ -10,15 +10,12 @@ export default function AdminScannerMeetup() {
   const { meetupId } = useParams();
   const navigate = useNavigate();
   const scannerRef = useRef(null);
-  
-  // Ref to track the auto-restart timer so we can cancel it if button is clicked
   const timeoutRef = useRef(null);
   
   const [scanning, setScanning] = useState(false);
   const [title, setTitle] = useState("Loading...");
   const [result, setResult] = useState(null);
 
-  // --- LOGIC SECTION ---
   useEffect(() => {
     supabase
       .from("meetup")
@@ -48,7 +45,6 @@ export default function AdminScannerMeetup() {
     }
   };
 
-  // Helper to restart scanner (used by both Timer and Button)
   const resumeScanning = () => {
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
     setResult(null);
@@ -60,28 +56,34 @@ export default function AdminScannerMeetup() {
     );
   };
 
-  // FIX: Helper to trigger result AND schedule the next scan
   const finishScan = (resultObj) => {
     setResult(resultObj);
-    // Always schedule the next scan, regardless of result type
     timeoutRef.current = setTimeout(resumeScanning, 2200);
   };
 
   const handleScan = async (code) => {
     if (!code) return;
-    scannerRef.current?.stop(); // Pause camera immediately
+    scannerRef.current?.stop();
 
     let name = "User";
 
     try {
       // 1. Check if using Old Token (tok-...)
       if (code.startsWith("tok-")) {
-        const { data: reg } = await supabase
+        // ✅ FIX: Properly structure the query with .match() or separate .eq() calls
+        const { data: reg, error: regError } = await supabase
           .from("registrations")
           .select("user_name, user_id, is_checked_in")
           .eq("meetup_id", meetupId)
           .eq("token", code)
-          .single();
+          .maybeSingle(); // Use maybeSingle() instead of single() to avoid errors when not found
+
+        if (regError && regError.code !== 'PGRST116') {
+          // PGRST116 is "not found" error, which is okay
+          console.error("Registration query error:", regError);
+          finishScan({ name: "Query failed", type: "error" });
+          return;
+        }
 
         if (!reg) {
           finishScan({ name: "Not registered", type: "error" });
@@ -94,49 +96,59 @@ export default function AdminScannerMeetup() {
         }
 
         name = reg.user_name || "User";
+        
+        // Try to get display name if user_id exists
         if (reg.user_id) {
           const { data: u } = await supabase
             .from("users")
             .select("display_name")
             .eq("uid", reg.user_id)
-            .single()
-            .catch(() => ({ data: null }));
+            .maybeSingle();
+          
           if (u?.display_name) name = u.display_name;
         }
 
-        await supabase
+        // Update check-in status
+        const { error: updateError } = await supabase
           .from("registrations")
-          .update({ is_checked_in: true, checked_in_at: new Date().toISOString() })
+          .update({ 
+            is_checked_in: true, 
+            checked_in_at: new Date().toISOString() 
+          })
           .eq("meetup_id", meetupId)
           .eq("token", code);
+
+        if (updateError) {
+          console.error("Check-in update error:", updateError);
+          finishScan({ name: "Update failed", type: "error" });
+          return;
+        }
 
         finishScan({ name: name, type: "success" });
       } 
       // 2. Check if using New UID Flow
       else {
-        const { data: user } = await supabase
+        const { data: user, error: userError } = await supabase
           .from("users")
           .select("display_name, username")
           .eq("uid", code)
-          .single()
-          .catch(() => ({ data: null }));
+          .maybeSingle();
 
-        if (!user) {
+        if (userError || !user) {
           finishScan({ name: "User not found", type: "error" });
           return;
         }
 
         name = user.display_name || user.username || "User";
 
-        const { data: reg } = await supabase
+        const { data: reg, error: regError } = await supabase
           .from("registrations")
           .select("id, is_checked_in")
           .eq("meetup_id", meetupId)
           .eq("user_id", code)
-          .single()
-          .catch(() => ({ data: null }));
+          .maybeSingle();
 
-        if (!reg) {
+        if (regError || !reg) {
           finishScan({ name: "Not registered", type: "error" });
           return;
         }
@@ -146,14 +158,24 @@ export default function AdminScannerMeetup() {
           return;
         }
 
-        await supabase
+        const { error: updateError } = await supabase
           .from("registrations")
-          .update({ is_checked_in: true, checked_in_at: new Date().toISOString() })
+          .update({ 
+            is_checked_in: true, 
+            checked_in_at: new Date().toISOString() 
+          })
           .eq("id", reg.id);
+
+        if (updateError) {
+          console.error("Check-in update error:", updateError);
+          finishScan({ name: "Update failed", type: "error" });
+          return;
+        }
 
         finishScan({ name: name, type: "success" });
       }
     } catch (e) {
+      console.error("Scan error:", e);
       finishScan({ name: "Scan failed", type: "error" });
     }
   };
@@ -165,7 +187,6 @@ export default function AdminScannerMeetup() {
     };
   }, []);
 
-  // --- UI SECTION ---
   return (
     <>
       <Toaster position="top-center" toastOptions={{ style: { background: '#333', color: '#fff' } }} />

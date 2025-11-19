@@ -1,18 +1,19 @@
-// src/pages/AdminMeetup.jsx
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { format } from "date-fns";
 import { supabase } from "../lib/supabaseClient";
+import toast, { Toaster } from "react-hot-toast";
 import {
   Calendar,
   Clock,
   Save,
   ArrowLeft,
   Loader2,
-  CheckCircle,
-  AlertCircle,
+  Type,
+  AlignLeft,
+  MapPin,
+  Eye,
+  LayoutTemplate
 } from "lucide-react";
-import toast, { Toaster } from "react-hot-toast";
 
 const AdminMeetup = () => {
   const navigate = useNavigate();
@@ -25,7 +26,7 @@ const AdminMeetup = () => {
     end_date_time: "",
   });
 
-  // Fetch current user on mount
+  // Fetch current user
   useEffect(() => {
     const fetchUser = async () => {
       const { data: { user } } = await supabase.auth.getUser();
@@ -67,7 +68,7 @@ const AdminMeetup = () => {
 
     setLoading(true);
     try {
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from("meetup")
         .insert([
           {
@@ -84,7 +85,7 @@ const AdminMeetup = () => {
       if (error) throw error;
 
       toast.success("Meetup created successfully!");
-      setTimeout(() => navigate("/admin/meetups"), 1500);
+      setTimeout(() => navigate("/admin/meetups"), 1500); // Adjust path as needed
     } catch (err) {
       console.error("Error creating meetup:", err);
       toast.error(err.message || "Failed to create meetup");
@@ -93,161 +94,225 @@ const AdminMeetup = () => {
     }
   };
 
+  // Helper for Live Preview Date
+  const formatPreviewDate = (dateStr) => {
+    if (!dateStr) return "---";
+    const date = new Date(dateStr);
+    return isNaN(date.getTime()) ? "Invalid Date" : date.toLocaleDateString("en-US", { month: 'short', day: 'numeric' });
+  };
+
+  const formatPreviewTime = (dateStr) => {
+    if (!dateStr) return "--:--";
+    const date = new Date(dateStr);
+    return isNaN(date.getTime()) ? "--:--" : date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  };
+
   return (
-    <>
+    <div className="min-h-screen bg-gray-50 font-sans text-gray-900 pb-12">
       <Toaster position="top-center" />
-      <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50">
-        {/* Header */}
-        <div className="bg-white shadow-sm border-b">
-          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-            <div className="flex items-center justify-between">
-              <button
-                onClick={() => navigate(-1)}
-                className="flex items-center space-x-2 text-gray-600 hover:text-gray-900 transition"
-              >
-                <ArrowLeft className="w-5 h-5" />
-                <span className="font-medium">Back</span>
-              </button>
-              <h1 className="text-2xl font-bold text-gray-900">Create New Meetup</h1>
-              <div className="w-20" />
-            </div>
+      
+      {/* Header */}
+      <div className="bg-white border-b sticky top-0 z-30">
+        <div className="max-w-7xl mx-auto px-4 py-4 flex items-center gap-4">
+          <button
+            onClick={() => navigate(-1)}
+            className="p-2 rounded-full hover:bg-gray-100 text-gray-500 transition-colors"
+          >
+            <ArrowLeft className="w-5 h-5" />
+          </button>
+          <div>
+            <h1 className="text-xl font-bold text-gray-900">Create Event</h1>
+            <p className="text-xs text-gray-500">Admin Dashboard</p>
           </div>
         </div>
+      </div>
 
-        {/* Form */}
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="bg-white rounded-2xl shadow-lg p-6 sm:p-8">
+      <main className="max-w-7xl mx-auto px-4 py-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
+        
+        {/* LEFT COLUMN: Form */}
+        <div className="lg:col-span-7 space-y-6">
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 sm:p-8">
+            <div className="flex items-center gap-2 mb-6 text-indigo-600">
+              <LayoutTemplate className="w-5 h-5" />
+              <h2 className="font-semibold text-gray-900">Event Details</h2>
+            </div>
+
             <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Title */}
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Meetup Title <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  name="title"
-                  value={formData.title}
-                  onChange={handleChange}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
-                  placeholder="e.g. React India Meetup #12"
-                  required
-                  minLength={3}
-                />
-                <p className="mt-1 text-xs text-gray-500">At least 3 characters</p>
-              </div>
-
-              {/* Description */}
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Description
-                </label>
-                <textarea
-                  name="description"
-                  value={formData.description}
-                  onChange={handleChange}
-                  rows={4}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition resize-none"
-                  placeholder="Tell attendees what to expect..."
-                />
-              </div>
-
-              {/* Start Date & Time */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    <Calendar className="inline w-4 h-4 mr-1" />
-                    Start Date & Time <span className="text-red-500">*</span>
-                  </label>
+              
+              {/* Title Input */}
+              <div className="group">
+                <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">Event Title</label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <Type className="h-5 w-5 text-gray-400 group-focus-within:text-indigo-500 transition-colors" />
+                  </div>
                   <input
-                    type="datetime-local"
-                    name="start_date_time"
-                    value={formData.start_date_time}
+                    type="text"
+                    name="title"
+                    value={formData.title}
                     onChange={handleChange}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    <Clock className="inline w-4 h-4 mr-1" />
-                    End Date & Time <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="datetime-local"
-                    name="end_date_time"
-                    value={formData.end_date_time}
-                    onChange={handleChange}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
+                    className="block w-full pl-10 pr-3 py-3 border border-gray-200 rounded-xl leading-5 bg-gray-50 text-gray-900 placeholder-gray-400 focus:outline-none focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                    placeholder="e.g. Tech Meetup 2025"
                     required
                   />
                 </div>
               </div>
 
-              {/* Time Validation Hint */}
+              {/* Description Input */}
+              <div className="group">
+                <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">Description</label>
+                <div className="relative">
+                  <div className="absolute top-3 left-3 pointer-events-none">
+                    <AlignLeft className="h-5 w-5 text-gray-400 group-focus-within:text-indigo-500 transition-colors" />
+                  </div>
+                  <textarea
+                    name="description"
+                    value={formData.description}
+                    onChange={handleChange}
+                    rows={4}
+                    className="block w-full pl-10 pr-3 py-3 border border-gray-200 rounded-xl leading-5 bg-gray-50 text-gray-900 placeholder-gray-400 focus:outline-none focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all resize-none"
+                    placeholder="What is this event about?"
+                  />
+                </div>
+              </div>
+
+              <div className="h-px bg-gray-100 my-6" />
+
+              {/* Date & Time Grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div className="group">
+                  <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">Starts</label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <Calendar className="h-5 w-5 text-gray-400 group-focus-within:text-indigo-500 transition-colors" />
+                    </div>
+                    <input
+                      type="datetime-local"
+                      name="start_date_time"
+                      value={formData.start_date_time}
+                      onChange={handleChange}
+                      className="block w-full pl-10 pr-3 py-3 border border-gray-200 rounded-xl bg-gray-50 focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div className="group">
+                  <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">Ends</label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <Clock className="h-5 w-5 text-gray-400 group-focus-within:text-indigo-500 transition-colors" />
+                    </div>
+                    <input
+                      type="datetime-local"
+                      name="end_date_time"
+                      value={formData.end_date_time}
+                      onChange={handleChange}
+                      className="block w-full pl-10 pr-3 py-3 border border-gray-200 rounded-xl bg-gray-50 focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                      required
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Duration Calculation / Error */}
               {formData.start_date_time && formData.end_date_time && (
-                <div className="flex items-center space-x-2 text-sm">
-                  {new Date(formData.end_date_time) > new Date(formData.start_date_time) ? (
-                    <>
-                      <CheckCircle className="w-5 h-5 text-green-500" />
-                      <span className="text-green-700">
-                        Duration: {Math.round(
-                          (new Date(formData.end_date_time) - new Date(formData.start_date_time)) / (1000 * 60)
-                        )}{" "}
-                        minutes
-                      </span>
-                    </>
-                  ) : (
-                    <>
-                      <AlertCircle className="w-5 h-5 text-red-500" />
-                      <span className="text-red-700">End time must be after start time</span>
-                    </>
-                  )}
-                </div>
+                 <div className={`mt-2 p-3 rounded-lg text-sm flex items-center gap-2 ${
+                   new Date(formData.end_date_time) > new Date(formData.start_date_time) 
+                   ? "bg-green-50 text-green-700 border border-green-100" 
+                   : "bg-red-50 text-red-700 border border-red-100"
+                 }`}>
+                    {new Date(formData.end_date_time) > new Date(formData.start_date_time) ? (
+                       <>
+                         <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"/>
+                         Duration: {((new Date(formData.end_date_time) - new Date(formData.start_date_time)) / (1000 * 60 * 60)).toFixed(1)} hours
+                       </>
+                    ) : (
+                       "End time must be after start time"
+                    )}
+                 </div>
               )}
 
-              {/* Submit */}
-              <div className="flex items-center justify-end space-x-4 pt-6 border-t">
-                <button
-                  type="button"
-                  onClick={() => navigate(-1)}
-                  className="px-6 py-3 text-gray-700 bg-gray-100 rounded-xl hover:bg-gray-200 transition font-medium"
-                >
-                  Cancel
-                </button>
+              {/* Submit Button */}
+              <div className="pt-4">
                 <button
                   type="submit"
                   disabled={loading}
-                  className="flex items-center space-x-2 px-8 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl hover:from-indigo-700 hover:to-purple-700 transition font-medium shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full flex justify-center items-center gap-2 bg-gray-900 hover:bg-gray-800 text-white font-semibold py-4 px-6 rounded-xl shadow-lg shadow-gray-200 hover:shadow-xl hover:-translate-y-0.5 transition-all disabled:opacity-70 disabled:hover:translate-y-0"
                 >
-                  {loading ? (
-                    <>
-                      <Loader2 className="w-5 h-5 animate-spin" />
-                      <span>Creating...</span>
-                    </>
-                  ) : (
-                    <>
-                      <Save className="w-5 h-5" />
-                      <span>Create Meetup</span>
-                    </>
-                  )}
+                  {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Save className="w-5 h-5" />}
+                  {loading ? "Creating Event..." : "Publish Event"}
                 </button>
               </div>
             </form>
           </div>
-
-          {/* Info Card */}
-          <div className="mt-8 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-6">
-            <h3 className="font-semibold text-blue-900 mb-2">After Creation</h3>
-            <ul className="text-sm text-blue-800 space-y-1">
-              <li>• You'll be redirected to the meetup list</li>
-              <li>• You can then add attendees and generate QR codes</li>
-              <li>• Each attendee gets a unique, secure QR token</li>
-            </ul>
-          </div>
         </div>
-      </div>
-    </>
+
+        {/* RIGHT COLUMN: Live Preview */}
+        <div className="lg:col-span-5">
+           <div className="sticky top-24 space-y-4">
+              <div className="flex items-center gap-2 text-gray-400 mb-2 ml-1">
+                 <Eye className="w-4 h-4" />
+                 <span className="text-xs font-bold uppercase tracking-widest">Live Preview</span>
+              </div>
+
+              {/* Preview Card */}
+              <div className="bg-white rounded-2xl shadow-xl shadow-indigo-100/50 border border-gray-100 overflow-hidden relative group">
+                 <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500"></div>
+                 
+                 <div className="p-6 sm:p-8">
+                    <div className="flex gap-5 items-start">
+                        {/* Date Box Preview */}
+                        <div className="hidden sm:flex flex-col items-center justify-center bg-indigo-50 text-indigo-700 rounded-2xl w-16 h-16 shrink-0 border border-indigo-100">
+                            <span className="text-[10px] font-bold uppercase tracking-wider">
+                                {formData.start_date_time ? new Date(formData.start_date_time).toLocaleString('default', { month: 'short' }) : "DEC"}
+                            </span>
+                            <span className="text-xl font-bold">
+                                {formData.start_date_time ? new Date(formData.start_date_time).getDate() : "25"}
+                            </span>
+                        </div>
+
+                        <div className="flex-1 min-w-0">
+                            <h3 className="text-2xl font-bold text-gray-900 leading-tight break-words">
+                                {formData.title || <span className="text-gray-300 italic">Untitled Event</span>}
+                            </h3>
+                            <div className="mt-4 flex flex-col gap-2 text-sm text-gray-600">
+                                <div className="flex items-center gap-2">
+                                    <Clock className="w-4 h-4 text-indigo-500" />
+                                    <span>
+                                        {formatPreviewTime(formData.start_date_time)} – {formatPreviewTime(formData.end_date_time)}
+                                    </span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <MapPin className="w-4 h-4 text-pink-500" />
+                                    <span>Event Venue</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="mt-6 pt-6 border-t border-gray-100">
+                        <p className="text-gray-600 text-sm leading-relaxed whitespace-pre-wrap">
+                            {formData.description || <span className="text-gray-300 italic">Description will appear here...</span>}
+                        </p>
+                    </div>
+                 </div>
+                 
+                 {/* Faux Action Bar */}
+                 <div className="bg-gray-50 px-6 py-4 flex justify-between items-center border-t border-gray-100">
+                    <div className="h-2 w-20 bg-gray-200 rounded"></div>
+                    <div className="h-8 w-28 bg-indigo-600 rounded-lg opacity-20"></div>
+                 </div>
+              </div>
+
+              <div className="bg-blue-50 rounded-xl p-4 border border-blue-100 text-blue-800 text-sm">
+                 <p><strong>Tip:</strong> Use a catchy title to attract more attendees. Detailed descriptions help reduce questions later.</p>
+              </div>
+           </div>
+        </div>
+
+      </main>
+    </div>
   );
 };
 

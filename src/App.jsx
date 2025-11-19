@@ -31,7 +31,6 @@ import AdminScannerMeetup from './admin/AdminScannerMeetup';
 import AdminMeetup from './admin/AdminMeetup';
 import AdminMeetupsList from './admin/AdminMeetupList';
 import AdminMeetupEdit from './admin/AdminMeetupEdit';
-import UserMeetup from './user/UserMeetup';
 import UserMeetupsList from './user/UserMeetupsList';
 import Navbar from './components/Navbar';
 
@@ -92,11 +91,11 @@ function Root() {
              <Route path="/mentorship-list" element={<UserMentorshipFormList/>} />
              <Route path="/code" element={<UserCodingPlatform/>} />
              <Route path="/scanner" element={<AdminScannerMeetup/>} />
-             <Route path="/meetup" element={<AdminMeetup/>} />
+             <Route path="/admin/meetup/create" element={<AdminMeetup/>} />
              <Route path="/admin/meetups" element={<AdminMeetupsList/>} />
              <Route path="/admin/scanner/:meetupId" element={<AdminScannerMeetup />} />
              <Route path="/admin/meetup/edit/:meetupId" element={<AdminMeetupEdit/>} />
-             <Route path="/user/meetup" element={<UserMeetup/>} />
+             
              <Route path="/meetups" element={<UserMeetupsList/>} />
                   
           

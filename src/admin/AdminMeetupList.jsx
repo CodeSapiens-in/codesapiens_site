@@ -1,19 +1,20 @@
-// src/pages/AdminMeetupsList.jsx
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { format, formatDistanceToNow } from "date-fns";
+import { formatDistanceToNow } from "date-fns";
 import { supabase } from "../lib/supabaseClient";
 import {
   Calendar,
   Clock,
   Users,
   QrCode,
-  Edit,
+  Edit2,
   Trash2,
   Plus,
   Loader2,
-  AlertCircle,
-  CheckCircle,
+  MoreHorizontal,
+  TrendingUp,
+  CalendarDays,
+  MapPin
 } from "lucide-react";
 import toast, { Toaster } from "react-hot-toast";
 
@@ -46,7 +47,6 @@ const AdminMeetupsList = () => {
 
       if (error) throw error;
 
-      // Flatten registrations count
       const formatted = data.map(meetup => ({
         ...meetup,
         attendeeCount: meetup.registrations[0]?.count || 0
@@ -59,6 +59,14 @@ const AdminMeetupsList = () => {
       setLoading(false);
     }
   };
+
+  // Calculate Stats for Dashboard Header
+  const stats = useMemo(() => {
+    const total = meetups.length;
+    const upcoming = meetups.filter(m => new Date(m.start_date_time) > new Date()).length;
+    const totalAttendees = meetups.reduce((acc, curr) => acc + curr.attendeeCount, 0);
+    return { total, upcoming, totalAttendees };
+  }, [meetups]);
 
   const handleDelete = async (id) => {
     if (!confirm("Are you sure you want to delete this meetup? This cannot be undone.")) return;
@@ -75,182 +83,87 @@ const AdminMeetupsList = () => {
       setMeetups(prev => prev.filter(m => m.id !== id));
       toast.success("Meetup deleted");
     } catch (err) {
-      console.error("Delete error:", err);
       toast.error("Failed to delete meetup");
     } finally {
       setDeletingId(null);
     }
   };
 
-  const getDuration = (start, end) => {
-    const mins = Math.round((new Date(end) - new Date(start)) / 60000);
-    if (mins < 60) return `${mins} min`;
-    const hours = Math.floor(mins / 60);
-    const remainingMins = mins % 60;
-    return remainingMins > 0 ? `${hours}h ${remainingMins}m` : `${hours}h`;
-  };
-
-  const isUpcoming = (start) => new Date(start) > new Date();
-  const isLive = (start, end) => new Date(start) <= new Date() && new Date() <= new Date(end);
-
   return (
     <>
       <Toaster position="top-center" />
-      <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50">
-        {/* Header */}
-        <div className="bg-white shadow-sm border-b">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <div className="min-h-screen bg-gray-50/50 pb-12">
+        
+        {/* Header Section */}
+        <div className="bg-white border-b border-gray-200 sticky top-0 z-20">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div>
-                <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">All Meetups</h1>
-                <p className="text-sm text-gray-600 mt-1">Manage events and check-in attendees</p>
+                <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Admin Dashboard</h1>
+                <p className="text-sm text-gray-500 mt-1">Manage your community events</p>
               </div>
               <button
                 onClick={() => navigate("/admin/meetup/create")}
-                className="flex items-center space-x-2 px-5 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl hover:from-indigo-700 hover:to-purple-700 transition font-medium shadow-lg"
+                className="flex items-center justify-center space-x-2 px-6 py-2.5 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-200 font-medium"
               >
                 <Plus className="w-5 h-5" />
-                <span>Create Meetup</span>
+                <span>Create New Event</span>
               </button>
             </div>
           </div>
         </div>
 
-        {/* Content */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+          
+          {/* Dashboard Stats Cards */}
+          {!loading && meetups.length > 0 && (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <StatCard 
+                label="Total Events" 
+                value={stats.total} 
+                icon={CalendarDays} 
+                color="text-blue-600" 
+                bg="bg-blue-50" 
+              />
+              <StatCard 
+                label="Upcoming" 
+                value={stats.upcoming} 
+                icon={TrendingUp} 
+                color="text-green-600" 
+                bg="bg-green-50" 
+              />
+              <StatCard 
+                label="Total Attendees" 
+                value={stats.totalAttendees} 
+                icon={Users} 
+                color="text-purple-600" 
+                bg="bg-purple-50" 
+              />
+            </div>
+          )}
+
+          {/* Main Content */}
           {loading ? (
             <div className="flex flex-col items-center justify-center py-20">
-              <Loader2 className="w-12 h-12 animate-spin text-indigo-600 mb-4" />
-              <p className="text-gray-600">Loading meetups...</p>
+              <Loader2 className="w-10 h-10 animate-spin text-indigo-600 mb-4" />
+              <p className="text-gray-500 font-medium">Loading your dashboard...</p>
             </div>
           ) : meetups.length === 0 ? (
-            <div className="text-center py-20">
-              <div className="bg-gray-100 w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6">
-                <Calendar className="w-12 h-12 text-gray-400" />
-              </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">No meetups yet</h3>
-              <p className="text-gray-600 mb-6">Create your first meetup to get started</p>
-              <button
-                onClick={() => navigate("/admin/meetup/create")}
-                className="inline-flex items-center space-x-2 px-6 py-3 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition"
-              >
-                <Plus className="w-5 h-5" />
-                <span>Create First Meetup</span>
-              </button>
-            </div>
+            <EmptyState navigate={navigate} />
           ) : (
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {meetups.map((meetup) => {
-                const upcoming = isUpcoming(meetup.start_date_time);
-                const live = isLive(meetup.start_date_time, meetup.end_date_time);
-
-                return (
-                  <div
+            <div>
+              <h2 className="text-lg font-bold text-gray-800 mb-5 px-1">All Events</h2>
+              <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+                {meetups.map((meetup) => (
+                  <AdminMeetupCard
                     key={meetup.id}
-                    className="bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 border border-gray-100 overflow-hidden"
-                  >
-                    {/* Status Badge */}
-                    <div className="px-5 pt-4">
-                      <div className="flex items-center justify-between">
-                        <span
-                          className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
-                            live
-                              ? "bg-green-100 text-green-800"
-                              : upcoming
-                              ? "bg-blue-100 text-blue-800"
-                              : "bg-gray-100 text-gray-600"
-                          }`}
-                        >
-                          {live ? (
-                            <>
-                              <CheckCircle className="w-3 h-3 mr-1" />
-                              Live Now
-                            </>
-                          ) : upcoming ? (
-                            <>
-                              <Clock className="w-3 h-3 mr-1" />
-                              Upcoming
-                            </>
-                          ) : (
-                            "Past"
-                          )}
-                        </span>
-                        <span className="text-xs text-gray-500">
-                          {formatDistanceToNow(new Date(meetup.start_date_time), { addSuffix: true })}
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* Content */}
-                    <div className="p-5">
-                      <h3 className="text-lg font-bold text-gray-900 mb-2 line-clamp-2">
-                        {meetup.title}
-                      </h3>
-                      {meetup.description && (
-                        <p className="text-sm text-gray-600 mb-4 line-clamp-2">
-                          {meetup.description}
-                        </p>
-                      )}
-
-                      {/* Date & Time */}
-                      <div className="space-y-2 mb-4">
-                        <div className="flex items-center text-sm text-gray-700">
-                          <Calendar className="w-4 h-4 mr-2 text-indigo-600" />
-                          <span>
-                            {format(new Date(meetup.start_date_time), "EEE, MMM d, yyyy")}
-                          </span>
-                        </div>
-                        <div className="flex items-center text-sm text-gray-700">
-                          <Clock className="w-4 h-4 mr-2 text-purple-600" />
-                          <span>
-                            {format(new Date(meetup.start_date_time), "h:mm a")} –{" "}
-                            {format(new Date(meetup.end_date_time), "h:mm a")} ({getDuration(meetup.start_date_time, meetup.end_date_time)})
-                          </span>
-                        </div>
-                        <div className="flex items-center text-sm text-gray-700">
-                          <Users className="w-4 h-4 mr-2 text-green-600" />
-                          <span>{meetup.attendeeCount} {meetup.attendeeCount === 1 ? "attendee" : "attendees"}</span>
-                        </div>
-                      </div>
-
-                      {/* Actions */}
-                      <div className="flex items-center justify-between pt-4 border-t border-gray-100">
-                        <div className="flex space-x-2">
-                          <button
-                            onClick={() => navigate(`/admin/scanner/${meetup.id}`)}
-                            className="flex items-center space-x-1 px-3 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white text-sm font-medium rounded-lg hover:from-indigo-700 hover:to-purple-700 transition shadow"
-                            title="Open QR Scanner"
-                          >
-                            <QrCode className="w-4 h-4" />
-                            <span className="hidden sm:inline">Scanner</span>
-                          </button>
-
-                          <button
-                            onClick={() => navigate(`/admin/meetup/edit/${meetup.id}`)}
-                            className="p-2 text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition"
-                            title="Edit"
-                          >
-                            <Edit className="w-4 h-4" />
-                          </button>
-                        </div>
-
-                        <button
-                          onClick={() => handleDelete(meetup.id)}
-                          disabled={deletingId === meetup.id}
-                          className="p-2 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition disabled Oppacity-50"
-                          title="Delete"
-                        >
-                          {deletingId === meetup.id ? (
-                            <Loader2 className="w-4 h-4 animate-spin" />
-                          ) : (
-                            <Trash2 className="w-4 h-4" />
-                          )}
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
+                    meetup={meetup}
+                    onDelete={handleDelete}
+                    deletingId={deletingId}
+                    navigate={navigate}
+                  />
+                ))}
+              </div>
             </div>
           )}
         </div>
@@ -258,5 +171,136 @@ const AdminMeetupsList = () => {
     </>
   );
 };
+
+/* --- Sub Components --- */
+
+const StatCard = ({ label, value, icon: Icon, color, bg }) => (
+  <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-between">
+    <div>
+      <p className="text-sm font-medium text-gray-500 mb-1">{label}</p>
+      <h3 className="text-3xl font-bold text-gray-900">{value}</h3>
+    </div>
+    <div className={`p-4 rounded-xl ${bg}`}>
+      <Icon className={`w-6 h-6 ${color}`} />
+    </div>
+  </div>
+);
+
+const AdminMeetupCard = ({ meetup, onDelete, deletingId, navigate }) => {
+  // FIX: Slice strings to avoid Timezone shifts
+  const rawStart = meetup.start_date_time.slice(0, 19);
+  const rawEnd = meetup.end_date_time.slice(0, 19);
+  
+  const startObj = new Date(rawStart);
+  const endObj = new Date(rawEnd);
+  const isUpcoming = startObj > new Date();
+  const isLive = startObj <= new Date() && new Date() <= endObj;
+
+  const formatTime = (date) => date.toLocaleTimeString("en-US", { hour: 'numeric', minute: '2-digit', hour12: true });
+
+  return (
+    <div className="group bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-200 flex flex-col overflow-hidden">
+      
+      {/* Top Section: Date & Content */}
+      <div className="p-6 flex gap-5 flex-1">
+        {/* Date Leaf Visual */}
+        <div className="flex flex-col items-center justify-center bg-gray-50 text-gray-600 rounded-2xl w-16 h-16 shrink-0 border border-gray-200 shadow-inner">
+          <span className="text-[10px] font-bold uppercase tracking-wider">
+            {startObj.toLocaleString('default', { month: 'short' })}
+          </span>
+          <span className="text-xl font-bold text-gray-900">{startObj.getDate()}</span>
+        </div>
+
+        <div className="flex-1 min-w-0">
+          <div className="flex justify-between items-start mb-1">
+             {/* Status Label */}
+            {isLive ? (
+               <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800 animate-pulse">
+                  ● Live Now
+               </span>
+            ) : isUpcoming ? (
+               <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-50 text-blue-700">
+                  Upcoming
+               </span>
+            ) : (
+               <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-600">
+                  Past Event
+               </span>
+            )}
+            
+            {/* Relative Time */}
+            <span className="text-xs text-gray-400 whitespace-nowrap ml-2">
+              {formatDistanceToNow(startObj, { addSuffix: true })}
+            </span>
+          </div>
+
+          <h3 className="text-lg font-bold text-gray-900 leading-tight mb-2 truncate" title={meetup.title}>
+            {meetup.title}
+          </h3>
+
+          <div className="space-y-1.5">
+            <div className="flex items-center text-sm text-gray-500">
+              <Clock className="w-4 h-4 mr-2 text-indigo-500" />
+              <span>{formatTime(startObj)} – {formatTime(endObj)}</span>
+            </div>
+            <div className="flex items-center text-sm text-gray-500">
+              <Users className="w-4 h-4 mr-2 text-indigo-500" />
+              <span className="font-medium text-gray-700">{meetup.attendeeCount}</span>
+              <span className="ml-1">registered</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Action Footer */}
+      <div className="bg-gray-50 p-4 border-t border-gray-100 flex items-center gap-3">
+        <button
+          onClick={() => navigate(`/admin/scanner/${meetup.id}`)}
+          className="flex-1 flex items-center justify-center gap-2 bg-gray-900 hover:bg-gray-800 text-white py-2.5 px-4 rounded-xl text-sm font-medium transition-colors shadow-sm"
+        >
+          <QrCode className="w-4 h-4" />
+          Scan Tickets
+        </button>
+
+        <div className="flex gap-1">
+          <button
+            onClick={() => navigate(`/admin/meetup/edit/${meetup.id}`)}
+            className="p-2.5 text-gray-500 hover:text-indigo-600 hover:bg-white rounded-xl border border-transparent hover:border-gray-200 transition-all"
+            title="Edit Details"
+          >
+            <Edit2 className="w-4 h-4" />
+          </button>
+          <button
+            onClick={() => onDelete(meetup.id)}
+            disabled={deletingId === meetup.id}
+            className="p-2.5 text-gray-500 hover:text-red-600 hover:bg-white rounded-xl border border-transparent hover:border-gray-200 transition-all disabled:opacity-50"
+            title="Delete Event"
+          >
+            {deletingId === meetup.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const EmptyState = ({ navigate }) => (
+  <div className="text-center py-20 bg-white rounded-3xl border border-gray-200 shadow-sm">
+    <div className="bg-indigo-50 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
+      <Calendar className="w-10 h-10 text-indigo-600" />
+    </div>
+    <h3 className="text-xl font-bold text-gray-900 mb-2">No meetups found</h3>
+    <p className="text-gray-500 mb-8 max-w-md mx-auto">
+      You haven't created any events yet. Get started by creating your first meetup to track attendees and generate tickets.
+    </p>
+    <button
+      onClick={() => navigate("/admin/meetup/create")}
+      className="inline-flex items-center space-x-2 px-8 py-3 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition font-medium shadow-lg shadow-indigo-200"
+    >
+      <Plus className="w-5 h-5" />
+      <span>Create First Event</span>
+    </button>
+  </div>
+);
 
 export default AdminMeetupsList;
