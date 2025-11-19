@@ -4,19 +4,14 @@ import {
   SessionContextProvider,
   useSession,
   useSessionContext,
-  useUser,
+  
 } from '@supabase/auth-helpers-react';
 import { supabase } from './lib/supabaseClient';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-
-import NavBar from './components/ui/NavBar';
-import Hero from './components/ui/Hero';
-import Footer from './components/ui/Footer';
 import AuthForm from './components/AuthForm';
 import Dashboard from './admin/Dashboard';
 import UserProfile from './user/UserProfile';
 import UserDashboard from './user/UserDashboard';
-import UserNavbar from './user/UserNavbar';
 import AnalyticsPage from './admin/AnalyticsPage';
 import NotFoundPage from './components/ui/NotFoundPage';
 import CodeSapiensHero from './components/CodesapiensHero';
@@ -33,6 +28,12 @@ import UserPlayGround from './user/UserPlayGround';
 import UserMentorshipFormList from './user/UserMentorshipFormList';
 import UserCodingPlatform from './user/UserCodingPlatform';
 import AdminScannerMeetup from './admin/AdminScannerMeetup';
+import AdminMeetup from './admin/AdminMeetup';
+import AdminMeetupsList from './admin/AdminMeetupList';
+import AdminMeetupEdit from './admin/AdminMeetupEdit';
+import UserMeetup from './user/UserMeetup';
+import UserMeetupsList from './user/UserMeetupsList';
+import Navbar from './components/Navbar';
 
 
 
@@ -72,7 +73,7 @@ function Root() {
     <div className="flex flex-col min-h-screen">
       <main className="flex-grow">
         <Router>
-          <UserNavbar />
+          <Navbar/>
           <Routes>
             <Route path="/admin" element={<Dashboard />} />
             <Route path="/profile" element={<UserProfile />} />
@@ -91,7 +92,13 @@ function Root() {
              <Route path="/mentorship-list" element={<UserMentorshipFormList/>} />
              <Route path="/code" element={<UserCodingPlatform/>} />
              <Route path="/scanner" element={<AdminScannerMeetup/>} />
-         
+             <Route path="/meetup" element={<AdminMeetup/>} />
+             <Route path="/admin/meetups" element={<AdminMeetupsList/>} />
+             <Route path="/admin/scanner/:meetupId" element={<AdminScannerMeetup />} />
+             <Route path="/admin/meetup/edit/:meetupId" element={<AdminMeetupEdit/>} />
+             <Route path="/user/meetup" element={<UserMeetup/>} />
+             <Route path="/meetups" element={<UserMeetupsList/>} />
+                  
           
 
            
