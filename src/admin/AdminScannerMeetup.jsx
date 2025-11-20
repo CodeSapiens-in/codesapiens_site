@@ -11,7 +11,7 @@ export default function AdminScannerMeetup() {
   const navigate = useNavigate();
   const scannerRef = useRef(null);
   const timeoutRef = useRef(null);
-  
+
   const [scanning, setScanning] = useState(false);
   const [title, setTitle] = useState("Loading...");
   const [result, setResult] = useState(null);
@@ -37,7 +37,7 @@ export default function AdminScannerMeetup() {
         { facingMode: "environment" },
         { fps: 12, qrbox: { width: 280, height: 280 } },
         async (text) => await handleScan(text.trim()),
-        () => {}
+        () => { }
       );
     } catch (err) {
       toast.error("Camera access denied");
@@ -49,16 +49,67 @@ export default function AdminScannerMeetup() {
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
     setResult(null);
     scannerRef.current?.start(
-      { facingMode: "environment" }, 
-      { fps: 12, qrbox: 280 }, 
-      handleScan, 
-      () => {}
+      { facingMode: "environment" },
+      { fps: 12, qrbox: 280 },
+      handleScan,
+      () => { }
     );
   };
 
   const finishScan = (resultObj) => {
     setResult(resultObj);
     timeoutRef.current = setTimeout(resumeScanning, 2200);
+  };
+
+  const updateUserAttendance = async (userId) => {
+    try {
+      // 1. Get current meetup details
+      const { data: meetupData } = await supabase
+        .from("meetup")
+        .select("title, start_date_time, venue")
+        .eq("id", meetupId)
+        .single();
+
+      if (!meetupData) return;
+
+      // 2. Get user's current attended_meetups
+      const { data: userData } = await supabase
+        .from("users")
+        .select("attended_meetups")
+        .eq("uid", userId)
+        .single();
+
+      let attended = userData?.attended_meetups || [];
+
+      // Ensure it's an array (handle if it's null or not an array)
+      if (!Array.isArray(attended)) attended = [];
+
+      // 3. Check if already added
+      const alreadyAdded = attended.some(m => m.meetup_id === meetupId);
+      if (alreadyAdded) return;
+
+      // 4. Add new meetup
+      const newEntry = {
+        meetup_id: meetupId,
+        title: meetupData.title,
+        date: meetupData.start_date_time,
+        venue: meetupData.venue,
+        attended_at: new Date().toISOString()
+      };
+
+      const updatedList = [...attended, newEntry];
+
+      // 5. Update user profile
+      await supabase
+        .from("users")
+        .update({ attended_meetups: updatedList })
+        .eq("uid", userId);
+
+      console.log("Updated user attendance:", userId);
+
+    } catch (err) {
+      console.error("Failed to update user attendance:", err);
+    }
   };
 
   const handleScan = async (code) => {
@@ -96,7 +147,7 @@ export default function AdminScannerMeetup() {
         }
 
         name = reg.user_name || "User";
-        
+
         // Try to get display name if user_id exists
         if (reg.user_id) {
           const { data: u } = await supabase
@@ -104,16 +155,16 @@ export default function AdminScannerMeetup() {
             .select("display_name")
             .eq("uid", reg.user_id)
             .maybeSingle();
-          
+
           if (u?.display_name) name = u.display_name;
         }
 
         // Update check-in status
         const { error: updateError } = await supabase
           .from("registrations")
-          .update({ 
-            is_checked_in: true, 
-            checked_in_at: new Date().toISOString() 
+          .update({
+            is_checked_in: true,
+            checked_in_at: new Date().toISOString()
           })
           .eq("meetup_id", meetupId)
           .eq("token", code);
@@ -124,8 +175,14 @@ export default function AdminScannerMeetup() {
           return;
         }
 
+        // --- NEW: Update User's Attended Meetups ---
+        if (reg.user_id) {
+          await updateUserAttendance(reg.user_id);
+        }
+        // -------------------------------------------
+
         finishScan({ name: name, type: "success" });
-      } 
+      }
       // 2. Check if using New UID Flow
       else {
         const { data: user, error: userError } = await supabase
@@ -160,9 +217,9 @@ export default function AdminScannerMeetup() {
 
         const { error: updateError } = await supabase
           .from("registrations")
-          .update({ 
-            is_checked_in: true, 
-            checked_in_at: new Date().toISOString() 
+          .update({
+            is_checked_in: true,
+            checked_in_at: new Date().toISOString()
           })
           .eq("id", reg.id);
 
@@ -171,6 +228,10 @@ export default function AdminScannerMeetup() {
           finishScan({ name: "Update failed", type: "error" });
           return;
         }
+
+        // --- NEW: Update User's Attended Meetups ---
+        await updateUserAttendance(code); // code is the uid here
+        // -------------------------------------------
 
         finishScan({ name: name, type: "success" });
       }
@@ -190,14 +251,14 @@ export default function AdminScannerMeetup() {
   return (
     <>
       <Toaster position="top-center" toastOptions={{ style: { background: '#333', color: '#fff' } }} />
-      
+
       <div className="fixed inset-0 bg-zinc-950 text-white overflow-hidden flex flex-col">
-        
+
         {/* Top Bar */}
         <div className="absolute top-0 left-0 right-0 z-30 p-4 pt-6 bg-gradient-to-b from-black/80 to-transparent">
           <div className="flex items-center justify-between max-w-md mx-auto w-full">
-            <button 
-              onClick={() => navigate(-1)} 
+            <button
+              onClick={() => navigate(-1)}
               className="p-3 rounded-full bg-white/10 backdrop-blur-md border border-white/10 active:scale-95 transition-all"
             >
               <ArrowLeft className="w-5 h-5" />
@@ -212,14 +273,14 @@ export default function AdminScannerMeetup() {
 
         {/* Main Content */}
         <div className="flex-1 relative bg-black">
-          
+
           <div id="reader" className="absolute inset-0 w-full h-full object-cover [&>video]:object-cover [&>video]:h-full [&>video]:w-full" />
 
           {/* Active Scanning UI */}
           {scanning && !result && (
             <div className="absolute inset-0 z-10 pointer-events-none flex flex-col items-center justify-center">
               <div className="absolute inset-0 border-[100vmax] border-black/60 box-border pointer-events-none transition-all duration-500" />
-              
+
               <div className="relative w-72 h-72 z-20">
                 <div className="absolute top-0 left-0 w-8 h-8 border-l-4 border-t-4 border-emerald-500 rounded-tl-2xl shadow-[0_0_15px_rgba(16,185,129,0.5)]" />
                 <div className="absolute top-0 right-0 w-8 h-8 border-r-4 border-t-4 border-emerald-500 rounded-tr-2xl shadow-[0_0_15px_rgba(16,185,129,0.5)]" />
@@ -244,7 +305,7 @@ export default function AdminScannerMeetup() {
                     <QrCode className="w-16 h-16 text-white" />
                   </div>
                 </div>
-                
+
                 <div className="space-y-2">
                   <h2 className="text-2xl font-bold text-white">Ready to Check In</h2>
                   <p className="text-zinc-400">Scan attendee tickets or user IDs</p>
@@ -264,7 +325,7 @@ export default function AdminScannerMeetup() {
           {/* Result Modal */}
           {result && (
             <div className="absolute inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-4 animate-fade-in">
-              <div 
+              <div
                 className={`w-full max-w-sm bg-zinc-900 border border-white/10 rounded-3xl p-8 pb-6 text-center shadow-2xl transform transition-all animate-pop-up
                   ${result.type === 'success' ? 'shadow-[0_0_50px_rgba(16,185,129,0.2)]' : ''}
                   ${result.type === 'error' ? 'shadow-[0_0_50px_rgba(239,68,68,0.2)]' : ''}
@@ -272,9 +333,9 @@ export default function AdminScannerMeetup() {
               >
                 {/* Icon */}
                 <div className={`mx-auto w-20 h-20 rounded-full flex items-center justify-center mb-6
-                  ${result.type === "success" ? "bg-emerald-500/20 text-emerald-400" : 
-                    result.type === "already" ? "bg-amber-500/20 text-amber-400" : 
-                    "bg-red-500/20 text-red-400"}`}
+                  ${result.type === "success" ? "bg-emerald-500/20 text-emerald-400" :
+                    result.type === "already" ? "bg-amber-500/20 text-amber-400" :
+                      "bg-red-500/20 text-red-400"}`}
                 >
                   {result.type === "success" && <Check className="w-10 h-10" strokeWidth={3} />}
                   {result.type === "already" && <AlertCircle className="w-10 h-10" strokeWidth={3} />}
@@ -283,26 +344,26 @@ export default function AdminScannerMeetup() {
 
                 {/* Text */}
                 <h2 className={`text-3xl font-black mb-2 tracking-tight
-                   ${result.type === "success" ? "text-emerald-400" : 
-                     result.type === "already" ? "text-amber-400" : 
-                     "text-red-400"}`}
+                   ${result.type === "success" ? "text-emerald-400" :
+                    result.type === "already" ? "text-amber-400" :
+                      "text-red-400"}`}
                 >
-                  {result.type === "success" ? "Checked In!" : 
-                   result.type === "already" ? "Already In" : 
-                   "Error"}
+                  {result.type === "success" ? "Checked In!" :
+                    result.type === "already" ? "Already In" :
+                      "Error"}
                 </h2>
-                
+
                 <p className="text-2xl text-white font-semibold break-words leading-tight mb-6">
                   {result.name}
                 </p>
-                
+
                 {/* Auto Progress */}
                 <div className="h-1 w-full bg-zinc-800 rounded-full overflow-hidden mb-4">
                   <div className="h-full bg-white/20 w-full animate-progress-shrink origin-left" />
                 </div>
 
                 {/* Immediate Scan Button */}
-                <button 
+                <button
                   onClick={resumeScanning}
                   className="w-full py-3 bg-white/5 hover:bg-white/10 active:bg-white/20 border border-white/10 rounded-xl font-medium text-white transition-colors flex items-center justify-center gap-2"
                 >

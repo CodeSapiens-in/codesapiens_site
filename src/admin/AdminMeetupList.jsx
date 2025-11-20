@@ -38,6 +38,7 @@ const AdminMeetupsList = () => {
           id,
           title,
           description,
+          venue,
           start_date_time,
           end_date_time,
           created_at,
@@ -242,6 +243,10 @@ const AdminMeetupCard = ({ meetup, onDelete, deletingId, navigate }) => {
             <div className="flex items-center text-sm text-gray-500">
               <Clock className="w-4 h-4 mr-2 text-indigo-500" />
               <span>{formatTime(startObj)} – {formatTime(endObj)}</span>
+            </div>
+            <div className="flex items-center text-sm text-gray-500">
+              <MapPin className="w-4 h-4 mr-2 text-pink-500" />
+              <span className="truncate">{meetup.venue || "Venue not set"}</span>
             </div>
             <div className="flex items-center text-sm text-gray-500">
               <Users className="w-4 h-4 mr-2 text-indigo-500" />
