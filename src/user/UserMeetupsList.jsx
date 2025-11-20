@@ -63,7 +63,7 @@ export default function UserMeetupsList() {
 
       const { data: meetupsData, error: meetupError } = await supabase
         .from("meetup")
-        .select("*, venue")
+        .select("*, venue, registration_start_time, registration_end_time, registration_open_until_meetup_end")
         .order("start_date_time", { ascending: true });
 
       if (meetupError) {
@@ -274,6 +274,40 @@ function MeetupCard({ meetup, user, userProfile, isRegistering, onToggleRegister
     });
   };
 
+  // Registration Status Logic
+  const getRegistrationStatus = () => {
+    const now = new Date();
+
+    // 1. Not Open Yet
+    if (meetup.registration_start_time && now < new Date(meetup.registration_start_time)) {
+      return {
+        isOpen: false,
+        message: `Opens ${new Date(meetup.registration_start_time).toLocaleDateString()}`,
+        type: 'upcoming'
+      };
+    }
+
+    // 2. Closed
+    let closeTime = null;
+    if (meetup.registration_open_until_meetup_end) {
+      closeTime = endDateObj;
+    } else if (meetup.registration_end_time) {
+      closeTime = new Date(meetup.registration_end_time);
+    } else {
+      // Default: Close when event starts if no specific end time set
+      closeTime = startDateObj;
+    }
+
+    if (now > closeTime) {
+      return { isOpen: false, message: "Registration Closed", type: 'closed' };
+    }
+
+    // 3. Open
+    return { isOpen: true, message: "Register Now", type: 'open' };
+  };
+
+  const regStatus = getRegistrationStatus();
+
   return (
     <div
       className={`group bg-white rounded-3xl shadow-sm border border-gray-200 overflow-hidden transition-all hover:shadow-xl hover:border-indigo-100 ${!isUpcoming && !isLive ? "opacity-75 grayscale-[0.3]" : ""
@@ -349,7 +383,7 @@ function MeetupCard({ meetup, user, userProfile, isRegistering, onToggleRegister
                   View Entry Pass
                 </button>
               </div>
-            ) : isUpcoming || isLive ? (
+            ) : regStatus.isOpen ? (
               !user ? (
                 <button
                   onClick={() => toast.error("Please log in to register")}
@@ -370,8 +404,9 @@ function MeetupCard({ meetup, user, userProfile, isRegistering, onToggleRegister
                 </button>
               )
             ) : (
-              <span className="text-gray-400 text-sm font-medium bg-gray-100 px-4 py-2 rounded-lg">
-                Event Ended
+              <span className={`text-sm font-medium px-4 py-2 rounded-lg ${regStatus.type === 'upcoming' ? 'bg-blue-50 text-blue-600' : 'bg-gray-100 text-gray-500'
+                }`}>
+                {regStatus.message}
               </span>
             )}
           </div>

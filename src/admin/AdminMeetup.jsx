@@ -25,6 +25,9 @@ const AdminMeetup = () => {
     venue: "",
     start_date_time: "",
     end_date_time: "",
+    registration_start_time: "",
+    registration_end_time: "",
+    registration_open_until_meetup_end: false,
   });
 
   // Fetch current user
@@ -42,12 +45,15 @@ const AdminMeetup = () => {
   }, [navigate]);
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    const { name, value, type, checked } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: type === "checkbox" ? checked : value,
+    }));
   };
 
   const validateForm = () => {
-    const { title, venue, start_date_time, end_date_time } = formData;
+    const { title, venue, start_date_time, end_date_time, registration_start_time, registration_end_time, registration_open_until_meetup_end } = formData;
     if (!title.trim() || title.trim().length < 3) {
       toast.error("Title must be at least 3 characters");
       return false;
@@ -63,6 +69,12 @@ const AdminMeetup = () => {
     if (new Date(end_date_time) <= new Date(start_date_time)) {
       toast.error("End time must be after start time");
       return false;
+    }
+    if (registration_start_time && !registration_open_until_meetup_end && registration_end_time) {
+      if (new Date(registration_end_time) <= new Date(registration_start_time)) {
+        toast.error("Registration end time must be after registration start time");
+        return false;
+      }
     }
     return true;
   };
@@ -82,6 +94,9 @@ const AdminMeetup = () => {
             venue: formData.venue.trim(),
             start_date_time: formData.start_date_time,
             end_date_time: formData.end_date_time,
+            registration_start_time: formData.registration_start_time || null,
+            registration_end_time: formData.registration_open_until_meetup_end ? null : (formData.registration_end_time || null),
+            registration_open_until_meetup_end: formData.registration_open_until_meetup_end,
             created_by: currentUser.id,
             updated_by: currentUser.id,
           },
@@ -237,6 +252,68 @@ const AdminMeetup = () => {
                       required
                     />
                   </div>
+                </div>
+              </div>
+
+              {/* Registration Window Section */}
+              <div className="h-px bg-gray-100 my-6" />
+
+              <div className="space-y-4">
+                <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider">Registration Window</h3>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                  <div className="group">
+                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">Registration Opens At</label>
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <Clock className="h-5 w-5 text-gray-400 group-focus-within:text-indigo-500 transition-colors" />
+                      </div>
+                      <input
+                        type="datetime-local"
+                        name="registration_start_time"
+                        value={formData.registration_start_time}
+                        onChange={handleChange}
+                        className="block w-full pl-10 pr-3 py-3 border border-gray-200 rounded-xl bg-gray-50 focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                      />
+                    </div>
+                    <p className="text-[10px] text-gray-400 mt-1">Leave empty to open immediately</p>
+                  </div>
+
+                  <div className="group">
+                    <label className={`block text-xs font-bold uppercase tracking-wider mb-1.5 ${formData.registration_open_until_meetup_end ? 'text-gray-300' : 'text-gray-500'}`}>
+                      Registration Closes At
+                    </label>
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <Clock className={`h-5 w-5 transition-colors ${formData.registration_open_until_meetup_end ? 'text-gray-200' : 'text-gray-400 group-focus-within:text-indigo-500'}`} />
+                      </div>
+                      <input
+                        type="datetime-local"
+                        name="registration_end_time"
+                        value={formData.registration_end_time}
+                        onChange={handleChange}
+                        disabled={formData.registration_open_until_meetup_end}
+                        className={`block w-full pl-10 pr-3 py-3 border rounded-xl transition-all ${formData.registration_open_until_meetup_end
+                          ? 'bg-gray-50 border-gray-100 text-gray-300 cursor-not-allowed'
+                          : 'border-gray-200 bg-gray-50 focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent'
+                          }`}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3 p-4 bg-indigo-50/50 rounded-xl border border-indigo-100">
+                  <input
+                    type="checkbox"
+                    id="registration_open_until_meetup_end"
+                    name="registration_open_until_meetup_end"
+                    checked={formData.registration_open_until_meetup_end}
+                    onChange={handleChange}
+                    className="w-5 h-5 text-indigo-600 rounded focus:ring-indigo-500 border-gray-300"
+                  />
+                  <label htmlFor="registration_open_until_meetup_end" className="text-sm font-medium text-gray-700 cursor-pointer select-none">
+                    Keep registration open until the event ends
+                  </label>
                 </div>
               </div>
 
