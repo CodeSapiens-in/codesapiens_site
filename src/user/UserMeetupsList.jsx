@@ -63,7 +63,7 @@ export default function UserMeetupsList() {
 
       const { data: meetupsData, error: meetupError } = await supabase
         .from("meetup")
-        .select("*")
+        .select("*, venue")
         .order("start_date_time", { ascending: true });
 
       if (meetupError) {
@@ -145,15 +145,15 @@ export default function UserMeetupsList() {
         prev.map((m) =>
           m.id === meetupId
             ? {
-                ...m,
-                registered: true,
-                registrationData: {
-                  token: data.token,
-                  name: nameToUse,
-                  email: emailToUse,
-                  registeredAt: data.created_at,
-                },
-              }
+              ...m,
+              registered: true,
+              registrationData: {
+                token: data.token,
+                name: nameToUse,
+                email: emailToUse,
+                registeredAt: data.created_at,
+              },
+            }
             : m
         )
       );
@@ -276,9 +276,8 @@ function MeetupCard({ meetup, user, userProfile, isRegistering, onToggleRegister
 
   return (
     <div
-      className={`group bg-white rounded-3xl shadow-sm border border-gray-200 overflow-hidden transition-all hover:shadow-xl hover:border-indigo-100 ${
-        !isUpcoming && !isLive ? "opacity-75 grayscale-[0.3]" : ""
-      }`}
+      className={`group bg-white rounded-3xl shadow-sm border border-gray-200 overflow-hidden transition-all hover:shadow-xl hover:border-indigo-100 ${!isUpcoming && !isLive ? "opacity-75 grayscale-[0.3]" : ""
+        }`}
     >
       <div className="flex flex-col md:flex-row">
         {/* Left: Date */}
@@ -330,7 +329,7 @@ function MeetupCard({ meetup, user, userProfile, isRegistering, onToggleRegister
                 <div className="w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center text-gray-400">
                   <MapPin className="w-4 h-4" />
                 </div>
-                <span className="font-medium">Event Venue</span>
+                <span className="font-medium">{meetup.venue || "Venue not set"}</span>
               </div>
             </div>
           </div>
@@ -361,11 +360,10 @@ function MeetupCard({ meetup, user, userProfile, isRegistering, onToggleRegister
               ) : (
                 <button
                   onClick={onToggleRegister}
-                  className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl text-sm font-semibold transition-all ${
-                    isRegistering
+                  className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl text-sm font-semibold transition-all ${isRegistering
                       ? "bg-gray-100 text-gray-600 hover:bg-gray-200"
                       : "bg-indigo-600 text-white hover:bg-indigo-700 shadow-lg shadow-indigo-200 hover:shadow-indigo-300 hover:-translate-y-0.5"
-                  }`}
+                    }`}
                 >
                   {isRegistering ? "Cancel" : "Register Now"}
                   {!isRegistering && <ChevronRight className="w-4 h-4" />}
@@ -431,7 +429,9 @@ function TicketModal({ meetup, onClose }) {
         </div>
 
         <div className="bg-gray-50 p-4 text-center border-t border-gray-100">
-          <p className="text-xs text-gray-400 font-medium">Show this QR code at the venue entrance</p>
+          <p className="text-xs text-gray-400 font-medium">
+            Show this QR code at {meetup.venue || "the venue"} entrance
+          </p>
         </div>
       </div>
     </div>

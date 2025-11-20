@@ -22,6 +22,7 @@ const AdminMeetup = () => {
   const [formData, setFormData] = useState({
     title: "",
     description: "",
+    venue: "",
     start_date_time: "",
     end_date_time: "",
   });
@@ -46,9 +47,13 @@ const AdminMeetup = () => {
   };
 
   const validateForm = () => {
-    const { title, start_date_time, end_date_time } = formData;
+    const { title, venue, start_date_time, end_date_time } = formData;
     if (!title.trim() || title.trim().length < 3) {
       toast.error("Title must be at least 3 characters");
+      return false;
+    }
+    if (!venue.trim()) {
+      toast.error("Venue is required");
       return false;
     }
     if (!start_date_time || !end_date_time) {
@@ -74,6 +79,7 @@ const AdminMeetup = () => {
           {
             title: formData.title.trim(),
             description: formData.description.trim() || null,
+            venue: formData.venue.trim(),
             start_date_time: formData.start_date_time,
             end_date_time: formData.end_date_time,
             created_by: currentUser.id,
@@ -110,7 +116,7 @@ const AdminMeetup = () => {
   return (
     <div className="min-h-screen bg-gray-50 font-sans text-gray-900 pb-12">
       <Toaster position="top-center" />
-      
+
       {/* Header */}
       <div className="bg-white border-b sticky top-0 z-30">
         <div className="max-w-7xl mx-auto px-4 py-4 flex items-center gap-4">
@@ -128,7 +134,7 @@ const AdminMeetup = () => {
       </div>
 
       <main className="max-w-7xl mx-auto px-4 py-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
-        
+
         {/* LEFT COLUMN: Form */}
         <div className="lg:col-span-7 space-y-6">
           <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 sm:p-8">
@@ -138,7 +144,7 @@ const AdminMeetup = () => {
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-6">
-              
+
               {/* Title Input */}
               <div className="group">
                 <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">Event Title</label>
@@ -172,6 +178,25 @@ const AdminMeetup = () => {
                     rows={4}
                     className="block w-full pl-10 pr-3 py-3 border border-gray-200 rounded-xl leading-5 bg-gray-50 text-gray-900 placeholder-gray-400 focus:outline-none focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all resize-none"
                     placeholder="What is this event about?"
+                  />
+                </div>
+              </div>
+
+              {/* Venue Input */}
+              <div className="group">
+                <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">Venue</label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <MapPin className="h-5 w-5 text-gray-400 group-focus-within:text-indigo-500 transition-colors" />
+                  </div>
+                  <input
+                    type="text"
+                    name="venue"
+                    value={formData.venue}
+                    onChange={handleChange}
+                    className="block w-full pl-10 pr-3 py-3 border border-gray-200 rounded-xl leading-5 bg-gray-50 text-gray-900 placeholder-gray-400 focus:outline-none focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                    placeholder="e.g. Conference Hall A, Online, etc."
+                    required
                   />
                 </div>
               </div>
@@ -217,20 +242,19 @@ const AdminMeetup = () => {
 
               {/* Duration Calculation / Error */}
               {formData.start_date_time && formData.end_date_time && (
-                 <div className={`mt-2 p-3 rounded-lg text-sm flex items-center gap-2 ${
-                   new Date(formData.end_date_time) > new Date(formData.start_date_time) 
-                   ? "bg-green-50 text-green-700 border border-green-100" 
-                   : "bg-red-50 text-red-700 border border-red-100"
-                 }`}>
-                    {new Date(formData.end_date_time) > new Date(formData.start_date_time) ? (
-                       <>
-                         <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"/>
-                         Duration: {((new Date(formData.end_date_time) - new Date(formData.start_date_time)) / (1000 * 60 * 60)).toFixed(1)} hours
-                       </>
-                    ) : (
-                       "End time must be after start time"
-                    )}
-                 </div>
+                <div className={`mt-2 p-3 rounded-lg text-sm flex items-center gap-2 ${new Date(formData.end_date_time) > new Date(formData.start_date_time)
+                  ? "bg-green-50 text-green-700 border border-green-100"
+                  : "bg-red-50 text-red-700 border border-red-100"
+                  }`}>
+                  {new Date(formData.end_date_time) > new Date(formData.start_date_time) ? (
+                    <>
+                      <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                      Duration: {((new Date(formData.end_date_time) - new Date(formData.start_date_time)) / (1000 * 60 * 60)).toFixed(1)} hours
+                    </>
+                  ) : (
+                    "End time must be after start time"
+                  )}
+                </div>
               )}
 
               {/* Submit Button */}
@@ -250,65 +274,65 @@ const AdminMeetup = () => {
 
         {/* RIGHT COLUMN: Live Preview */}
         <div className="lg:col-span-5">
-           <div className="sticky top-24 space-y-4">
-              <div className="flex items-center gap-2 text-gray-400 mb-2 ml-1">
-                 <Eye className="w-4 h-4" />
-                 <span className="text-xs font-bold uppercase tracking-widest">Live Preview</span>
-              </div>
+          <div className="sticky top-24 space-y-4">
+            <div className="flex items-center gap-2 text-gray-400 mb-2 ml-1">
+              <Eye className="w-4 h-4" />
+              <span className="text-xs font-bold uppercase tracking-widest">Live Preview</span>
+            </div>
 
-              {/* Preview Card */}
-              <div className="bg-white rounded-2xl shadow-xl shadow-indigo-100/50 border border-gray-100 overflow-hidden relative group">
-                 <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500"></div>
-                 
-                 <div className="p-6 sm:p-8">
-                    <div className="flex gap-5 items-start">
-                        {/* Date Box Preview */}
-                        <div className="hidden sm:flex flex-col items-center justify-center bg-indigo-50 text-indigo-700 rounded-2xl w-16 h-16 shrink-0 border border-indigo-100">
-                            <span className="text-[10px] font-bold uppercase tracking-wider">
-                                {formData.start_date_time ? new Date(formData.start_date_time).toLocaleString('default', { month: 'short' }) : "DEC"}
-                            </span>
-                            <span className="text-xl font-bold">
-                                {formData.start_date_time ? new Date(formData.start_date_time).getDate() : "25"}
-                            </span>
-                        </div>
+            {/* Preview Card */}
+            <div className="bg-white rounded-2xl shadow-xl shadow-indigo-100/50 border border-gray-100 overflow-hidden relative group">
+              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500"></div>
 
-                        <div className="flex-1 min-w-0">
-                            <h3 className="text-2xl font-bold text-gray-900 leading-tight break-words">
-                                {formData.title || <span className="text-gray-300 italic">Untitled Event</span>}
-                            </h3>
-                            <div className="mt-4 flex flex-col gap-2 text-sm text-gray-600">
-                                <div className="flex items-center gap-2">
-                                    <Clock className="w-4 h-4 text-indigo-500" />
-                                    <span>
-                                        {formatPreviewTime(formData.start_date_time)} – {formatPreviewTime(formData.end_date_time)}
-                                    </span>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                    <MapPin className="w-4 h-4 text-pink-500" />
-                                    <span>Event Venue</span>
-                                </div>
-                            </div>
-                        </div>
+              <div className="p-6 sm:p-8">
+                <div className="flex gap-5 items-start">
+                  {/* Date Box Preview */}
+                  <div className="hidden sm:flex flex-col items-center justify-center bg-indigo-50 text-indigo-700 rounded-2xl w-16 h-16 shrink-0 border border-indigo-100">
+                    <span className="text-[10px] font-bold uppercase tracking-wider">
+                      {formData.start_date_time ? new Date(formData.start_date_time).toLocaleString('default', { month: 'short' }) : "DEC"}
+                    </span>
+                    <span className="text-xl font-bold">
+                      {formData.start_date_time ? new Date(formData.start_date_time).getDate() : "25"}
+                    </span>
+                  </div>
+
+                  <div className="flex-1 min-w-0">
+                    <h3 className="text-2xl font-bold text-gray-900 leading-tight break-words">
+                      {formData.title || <span className="text-gray-300 italic">Untitled Event</span>}
+                    </h3>
+                    <div className="mt-4 flex flex-col gap-2 text-sm text-gray-600">
+                      <div className="flex items-center gap-2">
+                        <Clock className="w-4 h-4 text-indigo-500" />
+                        <span>
+                          {formatPreviewTime(formData.start_date_time)} – {formatPreviewTime(formData.end_date_time)}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <MapPin className="w-4 h-4 text-pink-500" />
+                        <span>{formData.venue || "Event Venue"}</span>
+                      </div>
                     </div>
+                  </div>
+                </div>
 
-                    <div className="mt-6 pt-6 border-t border-gray-100">
-                        <p className="text-gray-600 text-sm leading-relaxed whitespace-pre-wrap">
-                            {formData.description || <span className="text-gray-300 italic">Description will appear here...</span>}
-                        </p>
-                    </div>
-                 </div>
-                 
-                 {/* Faux Action Bar */}
-                 <div className="bg-gray-50 px-6 py-4 flex justify-between items-center border-t border-gray-100">
-                    <div className="h-2 w-20 bg-gray-200 rounded"></div>
-                    <div className="h-8 w-28 bg-indigo-600 rounded-lg opacity-20"></div>
-                 </div>
+                <div className="mt-6 pt-6 border-t border-gray-100">
+                  <p className="text-gray-600 text-sm leading-relaxed whitespace-pre-wrap">
+                    {formData.description || <span className="text-gray-300 italic">Description will appear here...</span>}
+                  </p>
+                </div>
               </div>
 
-              <div className="bg-blue-50 rounded-xl p-4 border border-blue-100 text-blue-800 text-sm">
-                 <p><strong>Tip:</strong> Use a catchy title to attract more attendees. Detailed descriptions help reduce questions later.</p>
+              {/* Faux Action Bar */}
+              <div className="bg-gray-50 px-6 py-4 flex justify-between items-center border-t border-gray-100">
+                <div className="h-2 w-20 bg-gray-200 rounded"></div>
+                <div className="h-8 w-28 bg-indigo-600 rounded-lg opacity-20"></div>
               </div>
-           </div>
+            </div>
+
+            <div className="bg-blue-50 rounded-xl p-4 border border-blue-100 text-blue-800 text-sm">
+              <p><strong>Tip:</strong> Use a catchy title to attract more attendees. Detailed descriptions help reduce questions later.</p>
+            </div>
+          </div>
         </div>
 
       </main>
