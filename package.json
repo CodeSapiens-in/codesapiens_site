@@ -7,7 +7,8 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "lint:fix": "eslint . --fix"
   },
   "dependencies": {
     "@hcaptcha/react-hcaptcha": "^1.12.1",
@@ -17,7 +18,7 @@
     "@supabase/supabase-js": "^2.56.0",
     "@tailwindcss/vite": "^4.1.12",
     "@vercel/blob": "^2.0.0",
-    "flowbite-react": "^0.12.7",
+    "date-fns": "^4.1.0",
     "framer-motion": "^12.23.12",
     "html5-qrcode": "^2.3.8",
     "lodash": "^4.17.21",

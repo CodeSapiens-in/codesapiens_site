@@ -93,13 +93,14 @@ const UserProfile = () => {
   const collegeInputRef = useRef(null);
   const collegeDropdownRef = useRef(null);
 
-  const tabs = ["Overview", "Skills", "Achievements", "Activity"];
+  // Add "Attended Meetups" to tabs
+  const tabs = ["Overview", "Skills", "Achievements", "Activity", "Attended Meetups"];
 
   // Generate years from 2020 to 2040 for the dropdown
-  const graduationYears =  [
-  ...Array.from({ length: 21 }, (_, i) => (2020 + i).toString()),
-  "Already Graduated"
-];
+  const graduationYears = [
+    ...Array.from({ length: 21 }, (_, i) => (2020 + i).toString()),
+    "Already Graduated"
+  ];
 
   // Utility function to validate and normalize URLs
   const validateUrl = (url) => {
@@ -173,10 +174,10 @@ const UserProfile = () => {
             adminApproved: data.admin_approved || false,
             createdAt: data.created_at,
             updatedAt: data.updated_at,
-            year: data.year === "Already Graduated" 
+            year: data.year === "Already Graduated"
               ? "Already Graduated"
-              : data.year 
-                ? parseInt(data.year, 10) 
+              : data.year
+                ? parseInt(data.year, 10)
                 : null,
             graduatingyear: data.year === "Already Graduated"
               ? "Already Graduated"
@@ -185,6 +186,7 @@ const UserProfile = () => {
             department: data.department || "Not specified",
             username: data.username || "",
             isPublic: data.is_public || false,
+            attendedMeetups: data.attended_meetups || [],
           };
 
           setResumeUrl(transformedUser.resumeUrl);
@@ -643,10 +645,10 @@ const UserProfile = () => {
         linkedin_url: validateUrl(editedData.linkedinUrl?.trim()),
         portfolio_url: validateUrl(editedData.portfolioUrl?.trim()),
         // Fix the year handling here
-        year: editedData.graduatingyear === "Already Graduated" 
+        year: editedData.graduatingyear === "Already Graduated"
           ? "Already Graduated"
-          : editedData.graduatingyear 
-            ? parseInt(editedData.graduatingyear, 10) 
+          : editedData.graduatingyear
+            ? parseInt(editedData.graduatingyear, 10)
             : null,
         major: editedData.major?.trim() || "Not specified",
         department: editedData.department?.trim() || "Not specified",
@@ -707,39 +709,39 @@ const UserProfile = () => {
   // Data for UI sections
   const personalInfo = userData
     ? [
-        { label: "Username", value: userData.username || "Not set", editable: true, type: "text" },
-        { label: "College", value: userData.college, editable: true, type: "college" },
-        {
-          label: "Graduating Year",
-          value: userData.year === "Already Graduated" 
-            ? "Already Graduated" 
-            : userData.year?.toString() || "Not specified",
-          editable: true,
-          type: "dropdown",
-          options: graduationYears,
-          name: "graduatingyear" // Add this to match the state property
-        },
-        { label: "Major", value: userData.major, editable: true, type: "dropdown", options: academicData.majors },
-        { label: "Department", value: userData.department, editable: true, type: "dropdown", options: academicData.departments },
-      ]
+      { label: "Username", value: userData.username || "Not set", editable: true, type: "text" },
+      { label: "College", value: userData.college, editable: true, type: "college" },
+      {
+        label: "Graduating Year",
+        value: userData.year === "Already Graduated"
+          ? "Already Graduated"
+          : userData.year?.toString() || "Not specified",
+        editable: true,
+        type: "dropdown",
+        options: graduationYears,
+        name: "graduatingyear" // Add this to match the state property
+      },
+      { label: "Major", value: userData.major, editable: true, type: "dropdown", options: academicData.majors },
+      { label: "Department", value: userData.department, editable: true, type: "dropdown", options: academicData.departments },
+    ]
     : [];
 
   // Social links
   const socialLinks = userData
     ? [
-        { label: "GitHub Profile", icon: Github, href: userData.githubUrl, name: "githubUrl" },
-        { label: "LinkedIn Profile", icon: Linkedin, href: userData.linkedinUrl, name: "linkedinUrl" },
-        { label: "Portfolio Website", icon: Globe, href: userData.portfolioUrl, name: "portfolioUrl" },
-      ]
+      { label: "GitHub Profile", icon: Github, href: userData.githubUrl, name: "githubUrl" },
+      { label: "LinkedIn Profile", icon: Linkedin, href: userData.linkedinUrl, name: "linkedinUrl" },
+      { label: "Portfolio Website", icon: Globe, href: userData.portfolioUrl, name: "portfolioUrl" },
+    ]
     : [];
 
   const technicalSkills =
     userSkills.length > 0
       ? userSkills.slice(0, 5).map((skill, index) => ({
-          skill,
-          level: 90 - index * 5,
-          color: ["bg-yellow-500", "bg-blue-500", "bg-green-500", "bg-green-600", "bg-purple-500"][index] || "bg-gray-500",
-        }))
+        skill,
+        level: 90 - index * 5,
+        color: ["bg-yellow-500", "bg-blue-500", "bg-green-500", "bg-green-600", "bg-purple-500"][index] || "bg-gray-500",
+      }))
       : [{ skill: "No skills added", level: 0, color: "bg-gray-300" }];
 
   // Render loading / auth states
@@ -879,9 +881,8 @@ const UserProfile = () => {
                             setIsCopied(true);
                             setTimeout(() => setIsCopied(false), 2000);
                           }}
-                          className={`flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 ${
-                            isCopied ? "bg-green-600 text-white" : "bg-green-500 text-white hover:bg-green-600"
-                          }`}
+                          className={`flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 ${isCopied ? "bg-green-600 text-white" : "bg-green-500 text-white hover:bg-green-600"
+                            }`}
                           title="Share public profile"
                         >
                           {isCopied ? (
@@ -902,9 +903,8 @@ const UserProfile = () => {
                     <div className="flex space-x-2">
                       <button
                         onClick={handleSave}
-                        className={`flex items-center space-x-2 px-4 py-2 bg-green-500 text-white rounded-lg transition-colors duration-200 text-sm font-medium ${
-                          usernameError ? "opacity-50 cursor-not-allowed" : "hover:bg-green-600"
-                        }`}
+                        className={`flex items-center space-x-2 px-4 py-2 bg-green-500 text-white rounded-lg transition-colors duration-200 text-sm font-medium ${usernameError ? "opacity-50 cursor-not-allowed" : "hover:bg-green-600"
+                          }`}
                         title="Save changes"
                         disabled={!!usernameError}
                       >
@@ -990,9 +990,8 @@ const UserProfile = () => {
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
-                className={`pb-3 text-sm font-medium border-b-2 transition-colors ${
-                  activeTab === tab ? "text-blue-600 border-blue-600" : "text-gray-500 border-transparent hover:text-gray-700"
-                }`}
+                className={`pb-3 text-sm font-medium border-b-2 transition-colors ${activeTab === tab ? "text-blue-600 border-blue-600" : "text-gray-500 border-transparent hover:text-gray-700"
+                  }`}
               >
                 {tab}
               </button>
@@ -1040,9 +1039,8 @@ const UserProfile = () => {
                                 type="text"
                                 value={collegeSearch}
                                 onChange={handleCollegeChange}
-                                className={`text-sm text-gray-900 border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 w-full pr-8 ${
-                                  collegeError ? "border-red-500 focus:border-red-500 focus:ring-red-500" : ""
-                                }`}
+                                className={`text-sm text-gray-900 border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 w-full pr-8 ${collegeError ? "border-red-500 focus:border-red-500 focus:ring-red-500" : ""
+                                  }`}
                                 placeholder="Search college (min 3 characters)..."
                               />
                               {collegeLoading && (
@@ -1104,9 +1102,8 @@ const UserProfile = () => {
                                 name={info.label.toLowerCase().replace(" ", "")}
                                 value={editedData[info.label.toLowerCase().replace(" ", "")] || ""}
                                 onChange={handleInputChange}
-                                className={`text-sm text-gray-900 border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 w-full ${
-                                  info.label === "Username" && usernameError ? "border-red-500 focus:border-red-500 focus:ring-red-500" : ""
-                                }`}
+                                className={`text-sm text-gray-900 border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 w-full ${info.label === "Username" && usernameError ? "border-red-500 focus:border-red-500 focus:ring-red-500" : ""
+                                  }`}
                                 placeholder={info.label}
                               />
                               {info.label === "Username" && usernameError && (
@@ -1249,9 +1246,8 @@ const UserProfile = () => {
                       onDragLeave={handleDrag}
                       onDragOver={handleDrag}
                       onDrop={handleDrop}
-                      className={`relative border-2 border-dashed rounded-lg p-6 cursor-pointer transition-colors ${
-                        dragActive ? "border-blue-400 bg-blue-50" : "border-gray-300 hover:border-gray-400"
-                      }`}
+                      className={`relative border-2 border-dashed rounded-lg p-6 cursor-pointer transition-colors ${dragActive ? "border-blue-400 bg-blue-50" : "border-gray-300 hover:border-gray-400"
+                        }`}
                     >
                       {uploadingResume ? (
                         <div className="flex flex-col items-center space-y-2">
@@ -1420,35 +1416,76 @@ const UserProfile = () => {
 
         {/* Activity Tab */}
         {activeTab === "Activity" && (
-          <div className="bg-white rounded-lg shadow-sm border">
-            <div className="p-4 sm:p-6 border-b">
-              <h3 className="text-lg font-semibold text-gray-900">Activity Timeline</h3>
-            </div>
-            <div className="p-4 sm:p-6">
-              <div className="text-center py-12">
-                <Calendar className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                <h4 className="text-lg font-semibold text-gray-700 mb-2">Activity Timeline Coming Soon!</h4>
-                <p className="text-gray-500 mb-4">We're building a comprehensive activity tracking system to show your learning journey.</p>
-                <p className="text-sm text-gray-400">Check back soon for detailed activity insights!</p>
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="p-2 bg-purple-100 rounded-lg text-purple-600">
+                <TrendingUp className="w-5 h-5" />
               </div>
+              <h2 className="text-lg font-bold text-gray-900">Recent Activity</h2>
             </div>
+
+            <div className="text-center py-12 bg-gray-50 rounded-xl border border-dashed border-gray-200">
+              <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                <TrendingUp className="w-6 h-6 text-gray-400" />
+              </div>
+              <p className="text-gray-500 font-medium">No recent activity</p>
+              <p className="text-sm text-gray-400 mt-1">Join events and hackathons to build your streak!</p>
+            </div>
+          </div>
+        )}
+
+        {/* Attended Meetups Tab */}
+        {activeTab === "Attended Meetups" && (
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="p-2 bg-indigo-100 rounded-lg text-indigo-600">
+                <Calendar className="w-5 h-5" />
+              </div>
+              <h2 className="text-lg font-bold text-gray-900">Attended Meetups</h2>
+            </div>
+
+            {userData.attendedMeetups && userData.attendedMeetups.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {userData.attendedMeetups.map((meetup, index) => (
+                  <div key={index} className="p-4 rounded-xl border border-gray-100 bg-gray-50 hover:bg-white hover:shadow-md transition-all">
+                    <h3 className="font-bold text-gray-900 mb-1">{meetup.title}</h3>
+                    <div className="flex items-center gap-2 text-sm text-gray-500 mb-2">
+                      <Calendar className="w-3 h-3" />
+                      <span>{new Date(meetup.date).toLocaleDateString()}</span>
+                    </div>
+                    {meetup.venue && (
+                      <p className="text-xs text-gray-400 mt-2 pt-2 border-t border-gray-200">
+                        📍 {meetup.venue}
+                      </p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-12 bg-gray-50 rounded-xl border border-dashed border-gray-200">
+                <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                  <Calendar className="w-6 h-6 text-gray-400" />
+                </div>
+                <p className="text-gray-500 font-medium">No meetups attended yet</p>
+                <p className="text-sm text-gray-400 mt-1">Check in at events to see them here!</p>
+              </div>
+            )}
           </div>
         )}
       </main>
 
       {/* Mobile bottom navigation */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t px-3 py-2 sm:hidden z-40">
+      < div className="fixed bottom-0 left-0 right-0 bg-white border-t px-3 py-2 sm:hidden z-40" >
         <div className="flex justify-around">
           {tabs.map((tab, index) => {
-            const icons = [TrendingUp, Award, Calendar, Menu];
+            const icons = [TrendingUp, Award, Trophy, TrendingUp, Calendar];
             const IconComponent = icons[index];
             return (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
-                className={`flex flex-col items-center space-y-1 py-2 px-3 rounded-lg transition-colors ${
-                  activeTab === tab ? "text-blue-600 bg-blue-50" : "text-gray-600"
-                }`}
+                className={`flex flex-col items-center space-y-1 py-2 px-3 rounded-lg transition-colors ${activeTab === tab ? "text-blue-600 bg-blue-50" : "text-gray-600"
+                  }`}
               >
                 <IconComponent className="w-5 h-5" />
                 <span className="text-xs font-medium">{tab}</span>
@@ -1456,9 +1493,9 @@ const UserProfile = () => {
             );
           })}
         </div>
-      </div>
+      </div >
       <div className="h-20 sm:hidden"></div>
-    </div>
+    </div >
   );
 };
 
