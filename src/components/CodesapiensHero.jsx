@@ -439,7 +439,7 @@ const CodeSapiensHero = () => {
             <h3 className="text-xl sm:text-2xl sm:text-3xl font-light text-zinc-900 mb-6 sm:mb-8 text-center">Upcoming Events</h3>
             <div className="w-full max-w-4xl mx-auto">
               <iframe 
-                src="https://lu.ma/embed/calendar/cal-wqMPYDIELcTaigI/events" 
+                src="https://luma.com/embed/calendar/cal-UvcJfwpSBZdMc61/events" 
                 width="100%" 
                 height="400" 
                 className="sm:h-96 lg:h-[450px]"

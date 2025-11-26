@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Bell, Settings, Menu, X, ChevronDown, User, Loader2, Shield, Users, BarChart3, TextSearch, BookPlus, CalendarSearch, FileCheck2, Computer, BrainCircuit ,Code, Ticket} from 'lucide-react';
+import { Bell, Settings, Menu, X, ChevronDown, User, Loader2, Shield, Users, BarChart3, TextSearch, BookPlus, CalendarSearch, FileCheck2, Computer, BrainCircuit ,Code} from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabaseClient';
 
@@ -455,16 +455,6 @@ export default function UnifiedNavbar() {
                 <BrainCircuit className="w-4 h-4 mr-2 flex-shrink-0" />
                 <span>Mentorship Form Submission</span>
               </button>
-              <button
-                onClick={() => {
-                  setIsProfileDropdownOpen(false);
-                  navigate('/admin/meetups');
-                }}
-                className="w-full text-left flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 active:bg-gray-200 transition-colors"
-              >
-                <Ticket className="w-4 h-4 mr-2 flex-shrink-0" />
-                <span>Meetups</span>
-              </button>
             </>
           ) : (
             <>
@@ -508,16 +498,6 @@ export default function UnifiedNavbar() {
                 <Computer className="w-4 h-4 mr-2 flex-shrink-0" />
                 <span>Mentorship</span>
               </button>
-              <button
-                onClick={() => {
-                  setIsProfileDropdownOpen(false);
-                  navigate('/meetups');
-                }}
-                className="w-full text-left flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 active:bg-gray-200 transition-colors"
-              >
-                <Ticket className="w-4 h-4 mr-2 flex-shrink-0" />
-                <span>Meetups</span>
-              </button>
             
               <button
                 onClick={() => {
@@ -529,7 +509,6 @@ export default function UnifiedNavbar() {
                 <CalendarSearch className="w-4 h-4 mr-2 flex-shrink-0" />
                 <span>Events</span>
               </button>
-              
             </>
           )}
           <div className="border-t border-gray-100 mt-2 pt-2">
