@@ -112,25 +112,44 @@ const MentorshipLanding = () => {
 
         try {
             // 1. Validate Usernames
-            const usernames = [teamForm.member2.trim(), teamForm.member3.trim()].filter(u => u);
-            if (usernames.length !== 2) throw new Error('Please provide usernames for both team members.');
+            const m2Input = teamForm.member2.trim();
+            const m3Input = teamForm.member3.trim();
 
-            // Check if usernames exist and get UIDs
-            const { data: usersData, error: usersError } = await supabase
-                .from('users')
-                .select('uid, username')
-                .in('username', usernames);
+            if (!m2Input || !m3Input) throw new Error('Please provide usernames for both team members.');
 
-            if (usersError) throw usersError;
+            console.log('[Team Registration] Looking up usernames:', m2Input, m3Input);
 
-            if (usersData.length !== 2) {
-                const foundUsernames = usersData.map(u => u.username);
-                const missing = usernames.filter(u => !foundUsernames.includes(u));
-                throw new Error(`Users not found: ${missing.join(', ')}`);
+            // Check if usernames exist using RPC function (bypasses RLS)
+            const [res2, res3] = await Promise.all([
+                supabase.rpc('get_user_by_username', { lookup_username: m2Input }),
+                supabase.rpc('get_user_by_username', { lookup_username: m3Input })
+            ]);
+
+            console.log('[Team Registration] Response for member2:', res2);
+            console.log('[Team Registration] Response for member3:', res3);
+
+            if (res2.error) {
+                console.error('[Team Registration] Error looking up member2:', res2.error);
+                throw new Error(`Error looking up ${m2Input}: ${res2.error.message}`);
+            }
+            if (res3.error) {
+                console.error('[Team Registration] Error looking up member3:', res3.error);
+                throw new Error(`Error looking up ${m3Input}: ${res3.error.message}`);
             }
 
-            const member2 = usersData.find(u => u.username === teamForm.member2.trim());
-            const member3 = usersData.find(u => u.username === teamForm.member3.trim());
+            const member2 = res2.data?.[0];
+            const member3 = res3.data?.[0];
+
+            console.log('[Team Registration] Found member2:', member2);
+            console.log('[Team Registration] Found member3:', member3);
+
+            const missing = [];
+            if (!member2) missing.push(m2Input);
+            if (!member3) missing.push(m3Input);
+
+            if (missing.length > 0) {
+                throw new Error(`Users not found: ${missing.join(', ')}. Please check the usernames are correct.`);
+            }
 
             // 2. Create Team
             const { data: teamData, error: teamError } = await supabase

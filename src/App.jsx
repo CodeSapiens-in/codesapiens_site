@@ -7,7 +7,10 @@ import {
   useUser,
 } from '@supabase/auth-helpers-react';
 import { supabase } from './lib/supabaseClient';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
+import { AnimatePresence } from 'framer-motion';
+import { Loader2 } from 'lucide-react';
+import PageTransition from './components/PageTransition';
 
 
 import Hero from './components/ui/Hero';
@@ -39,9 +42,69 @@ import AdminMeetupEdit from './admin/AdminMeetupEdit';
 import UserMeetupsList from './user/UserMeetupsList';
 import MentorshipLanding from './user/MentorshipLanding';
 import AdminMentorshipPrograms from './admin/AdminMentorshipPrograms';
+import AdminMentorshipManager from './admin/AdminMentorshipManager';
+import AdminMentorshipProgramEditor from './admin/AdminMentorshipProgramEditor';
+import AdminWeekEditor from './admin/AdminWeekEditor';
+import AdminWeekSubmissions from './admin/AdminWeekSubmissions';
+import AdminGeneralMentorshipRequests from './admin/AdminGeneralMentorshipRequests';
+import AdminAllProgramRegistrations from './admin/AdminAllProgramRegistrations';
+import AdminBlogList from './admin/AdminBlogList';
+import AdminBlogEditor from './admin/AdminBlogEditor';
+import AdminBlogEmailer from './admin/AdminBlogEmailer';
+import BlogListPage from './components/BlogListPage';
+import BlogDetail from './user/BlogDetail';
 
 
+const AnimatedRoutes = () => {
+  const location = useLocation();
+  return (
+    <AnimatePresence mode="wait">
+      <Routes location={location} key={location.pathname}>
+        <Route path="/admin" element={<PageTransition><Dashboard /></PageTransition>} />
+        <Route path="/profile" element={<PageTransition><UserProfile /></PageTransition>} />
+        <Route path="/" element={<PageTransition><UserDashboard /></PageTransition>} />
+        <Route path="/analytics" element={<PageTransition><AnalyticsPage /></PageTransition>} />
+        <Route path="/user-list" element={<PageTransition><AllUserList /></PageTransition>} />
+        <Route path="/forgot-password" element={<PageTransition><ResetPassword /></PageTransition>} />
+        <Route path="/reset-password" element={<PageTransition><ResetPasswordConfirm /></PageTransition>} />
+        <Route path="/events" element={<PageTransition><UserEvents /></PageTransition>} />
+        <Route path="/resource" element={<PageTransition><UserResource /></PageTransition>} />
+        <Route path="/resume" element={<PageTransition><UserResumeBuilder /></PageTransition>} />
+        <Route path="/mentorship" element={<PageTransition><UserMentorshipForm /></PageTransition>} />
+        <Route path="/mentorship-form" element={<PageTransition><AdminMentorshipSubmission /></PageTransition>} />
+        <Route path="/profile/:username" element={<PageTransition><PublicProfile /></PageTransition>} />
+        <Route path="/playground" element={<PageTransition><UserPlayGround /></PageTransition>} />
+        <Route path="/mentorship-list" element={<PageTransition><UserMentorshipFormList /></PageTransition>} />
+        <Route path="/code" element={<PageTransition><UserCodingPlatform /></PageTransition>} />
 
+        <Route path="/admin/scanner/:id" element={<PageTransition><AdminScannerMeetup /></PageTransition>} />
+        <Route path="/admin/meetups" element={<PageTransition><AdminMeetupList /></PageTransition>} />
+        <Route path="/admin/meetup/create" element={<PageTransition><AdminMeetup /></PageTransition>} />
+        <Route path="/admin/meetup/edit/:meetupId" element={<PageTransition><AdminMeetupEdit /></PageTransition>} />
+        <Route path="/meetups" element={<PageTransition><UserMeetupsList /></PageTransition>} />
+        <Route path="/admin/mentorship-programs" element={<PageTransition><AdminMentorshipPrograms /></PageTransition>} />
+        <Route path="/admin/mentorship/manage/:id" element={<PageTransition><AdminMentorshipManager /></PageTransition>} />
+        <Route path="/admin/mentorship/create" element={<PageTransition><AdminMentorshipProgramEditor /></PageTransition>} />
+        <Route path="/admin/mentorship/edit/:id" element={<PageTransition><AdminMentorshipProgramEditor /></PageTransition>} />
+        <Route path="/admin/mentorship/program/:programId/week/create" element={<PageTransition><AdminWeekEditor /></PageTransition>} />
+        <Route path="/admin/mentorship/week/:weekId/edit" element={<PageTransition><AdminWeekEditor /></PageTransition>} />
+        <Route path="/admin/mentorship/submissions/:weekId" element={<PageTransition><AdminWeekSubmissions /></PageTransition>} />
+        <Route path="/admin/mentorship/general-requests" element={<PageTransition><AdminGeneralMentorshipRequests /></PageTransition>} />
+        <Route path="/admin/mentorship/all-registrations" element={<PageTransition><AdminAllProgramRegistrations /></PageTransition>} />
+
+        {/* Blog Routes */}
+        <Route path="/admin/blogs" element={<PageTransition><AdminBlogList /></PageTransition>} />
+        <Route path="/admin/blog/create" element={<PageTransition><AdminBlogEditor /></PageTransition>} />
+        <Route path="/admin/blog/edit/:id" element={<PageTransition><AdminBlogEditor /></PageTransition>} />
+        <Route path="/admin/blog/email/:id" element={<PageTransition><AdminBlogEmailer /></PageTransition>} />
+        <Route path="/blogs" element={<PageTransition><BlogListPage /></PageTransition>} />
+        <Route path="/blog/:slug" element={<PageTransition><BlogDetail /></PageTransition>} />
+
+        <Route path="*" element={<PageTransition><NotFoundPage /></PageTransition>} />
+      </Routes>
+    </AnimatePresence>
+  );
+};
 function Root() {
   const session = useSession();
   const { isLoading } = useSessionContext();
@@ -49,8 +112,11 @@ function Root() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <p>Loading...</p>
+      <div className="flex items-center justify-center min-h-screen bg-gray-50">
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="w-10 h-10 text-indigo-600 animate-spin" />
+          <p className="text-gray-500 font-medium">Loading CodeSapiens...</p>
+        </div>
       </div>
     );
   }
@@ -79,38 +145,7 @@ function Root() {
       <main className="flex-grow">
         <Router>
           <NavBar />
-          <Routes>
-            <Route path="/admin" element={<Dashboard />} />
-            <Route path="/profile" element={<UserProfile />} />
-            <Route path="/" element={<UserDashboard />} />
-            <Route path="/analytics" element={<AnalyticsPage />} />
-            <Route path="/user-list" element={<AllUserList />} />
-            <Route path="/forgot-password" element={<ResetPassword />} />
-            <Route path="/reset-password" element={<ResetPasswordConfirm />} />
-            <Route path="/events" element={<UserEvents />} />
-            <Route path="/resource" element={<UserResource />} />
-            <Route path="/resume" element={<UserResumeBuilder />} />
-            <Route path="/mentorship" element={<UserMentorshipForm />} />
-            <Route path="/mentorship-form" element={<AdminMentorshipSubmission />} />
-            <Route path="/profile/:username" element={<PublicProfile />} />
-            <Route path="/playground" element={<UserPlayGround />} />
-            <Route path="/mentorship-list" element={<UserMentorshipFormList />} />
-            <Route path="/code" element={<UserCodingPlatform />} />
-
-            <Route path="/admin/scanner/:id" element={<AdminScannerMeetup />} />
-            <Route path="/admin/meetups" element={<AdminMeetupList />} />
-            <Route path="/admin/meetup/create" element={<AdminMeetup />} />
-            <Route path="/admin/meetup/edit/:meetupId" element={<AdminMeetupEdit />} />
-            <Route path="/meetups" element={<UserMeetupsList />} />
-            <Route path="/mentorship-programs" element={<MentorshipLanding />} />
-            <Route path="/admin/mentorship-programs" element={<AdminMentorshipPrograms />} />
-
-
-
-
-            <Route path="*" element={<NotFoundPage />} />
-
-          </Routes>
+          <AnimatedRoutes />
         </Router>
       </main>
     </div>

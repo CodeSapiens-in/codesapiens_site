@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Users, Search, BarChart3, Loader2, X } from 'lucide-react';
+import { Users, Search, BarChart3, Loader2, X, FileText } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
 import { useNavigate } from 'react-router-dom';
 
@@ -26,7 +26,7 @@ const Dashboard = () => {
         setError(null);
 
         // Get the current authenticated user
-        
+
         const {
           data: { user },
           error: authError,
@@ -45,7 +45,7 @@ const Dashboard = () => {
         }
 
         // Fetch admin profile
-        const { data: profileData, error: profileError } =  await supabase
+        const { data: profileData, error: profileError } = await supabase
           .from('users')
           .select('*')
           .eq('uid', user.id)
@@ -127,11 +127,11 @@ const Dashboard = () => {
   // Helper function to get relative time
   const getRelativeTime = (dateString) => {
     if (!dateString) return 'Never';
-    
+
     const now = new Date();
     const date = new Date(dateString);
     const diffInSeconds = Math.floor((now - date) / 1000);
-    
+
     if (diffInSeconds < 60) return `${diffInSeconds}s ago`;
     if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`;
     if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h ago`;
@@ -152,19 +152,26 @@ const Dashboard = () => {
   // Filter students based on search and filter
   const filteredStudents = students.filter(student => {
     const matchesSearch = student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         student.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         (student.college && student.college.toLowerCase().includes(searchTerm.toLowerCase()));
+      student.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (student.college && student.college.toLowerCase().includes(searchTerm.toLowerCase()));
     const matchesFilter = filter === '' || student.status === filter;
     return matchesSearch && matchesFilter;
   });
 
   const quickActions = [
-    { 
-      icon: BarChart3, 
-      label: "View Analytics", 
-      shortLabel: "Analytics", 
+    {
+      icon: BarChart3,
+      label: "View Analytics",
+      shortLabel: "Analytics",
       color: "bg-purple-600 hover:bg-purple-700",
       onClick: () => navigate('/analytics')
+    },
+    {
+      icon: FileText,
+      label: "Manage Blogs",
+      shortLabel: "Blogs",
+      color: "bg-blue-600 hover:bg-blue-700",
+      onClick: () => navigate('/admin/blogs')
     }
   ];
 
@@ -199,7 +206,7 @@ const Dashboard = () => {
           <X className="w-16 h-16 text-red-500 mx-auto mb-4" />
           <h2 className="text-xl font-semibold text-gray-900 mb-2">Authentication Required</h2>
           <p className="text-gray-600 mb-4">Please log in to access the admin dashboard.</p>
-          <button 
+          <button
             onClick={() => window.location.href = '/login'}
             className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors duration-200"
           >
@@ -233,7 +240,7 @@ const Dashboard = () => {
             <X className="w-16 h-16 text-red-500 mx-auto mb-4" />
             <h2 className="text-xl font-semibold text-gray-900 mb-2">Error Loading Dashboard</h2>
             <p className="text-gray-600 mb-4">{error}</p>
-            <button 
+            <button
               onClick={() => window.location.reload()}
               className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors duration-200"
             >
@@ -315,7 +322,7 @@ const Dashboard = () => {
                       className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
                     />
                   </div>
-                  <select 
+                  <select
                     value={filter}
                     onChange={(e) => setFilter(e.target.value)}
                     className="w-full sm:w-32 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
@@ -395,7 +402,7 @@ const Dashboard = () => {
                 {quickActions.map((action, index) => {
                   const IconComponent = action.icon;
                   return (
-                    <button 
+                    <button
                       key={index}
                       onClick={action.onClick}
                       className={`flex flex-col sm:flex-row xl:flex-row items-center justify-center space-y-1 sm:space-y-0 sm:space-x-2 xl:space-x-2 ${action.color} text-white py-3 sm:py-2 xl:py-3 px-2 sm:px-3 xl:px-4 rounded-lg transition-colors text-xs sm:text-sm font-medium`}
@@ -436,8 +443,8 @@ const Dashboard = () => {
             {quickActions.map((action, index) => {
               const IconComponent = action.icon;
               return (
-                <button 
-                  key={index} 
+                <button
+                  key={index}
                   onClick={action.onClick}
                   className="flex flex-col items-center space-y-1 py-2 px-3"
                 >

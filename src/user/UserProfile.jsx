@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   ArrowLeft,
   Edit,
@@ -24,10 +25,18 @@ import {
   Upload,
   Eye,
   Check,
+  Sparkles,
+  Star,
+  Zap,
+  Code,
+  BookOpen,
+  ExternalLink,
 } from "lucide-react";
 import { supabase } from "../lib/supabaseClient";
 import skillsList from "../assets/skills.json";
 import academicData from "../assets/academic.json";
+import "../styles/profile-animations.css";
+
 
 // Simple debounce function
 const debounce = (func, delay) => {

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Calendar, Trophy, Users, TrendingUp, Settings, X, ExternalLink } from "lucide-react";
 import { supabase } from "../lib/supabaseClient";
 import { useNavigate } from "react-router-dom";
+import DashboardBlogSection from "../components/DashboardBlogSection";
 
 export default function UserDashboard() {
   const [userData, setUserData] = useState(null);
@@ -187,26 +188,26 @@ export default function UserDashboard() {
     }
   };
 
-   const handleSignOut = async () => {
-      try {
-        // Sign out from Supabase
-        const { error } = await supabase.auth.signOut();
-  
-        if (error) {
-          console.error('Error signing out:', error);
-        }
-  
-        // Clear any local state and redirect
-        setUserData(null);
-        setIsMobileMenuOpen(false);
-        setIsProfileDropdownOpen(false);
-  
-        // Redirect to login or home page
-        navigate('/');
-      } catch (err) {
-        console.error('Sign out error:', err);
+  const handleSignOut = async () => {
+    try {
+      // Sign out from Supabase
+      const { error } = await supabase.auth.signOut();
+
+      if (error) {
+        console.error('Error signing out:', error);
       }
-    };
+
+      // Clear any local state and redirect
+      setUserData(null);
+      setIsMobileMenuOpen(false);
+      setIsProfileDropdownOpen(false);
+
+      // Redirect to login or home page
+      navigate('/');
+    } catch (err) {
+      console.error('Sign out error:', err);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -285,6 +286,9 @@ export default function UserDashboard() {
                   )}
                 </div>
               </div>
+
+              {/* Blog Section */}
+              <DashboardBlogSection maxPosts={3} />
 
               {userData.skills && userData.skills.length > 0 ? (
                 <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-8">
