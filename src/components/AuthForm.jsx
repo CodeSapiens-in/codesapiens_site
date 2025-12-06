@@ -1,9 +1,9 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Calendar, Globe, Github, Building, Eye, EyeOff, Mail, Lock } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
 import { useNavigate } from 'react-router-dom';
 
-// API Configuration - Change only if you use Turnstile backend verification
+// API Configuration
 const API_BASE_URL = 'https://colleges-name-api.vercel.app';
 
 export default function CodeSapiensPlatform() {
@@ -16,54 +16,8 @@ export default function CodeSapiensPlatform() {
     password: '',
   });
   const [profile, setProfile] = useState(null);
-  const [turnstileToken, setTurnstileToken] = useState(null);
-  const turnstileRef = useRef(null);
-  const widgetIdRef = useRef(null);
-  const scriptLoadedRef = useRef(false);
   const navigate = useNavigate();
 
-  // Load Cloudflare Turnstile script once
-  useEffect(() => {
-    if (scriptLoadedRef.current || window.turnstile) return;
-
-    const script = document.createElement('script');
-    script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js';
-    script.async = true;
-    script.defer = true;
-    script.onload = () => {
-      scriptLoadedRef.current = true;
-      console.log('[CodeSapiens] Turnstile script loaded');
-    };
-    document.body.appendChild(script);
-  }, []);
-
-  // Render Turnstile widget when mode changes
-  useEffect(() => {
-    if (widgetIdRef.current !== null && window.turnstile) {
-      window.turnstile.remove(widgetIdRef.current);
-      widgetIdRef.current = null;
-    }
-
-    if (!window.turnstile || !turnstileRef.current) return;
-
-    const sitekey = '0x4AAAAAAB8LVUdoo8-C9TDo'; // Replace if needed
-
-    widgetIdRef.current = window.turnstile.render(turnstileRef.current, {
-      sitekey,
-      callback: (token) => {
-        setTurnstileToken(token);
-        setMessage(null);
-      },
-      'error-callback': () => {
-        setMessage('CAPTCHA error. Please try again.');
-        setTurnstileToken(null);
-      },
-      'expired-callback': () => {
-        setMessage('CAPTCHA expired. Please try again.');
-        setTurnstileToken(null);
-      },
-    });
-  }, [mode]);
 
   // Listen to Supabase auth state (critical for OAuth redirect)
   useEffect(() => {
@@ -129,12 +83,6 @@ export default function CodeSapiensPlatform() {
     setLoading(true);
     setMessage(null);
 
-    if (!turnstileToken && mode !== 'signUp') {
-      setMessage('Please complete the CAPTCHA.');
-      setLoading(false);
-      return;
-    }
-
     try {
       if (mode === 'forgotPassword') {
         const { error } = await supabase.auth.resetPasswordForEmail(formData.email, {
@@ -159,9 +107,6 @@ export default function CodeSapiensPlatform() {
       }
     } catch (err) {
       setMessage(`Error: ${err.message}`);
-      if (window.turnstile && widgetIdRef.current) {
-        window.turnstile.reset(widgetIdRef.current);
-      }
     } finally {
       setLoading(false);
     }
@@ -171,7 +116,6 @@ export default function CodeSapiensPlatform() {
     setMode(newMode);
     setMessage(null);
     setFormData({ email: '', password: '' });
-    setTurnstileToken(null);
   };
 
   const features = [
@@ -269,10 +213,9 @@ export default function CodeSapiensPlatform() {
                     />
                   </div>
                 </div>
-                <div ref={turnstileRef} className="my-6" />
                 <button
                   type="submit"
-                  disabled={loading || !turnstileToken}
+                  disabled={loading}
                   className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 disabled:opacity-50"
                 >
                   {loading ? 'Sending...' : 'Send Reset Link'}
@@ -364,12 +307,9 @@ export default function CodeSapiensPlatform() {
                   Continue with Google
                 </button>
 
-                {/* Turnstile CAPTCHA (only for email/password) */}
-                {mode !== 'signUp' && <div ref={turnstileRef} className="my-6" />}
-
                 <button
                   type="submit"
-                  disabled={loading || (!turnstileToken && mode !== 'signUp')}
+                  disabled={loading}
                   className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 rounded-lg font-medium hover:from-blue-700 hover:to-purple-700 disabled:opacity-50 transition-all"
                 >
                   {loading ? 'Please wait...' : mode === 'signUp' ? 'Sign Up' : 'Sign In'}
