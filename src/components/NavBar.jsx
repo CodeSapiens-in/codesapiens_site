@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Bell, Settings, Menu, X, ChevronDown, User, Loader2, Shield, Users, BarChart3, TextSearch, BookPlus, CalendarSearch, FileCheck2, Computer, BrainCircuit ,Code} from 'lucide-react';
+import { Bell, Settings, Menu, X, ChevronDown, User, Loader2, Shield, Users, BarChart3, TextSearch, BookPlus, CalendarSearch, FileCheck2, Computer, BrainCircuit, Code } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabaseClient';
 
@@ -134,9 +134,9 @@ export default function UnifiedNavbar() {
   // Handle clicks outside dropdowns
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (profileDropdownRef.current && 
-          !profileDropdownRef.current.contains(event.target) &&
-          !profileButtonRef.current?.contains(event.target)) {
+      if (profileDropdownRef.current &&
+        !profileDropdownRef.current.contains(event.target) &&
+        !profileButtonRef.current?.contains(event.target)) {
         setIsProfileDropdownOpen(false);
       }
       if (mobileMenuRef.current && !mobileMenuRef.current.contains(event.target)) {
@@ -174,16 +174,16 @@ export default function UnifiedNavbar() {
         const buttonRect = button.getBoundingClientRect();
         const viewportHeight = window.innerHeight;
         const viewportWidth = window.innerWidth;
-        
+
         // Reset styles
         dropdown.style.position = 'fixed';
         dropdown.style.zIndex = '9999';
-        
+
         // Calculate available space
         const spaceBelow = viewportHeight - buttonRect.bottom;
         const spaceAbove = buttonRect.top;
         const dropdownHeight = dropdown.offsetHeight;
-        
+
         // Position vertically
         if (spaceBelow >= dropdownHeight || spaceBelow > spaceAbove) {
           // Show below
@@ -194,15 +194,15 @@ export default function UnifiedNavbar() {
           dropdown.style.bottom = `${viewportHeight - buttonRect.top + 8}px`;
           dropdown.style.top = 'auto';
         }
-        
+
         // Position horizontally
         const dropdownWidth = Math.min(320, viewportWidth - 32); // Max width with padding
         dropdown.style.width = `${dropdownWidth}px`;
-        
+
         // Align to right edge of button but ensure it stays within viewport
         const rightPosition = viewportWidth - buttonRect.right;
         const maxRight = viewportWidth - dropdownWidth - 16; // 16px padding from edge
-        
+
         if (buttonRect.right - dropdownWidth < 16) {
           // Would go off left edge, align to left edge with padding
           dropdown.style.left = '16px';
@@ -212,7 +212,7 @@ export default function UnifiedNavbar() {
           dropdown.style.right = `${Math.max(16, rightPosition)}px`;
           dropdown.style.left = 'auto';
         }
-        
+
         // Ensure dropdown doesn't exceed viewport height
         const maxHeight = Math.min(
           spaceBelow >= dropdownHeight ? spaceBelow - 16 : spaceAbove - 16,
@@ -221,12 +221,12 @@ export default function UnifiedNavbar() {
         dropdown.style.maxHeight = `${maxHeight}px`;
         dropdown.style.overflowY = 'auto';
       };
-      
+
       // Adjust position immediately and on scroll/resize
       adjustDropdownPosition();
       window.addEventListener('scroll', adjustDropdownPosition, true);
       window.addEventListener('resize', adjustDropdownPosition);
-      
+
       return () => {
         window.removeEventListener('scroll', adjustDropdownPosition, true);
         window.removeEventListener('resize', adjustDropdownPosition);
@@ -378,7 +378,7 @@ export default function UnifiedNavbar() {
     if (isAdmin) {
       return (
         <div className="hidden md:flex items-center justify-center flex-1 max-w-md mx-auto">
-          <div className="flex items-center space-x-8">
+          <div className="flex items-center space-x-4">
             <button
               onClick={() => navigate('/user-list')}
               className={`text-gray-700 ${hoverColor} px-3 py-2 rounded-md font-medium transition-colors flex items-center space-x-2`}
@@ -393,10 +393,22 @@ export default function UnifiedNavbar() {
               Analytics
             </button>
             <button
-              onClick={() => navigate('/mentorship-form')}
+              onClick={() => navigate('/admin/meetup')}
               className={`text-gray-700 ${hoverColor} px-3 py-2 rounded-md font-medium transition-colors`}
             >
-              MentorShip
+              Meetups
+            </button>
+            <button
+              onClick={() => navigate('/admin/mentorship-programs')}
+              className={`text-gray-700 ${hoverColor} px-3 py-2 rounded-md font-medium transition-colors`}
+            >
+              Mentorships
+            </button>
+            <button
+              onClick={() => navigate('/admin/all-program-registrations')}
+              className={`text-gray-700 ${hoverColor} px-3 py-2 rounded-md font-medium transition-colors`}
+            >
+              Registrations
             </button>
           </div>
         </div>
@@ -410,7 +422,7 @@ export default function UnifiedNavbar() {
     if (!isProfileDropdownOpen || loading) return null;
 
     return (
-      <div 
+      <div
         ref={profileDropdownRef}
         className="bg-white rounded-xl shadow-2xl border border-gray-200 py-2"
         style={{
@@ -491,14 +503,14 @@ export default function UnifiedNavbar() {
               <button
                 onClick={() => {
                   setIsProfileDropdownOpen(false);
-                  navigate('/mentorship');
+                  navigate('/mentorship-landing');
                 }}
                 className="w-full text-left flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 active:bg-gray-200 transition-colors"
               >
                 <Computer className="w-4 h-4 mr-2 flex-shrink-0" />
                 <span>Mentorship</span>
               </button>
-            
+
               <button
                 onClick={() => {
                   setIsProfileDropdownOpen(false);
@@ -682,7 +694,7 @@ export default function UnifiedNavbar() {
 
       {/* Backdrop for desktop screens - only show on desktop when dropdown is open */}
       {isProfileDropdownOpen && window.innerWidth >= 768 && (
-        <div 
+        <div
           className="fixed inset-0 z-40"
           onClick={() => setIsProfileDropdownOpen(false)}
           style={{ pointerEvents: 'auto' }}
