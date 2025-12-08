@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Loader2, 
-  X, 
-  Mail, 
-  Phone, 
-  Github, 
-  Linkedin, 
-  Globe, 
-  Trophy, 
+import {
+  Loader2,
+  X,
+  Mail,
+  Phone,
+  Github,
+  Linkedin,
+  Globe,
+  Trophy,
   Calendar,
   Search,
   Eye,
@@ -19,6 +19,7 @@ import {
 import { supabase } from '../lib/supabaseClient';
 import Tesseract from 'tesseract.js';
 import * as pdfjsLib from 'pdfjs-dist/build/pdf'; // Use specific import for pdfjs-dist
+import AdminLayout from '../components/AdminLayout';
 
 const AllUserList = () => {
   const [users, setUsers] = useState([]);
@@ -113,8 +114,8 @@ const AllUserList = () => {
   // Handle search
   useEffect(() => {
     const lowerQuery = searchQuery.toLowerCase();
-    const filtered = users.filter(user => 
-      user.displayName.toLowerCase().includes(lowerQuery) || 
+    const filtered = users.filter(user =>
+      user.displayName.toLowerCase().includes(lowerQuery) ||
       user.email.toLowerCase().includes(lowerQuery)
     );
     setFilteredUsers(filtered);
@@ -285,12 +286,12 @@ ${text}`;
     { label: "Portfolio Website", icon: Globe, href: selectedUser.portfolioUrl || "#", available: !!selectedUser.portfolioUrl }
   ] : [];
 
-  const technicalSkills = selectedUser && selectedUser.skills.length > 0 ? 
+  const technicalSkills = selectedUser && selectedUser.skills.length > 0 ?
     selectedUser.skills.slice(0, 5).map((skill, index) => ({
       skill,
       level: 90 - (index * 5),
       color: ["bg-yellow-500", "bg-blue-500", "bg-green-500", "bg-green-600", "bg-purple-500"][index] || "bg-gray-500"
-    })) : 
+    })) :
     [{ skill: "No skills added", level: 0, color: "bg-gray-300" }];
 
   if (loading) {
@@ -311,7 +312,7 @@ ${text}`;
           <X className="w-16 h-16 text-red-500 mx-auto mb-4" />
           <h2 className="text-xl font-semibold text-gray-900 mb-2">Error Loading Users</h2>
           <p className="text-gray-600 mb-4">{error}</p>
-          <button 
+          <button
             onClick={() => window.location.reload()}
             className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors duration-200"
           >
@@ -323,221 +324,222 @@ ${text}`;
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 px-4 sm:px-6 lg:px-8 py-4 sm:py-8 flex flex-col">
-      {/* Header and Search */}
-      <div className="mb-6 sm:mb-8">
-        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">All Users</h1>
-        <p className="text-gray-600 mt-1 sm:mt-2 text-sm sm:text-base">Browse through the list of all registered users</p>
-        <div className="mt-3 sm:mt-4 relative">
-          <input
-            type="text"
-            placeholder="Search by name or email..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full p-2 sm:p-3 pl-8 sm:pl-10 text-sm sm:text-base border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-          />
-          <Search className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 absolute left-2 sm:left-3 top-1/2 transform -translate-y-1/2" />
+    <AdminLayout>
+      <div className="max-w-7xl mx-auto space-y-6">
+        {/* Header and Search */}
+        <div className="mb-6 sm:mb-8">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">All Users</h1>
+          <p className="text-gray-600 mt-1 sm:mt-2 text-sm sm:text-base">Browse through the list of all registered users</p>
+          <div className="mt-3 sm:mt-4 relative">
+            <input
+              type="text"
+              placeholder="Search by name or email..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full p-2 sm:p-3 pl-8 sm:pl-10 text-sm sm:text-base border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+            />
+            <Search className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 absolute left-2 sm:left-3 top-1/2 transform -translate-y-1/2" />
+          </div>
         </div>
-      </div>
 
-      {/* Mobile Card View */}
-      <div className="flex-1 block md:hidden">
-        <div className="space-y-4">
-          {currentUsers.map((user) => (
-            <div 
-              key={user.uid}
-              className="bg-white rounded-lg shadow-sm border p-4"
-            >
-              <div className="flex items-start space-x-3">
-                <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-blue-600 rounded-full flex items-center justify-center">
-                  {user.avatar ? (
-                    <img 
-                      src={user.avatar} 
-                      alt={user.displayName}
-                      className="w-full h-full rounded-full object-cover"
-                    />
-                  ) : (
-                    <span className="text-white font-bold text-lg">
-                      {user.displayName?.charAt(0).toUpperCase() || 'U'}
-                    </span>
-                  )}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <h3 className="text-lg font-semibold text-gray-900 truncate">{user.displayName}</h3>
-                  <p className="text-sm text-gray-500 truncate">{user.email}</p>
-                  <div className="mt-2 flex flex-wrap gap-2">
-                    <span className="inline-block bg-blue-50 text-blue-700 text-xs px-2 py-1 rounded-full">
-                      {user.role}
-                    </span>
-                    <span className="inline-block bg-green-50 text-green-700 text-xs px-2 py-1 rounded-full">
-                      {user.college}
-                    </span>
+        {/* Mobile Card View */}
+        <div className="flex-1 block md:hidden">
+          <div className="space-y-4">
+            {currentUsers.map((user) => (
+              <div
+                key={user.uid}
+                className="bg-white rounded-lg shadow-sm border p-4"
+              >
+                <div className="flex items-start space-x-3">
+                  <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-blue-600 rounded-full flex items-center justify-center">
+                    {user.avatar ? (
+                      <img
+                        src={user.avatar}
+                        alt={user.displayName}
+                        className="w-full h-full rounded-full object-cover"
+                      />
+                    ) : (
+                      <span className="text-white font-bold text-lg">
+                        {user.displayName?.charAt(0).toUpperCase() || 'U'}
+                      </span>
+                    )}
                   </div>
-                  <div className="mt-2">
-                    <p className="text-xs text-gray-600">
-                      Skills: {user.skills.length > 0 ? user.skills.slice(0, 2).join(', ') + (user.skills.length > 2 ? '...' : '') : 'No skills'}
-                    </p>
-                  </div>
-                </div>
-              </div>
-              <div className="mt-4">
-                <button
-                  onClick={() => handleViewDetails(user)}
-                  className="w-full bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium py-2 px-4 rounded-lg transition-colors duration-200"
-                >
-                  View Details
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Desktop Table View */}
-      <div className="flex-1 overflow-auto hidden md:block">
-        <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
-          <div className="block sm:hidden">
-            <div className="divide-y divide-gray-200">
-              {currentUsers.map((user) => (
-                <div key={user.uid} className="p-4 hover:bg-gray-50">
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center space-x-3">
-                      <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-blue-600 rounded-full flex items-center justify-center">
-                        {user.avatar ? (
-                          <img 
-                            src={user.avatar} 
-                            alt={user.displayName}
-                            className="w-full h-full rounded-full object-cover"
-                          />
-                        ) : (
-                          <span className="text-white font-bold text-sm">
-                            {user.displayName?.charAt(0).toUpperCase() || 'U'}
-                          </span>
-                        )}
-                      </div>
-                      <div>
-                        <h3 className="font-medium text-gray-900 text-sm">{user.displayName}</h3>
-                        <p className="text-xs text-gray-500">{user.role}</p>
-                      </div>
-                    </div>
-                    <button
-                      onClick={() => handleViewDetails(user)}
-                      className="text-blue-600 hover:text-blue-800 text-xs font-medium"
-                    >
-                      Details
-                    </button>
-                  </div>
-                  <div className="space-y-2 text-xs">
-                    <div className="flex justify-between">
-                      <span className="text-gray-500">Email:</span>
-                      <span className="text-gray-900 truncate ml-2">{user.email}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-500">College:</span>
-                      <span className="text-gray-900 truncate ml-2">{user.college}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-500">Skills:</span>
-                      <span className="text-gray-900 truncate ml-2">
-                        {user.skills.length > 0 ? user.skills.slice(0, 2).join(', ') + (user.skills.length > 2 ? '...' : '') : 'No skills'}
+                  <div className="flex-1 min-w-0">
+                    <h3 className="text-lg font-semibold text-gray-900 truncate">{user.displayName}</h3>
+                    <p className="text-sm text-gray-500 truncate">{user.email}</p>
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      <span className="inline-block bg-blue-50 text-blue-700 text-xs px-2 py-1 rounded-full">
+                        {user.role}
+                      </span>
+                      <span className="inline-block bg-green-50 text-green-700 text-xs px-2 py-1 rounded-full">
+                        {user.college}
                       </span>
                     </div>
+                    <div className="mt-2">
+                      <p className="text-xs text-gray-600">
+                        Skills: {user.skills.length > 0 ? user.skills.slice(0, 2).join(', ') + (user.skills.length > 2 ? '...' : '') : 'No skills'}
+                      </p>
+                    </div>
                   </div>
                 </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="hidden sm:block overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50 sticky top-0 z-20">
-                <tr>
-                  <th className="px-3 sm:px-4 lg:px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                  <th className="px-3 sm:px-4 lg:px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
-                  <th className="px-3 sm:px-4 lg:px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
-                  <th className="px-3 sm:px-4 lg:px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">College</th>
-                  <th className="px-3 sm:px-4 lg:px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Skills</th>
-                  <th className="px-3 sm:px-4 lg:px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {currentUsers.map((user, index) => (
-                  <tr 
-                    key={user.uid} 
-                    className={`${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'} hover:bg-gray-100 transition-colors duration-200`}
+                <div className="mt-4">
+                  <button
+                    onClick={() => handleViewDetails(user)}
+                    className="w-full bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium py-2 px-4 rounded-lg transition-colors duration-200"
                   >
-                    <td className="px-3 sm:px-4 lg:px-6 py-4 whitespace-nowrap text-xs sm:text-sm font-medium text-gray-900 text-center">{user.displayName}</td>
-                    <td className="px-3 sm:px-4 lg:px-6 py-4 whitespace-nowrap text-xs sm:text-sm text-gray-500 text-center">{user.email}</td>
-                    <td className="px-3 sm:px-4 lg:px-6 py-4 whitespace-nowrap text-xs sm:text-sm text-gray-500 text-center">{user.role}</td>
-                    <td className="px-3 sm:px-4 lg:px-6 py-4 whitespace-nowrap text-xs sm:text-sm text-gray-500 text-center">{user.college}</td>
-                    <td className="px-3 sm:px-4 lg:px-6 py-4 whitespace-nowrap text-xs sm:text-sm text-gray-500 text-center">
-                      {user.skills.length > 0 ? user.skills.slice(0, 3).join(', ') + (user.skills.length > 3 ? '...' : '') : 'No skills'}
-                    </td>
-                    <td className="px-3 sm:px-4 lg:px-6 py-4 whitespace-nowrap text-xs sm:text-sm text-center">
+                    View Details
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Desktop Table View */}
+        <div className="flex-1 overflow-auto hidden md:block">
+          <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
+            <div className="block sm:hidden">
+              <div className="divide-y divide-gray-200">
+                {currentUsers.map((user) => (
+                  <div key={user.uid} className="p-4 hover:bg-gray-50">
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-blue-600 rounded-full flex items-center justify-center">
+                          {user.avatar ? (
+                            <img
+                              src={user.avatar}
+                              alt={user.displayName}
+                              className="w-full h-full rounded-full object-cover"
+                            />
+                          ) : (
+                            <span className="text-white font-bold text-sm">
+                              {user.displayName?.charAt(0).toUpperCase() || 'U'}
+                            </span>
+                          )}
+                        </div>
+                        <div>
+                          <h3 className="font-medium text-gray-900 text-sm">{user.displayName}</h3>
+                          <p className="text-xs text-gray-500">{user.role}</p>
+                        </div>
+                      </div>
                       <button
                         onClick={() => handleViewDetails(user)}
-                        className="text-blue-600 hover:text-blue-800 font-medium transition-colors duration-200"
+                        className="text-blue-600 hover:text-blue-800 text-xs font-medium"
                       >
-                        More Details
+                        Details
                       </button>
-                    </td>
-                  </tr>
+                    </div>
+                    <div className="space-y-2 text-xs">
+                      <div className="flex justify-between">
+                        <span className="text-gray-500">Email:</span>
+                        <span className="text-gray-900 truncate ml-2">{user.email}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-500">College:</span>
+                        <span className="text-gray-900 truncate ml-2">{user.college}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-500">Skills:</span>
+                        <span className="text-gray-900 truncate ml-2">
+                          {user.skills.length > 0 ? user.skills.slice(0, 2).join(', ') + (user.skills.length > 2 ? '...' : '') : 'No skills'}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
                 ))}
-              </tbody>
-            </table>
+              </div>
+            </div>
+
+            <div className="hidden sm:block overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50 sticky top-0 z-20">
+                  <tr>
+                    <th className="px-3 sm:px-4 lg:px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                    <th className="px-3 sm:px-4 lg:px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                    <th className="px-3 sm:px-4 lg:px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
+                    <th className="px-3 sm:px-4 lg:px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">College</th>
+                    <th className="px-3 sm:px-4 lg:px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Skills</th>
+                    <th className="px-3 sm:px-4 lg:px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {currentUsers.map((user, index) => (
+                    <tr
+                      key={user.uid}
+                      className={`${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'} hover:bg-gray-100 transition-colors duration-200`}
+                    >
+                      <td className="px-3 sm:px-4 lg:px-6 py-4 whitespace-nowrap text-xs sm:text-sm font-medium text-gray-900 text-center">{user.displayName}</td>
+                      <td className="px-3 sm:px-4 lg:px-6 py-4 whitespace-nowrap text-xs sm:text-sm text-gray-500 text-center">{user.email}</td>
+                      <td className="px-3 sm:px-4 lg:px-6 py-4 whitespace-nowrap text-xs sm:text-sm text-gray-500 text-center">{user.role}</td>
+                      <td className="px-3 sm:px-4 lg:px-6 py-4 whitespace-nowrap text-xs sm:text-sm text-gray-500 text-center">{user.college}</td>
+                      <td className="px-3 sm:px-4 lg:px-6 py-4 whitespace-nowrap text-xs sm:text-sm text-gray-500 text-center">
+                        {user.skills.length > 0 ? user.skills.slice(0, 3).join(', ') + (user.skills.length > 3 ? '...' : '') : 'No skills'}
+                      </td>
+                      <td className="px-3 sm:px-4 lg:px-6 py-4 whitespace-nowrap text-xs sm:text-sm text-center">
+                        <button
+                          onClick={() => handleViewDetails(user)}
+                          className="text-blue-600 hover:text-blue-800 font-medium transition-colors duration-200"
+                        >
+                          More Details
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* Pagination Controls */}
-      {totalPages > 1 && (
-        <div className="mt-6 flex flex-col sm:flex-row items-center justify-between space-y-4 sm:space-y-0">
-          <div className="text-sm text-gray-600">
-            Showing {indexOfFirstUser + 1} to {Math.min(indexOfLastUser, filteredUsers.length)} of {filteredUsers.length} users
-          </div>
-          <div className="flex items-center space-x-2">
-            <button
-              onClick={handlePrevPage}
-              disabled={currentPage === 1}
-              className={`p-2 rounded-full ${currentPage === 1 ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-blue-100 text-blue-600 hover:bg-blue-200'} transition-colors duration-200`}
-            >
-              <ChevronLeft className="w-5 h-5" />
-            </button>
-            <div className="flex space-x-1">
-              {Array.from({ length: totalPages }, (_, index) => (
-                <button
-                  key={index + 1}
-                  onClick={() => handlePageChange(index + 1)}
-                  className={`px-3 py-1 rounded-lg text-sm font-medium ${
-                    currentPage === index + 1
+        {/* Pagination Controls */}
+        {totalPages > 1 && (
+          <div className="mt-6 flex flex-col sm:flex-row items-center justify-between space-y-4 sm:space-y-0">
+            <div className="text-sm text-gray-600">
+              Showing {indexOfFirstUser + 1} to {Math.min(indexOfLastUser, filteredUsers.length)} of {filteredUsers.length} users
+            </div>
+            <div className="flex items-center space-x-2">
+              <button
+                onClick={handlePrevPage}
+                disabled={currentPage === 1}
+                className={`p-2 rounded-full ${currentPage === 1 ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-blue-100 text-blue-600 hover:bg-blue-200'} transition-colors duration-200`}
+              >
+                <ChevronLeft className="w-5 h-5" />
+              </button>
+              <div className="flex space-x-1">
+                {Array.from({ length: totalPages }, (_, index) => (
+                  <button
+                    key={index + 1}
+                    onClick={() => handlePageChange(index + 1)}
+                    className={`px-3 py-1 rounded-lg text-sm font-medium ${currentPage === index + 1
                       ? 'bg-blue-500 text-white'
                       : 'bg-white text-gray-600 hover:bg-gray-100'
-                  } transition-colors duration-200 border border-gray-200`}
-                >
-                  {index + 1}
-                </button>
-              ))}
+                      } transition-colors duration-200 border border-gray-200`}
+                  >
+                    {index + 1}
+                  </button>
+                ))}
+              </div>
+              <button
+                onClick={handleNextPage}
+                disabled={currentPage === totalPages}
+                className={`p-2 rounded-full ${currentPage === totalPages ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-blue-100 text-blue-600 hover:bg-blue-200'} transition-colors duration-200`}
+              >
+                <ChevronRight className="w-5 h-5" />
+              </button>
             </div>
-            <button
-              onClick={handleNextPage}
-              disabled={currentPage === totalPages}
-              className={`p-2 rounded-full ${currentPage === totalPages ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-blue-100 text-blue-600 hover:bg-blue-200'} transition-colors duration-200`}
-            >
-              <ChevronRight className="w-5 h-5" />
-            </button>
           </div>
-        </div>
-      )}
+        )}
+      </div>
 
       {/* Details Panel */}
       {isDetailsOpen && (
         <>
-          <div 
+          <div
             className="fixed inset-0 bg-gray-800 bg-opacity-50 backdrop-blur-md z-40 transition-all duration-300 ease-in-out"
             onClick={handleCloseDetails}
           />
-          
-          <div 
+
+          <div
             className={`fixed top-0 right-0 h-full w-full bg-white shadow-2xl transform transition-all duration-300 ease-in-out overflow-y-auto z-50
               ${isDetailsOpen ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0'}`}
           >
@@ -560,8 +562,8 @@ ${text}`;
                   <div className="flex flex-col sm:flex-row items-start space-y-4 sm:space-y-0 sm:space-x-6">
                     <div className="w-20 h-20 sm:w-24 sm:h-24 bg-gradient-to-br from-purple-500 to-blue-600 rounded-full flex items-center justify-center flex-shrink-0">
                       {selectedUser.avatar ? (
-                        <img 
-                          src={selectedUser.avatar} 
+                        <img
+                          src={selectedUser.avatar}
                           alt={selectedUser.displayName}
                           className="w-full h-full rounded-full object-cover"
                         />
@@ -661,7 +663,7 @@ ${text}`;
                               <span className="text-sm font-medium text-gray-700">{link.label}</span>
                             </div>
                             {link.available ? (
-                              <a 
+                              <a
                                 href={link.href}
                                 target="_blank"
                                 rel="noopener noreferrer"
@@ -760,7 +762,7 @@ ${text}`;
                               <span className="text-sm text-gray-500">{item.level}%</span>
                             </div>
                             <div className="w-full bg-gray-200 rounded-full h-2">
-                              <div 
+                              <div
                                 className={`h-2 rounded-full ${item.color} transition-all duration-300`}
                                 style={{ width: `${item.level}%` }}
                               ></div>
@@ -800,7 +802,7 @@ ${text}`;
           </div>
         </>
       )}
-    </div>
+    </AdminLayout>
   );
 };
 

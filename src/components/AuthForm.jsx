@@ -1,13 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Calendar, Globe, Github, Building, Eye, EyeOff, Mail, Lock } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, ArrowRight, ArrowLeft } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
 import { useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 
-// API Configuration
-const API_BASE_URL = 'https://colleges-name-api.vercel.app';
-
-export default function CodeSapiensPlatform() {
-  const [mode, setMode] = useState('signIn');
+export default function AuthForm() {
+  const [mode, setMode] = useState('signIn'); // 'signIn', 'signUp', 'forgotPassword'
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState(null);
@@ -15,43 +13,19 @@ export default function CodeSapiensPlatform() {
     email: '',
     password: '',
   });
-  const [profile, setProfile] = useState(null);
   const navigate = useNavigate();
 
-
-  // Listen to Supabase auth state (critical for OAuth redirect)
+  // Listen to Supabase auth state
   useEffect(() => {
-    supabase.auth.onAuthStateChange((event, session) => {
+    const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === 'SIGNED_IN') {
-        setMessage('Signed in successfully!');
         navigate('/');
       }
-      if (event === 'SIGNED_OUT') {
-        setProfile(null);
-      }
     });
-  }, [navigate]);
-
-  // Fetch user profile after login
-  useEffect(() => {
-    const fetchProfile = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        setProfile(null);
-        return;
-      }
-
-      const { data, error } = await supabase
-        .from('users')
-        .select('*')
-        .eq('uid', user.id)
-        .single();
-
-      if (!error && data) setProfile(data);
+    return () => {
+      authListener.subscription.unsubscribe();
     };
-
-    fetchProfile();
-  }, [loading]);
+  }, [navigate]);
 
   const handleInputChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -59,23 +33,19 @@ export default function CodeSapiensPlatform() {
 
   const togglePasswordVisibility = () => setShowPassword(!showPassword);
 
-  // Google OAuth Login
   const signInWithGoogle = async () => {
     setLoading(true);
     setMessage(null);
-
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: 'http://localhost:5173', // Works in dev
+        redirectTo: window.location.origin,
       },
     });
-
     if (error) {
       setMessage(`Google Login Failed: ${error.message}`);
       setLoading(false);
     }
-    // On success: redirects to Google → back to your app → auto-handled by listener
   };
 
   const handleSubmit = async (e) => {
@@ -86,7 +56,7 @@ export default function CodeSapiensPlatform() {
     try {
       if (mode === 'forgotPassword') {
         const { error } = await supabase.auth.resetPasswordForEmail(formData.email, {
-          redirectTo: 'http://localhost:5173/reset-password',
+          redirectTo: `${window.location.origin}/reset-password`,
         });
         if (error) throw error;
         setMessage('Password reset link sent! Check your email.');
@@ -118,163 +88,110 @@ export default function CodeSapiensPlatform() {
     setFormData({ email: '', password: '' });
   };
 
-  const features = [
-    { icon: Calendar, title: 'College Network', description: 'Connect with students from your college and beyond', bgColor: 'bg-blue-100', iconColor: 'text-blue-600' },
-    { icon: Globe, title: 'Skill Development', description: 'Attend workshops and earn certificates', bgColor: 'bg-purple-100', iconColor: 'text-purple-600' },
-    { icon: Github, title: 'Portfolio Building', description: 'Showcase your projects and achievements', bgColor: 'bg-green-100', iconColor: 'text-green-600' },
-    { icon: Building, title: 'Professional Network', description: 'Build connections for your career', bgColor: 'bg-orange-100', iconColor: 'text-orange-600' },
-  ];
-
-  const renderContent = () => {
-    if (!profile) return null;
-    if (profile.role === 'admin') {
-      return (
-        <div className="p-4 bg-yellow-50 border border-yellow-300 rounded-lg mt-4">
-          <h2 className="font-bold text-lg mb-2">Admin Dashboard</h2>
-          <p>Welcome, {profile.display_name || 'Admin'}!</p>
-        </div>
-      );
-    }
-    return (
-      <div className="p-4 bg-green-50 border border-green-300 rounded-lg mt-4">
-        <h2 className="font-bold text-lg mb-2">Student Dashboard</h2>
-        <p>Welcome, {profile.display_name || 'Student'}!</p>
-      </div>
-    );
+  // Animation variants
+  const containerVariants = {
+    hidden: { opacity: 0, x: 20 },
+    visible: { opacity: 1, x: 0, transition: { duration: 0.5, ease: "easeOut" } },
+    exit: { opacity: 0, x: -20, transition: { duration: 0.3 } }
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white border-b border-gray-200 px-4 sm:px-6 py-4">
-        <div className="flex flex-col sm:flex-row items-center justify-between max-w-7xl mx-auto">
-          <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 rounded-lg overflow-hidden">
+    <div className="min-h-screen flex bg-zinc-50 overflow-hidden">
+      {/* Left Panel - Visuals */}
+      <div className="hidden lg:flex lg:w-1/2 relative bg-zinc-900 overflow-hidden">
+        <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=2070&auto=format&fit=crop')] bg-cover bg-center opacity-40 mix-blend-overlay"></div>
+        <div className="absolute inset-0 bg-gradient-to-br from-zinc-900 via-zinc-900/90 to-black/80"></div>
+
+        <div className="relative z-10 flex flex-col justify-between p-16 h-full text-zinc-50">
+          <div>
+            <div className="w-12 h-12 mb-8 bg-white/10 backdrop-blur-md rounded-xl flex items-center justify-center border border-white/20">
               <img
-                src="https://res.cloudinary.com/dqudvximt/image/upload/v1756797708/WhatsApp_Image_2025-09-02_at_12.45.18_b15791ea_rnlwrz.jpg"
-                alt="CodeSapiens Logo"
-                className="w-full h-full object-cover"
+                src="https://res.cloudinary.com/druvxcll9/image/upload/v1761122530/WhatsApp_Image_2025-09-02_at_12.45.18_b15791ea_rnlwrz_3_r4kp2u.jpg"
+                alt="Logo"
+                className="w-8 h-8 rounded-full object-cover"
               />
             </div>
-            <span className="text-xl font-semibold text-gray-900">CodeSapiens</span>
-          </div>
-          <span className="text-base text-gray-600 mt-2 sm:mt-0">
-            Student Community Management Platform
-          </span>
-        </div>
-      </header>
-
-      <div className="flex flex-col lg:flex-row max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
-        {/* Left Content */}
-        <div className="flex-1 mb-8 lg:mb-0 lg:pr-8">
-          <div className="max-w-2xl">
-            <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-6 leading-tight">
-              Build Your Student Community
+            <h1 className="text-5xl font-light tracking-wide leading-tight mb-6">
+              Welcome to <br />
+              <span className="font-semibold">CodeSapiens</span>
             </h1>
-            <p className="text-lg text-gray-600 mb-12 leading-relaxed">
-              Connect, learn, and grow with fellow students. Attend workshops, earn badges, and build your professional network.
+            <p className="text-xl text-zinc-400 font-light max-w-md leading-relaxed">
+              Join the biggest student-run tech community. Connect, learn, and build your future with us.
             </p>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-              {features.map((feature, i) => {
-                const Icon = feature.icon;
-                return (
-                  <div key={i} className="bg-white p-6 rounded-xl border border-gray-200 hover:shadow-md transition-shadow">
-                    <div className={`w-12 h-12 ${feature.bgColor} rounded-lg flex items-center justify-center mb-4`}>
-                      <Icon className={`w-6 h-6 ${feature.iconColor}`} />
-                    </div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-2">{feature.title}</h3>
-                    <p className="text-gray-600">{feature.description}</p>
-                  </div>
-                );
-              })}
+          </div>
+
+          <div className="space-y-4">
+            <div className="flex items-center space-x-4 text-zinc-400 text-sm font-light">
+              <span>© 2025 CodeSapiens</span>
+              <span className="w-1 h-1 bg-zinc-600 rounded-full"></span>
+              <span>Privacy Policy</span>
+              <span className="w-1 h-1 bg-zinc-600 rounded-full"></span>
+              <span>Terms</span>
             </div>
           </div>
         </div>
+      </div>
 
-        {/* Right Panel - Auth Form */}
-        <div className="w-full lg:w-96 bg-white border-t lg:border-t-0 lg:border-l border-gray-200 px-8 py-12">
-          {mode === 'forgotPassword' ? (
-            <div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">Reset Password</h2>
-              <p className="text-gray-600 mb-6">Enter your email to receive a reset link</p>
-              <form onSubmit={handleSubmit} className="space-y-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
-                  <div className="relative">
-                    <Mail className="w-5 h-5 text-gray-400 absolute left-3 top-3" />
-                    <input
-                      type="email"
-                      name="email"
-                      required
-                      value={formData.email}
-                      onChange={handleInputChange}
-                      className="w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-                      placeholder="admin@example.com"
-                    />
-                  </div>
-                </div>
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 disabled:opacity-50"
-                >
-                  {loading ? 'Sending...' : 'Send Reset Link'}
-                </button>
-                <p className="text-center text-gray-600">
-                  Back to{' '}
-                  <button type="button" onClick={() => toggleMode('signIn')} className="text-blue-600 font-medium">
-                    Sign In
-                  </button>
-                </p>
-              </form>
-            </div>
-          ) : (
-            <>
-              <div className="mb-8">
-                <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                  {mode === 'signUp' ? 'Join Our Community' : 'Welcome Back'}
+      {/* Right Panel - Form */}
+      <div className="w-full lg:w-1/2 flex items-center justify-center p-6 sm:p-12 relative">
+        <div className="w-full max-w-md">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={mode}
+              variants={containerVariants}
+              initial="hidden"
+              animate="visible"
+              exit="exit"
+              className="bg-white p-8 sm:p-10 rounded-2xl shadow-xl border border-zinc-100"
+            >
+              <div className="mb-8 text-center">
+                <h2 className="text-3xl font-light text-zinc-900 mb-2 tracking-wide">
+                  {mode === 'signIn' ? 'Welcome Back' : mode === 'signUp' ? 'Create Account' : 'Reset Password'}
                 </h2>
-                <p className="text-gray-600">
-                  {mode === 'signUp' ? 'Create your account to get started' : 'Sign in to continue'}
+                <p className="text-zinc-500 font-light text-sm">
+                  {mode === 'signIn'
+                    ? 'Enter your details to access your account'
+                    : mode === 'signUp'
+                      ? 'Start your journey with us today'
+                      : 'We will send you a link to reset it'}
                 </p>
               </div>
 
-              <form onSubmit={handleSubmit} className="space-y-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
-                  <div className="relative">
-                    <Mail className="w-5 h-5 text-gray-400 absolute left-3 top-3" />
+              <form onSubmit={handleSubmit} className="space-y-5">
+                <div className="space-y-1">
+                  <label className="text-xs font-medium text-zinc-500 uppercase tracking-wider ml-1">Email Address</label>
+                  <div className="relative group">
+                    <Mail className="w-5 h-5 text-zinc-400 absolute left-3 top-3.5 transition-colors group-focus-within:text-zinc-800" />
                     <input
                       type="email"
                       name="email"
                       required
                       value={formData.email}
                       onChange={handleInputChange}
-                      disabled={loading}
-                      className="w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-                      placeholder="you@example.com"
+                      className="w-full pl-10 pr-4 py-3 bg-zinc-50 border border-zinc-200 rounded-lg focus:ring-2 focus:ring-zinc-900 focus:border-transparent outline-none transition-all font-light text-zinc-900 placeholder-zinc-400"
+                      placeholder="name@example.com"
                     />
                   </div>
                 </div>
 
-                {mode !== 'signUp' && (
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Password</label>
-                    <div className="relative">
-                      <Lock className="w-5 h-5 text-gray-400 absolute left-3 top-3" />
+                {mode !== 'forgotPassword' && (
+                  <div className="space-y-1">
+                    <label className="text-xs font-medium text-zinc-500 uppercase tracking-wider ml-1">Password</label>
+                    <div className="relative group">
+                      <Lock className="w-5 h-5 text-zinc-400 absolute left-3 top-3.5 transition-colors group-focus-within:text-zinc-800" />
                       <input
                         type={showPassword ? 'text' : 'password'}
                         name="password"
                         required
                         value={formData.password}
                         onChange={handleInputChange}
-                        disabled={loading}
-                        className="w-full pl-11 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                        className="w-full pl-10 pr-12 py-3 bg-zinc-50 border border-zinc-200 rounded-lg focus:ring-2 focus:ring-zinc-900 focus:border-transparent outline-none transition-all font-light text-zinc-900 placeholder-zinc-400"
+                        placeholder="••••••••"
                       />
                       <button
                         type="button"
                         onClick={togglePasswordVisibility}
-                        className="absolute right-3 top-3 text-gray-400 hover:text-gray-600"
+                        className="absolute right-3 top-3.5 text-zinc-400 hover:text-zinc-600 transition-colors"
                       >
                         {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                       </button>
@@ -282,63 +199,80 @@ export default function CodeSapiensPlatform() {
                   </div>
                 )}
 
-                {/* Google Sign-In Button */}
-                <div className="relative">
-                  <div className="absolute inset-0 flex items-center">
-                    <div className="w-full border-t border-gray-300" />
+                {mode === 'signIn' && (
+                  <div className="flex justify-end">
+                    <button
+                      type="button"
+                      onClick={() => toggleMode('forgotPassword')}
+                      className="text-xs text-zinc-500 hover:text-zinc-900 font-medium transition-colors"
+                    >
+                      Forgot password?
+                    </button>
                   </div>
-                  <div className="relative flex justify-center text-sm">
-                    <span className="px-2 bg-white text-gray-500">Or continue with</span>
-                  </div>
-                </div>
-
-                <button
-                  type="button"
-                  onClick={signInWithGoogle}
-                  disabled={loading}
-                  className="w-full flex items-center justify-center gap-3 px-4 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 font-medium"
-                >
-                  <svg className="w-5 h-5" viewBox="0 0 24 24">
-                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.56-.2-2.32H12v4.4h5.84c-.25 1.32-.98 2.44-2.04 3.2v2.55h3.3c1.92-1.77 3.03-4.38 3.03-7.13z" />
-                    <path fill="#34A853" d="M12 23c2.97 0 5.46-1.01 7.28-2.73l-3.3-2.55c-.9.62-2.05.98-3.98.98-3.06 0-5.66-2.06-6.6-4.84H1.04v2.62C2.84 20.42 6.72 23 12 23z" />
-                    <path fill="#FBBC05" d="M5.4 14.08c-.43-1.26-.68-2.61-.68-4.02 0-1.41.25-2.76.68-4.02V3.46H1.04C.37 5.18 0 7.04 0 9.02c0 1.98.37 3.84 1.04 5.56l4.36-3.5z" />
-                    <path fill="#EA4335" d="M12 6.98c1.62 0 3.06.55 4.2 1.63l3.15-3.15C17.46 3.05 14.97 2 12 2 6.72 2 2.84 4.58 1.04 8.52l4.36 3.5C6.34 9.16 8.94 6.98 12 6.98z" />
-                  </svg>
-                  Continue with Google
-                </button>
+                )}
 
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 rounded-lg font-medium hover:from-blue-700 hover:to-purple-700 disabled:opacity-50 transition-all"
+                  className="w-full bg-zinc-900 text-white py-3.5 rounded-lg font-medium tracking-wide hover:bg-zinc-800 active:scale-[0.98] transition-all disabled:opacity-70 disabled:cursor-not-allowed shadow-lg shadow-zinc-900/20 flex items-center justify-center space-x-2"
                 >
-                  {loading ? 'Please wait...' : mode === 'signUp' ? 'Sign Up' : 'Sign In'}
+                  <span>{loading ? 'Processing...' : mode === 'signIn' ? 'Sign In' : mode === 'signUp' ? 'Create Account' : 'Send Reset Link'}</span>
+                  {!loading && <ArrowRight className="w-4 h-4" />}
                 </button>
 
-                <div className="text-center space-y-2 text-sm text-gray-600">
-                  <p>
-                    {mode === 'signUp' ? 'Already have an account? ' : "Don't have an account? "}
-                    <button type="button" onClick={() => toggleMode(mode === 'signUp' ? 'signIn' : 'signUp')} className="text-blue-600 font-medium">
-                      {mode === 'signUp' ? 'Sign In' : 'Sign Up'}
+                {mode !== 'forgotPassword' && (
+                  <>
+                    <div className="relative py-2">
+                      <div className="absolute inset-0 flex items-center">
+                        <div className="w-full border-t border-zinc-200" />
+                      </div>
+                      <div className="relative flex justify-center text-xs uppercase tracking-widest">
+                        <span className="bg-white px-2 text-zinc-400">Or continue with</span>
+                      </div>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={signInWithGoogle}
+                      disabled={loading}
+                      className="w-full bg-white text-zinc-700 border border-zinc-200 py-3.5 rounded-lg font-medium hover:bg-zinc-50 hover:border-zinc-300 active:scale-[0.98] transition-all flex items-center justify-center space-x-3"
+                    >
+                      <svg className="w-5 h-5" viewBox="0 0 24 24">
+                        <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.56-.2-2.32H12v4.4h5.84c-.25 1.32-.98 2.44-2.04 3.2v2.55h3.3c1.92-1.77 3.03-4.38 3.03-7.13z" />
+                        <path fill="#34A853" d="M12 23c2.97 0 5.46-1.01 7.28-2.73l-3.3-2.55c-.9.62-2.05.98-3.98.98-3.06 0-5.66-2.06-6.6-4.84H1.04v2.62C2.84 20.42 6.72 23 12 23z" />
+                        <path fill="#FBBC05" d="M5.4 14.08c-.43-1.26-.68-2.61-.68-4.02 0-1.41.25-2.76.68-4.02V3.46H1.04C.37 5.18 0 7.04 0 9.02c0 1.98.37 3.84 1.04 5.56l4.36-3.5z" />
+                        <path fill="#EA4335" d="M12 6.98c1.62 0 3.06.55 4.2 1.63l3.15-3.15C17.46 3.05 14.97 2 12 2 6.72 2 2.84 4.58 1.04 8.52l4.36 3.5C6.34 9.16 8.94 6.98 12 6.98z" />
+                      </svg>
+                      <span>Google</span>
                     </button>
-                  </p>
-                  <p>
-                    <button type="button" onClick={() => toggleMode('forgotPassword')} className="text-blue-600 font-medium">
-                      Forgot Password?
-                    </button>
-                  </p>
-                </div>
+                  </>
+                )}
 
                 {message && (
-                  <div className={`p-3 rounded-lg text-sm ${message.startsWith('Error') || message.includes('Failed') ? 'bg-red-50 text-red-800 border border-red-200' : 'bg-green-50 text-green-800 border border-green-200'}`}>
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className={`p-3 rounded-lg text-sm text-center ${message.startsWith('Error') || message.includes('Failed') ? 'bg-red-50 text-red-600 border border-red-100' : 'bg-green-50 text-green-600 border border-green-100'}`}
+                  >
                     {message}
-                  </div>
+                  </motion.div>
                 )}
               </form>
 
-              {profile && renderContent()}
-            </>
-          )}
+              <div className="mt-8 text-center">
+                <p className="text-zinc-500 text-sm font-light">
+                  {mode === 'signUp' ? 'Already have an account? ' : mode === 'forgotPassword' ? 'Remember your password? ' : "Don't have an account? "}
+                  <button
+                    type="button"
+                    onClick={() => toggleMode(mode === 'signUp' ? 'signIn' : 'signUp')}
+                    className="text-zinc-900 font-medium hover:underline underline-offset-4 transition-all"
+                  >
+                    {mode === 'signUp' ? 'Sign In' : 'Sign Up'}
+                  </button>
+                </p>
+              </div>
+            </motion.div>
+          </AnimatePresence>
         </div>
       </div>
     </div>

@@ -25,8 +25,13 @@ import {
   Calendar,
   Building,
   GraduationCap,
+  TrendingUp,
+  TrendingDown,
 } from "lucide-react";
 import { supabase } from "../lib/supabaseClient";
+import AdminLayout from '../components/AdminLayout';
+
+const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8'];
 
 // Error Boundary Component
 class ErrorBoundary extends Component {
@@ -405,413 +410,109 @@ export default function AnalyticsPage() {
 
   return (
     <ErrorBoundary>
-      <div className="min-h-screen bg-gray-50">
-        {loading && !refreshing ? (
-          <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-            <div className="text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
-              <p className="text-gray-600">Loading analytics...</p>
+      <AdminLayout>
+        <div className="min-h-screen bg-gray-50">
+          {loading && !refreshing ? (
+            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+              <div className="text-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+                <p className="text-gray-600">Loading analytics...</p>
+              </div>
             </div>
-          </div>
-        ) : (
-          <main className="px-4 sm:px-6 lg:px-8 py-6 max-w-7xl mx-auto">
-            {/* Header */}
-            <div className="mb-8">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-                <div>
-                  <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
-                    Analytics Dashboard
-                  </h1>
-                  <p className="text-gray-600">
-                    Insights and metrics for your student community
-                  </p>
-                </div>
-                <div className="flex items-center space-x-3 mt-4 sm:mt-0 flex-wrap">
-                  <div className="relative">
-                    <Filter className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
-                    <select
-                      value={timeRange}
-                      onChange={(e) => setTimeRange(e.target.value)}
-                      className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none"
-                      aria-label="Select time range"
+          ) : (
+            <main className="px-4 sm:px-6 lg:px-8 py-6 max-w-7xl mx-auto">
+              {/* Header */}
+              <div className="mb-8">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+                  <div>
+                    <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
+                      Analytics Dashboard
+                    </h1>
+                    <p className="text-gray-600">
+                      Insights and metrics for your student community
+                    </p>
+                  </div>
+                  <div className="flex items-center space-x-3 mt-4 sm:mt-0 flex-wrap">
+                    <div className="relative">
+                      <Filter className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
+                      <select
+                        value={timeRange}
+                        onChange={(e) => setTimeRange(e.target.value)}
+                        className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none"
+                        aria-label="Select time range"
+                      >
+                        <option value="7">Last 7 days</option>
+                        <option value="30">Last 30 days</option>
+                        <option value="90">Last 90 days</option>
+                        <option value="365">Last year</option>
+                      </select>
+                    </div>
+                    <button
+                      onClick={handleRefresh}
+                      disabled={refreshing}
+                      className="px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors duration-200 flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                      aria-label="Refresh analytics data"
                     >
-                      <option value="7">Last 7 days</option>
-                      <option value="30">Last 30 days</option>
-                      <option value="90">Last 90 days</option>
-                      <option value="365">Last year</option>
-                    </select>
+                      <RefreshCw className={`w-4 h-4 ${refreshing ? "animate-spin" : ""}`} />
+                      <span>Refresh</span>
+                    </button>
+                    <button
+                      onClick={exportReport}
+                      className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors duration-200 flex items-center space-x-2"
+                      aria-label="Export analytics report"
+                    >
+                      <Download className="w-4 h-4" />
+                      <span>Export</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {error && (
+                <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+                  <div className="flex items-center">
+                    <AlertCircle className="w-5 h-5 text-red-500 mr-2" />
+                    <p className="text-red-700">Error: {error}</p>
                   </div>
                   <button
                     onClick={handleRefresh}
-                    disabled={refreshing}
-                    className="px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors duration-200 flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                    aria-label="Refresh analytics data"
+                    className="mt-2 text-sm text-red-600 hover:text-red-800 underline"
+                    aria-label="Retry loading analytics data"
                   >
-                    <RefreshCw className={`w-4 h-4 ${refreshing ? "animate-spin" : ""}`} />
-                    <span>Refresh</span>
-                  </button>
-                  <button
-                    onClick={exportReport}
-                    className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors duration-200 flex items-center space-x-2"
-                    aria-label="Export analytics report"
-                  >
-                    <Download className="w-4 h-4" />
-                    <span>Export</span>
+                    Try again
                   </button>
                 </div>
-              </div>
-            </div>
+              )}
 
-            {error && (
-              <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
-                <div className="flex items-center">
-                  <AlertCircle className="w-5 h-5 text-red-500 mr-2" />
-                  <p className="text-red-700">Error: {error}</p>
-                </div>
-                <button
-                  onClick={handleRefresh}
-                  className="mt-2 text-sm text-red-600 hover:text-red-800 underline"
-                  aria-label="Retry loading analytics data"
-                >
-                  Try again
-                </button>
-              </div>
-            )}
-
-            {/* Overview Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 mb-8">
-              {overviewCards.map((card, index) => (
-                <div
-                  key={index}
-                  className={`${card.bgColor} rounded-xl p-4 sm:p-6 border border-gray-200 transition-shadow hover:shadow-md`}
-                  role="region"
-                  aria-label={`${card.title} overview`}
-                >
-                  <div className="flex items-center justify-between mb-2">
-                    <div className={`${card.iconBg} p-3 rounded-lg`}>{card.icon}</div>
-                    {card.change && (
-                      <div
-                        className={`text-sm font-medium ${
-                          card.changeType === "positive" ? "text-green-600" : "text-red-600"
-                        }`}
-                      >
-                        {card.change}
-                      </div>
-                    )}
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-gray-600 mb-1">{card.title}</p>
-                    <p className="text-2xl sm:text-3xl font-bold text-gray-900">
-                      {card.value}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {/* Charts Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 mb-8">
-              {/* Student Growth Chart */}
-              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 md:col-span-2 xl:col-span-3">
-                <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-xl font-semibold text-gray-900">Student Growth</h2>
-                  <UserCheck className="w-5 h-5 text-green-500" />
-                </div>
-                {analyticsData.studentGrowth.length > 0 ? (
-                  <>
-                    <div className="h-64 md:h-80">
-                      <ResponsiveContainer width="100%" height="100%">
-                        <AreaChart data={analyticsData.studentGrowth}>
-                          <CartesianGrid strokeDasharray="3 3" />
-                          <XAxis dataKey="period" />
-                          <YAxis />
-                          <Tooltip
-                            contentStyle={{
-                              backgroundColor: "#fff",
-                              border: "1px solid #e5e7eb",
-                              borderRadius: "8px",
-                            }}
-                          />
-                          <Area
-                            type="monotone"
-                            dataKey="students"
-                            stroke="#3B82F6"
-                            fill="#93C5FD"
-                            fillOpacity={0.3}
-                            name="Total Students"
-                          />
-                          <Area
-                            type="monotone"
-                            dataKey="active"
-                            stroke="#10B981"
-                            fill="#6EE7B7"
-                            fillOpacity={0.3}
-                            name="Active Students"
-                          />
-                        </AreaChart>
-                      </ResponsiveContainer>
-                    </div>
-                    {renderGrowthSummary()}
-                  </>
-                ) : (
-                  <div className="h-64 flex items-center justify-center text-gray-500">
-                    No growth data available
-                  </div>
-                )}
-              </div>
-
-              {/* College Distribution */}
-              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-xl font-semibold text-gray-900">College Distribution</h2>
-                  <School className="w-5 h-5 text-blue-500" />
-                </div>
-                {analyticsData.collegeDistribution.length > 0 ? (
-                  <>
-                    <div className="h-48 md:h-56 flex justify-center">
-                      <ResponsiveContainer width="100%" height="100%">
-                        <PieChart>
-                          <Pie
-                            data={analyticsData.collegeDistribution}
-                            cx="50%"
-                            cy="50%"
-                            outerRadius={60}
-                            dataKey="value"
-                          >
-                            {analyticsData.collegeDistribution.map((entry, index) => (
-                              <Cell key={`cell-${index}`} fill={entry.color} />
-                            ))}
-                          </Pie>
-                          <Tooltip
-                            contentStyle={{
-                              backgroundColor: "#fff",
-                              border: "1px solid #e5e7eb",
-                              borderRadius: "8px",
-                            }}
-                          />
-                        </PieChart>
-                      </ResponsiveContainer>
-                    </div>
-                    {renderDistributionLegend(analyticsData.collegeDistribution, "Colleges (Total: " + totalStudents.toLocaleString() + ")")}
-                  </>
-                ) : (
-                  <div className="h-64 flex items-center justify-center text-gray-500">
-                    No college data available
-                  </div>
-                )}
-              </div>
-
-              {/* Year Distribution */}
-              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-xl font-semibold text-gray-900">Year Distribution</h2>
-                  <Calendar className="w-5 h-5 text-orange-500" />
-                </div>
-                {analyticsData.yearDistribution.length > 0 ? (
-                  <>
-                    <div className="h-48 md:h-56 flex justify-center">
-                      <ResponsiveContainer width="100%" height="100%">
-                        <PieChart>
-                          <Pie
-                            data={analyticsData.yearDistribution}
-                            cx="50%"
-                            cy="50%"
-                            outerRadius={60}
-                            dataKey="value"
-                          >
-                            {analyticsData.yearDistribution.map((entry, index) => (
-                              <Cell key={`cell-${index}`} fill={entry.color} />
-                            ))}
-                          </Pie>
-                          <Tooltip
-                            contentStyle={{
-                              backgroundColor: "#fff",
-                              border: "1px solid #e5e7eb",
-                              borderRadius: "8px",
-                            }}
-                          />
-                        </PieChart>
-                      </ResponsiveContainer>
-                    </div>
-                    {renderDistributionLegend(analyticsData.yearDistribution, "Graudating year (Total: " + totalStudents.toLocaleString() + ")")}
-                  </>
-                ) : (
-                  <div className="h-64 flex items-center justify-center text-gray-500">
-                    No year data available
-                  </div>
-                )}
-              </div>
-
-              {/* Department Distribution */}
-              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-xl font-semibold text-gray-900">Department Distribution</h2>
-                  <Building className="w-5 h-5 text-teal-500" />
-                </div>
-                {analyticsData.departmentDistribution.length > 0 ? (
-                  <>
-                    <div className="h-48 md:h-56 flex justify-center">
-                      <ResponsiveContainer width="100%" height="100%">
-                        <PieChart>
-                          <Pie
-                            data={analyticsData.departmentDistribution}
-                            cx="50%"
-                            cy="50%"
-                            outerRadius={60}
-                            dataKey="value"
-                          >
-                            {analyticsData.departmentDistribution.map((entry, index) => (
-                              <Cell key={`cell-${index}`} fill={entry.color} />
-                            ))}
-                          </Pie>
-                          <Tooltip
-                            contentStyle={{
-                              backgroundColor: "#fff",
-                              border: "1px solid #e5e7eb",
-                              borderRadius: "8px",
-                            }}
-                          />
-                        </PieChart>
-                      </ResponsiveContainer>
-                    </div>
-                    {renderDistributionLegend(analyticsData.departmentDistribution, "Departments (Total: " + totalStudents.toLocaleString() + ")")}
-                  </>
-                ) : (
-                  <div className="h-64 flex items-center justify-center text-gray-500">
-                    No department data available
-                  </div>
-                )}
-              </div>
-
-              {/* Major Distribution */}
-              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-xl font-semibold text-gray-900">Major Distribution</h2>
-                  <GraduationCap className="w-5 h-5 text-purple-500" />
-                </div>
-                {analyticsData.majorDistribution.length > 0 ? (
-                  <>
-                    <div className="h-48 md:h-56 flex justify-center">
-                      <ResponsiveContainer width="100%" height="100%">
-                        <PieChart>
-                          <Pie
-                            data={analyticsData.majorDistribution}
-                            cx="50%"
-                            cy="50%"
-                            outerRadius={60}
-                            dataKey="value"
-                          >
-                            {analyticsData.majorDistribution.map((entry, index) => (
-                              <Cell key={`cell-${index}`} fill={entry.color} />
-                            ))}
-                          </Pie>
-                          <Tooltip
-                            contentStyle={{
-                              backgroundColor: "#fff",
-                              border: "1px solid #e5e7eb",
-                              borderRadius: "8px",
-                            }}
-                          />
-                        </PieChart>
-                      </ResponsiveContainer>
-                    </div>
-                    {renderDistributionLegend(analyticsData.majorDistribution, "Majors (Total: " + totalStudents.toLocaleString() + ")")}
-                  </>
-                ) : (
-                  <div className="h-64 flex items-center justify-center text-gray-500">
-                    No major data available
-                  </div>
-                )}
-              </div>
-
-              {/* Skills Popularity */}
-              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 md:col-span-2 xl:col-span-3">
-                <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-xl font-semibold text-gray-900">Popular Skills</h2>
-                  <BookOpen className="w-5 h-5 text-purple-500" />
-                </div>
-                {analyticsData.skillsPopularity.length > 0 ? (
-                  <>
-                    <div className="h-64 md:h-72 lg:h-96">
-                      <ResponsiveContainer width="100%" height="100%">
-                        <BarChart
-                          data={analyticsData.skillsPopularity}
-                          margin={{ top: 5, right: 20, left: 10, bottom: 80 }}
+              {/* Overview Cards */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 mb-8">
+                {overviewCards.map((card, index) => (
+                  <div
+                    key={index}
+                    className={`${card.bgColor} rounded-xl p-4 sm:p-6 border border-gray-200 transition-shadow hover:shadow-md`}
+                    role="region"
+                    aria-label={`${card.title} overview`}
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <div className={`${card.iconBg} p-3 rounded-lg`}>{card.icon}</div>
+                      {card.change && (
+                        <div
+                          className={`text-sm font-medium ${card.changeType === "positive" ? "text-green-600" : "text-red-600"
+                            }`}
                         >
-                          <CartesianGrid strokeDasharray="3 3" />
-                          <XAxis
-                            dataKey="skill"
-                            angle={-45}
-                            textAnchor="end"
-                            height={90}
-                            interval={0}
-                            tick={{ fontSize: 10 }}
-                          />
-                          <YAxis />
-                          <Tooltip
-                            contentStyle={{
-                              backgroundColor: "#fff",
-                              border: "1px solid #e5e7eb",
-                              borderRadius: "8px",
-                            }}
-                          />
-                          <Bar dataKey="count" fill="#8B5CF6" />
-                        </BarChart>
-                      </ResponsiveContainer>
+                          {card.change}
+                        </div>
+                      )}
                     </div>
-                    {renderSkillsLegend(analyticsData.skillsPopularity, "All Skills Mentions (Total: " + analyticsData.skillsPopularity.reduce((sum, item) => sum + item.count, 0) + ")")}
-                  </>
-                ) : (
-                  <div className="h-64 flex items-center justify-center text-gray-500">
-                    No skills data available
+                    <h3 className="text-2xl font-bold text-gray-900">{card.value}</h3>
+                    <p className="text-gray-600 text-sm">{card.title}</p>
                   </div>
-                )}
+                ))}
               </div>
-            </div>
 
-            {/* Summary Insights */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-8">
-              <h2 className="text-xl font-semibold text-gray-900 mb-6 flex items-center">
-                <BookOpen className="w-5 h-5 text-yellow-500 mr-2" />
-                Key Insights
-              </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                <div className="bg-blue-50 p-4 rounded-lg">
-                  <h3 className="font-semibold text-blue-900 mb-2">Engagement Rate</h3>
-                  <p className="text-blue-700 text-sm">
-                    {analyticsData.overview.totalStudents > 0
-                      ? `${Math.round(
-                          (analyticsData.overview.activeStudents /
-                            analyticsData.overview.totalStudents) *
-                            100
-                        )}%`
-                      : "0%"}{" "}
-                    of students are actively participating in community activities
-                  </p>
-                </div>
-                <div className="bg-green-50 p-4 rounded-lg">
-                  <h3 className="font-semibold text-green-900 mb-2">Community Size</h3>
-                  <p className="text-green-700 text-sm">
-                    {analyticsData.overview.totalStudents} total students
-                  </p>
-                </div>
-                <div className="bg-purple-50 p-4 rounded-lg">
-                  <h3 className="font-semibold text-purple-900 mb-2">Top Skills</h3>
-                  <p className="text-purple-700 text-sm">
-                    {analyticsData.skillsPopularity.length > 0
-                      ? `${analyticsData.skillsPopularity[0]?.skill || "Various skills"} is most popular among students`
-                      : "No skills data available yet"}
-                  </p>
-                </div>
-                <div className="bg-orange-50 p-4 rounded-lg">
-                  <h3 className="font-semibold text-orange-900 mb-2">Top Year</h3>
-                  <p className="text-orange-700 text-sm">
-                    {analyticsData.yearDistribution.length > 0
-                      ? `Year ${analyticsData.yearDistribution[0]?.name || "Not Specified"} has the most students`
-                      : "No year data available yet"}
-                  </p>
-                </div>
-                <div className="bg-teal-50 p-4 rounded-lg">
+              {/* Top Stats & Data Source Info */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div className="bg-teal-50 p-4 rounded-lg border border-teal-100">
                   <h3 className="font-semibold text-teal-900 mb-2">Top Department</h3>
                   <p className="text-teal-700 text-sm">
                     {analyticsData.departmentDistribution.length > 0
@@ -819,7 +520,7 @@ export default function AnalyticsPage() {
                       : "No department data available yet"}
                   </p>
                 </div>
-                <div className="bg-indigo-50 p-4 rounded-lg">
+                <div className="bg-indigo-50 p-4 rounded-lg border border-indigo-100">
                   <h3 className="font-semibold text-indigo-900 mb-2">Top Major</h3>
                   <p className="text-indigo-700 text-sm">
                     {analyticsData.majorDistribution.length > 0
@@ -827,26 +528,118 @@ export default function AnalyticsPage() {
                       : "No major data available yet"}
                   </p>
                 </div>
-              </div>
-            </div>
-
-            {/* Data Source Info */}
-            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-              <div className="flex items-start">
-                <BookOpen className="w-5 h-5 text-yellow-600 mr-2 mt-0.5" />
-                <div>
-                  <h3 className="font-medium text-yellow-800 mb-1">Data Integration Notes</h3>
-                  <ul className="text-sm text-yellow-700 space-y-1">
-                    <li>• User data is fetched from Supabase users table</li>
-                    <li>• Growth calculations are based on available data</li>
-                    <li>• Year, department, and major distributions included</li>
-                  </ul>
+                {/* Data Source Info */}
+                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                  <div className="flex items-start">
+                    <BookOpen className="w-5 h-5 text-yellow-600 mr-2 mt-0.5" />
+                    <div>
+                      <h3 className="font-medium text-yellow-800 mb-1">Data Integration Notes</h3>
+                      <ul className="text-sm text-yellow-700 space-y-1">
+                        <li>• User data is fetched from Supabase users table</li>
+                        <li>• Growth calculations are based on available data</li>
+                        <li>• Year, department, and major distributions included</li>
+                      </ul>
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
-          </main>
-        )}
-      </div>
+
+              {/* Charts Section */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                  <h2 className="text-lg font-semibold text-gray-900 mb-4">Student Growth Trend</h2>
+                  <div className="h-80">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <AreaChart data={analyticsData.studentGrowth}>
+                        <defs>
+                          <linearGradient id="colorStudents" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor="#3B82F6" stopOpacity={0.1} />
+                            <stop offset="95%" stopColor="#3B82F6" stopOpacity={0} />
+                          </linearGradient>
+                        </defs>
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
+                        <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{ fill: '#6B7280', fontSize: 12 }} dy={10} />
+                        <YAxis axisLine={false} tickLine={false} tick={{ fill: '#6B7280', fontSize: 12 }} />
+                        <Tooltip contentStyle={{ backgroundColor: '#FFF', borderRadius: '8px', border: '1px solid #E5E7EB', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' }} />
+                        <Area type="monotone" dataKey="students" stroke="#3B82F6" strokeWidth={2} fillOpacity={1} fill="url(#colorStudents)" />
+                      </AreaChart>
+                    </ResponsiveContainer>
+                  </div>
+                  {renderGrowthSummary()}
+                </div>
+
+                <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                  <h2 className="text-lg font-semibold text-gray-900 mb-4">Department Distribution</h2>
+                  <div className="h-80">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <Pie
+                          data={analyticsData.departmentDistribution}
+                          cx="50%"
+                          cy="50%"
+                          innerRadius={60}
+                          outerRadius={100}
+                          paddingAngle={5}
+                          dataKey="count"
+                        >
+                          {analyticsData.departmentDistribution.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                          ))}
+                        </Pie>
+                        <Tooltip />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </div>
+                  {renderDistributionLegend(analyticsData.departmentDistribution, "Departments")}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                  <h2 className="text-lg font-semibold text-gray-900 mb-4">Academic Year Distribution</h2>
+                  <div className="h-80">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={analyticsData.yearDistribution}>
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
+                        <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#6B7280', fontSize: 12 }} dy={10} />
+                        <YAxis axisLine={false} tickLine={false} tick={{ fill: '#6B7280', fontSize: 12 }} />
+                        <Tooltip cursor={{ fill: '#F3F4F6' }} contentStyle={{ backgroundColor: '#FFF', borderRadius: '8px', border: '1px solid #E5E7EB' }} />
+                        <Bar dataKey="count" fill="#8B5CF6" radius={[4, 4, 0, 0]} />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+
+                <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                  <h2 className="text-lg font-semibold text-gray-900 mb-4">Major Distribution</h2>
+                  <div className="h-80">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <Pie
+                          data={analyticsData.majorDistribution}
+                          cx="50%"
+                          cy="50%"
+                          innerRadius={60}
+                          outerRadius={100}
+                          paddingAngle={5}
+                          dataKey="count"
+                        >
+                          {analyticsData.majorDistribution.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                          ))}
+                        </Pie>
+                        <Tooltip />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </div>
+                  {renderDistributionLegend(analyticsData.majorDistribution, "Majors")}
+                </div>
+              </div>
+
+            </main>
+          )}
+        </div>
+      </AdminLayout>
     </ErrorBoundary>
   );
-}
+};

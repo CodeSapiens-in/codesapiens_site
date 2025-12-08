@@ -33,6 +33,7 @@ import {
   ExternalLink,
 } from "lucide-react";
 import { supabase } from "../lib/supabaseClient";
+import { useUser } from '@supabase/auth-helpers-react';
 import skillsList from "../assets/skills.json";
 import academicData from "../assets/academic.json";
 import "../styles/profile-animations.css";
@@ -68,6 +69,7 @@ const extractGithubUsername = (url) => {
 };
 
 const UserProfile = () => {
+  const user = useUser();
   const [activeTab, setActiveTab] = useState("Overview");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [userData, setUserData] = useState(null);
@@ -130,18 +132,6 @@ const UserProfile = () => {
         setAuthChecking(true);
         setLoading(true);
         setError(null);
-
-        const {
-          data: { user },
-          error: authError,
-        } = await supabase.auth.getUser();
-
-        if (authError) {
-          console.error("[Frontend] : Auth error:", authError.message);
-          setIsAuthenticated(false);
-          setAuthChecking(false);
-          return;
-        }
 
         if (!user) {
           setIsAuthenticated(false);
@@ -236,7 +226,7 @@ const UserProfile = () => {
     };
 
     fetchUserData();
-  }, []);
+  }, [user]);
 
   // Click-outside handling for college dropdown
   useEffect(() => {

@@ -6,7 +6,7 @@ import {
 import { supabase } from '../lib/supabaseClient';
 import { useNavigate, useParams } from 'react-router-dom';
 
-const API_BASE_URL = 'http://localhost:3001';
+const API_BASE_URL = 'https://colleges-name-api.vercel.app';
 
 const AdminBlogEmailer = () => {
     const { id } = useParams();
@@ -439,7 +439,8 @@ const AdminBlogEmailer = () => {
                                                     : 'hover:bg-gray-50'
                                                     }`}
                                             >
-                                                <div className="flex-shrink-0">
+                                                {/* Checkbox */}
+                                                <div className="flex-shrink-0 w-5">
                                                     {selectedEmails.has(student.email) ? (
                                                         <CheckSquare className="w-5 h-5 text-blue-600" />
                                                     ) : (
@@ -447,7 +448,8 @@ const AdminBlogEmailer = () => {
                                                     )}
                                                 </div>
 
-                                                <div className="flex-shrink-0">
+                                                {/* Avatar */}
+                                                <div className="flex-shrink-0 w-10">
                                                     {student.avatar ? (
                                                         <img
                                                             src={student.avatar}
@@ -461,7 +463,8 @@ const AdminBlogEmailer = () => {
                                                     )}
                                                 </div>
 
-                                                <div className="flex-1 min-w-0">
+                                                {/* Name & Email */}
+                                                <div className="flex-1 min-w-0 overflow-hidden">
                                                     <p className="font-medium text-gray-900 truncate">
                                                         {student.display_name || 'No Name'}
                                                     </p>
@@ -470,9 +473,10 @@ const AdminBlogEmailer = () => {
                                                     </p>
                                                 </div>
 
+                                                {/* College */}
                                                 {student.college && (
                                                     <div className="flex-shrink-0 hidden sm:flex items-center text-sm text-gray-500">
-                                                        <Building className="w-4 h-4 mr-1" />
+                                                        <Building className="w-4 h-4 mr-1 flex-shrink-0" />
                                                         <span className="truncate max-w-32">{student.college}</span>
                                                     </div>
                                                 )}

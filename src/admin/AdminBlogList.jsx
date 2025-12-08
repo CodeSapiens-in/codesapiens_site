@@ -5,6 +5,7 @@ import {
 } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
 import { useNavigate } from 'react-router-dom';
+import AdminLayout from '../components/AdminLayout';
 
 const AdminBlogList = () => {
     const [blogs, setBlogs] = useState([]);
@@ -12,53 +13,16 @@ const AdminBlogList = () => {
     const [error, setError] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
     const [filter, setFilter] = useState('all');
-    const [isAuthenticated, setIsAuthenticated] = useState(false);
-    const [authChecking, setAuthChecking] = useState(true);
     const [deleteModalBlog, setDeleteModalBlog] = useState(null);
     const navigate = useNavigate();
 
     useEffect(() => {
-        checkAuthAndFetchBlogs();
+        fetchBlogs();
     }, []);
-
-    const checkAuthAndFetchBlogs = async () => {
-        try {
-            setAuthChecking(true);
-            setLoading(true);
-            setError(null);
-
-            const { data: { user }, error: authError } = await supabase.auth.getUser();
-
-            if (authError || !user) {
-                setIsAuthenticated(false);
-                setAuthChecking(false);
-                return;
-            }
-
-            // Check if user is admin
-            const { data: profileData, error: profileError } = await supabase
-                .from('users')
-                .select('role')
-                .eq('uid', user.id)
-                .single();
-
-            if (profileError || profileData?.role !== 'admin') {
-                navigate('/');
-                return;
-            }
-
-            setIsAuthenticated(true);
-            await fetchBlogs();
-        } catch (err) {
-            setError(err.message);
-        } finally {
-            setLoading(false);
-            setAuthChecking(false);
-        }
-    };
 
     const fetchBlogs = async () => {
         try {
+            setLoading(true);
             const { data, error } = await supabase
                 .from('blogs')
                 .select(`
@@ -71,6 +35,8 @@ const AdminBlogList = () => {
             setBlogs(data || []);
         } catch (err) {
             setError(err.message);
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -136,54 +102,29 @@ const AdminBlogList = () => {
         drafts: blogs.filter(b => b.status === 'draft').length
     };
 
-    if (authChecking) {
-        return (
-            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-                <div className="text-center">
-                    <Loader2 className="w-12 h-12 animate-spin text-blue-500 mx-auto mb-4" />
-                    <p className="text-gray-600">Loading...</p>
-                </div>
-            </div>
-        );
-    }
-
-    if (!isAuthenticated) {
-        return (
-            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-                <div className="text-center">
-                    <X className="w-16 h-16 text-red-500 mx-auto mb-4" />
-                    <h2 className="text-xl font-semibold text-gray-900 mb-2">Access Denied</h2>
-                    <p className="text-gray-600 mb-4">You need admin privileges to access this page.</p>
-                </div>
-            </div>
-        );
-    }
-
     return (
-        <div className="min-h-screen bg-gray-50">
-            <main className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto">
+        <AdminLayout>
+            <div className="space-y-8">
                 {/* Header */}
-                <div className="mb-8">
-                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                        <div>
-                            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 flex items-center gap-3">
-                                <FileText className="w-8 h-8 text-blue-600" />
-                                Blog Management
-                            </h1>
-                            <p className="text-gray-600 mt-1">Create and manage blog posts for your community</p>
-                        </div>
-                        <button
-                            onClick={() => navigate('/admin/blog/create')}
-                            className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors shadow-sm"
-                        >
-                            <Plus className="w-5 h-5 mr-2" />
-                            New Blog Post
-                        </button>
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                    <div>
+                        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 flex items-center gap-3">
+                            <FileText className="w-8 h-8 text-blue-600" />
+                            Blog Management
+                        </h1>
+                        <p className="text-gray-600 mt-1">Create and manage blog posts for your community</p>
                     </div>
+                    <button
+                        onClick={() => navigate('/admin/blog/create')}
+                        className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors shadow-sm"
+                    >
+                        <Plus className="w-5 h-5 mr-2" />
+                        New Blog Post
+                    </button>
                 </div>
 
                 {/* Stats Cards */}
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-200">
                         <div className="flex items-center justify-between">
                             <div>
@@ -220,7 +161,7 @@ const AdminBlogList = () => {
                 </div>
 
                 {/* Search and Filter */}
-                <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 mb-6">
+                <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
                     <div className="flex flex-col sm:flex-row gap-4">
                         <div className="relative flex-1">
                             <Search className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
@@ -416,8 +357,8 @@ const AdminBlogList = () => {
                         </div>
                     </div>
                 )}
-            </main>
-        </div>
+            </div>
+        </AdminLayout>
     );
 };
 

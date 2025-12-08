@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { Calendar, Trophy, Users, TrendingUp, Settings, X, ExternalLink } from "lucide-react";
 import { supabase } from "../lib/supabaseClient";
+import { useUser } from '@supabase/auth-helpers-react';
 import { useNavigate } from "react-router-dom";
 import DashboardBlogSection from "../components/DashboardBlogSection";
 
 export default function UserDashboard() {
+  const user = useUser();
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -41,17 +43,7 @@ export default function UserDashboard() {
         setLoading(true);
         setError(null);
 
-        const {
-          data: { user },
-          error: authError,
-        } = await supabase.auth.getUser();
 
-        if (authError) {
-          console.error("Auth error:", authError);
-          setIsAuthenticated(false);
-          setAuthChecking(false);
-          return;
-        }
 
         if (!user) {
           setIsAuthenticated(false);
@@ -77,7 +69,7 @@ export default function UserDashboard() {
 
         if (data) {
           if (data.role === "admin") {
-            window.location.href = "/admin";
+            navigate("/admin");
             return;
           }
 
@@ -119,7 +111,7 @@ export default function UserDashboard() {
     };
 
     fetchUserData();
-  }, []);
+  }, [user]);
 
   // Handle external link navigation for events
   const handleEventsClick = () => {
