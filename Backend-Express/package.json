@@ -18,6 +18,7 @@
     "multer": "^2.0.2",
     "node-fetch": "^2.7.0",
     "nodecsv": "^1.1.0",
+    "nodemailer": "^7.0.11",
     "nodemon": "^3.1.10",
     "pdf-lib": "^1.17.1",
     "winston": "^3.17.0"
