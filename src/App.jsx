@@ -11,6 +11,7 @@ import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-route
 import { AnimatePresence } from 'framer-motion';
 import { Loader2 } from 'lucide-react';
 import PageTransition from './components/PageTransition';
+import AdminLayout from './components/AdminLayout';
 
 
 import Hero from './components/ui/Hero';
@@ -22,7 +23,7 @@ import UserDashboard from './user/UserDashboard';
 import NavBar from './components/NavBar';
 import AnalyticsPage from './admin/AnalyticsPage';
 import NotFoundPage from './components/ui/NotFoundPage';
-import CodeSapiensHero from './components/CodesapiensHero';
+import CodeSapiensHero from './components/CodeSapiensHero';
 import AllUserList from './admin/AllUserList';
 import ResetPassword from './components/ResetPassword';
 import ResetPasswordConfirm from './components/ResetPasswordConfirm'
@@ -108,7 +109,7 @@ const AnimatedRoutes = () => {
 function Root() {
   const session = useSession();
   const { isLoading } = useSessionContext();
-  console.log('Current session:');
+
 
   if (isLoading) {
     return (
@@ -132,6 +133,7 @@ function Root() {
 
             <Route path="/forgot-password" element={<ResetPassword />} />
             <Route path="/reset-password" element={<ResetPasswordConfirm />} />
+            <Route path="/test-analytics" element={<AdminLayout><AnalyticsPage /></AdminLayout>} />
             <Route path="*" element={<NotFoundPage />} />
           </Routes>
         </Router>

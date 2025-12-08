@@ -17,6 +17,7 @@ import {
   MapPin
 } from "lucide-react";
 import toast, { Toaster } from "react-hot-toast";
+import AdminLayout from "../components/AdminLayout";
 
 const AdminMeetupsList = () => {
   const navigate = useNavigate();
@@ -91,85 +92,78 @@ const AdminMeetupsList = () => {
   };
 
   return (
-    <>
+    <AdminLayout>
       <Toaster position="top-center" />
-      <div className="min-h-screen bg-gray-50/50 pb-12">
+      <div className="space-y-8">
 
         {/* Header Section */}
-        <div className="bg-white border-b border-gray-200 sticky top-0 z-20">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-              <div>
-                <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Admin Dashboard</h1>
-                <p className="text-sm text-gray-500 mt-1">Manage your community events</p>
-              </div>
-              <button
-                onClick={() => navigate("/admin/meetup/create")}
-                className="flex items-center justify-center space-x-2 px-6 py-2.5 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-200 font-medium"
-              >
-                <Plus className="w-5 h-5" />
-                <span>Create New Event</span>
-              </button>
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Meetups</h1>
+            <p className="text-sm text-gray-500 mt-1">Manage your community events</p>
+          </div>
+          <button
+            onClick={() => navigate("/admin/meetup/create")}
+            className="flex items-center justify-center space-x-2 px-6 py-2.5 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-200 font-medium"
+          >
+            <Plus className="w-5 h-5" />
+            <span>Create New Event</span>
+          </button>
+        </div>
+
+        {/* Dashboard Stats Cards */}
+        {!loading && meetups.length > 0 && (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <StatCard
+              label="Total Events"
+              value={stats.total}
+              icon={CalendarDays}
+              color="text-blue-600"
+              bg="bg-blue-50"
+            />
+            <StatCard
+              label="Upcoming"
+              value={stats.upcoming}
+              icon={TrendingUp}
+              color="text-green-600"
+              bg="bg-green-50"
+            />
+            <StatCard
+              label="Total Attendees"
+              value={stats.totalAttendees}
+              icon={Users}
+              color="text-purple-600"
+              bg="bg-purple-50"
+            />
+          </div>
+        )}
+
+        {/* Main Content */}
+        {loading ? (
+          <div className="flex flex-col items-center justify-center py-20">
+            <Loader2 className="w-10 h-10 animate-spin text-indigo-600 mb-4" />
+            <p className="text-gray-500 font-medium">Loading your dashboard...</p>
+          </div>
+        ) : meetups.length === 0 ? (
+          <EmptyState navigate={navigate} />
+        ) : (
+          <div>
+            <h2 className="text-lg font-bold text-gray-800 mb-5 px-1">All Events</h2>
+            <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+              {meetups.map((meetup) => (
+                <AdminMeetupCard
+                  key={meetup.id}
+                  meetup={meetup}
+                  onDelete={handleDelete}
+                  deletingId={deletingId}
+                  navigate={navigate}
+                />
+              ))}
             </div>
           </div>
-        </div>
-
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
-
-          {/* Dashboard Stats Cards */}
-          {!loading && meetups.length > 0 && (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <StatCard
-                label="Total Events"
-                value={stats.total}
-                icon={CalendarDays}
-                color="text-blue-600"
-                bg="bg-blue-50"
-              />
-              <StatCard
-                label="Upcoming"
-                value={stats.upcoming}
-                icon={TrendingUp}
-                color="text-green-600"
-                bg="bg-green-50"
-              />
-              <StatCard
-                label="Total Attendees"
-                value={stats.totalAttendees}
-                icon={Users}
-                color="text-purple-600"
-                bg="bg-purple-50"
-              />
-            </div>
-          )}
-
-          {/* Main Content */}
-          {loading ? (
-            <div className="flex flex-col items-center justify-center py-20">
-              <Loader2 className="w-10 h-10 animate-spin text-indigo-600 mb-4" />
-              <p className="text-gray-500 font-medium">Loading your dashboard...</p>
-            </div>
-          ) : meetups.length === 0 ? (
-            <EmptyState navigate={navigate} />
-          ) : (
-            <div>
-              <h2 className="text-lg font-bold text-gray-800 mb-5 px-1">All Events</h2>
-              <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-                {meetups.map((meetup) => (
-                  <AdminMeetupCard
-                    key={meetup.id}
-                    meetup={meetup}
-                    onDelete={handleDelete}
-                    deletingId={deletingId}
-                    navigate={navigate}
-                  />
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
+        )}
       </div>
-    </>
+    </AdminLayout>
   );
 };
 

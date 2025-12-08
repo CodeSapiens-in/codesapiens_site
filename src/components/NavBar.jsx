@@ -1,9 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Bell, Settings, Menu, X, ChevronDown, User, Loader2, Shield, Users, BarChart3, TextSearch, BookPlus, CalendarSearch, FileCheck2, Computer, BrainCircuit, Code, BookOpen } from 'lucide-react';
+import { Bell, Settings, Menu, X, ChevronDown, User, Loader2, Shield, Users, BarChart3, TextSearch, BookPlus, CalendarSearch, FileCheck2, Computer, BrainCircuit, Code, BookOpen, LayoutDashboard, FileText } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabaseClient';
+import { useUser } from '@supabase/auth-helpers-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export default function NavBar() {
+  const user = useUser();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
   const [userData, setUserData] = useState(null);
@@ -18,27 +21,7 @@ export default function NavBar() {
   const mobileMenuRef = useRef(null);
   const profileButtonRef = useRef(null);
 
-  // Function to fetch all user emails
-  const fetchAllUserEmails = async () => {
-    try {
-      const { data, error } = await supabase.auth.getUser();
-      console.log('Current user:', data?.user || 'No user logged in');
 
-      if (error) {
-        console.error('Error fetching user emails:', error.message);
-        return;
-      }
-
-      if (data && data.length > 0) {
-        const emails = data.map(user => user.email);
-        console.log('User emails:', emails);
-      } else {
-        console.log('No user emails found in the database');
-      }
-    } catch (err) {
-      console.error('Unexpected error fetching user emails:', err.message);
-    }
-  };
 
   // Fetch user data using Supabase
   useEffect(() => {
@@ -48,18 +31,7 @@ export default function NavBar() {
         setLoading(true);
         setError(null);
 
-        // Get the current authenticated user
-        const {
-          data: { user },
-          error: authError,
-        } = await supabase.auth.getUser();
 
-        if (authError) {
-          console.error('Auth error:', authError);
-          setIsAuthenticated(false);
-          setAuthChecking(false);
-          return;
-        }
 
         if (!user) {
           setIsAuthenticated(false);
@@ -104,8 +76,6 @@ export default function NavBar() {
 
         setUserData(transformedUser);
 
-        // Fetch all user emails after fetching user data
-        await fetchAllUserEmails();
 
       } catch (err) {
         setError(err.message);
@@ -129,7 +99,7 @@ export default function NavBar() {
     };
 
     fetchUserData();
-  }, []);
+  }, [user]);
 
   // Handle clicks outside dropdowns
   useEffect(() => {
@@ -251,7 +221,7 @@ export default function NavBar() {
 
     // Handle navigation
     if (href && href !== '#') {
-      window.location.href = href;
+      navigate(href);
     }
   };
 
@@ -282,8 +252,8 @@ export default function NavBar() {
   const renderUserAvatar = (size = 'w-9 h-9', textSize = 'text-sm') => {
     if (loading) {
       return (
-        <div className={`${size} bg-gray-300 rounded-full flex items-center justify-center animate-pulse`}>
-          <Loader2 className="w-4 h-4 text-gray-500 animate-spin" />
+        <div className={`${size} bg-zinc-200 rounded-full flex items-center justify-center animate-pulse`}>
+          <Loader2 className="w-4 h-4 text-zinc-400 animate-spin" />
         </div>
       );
     }
@@ -293,17 +263,17 @@ export default function NavBar() {
         <img
           src={userData.avatar}
           alt={userData.displayName}
-          className={`${size} rounded-full object-cover`}
+          className={`${size} rounded-full object-cover border border-zinc-200`}
         />
       );
     }
 
     const gradientClass = isAdmin
       ? 'bg-gradient-to-br from-red-500 to-orange-600'
-      : 'bg-gradient-to-br from-blue-500 to-purple-600';
+      : 'bg-zinc-900';
 
     return (
-      <div className={`${size} ${gradientClass} rounded-full flex items-center justify-center shadow-md`}>
+      <div className={`${size} ${gradientClass} rounded-full flex items-center justify-center shadow-sm`}>
         <span className={`text-white font-medium ${textSize}`}>
           {userData?.initials || (isAdmin ? 'A' : 'U')}
         </span>
@@ -315,19 +285,19 @@ export default function NavBar() {
     if (loading) {
       return (
         <div className="space-y-1">
-          <div className="h-4 bg-gray-300 rounded animate-pulse w-24"></div>
-          {showEmail && <div className="h-3 bg-gray-300 rounded animate-pulse w-32"></div>}
+          <div className="h-4 bg-zinc-200 rounded animate-pulse w-24"></div>
+          {showEmail && <div className="h-3 bg-zinc-200 rounded animate-pulse w-32"></div>}
         </div>
       );
     }
 
     return (
       <div>
-        <div className="font-medium text-gray-900">
+        <div className="font-medium text-zinc-900">
           {userData?.displayName || 'Loading...'}
         </div>
         {showEmail && (
-          <div className="text-sm text-gray-500 flex items-center space-x-1">
+          <div className="text-sm text-zinc-500 flex items-center space-x-1">
             {isAdmin ? (
               <>
                 <Shield className="w-3 h-3 text-red-500" />
@@ -351,65 +321,54 @@ export default function NavBar() {
   };
 
   const renderLogo = () => {
-    if (isAdmin) {
-      return (
-        <div className="flex items-center space-x-3 flex-shrink-0 cursor-pointer" onClick={() => navigate('/admin')}>
-          <div className="w-10 h-10 bg-gradient-to-br from-red-500 to-orange-600 rounded-lg flex items-center justify-center shadow-lg">
-            <Shield className="text-white w-5 h-5" />
-          </div>
-          <span className="text-xl font-semibold text-gray-900">CodeSapiens Admin</span>
-        </div>
-      );
-    }
-
     return (
-      <div className="flex items-center space-x-3 flex-shrink-0 cursor-pointer" onClick={() => navigate('/')}>
-        <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center shadow-lg">
-          <span className="text-white font-bold text-lg">CS</span>
+      <div className="flex items-center space-x-3 flex-shrink-0 cursor-pointer group" onClick={() => navigate(isAdmin ? '/admin' : '/')}>
+        <div className="w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center overflow-hidden rounded-full shadow-sm transition-transform duration-300 group-hover:scale-105">
+          <img
+            src="https://res.cloudinary.com/druvxcll9/image/upload/v1761122530/WhatsApp_Image_2025-09-02_at_12.45.18_b15791ea_rnlwrz_3_r4kp2u.jpg"
+            alt="Logo"
+            className="w-full h-full object-cover"
+          />
         </div>
-        <span className="text-xl font-semibold text-gray-900">CodeSapiens</span>
+        <span className="text-lg sm:text-xl font-light tracking-wider text-zinc-900 group-hover:text-zinc-700 transition-colors">
+          {isAdmin ? 'CodeSapiens Admin' : 'CodeSapiens'}
+        </span>
       </div>
     );
   };
 
   const renderDesktopNavigation = () => {
-    const hoverColor = isAdmin ? 'hover:text-red-600' : 'hover:text-blue-600';
+    const hoverColor = isAdmin ? 'hover:text-red-600' : 'hover:text-zinc-900';
+    const activeClass = "text-zinc-900 bg-zinc-100";
+    const baseClass = "text-zinc-500 px-3 py-2 rounded-md font-light tracking-wide transition-all duration-300 hover:bg-zinc-50 flex items-center space-x-2";
 
     if (isAdmin) {
       return (
         <div className="hidden md:flex items-center justify-center flex-1 max-w-md mx-auto">
-          <div className="flex items-center space-x-8">
-            <button
-              onClick={() => navigate('/user-list')}
-              className={`text-gray-700 ${hoverColor} px-3 py-2 rounded-md font-medium transition-colors flex items-center space-x-2`}
-            >
+          <div className="flex items-center space-x-2">
+            <button onClick={() => navigate('/admin')} className={`${baseClass} ${hoverColor}`}>
+              <LayoutDashboard className="w-4 h-4" />
+              <span>Dashboard</span>
+            </button>
+            <button onClick={() => navigate('/user-list')} className={`${baseClass} ${hoverColor}`}>
               <Users className="w-4 h-4" />
               <span>Users</span>
             </button>
-            <button
-              onClick={() => navigate('/analytics')}
-              className={`text-gray-700 ${hoverColor} px-3 py-2 rounded-md font-medium transition-colors`}
-            >
-              Analytics
+            <button onClick={() => navigate('/analytics')} className={`${baseClass} ${hoverColor}`}>
+              <BarChart3 className="w-4 h-4" />
+              <span>Analytics</span>
             </button>
-            <button
-              onClick={() => navigate('/mentorship-form')}
-              className={`text-gray-700 ${hoverColor} px-3 py-2 rounded-md font-medium transition-colors`}
-            >
-              MentorShip
+            <button onClick={() => navigate('/admin/meetups')} className={`${baseClass} ${hoverColor}`}>
+              <CalendarSearch className="w-4 h-4" />
+              <span>Meetups</span>
             </button>
-
-            <button
-              onClick={() => navigate('/admin/meetups')}
-              className={`text-gray-700 ${hoverColor} px-3 py-2 rounded-md font-medium transition-colors`}
-            >
-              Meetups
+            <button onClick={() => navigate('/admin/mentorship-programs')} className={`${baseClass} ${hoverColor}`}>
+              <BookPlus className="w-4 h-4" />
+              <span>Programs</span>
             </button>
-            <button
-              onClick={() => navigate('/admin/mentorship-programs')}
-              className={`text-gray-700 ${hoverColor} px-3 py-2 rounded-md font-medium transition-colors`}
-            >
-              Programs
+            <button onClick={() => navigate('/admin/blogs')} className={`${baseClass} ${hoverColor}`}>
+              <FileText className="w-4 h-4" />
+              <span>Blogs</span>
             </button>
           </div>
         </div>
@@ -423,244 +382,187 @@ export default function NavBar() {
     if (!isProfileDropdownOpen || loading) return null;
 
     return (
-      <div
-        ref={profileDropdownRef}
-        className="bg-white rounded-xl shadow-2xl border border-gray-200 py-2"
-        style={{
-          position: 'fixed',
-          zIndex: 9999,
-          WebkitOverflowScrolling: 'touch'
-        }}
-      >
-        <div className="px-4 py-3 border-b border-gray-100">
-          <div className="flex items-center space-x-3">
-            {renderUserAvatar('w-12 h-12', 'text-lg')}
-            <div className="min-w-0 flex-1">
-              {renderUserInfo()}
-              {!isAdmin && userData?.college && (
-                <div className="text-xs text-gray-400 mt-1 truncate">
-                  {userData.college}
-                </div>
-              )}
+      <AnimatePresence>
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95, y: -10 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          exit={{ opacity: 0, scale: 0.95, y: -10 }}
+          transition={{ duration: 0.2 }}
+          ref={profileDropdownRef}
+          className="bg-white/90 backdrop-blur-xl rounded-xl shadow-2xl border border-zinc-200/50 py-2"
+          style={{
+            position: 'fixed',
+            zIndex: 9999,
+            WebkitOverflowScrolling: 'touch'
+          }}
+        >
+          <div className="px-4 py-3 border-b border-zinc-100">
+            <div className="flex items-center space-x-3">
+              {renderUserAvatar('w-12 h-12', 'text-lg')}
+              <div className="min-w-0 flex-1">
+                {renderUserInfo()}
+                {!isAdmin && userData?.college && (
+                  <div className="text-xs text-zinc-400 mt-1 truncate font-light">
+                    {userData.college}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
-        </div>
-        <div className="py-2">
-          {isAdmin ? (
-            <>
+          <div className="py-2">
+            {isAdmin ? (
+              <>
+                <button onClick={() => { setIsProfileDropdownOpen(false); navigate('/analytics'); }} className="w-full text-left flex items-center px-4 py-2 text-sm text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900 transition-colors">
+                  <TextSearch className="w-4 h-4 mr-3 flex-shrink-0" />
+                  <span>View Analytics</span>
+                </button>
+                <button onClick={() => { setIsProfileDropdownOpen(false); navigate('/mentorship-form'); }} className="w-full text-left flex items-center px-4 py-2 text-sm text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900 transition-colors">
+                  <BrainCircuit className="w-4 h-4 mr-3 flex-shrink-0" />
+                  <span>Mentorship Form Submission</span>
+                </button>
+                <button onClick={() => { setIsProfileDropdownOpen(false); navigate('/admin/meetups'); }} className="w-full text-left flex items-center px-4 py-2 text-sm text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900 transition-colors">
+                  <CalendarSearch className="w-4 h-4 mr-3 flex-shrink-0" />
+                  <span>Meetups</span>
+                </button>
+                <button onClick={() => { setIsProfileDropdownOpen(false); navigate('/admin/mentorship-programs'); }} className="w-full text-left flex items-center px-4 py-2 text-sm text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900 transition-colors">
+                  <BookPlus className="w-4 h-4 mr-3 flex-shrink-0" />
+                  <span>Programs</span>
+                </button>
+              </>
+            ) : (
+              <>
+                <button onClick={() => { setIsProfileDropdownOpen(false); navigate('/profile'); }} className="w-full text-left flex items-center px-4 py-2 text-sm text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900 transition-colors">
+                  <User className="w-4 h-4 mr-3 flex-shrink-0" />
+                  <span>Profile</span>
+                </button>
+                <button onClick={() => { setIsProfileDropdownOpen(false); navigate('/resource'); }} className="w-full text-left flex items-center px-4 py-2 text-sm text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900 transition-colors">
+                  <BookPlus className="w-4 h-4 mr-3 flex-shrink-0" />
+                  <span>Resources</span>
+                </button>
+                <button onClick={() => { setIsProfileDropdownOpen(false); navigate('/resume'); }} className="w-full text-left flex items-center px-4 py-2 text-sm text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900 transition-colors">
+                  <FileCheck2 className="w-4 h-4 mr-3 flex-shrink-0" />
+                  <span>Resume Builder (Beta)</span>
+                </button>
+                <button onClick={() => { setIsProfileDropdownOpen(false); navigate('/mentorship'); }} className="w-full text-left flex items-center px-4 py-2 text-sm text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900 transition-colors">
+                  <BrainCircuit className="w-4 h-4 mr-3 flex-shrink-0" />
+                  <span>Mentorship</span>
+                </button>
+                <button onClick={() => { setIsProfileDropdownOpen(false); navigate('/mentorship-list'); }} className="w-full text-left flex items-center px-4 py-2 text-sm text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900 transition-colors">
+                  <FileCheck2 className="w-4 h-4 mr-3 flex-shrink-0" />
+                  <span>My Submissions</span>
+                </button>
+                <button onClick={() => { setIsProfileDropdownOpen(false); navigate('/events'); }} className="w-full text-left flex items-center px-4 py-2 text-sm text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900 transition-colors">
+                  <CalendarSearch className="w-4 h-4 mr-3 flex-shrink-0" />
+                  <span>Events</span>
+                </button>
+                <button onClick={() => { setIsProfileDropdownOpen(false); navigate('/meetups'); }} className="w-full text-left flex items-center px-4 py-2 text-sm text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900 transition-colors">
+                  <Users className="w-4 h-4 mr-3 flex-shrink-0" />
+                  <span>Meetups</span>
+                </button>
+                <button onClick={() => { setIsProfileDropdownOpen(false); navigate('/blogs'); }} className="w-full text-left flex items-center px-4 py-2 text-sm text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900 transition-colors">
+                  <BookOpen className="w-4 h-4 mr-3 flex-shrink-0" />
+                  <span>Blogs</span>
+                </button>
+              </>
+            )}
+            <div className="border-t border-zinc-100 mt-2 pt-2">
               <button
                 onClick={() => {
                   setIsProfileDropdownOpen(false);
-                  navigate('/analytics');
+                  handleSignOut();
                 }}
-                className="w-full text-left flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 active:bg-gray-200 transition-colors"
+                className="w-full text-left flex items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50 active:bg-red-100 transition-colors"
               >
-                <TextSearch className="w-4 h-4 mr-2 flex-shrink-0" />
-                <span>View Analytics</span>
+                Sign Out
               </button>
-              <button
-                onClick={() => {
-                  setIsProfileDropdownOpen(false);
-                  navigate('/mentorship-form');
-                }}
-                className="w-full text-left flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 active:bg-gray-200 transition-colors"
-              >
-                <BrainCircuit className="w-4 h-4 mr-2 flex-shrink-0" />
-                <span>Mentorship Form Submission</span>
-              </button>
-
-              <button
-                onClick={() => {
-                  setIsProfileDropdownOpen(false);
-                  navigate('/admin/meetups');
-                }}
-                className="w-full text-left flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 active:bg-gray-200 transition-colors"
-              >
-                <CalendarSearch className="w-4 h-4 mr-2 flex-shrink-0" />
-                <span>Meetups</span>
-              </button>
-              <button
-                onClick={() => {
-                  setIsProfileDropdownOpen(false);
-                  navigate('/admin/mentorship-programs');
-                }}
-                className="w-full text-left flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 active:bg-gray-200 transition-colors"
-              >
-                <BookPlus className="w-4 h-4 mr-2 flex-shrink-0" />
-                <span>Programs</span>
-              </button>
-            </>
-          ) : (
-            <>
-              <button
-                onClick={() => {
-                  setIsProfileDropdownOpen(false);
-                  navigate('/profile');
-                }}
-                className="w-full text-left flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 active:bg-gray-200 transition-colors"
-              >
-                <User className="w-4 h-4 mr-2 flex-shrink-0" />
-                <span>Profile</span>
-              </button>
-              <button
-                onClick={() => {
-                  setIsProfileDropdownOpen(false);
-                  navigate('/resource');
-                }}
-                className="w-full text-left flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 active:bg-gray-200 transition-colors"
-              >
-                <BookPlus className="w-4 h-4 mr-2 flex-shrink-0" />
-                <span>Resources</span>
-              </button>
-              <button
-                onClick={() => {
-                  setIsProfileDropdownOpen(false);
-                  navigate('/resume');
-                }}
-                className="w-full text-left flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 active:bg-gray-200 transition-colors"
-              >
-                <FileCheck2 className="w-4 h-4 mr-2 flex-shrink-0" />
-                <span>Resume Builder(Beta)</span>
-              </button>
-              <button
-                onClick={() => {
-                  setIsProfileDropdownOpen(false);
-                  navigate('/mentorship');
-                }}
-                className="w-full text-left flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 active:bg-gray-200 transition-colors"
-              >
-                <span>Mentorship</span>
-              </button>
-              <button
-                onClick={() => {
-                  setIsProfileDropdownOpen(false);
-                  navigate('/mentorship-list');
-                }}
-                className="w-full text-left flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 active:bg-gray-200 transition-colors"
-              >
-                <FileCheck2 className="w-4 h-4 mr-2 flex-shrink-0" />
-                <span>My Submissions</span>
-              </button>
-
-
-              <button
-                onClick={() => {
-                  setIsProfileDropdownOpen(false);
-                  navigate('/events');
-                }}
-                className="w-full text-left flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 active:bg-gray-200 transition-colors"
-              >
-                <CalendarSearch className="w-4 h-4 mr-2 flex-shrink-0" />
-                <span>Events</span>
-              </button>
-              <button
-                onClick={() => {
-                  setIsProfileDropdownOpen(false);
-                  navigate('/meetups');
-                }}
-                className="w-full text-left flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 active:bg-gray-200 transition-colors"
-              >
-                <Users className="w-4 h-4 mr-2 flex-shrink-0" />
-                <span>Meetups</span>
-              </button>
-              <button
-                onClick={() => {
-                  setIsProfileDropdownOpen(false);
-                  navigate('/blogs');
-                }}
-                className="w-full text-left flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 active:bg-gray-200 transition-colors"
-              >
-                <BookOpen className="w-4 h-4 mr-2 flex-shrink-0" />
-                <span>Blogs</span>
-              </button>
-            </>
-          )}
-          <div className="border-t border-gray-100 mt-2 pt-2">
-            <button
-              onClick={() => {
-                setIsProfileDropdownOpen(false);
-                handleSignOut();
-              }}
-              className="w-full text-left flex items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50 active:bg-red-100 transition-colors"
-            >
-              Sign Out
-            </button>
+            </div>
           </div>
-        </div>
-      </div>
+        </motion.div>
+      </AnimatePresence>
     );
   };
 
   const renderMobileMenu = () => {
     if (!isMobileMenuOpen) return null;
 
-    const hoverColor = isAdmin ? 'hover:text-red-600' : 'hover:text-blue-600';
+    const hoverColor = isAdmin ? 'hover:text-red-600' : 'hover:text-zinc-900';
 
     return (
-      <div ref={mobileMenuRef} className="md:hidden border-t border-gray-200 py-4 space-y-2 bg-white">
-        {isAdmin ? (
-          <>
-            <button
-              onClick={() => navigate('/user-list')}
-              className={`w-full text-left block px-4 py-2 text-gray-700 hover:bg-gray-100 ${hoverColor} rounded-md font-medium transition-colors flex items-center space-x-2`}
-            >
-              <Users className="w-4 h-4" />
-              <span>Users</span>
-            </button>
-            <button
-              onClick={() => handleNavClick('/analytics')}
-              className={`w-full text-left block px-4 py-2 text-gray-700 hover:bg-gray-100 ${hoverColor} rounded-md font-medium transition-colors`}
-            >
-              Analytics
-            </button>
-          </>
-        ) : (
-          <>
-          </>
-        )}
+      <AnimatePresence>
+        <motion.div
+          initial={{ height: 0, opacity: 0 }}
+          animate={{ height: 'auto', opacity: 1 }}
+          exit={{ height: 0, opacity: 0 }}
+          transition={{ duration: 0.3, ease: "easeInOut" }}
+          ref={mobileMenuRef}
+          className="md:hidden border-t border-zinc-100 py-4 space-y-2 bg-white/95 backdrop-blur-md overflow-hidden"
+        >
+          {isAdmin && (
+            <>
+              <button onClick={() => navigate('/admin')} className={`w-full text-left block px-4 py-2 text-zinc-600 hover:bg-zinc-50 ${hoverColor} rounded-md font-light transition-colors flex items-center space-x-2`}>
+                <LayoutDashboard className="w-4 h-4" />
+                <span>Dashboard</span>
+              </button>
+              <button onClick={() => navigate('/user-list')} className={`w-full text-left block px-4 py-2 text-zinc-600 hover:bg-zinc-50 ${hoverColor} rounded-md font-light transition-colors flex items-center space-x-2`}>
+                <Users className="w-4 h-4" />
+                <span>Users</span>
+              </button>
+              <button onClick={() => navigate('/analytics')} className={`w-full text-left block px-4 py-2 text-zinc-600 hover:bg-zinc-50 ${hoverColor} rounded-md font-light transition-colors flex items-center space-x-2`}>
+                <BarChart3 className="w-4 h-4" />
+                <span>Analytics</span>
+              </button>
+              <button onClick={() => navigate('/admin/meetups')} className={`w-full text-left block px-4 py-2 text-zinc-600 hover:bg-zinc-50 ${hoverColor} rounded-md font-light transition-colors flex items-center space-x-2`}>
+                <CalendarSearch className="w-4 h-4" />
+                <span>Meetups</span>
+              </button>
+              <button onClick={() => navigate('/admin/mentorship-programs')} className={`w-full text-left block px-4 py-2 text-zinc-600 hover:bg-zinc-50 ${hoverColor} rounded-md font-light transition-colors flex items-center space-x-2`}>
+                <BookPlus className="w-4 h-4" />
+                <span>Programs</span>
+              </button>
+              <button onClick={() => navigate('/admin/blogs')} className={`w-full text-left block px-4 py-2 text-zinc-600 hover:bg-zinc-50 ${hoverColor} rounded-md font-light transition-colors flex items-center space-x-2`}>
+                <FileText className="w-4 h-4" />
+                <span>Blogs</span>
+              </button>
+            </>
+          )}
 
-        {/* Mobile User Info */}
-        <div className="border-t border-gray-200 pt-4 mt-4">
-          <div className="px-4 py-2">
-            <div className="flex items-center space-x-3 mb-3">
-              {renderUserAvatar('w-10 h-10')}
-              <div>
-                {renderUserInfo()}
+
+          {/* Mobile User Info */}
+          <div className="border-t border-zinc-100 pt-4 mt-4">
+            <div className="px-4 py-2">
+              <div className="flex items-center space-x-3 mb-3">
+                {renderUserAvatar('w-10 h-10')}
+                <div>
+                  {renderUserInfo()}
+                </div>
+              </div>
+              <div className="space-y-2">
+                <button
+                  onClick={handleSignOut}
+                  className="w-full text-left block text-sm text-red-600 hover:text-red-700 py-1 font-medium"
+                >
+                  Sign Out
+                </button>
               </div>
             </div>
-            <div className="space-y-2">
-              {isAdmin ? (
-                <>
-                </>
-              ) : (
-                <>
-                </>
-              )}
-              <button
-                onClick={handleSignOut}
-                className="w-full text-left block text-sm text-red-600 hover:text-red-700 py-1"
-              >
-                Sign Out
-              </button>
-            </div>
           </div>
-        </div>
-      </div>
+        </motion.div>
+      </AnimatePresence>
     );
   };
 
   // Auth checking state
   if (authChecking) {
     return (
-      <nav className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50 w-full">
+      <nav className="bg-white/80 backdrop-blur-md shadow-sm border-b border-zinc-200/50 sticky top-0 z-50 w-full">
         <div className="w-full px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center space-x-3 flex-shrink-0">
-              <div className="w-10 h-10 bg-gray-300 rounded-lg animate-pulse"></div>
-              <div className="w-32 h-6 bg-gray-300 rounded animate-pulse"></div>
+              <div className="w-10 h-10 bg-zinc-200 rounded-full animate-pulse"></div>
+              <div className="w-32 h-6 bg-zinc-200 rounded animate-pulse"></div>
             </div>
             <div className="flex items-center space-x-4">
-              <Loader2 className="w-5 h-5 text-gray-400 animate-spin" />
+              <Loader2 className="w-5 h-5 text-zinc-400 animate-spin" />
             </div>
           </div>
         </div>
@@ -678,11 +580,9 @@ export default function NavBar() {
     return null;
   }
 
-  const notificationCount = isAdmin ? 3 : 1;
-
   return (
     <>
-      <nav className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50 w-full">
+      <nav className="bg-white/80 backdrop-blur-md shadow-sm border-b border-zinc-200/50 sticky top-0 z-50 w-full transition-all duration-300">
         <div className="w-full px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             {/* Logo Section */}
@@ -693,22 +593,18 @@ export default function NavBar() {
 
             {/* Right Section */}
             <div className="flex items-center space-x-4 flex-shrink-0">
-              {/* Notification Bell */}
-              <div className="relative">
-              </div>
-
               {/* User Profile Section */}
               <div className="relative">
                 <button
                   ref={profileButtonRef}
                   onClick={toggleProfileDropdown}
-                  className="flex items-center space-x-3 p-1 rounded-lg hover:bg-gray-100 transition-colors"
+                  className="flex items-center space-x-3 p-1.5 rounded-full hover:bg-zinc-100 transition-colors group"
                   disabled={loading}
                 >
                   {renderUserAvatar()}
                   <div className="hidden lg:flex items-center space-x-1">
                     {renderUserInfo()}
-                    <ChevronDown className={`w-4 h-4 text-gray-500 ml-1 transition-transform ${isProfileDropdownOpen ? 'rotate-180' : ''}`} />
+                    <ChevronDown className={`w-4 h-4 text-zinc-400 ml-1 transition-transform duration-300 ${isProfileDropdownOpen ? 'rotate-180' : ''} group-hover:text-zinc-600`} />
                   </div>
                 </button>
               </div>
@@ -716,7 +612,7 @@ export default function NavBar() {
               {/* Mobile Menu Button */}
               <button
                 onClick={toggleMobileMenu}
-                className="md:hidden p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+                className="md:hidden p-2 text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100 rounded-lg transition-colors"
               >
                 {isMobileMenuOpen ? (
                   <X className="w-6 h-6" />

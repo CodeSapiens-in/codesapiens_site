@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import { Plus, Calendar, Users, Edit, Trash2, Loader2, ExternalLink, BookOpen } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import AdminLayout from '../components/AdminLayout';
 
 const AdminMentorshipPrograms = () => {
     const [programs, setPrograms] = useState([]);
@@ -58,41 +59,45 @@ const AdminMentorshipPrograms = () => {
 
     if (loading) {
         return (
-            <div className="flex justify-center items-center min-h-screen">
-                <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
-            </div>
+            <AdminLayout>
+                <div className="flex justify-center items-center min-h-[60vh]">
+                    <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+                </div>
+            </AdminLayout>
         );
     }
 
     return (
-        <div className="p-6 bg-gray-50 min-h-screen">
-            <div className="max-w-7xl mx-auto">
-                <div className="flex justify-between items-center mb-8">
+        <AdminLayout>
+            <div className="space-y-8">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                     <div>
                         <h1 className="text-3xl font-bold text-gray-900">Mentorship Programs</h1>
                         <p className="text-gray-600 mt-1">Manage your mentorship cohorts and curriculums</p>
                     </div>
-                    <Link
-                        to="/admin/mentorship/create"
-                        className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                    >
-                        <Plus className="w-5 h-5 mr-2" />
-                        Create Program
-                    </Link>
-                    <Link
-                        to="/admin/mentorship/general-requests"
-                        className="ml-4 flex items-center px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
-                    >
-                        <Users className="w-5 h-5 mr-2" />
-                        General Requests
-                    </Link>
-                    <Link
-                        to="/admin/mentorship/all-registrations"
-                        className="ml-4 flex items-center px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
-                    >
-                        <BookOpen className="w-5 h-5 mr-2" />
-                        All Registrations
-                    </Link>
+                    <div className="flex flex-wrap gap-3">
+                        <Link
+                            to="/admin/mentorship/create"
+                            className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                        >
+                            <Plus className="w-5 h-5 mr-2" />
+                            Create Program
+                        </Link>
+                        <Link
+                            to="/admin/mentorship/general-requests"
+                            className="flex items-center px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                        >
+                            <Users className="w-5 h-5 mr-2" />
+                            General Requests
+                        </Link>
+                        <Link
+                            to="/admin/mentorship/all-registrations"
+                            className="flex items-center px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+                        >
+                            <BookOpen className="w-5 h-5 mr-2" />
+                            All Registrations
+                        </Link>
+                    </div>
                 </div>
 
                 {error && (
@@ -179,7 +184,7 @@ const AdminMentorshipPrograms = () => {
                     )}
                 </div>
             </div>
-        </div>
+        </AdminLayout>
     );
 };
 
