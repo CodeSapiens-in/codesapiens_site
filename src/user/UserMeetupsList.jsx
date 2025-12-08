@@ -10,35 +10,64 @@ import {
   Ticket, ArrowRight, Zap, Hexagon, MoveUpRight, Smile, PenTool
 } from "lucide-react";
 
-// --- CUSTOM SVG DOODLES & GRID ---
+// --- CUSTOM HAND-DRAWN DOODLES (ANIMATED) ---
 
-// The "Framework" Grid System (Blue lines on left)
-const FrameworkGrid = () => (
-  <div className="absolute inset-0 pointer-events-none z-0 flex w-full h-full">
-    {/* Line 1: Far Left (Sidebar edge) */}
-    <div className="h-full w-px bg-[#0061FE]/30 absolute left-[40px] hidden md:block"></div>
-    {/* Line 2: Content Start */}
-    <div className="h-full w-px bg-[#0061FE]/30 absolute left-[40px] md:left-[240px]"></div>
-    {/* Line 3: Grid Cell (Right) */}
-    <div className="h-full w-px bg-[#0061FE]/20 absolute right-[40px] hidden lg:block"></div>
-    
-    {/* Horizontal Lines for "Grid" look in Hero */}
-    <div className="absolute top-[180px] left-0 right-0 h-px bg-[#0061FE]/20"></div>
-    <div className="absolute top-[500px] left-0 right-0 h-px bg-[#0061FE]/20"></div>
+const DrawVariant = {
+  hidden: { pathLength: 0, opacity: 0 },
+  visible: { 
+    pathLength: 1, 
+    opacity: 1,
+    transition: { duration: 1.5, ease: "easeInOut" }
+  }
+};
+
+const HandDrawnFolder = () => (
+  <svg width="100" height="80" viewBox="0 0 100 80" fill="none" stroke="#0061FE" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="transform -rotate-6">
+    <motion.path
+      d="M5,25 L5,75 L95,75 L95,25 L55,25 L45,5 L15,5 L5,25"
+      variants={DrawVariant} initial="hidden" animate="visible"
+    />
+    <motion.path d="M5,25 L95,25" variants={DrawVariant} initial="hidden" animate="visible" />
+  </svg>
+);
+
+const HandDrawnPlane = () => (
+  <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="#0061FE" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="transform rotate-12">
+    <motion.path
+      d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"
+      variants={DrawVariant} initial="hidden" animate="visible"
+    />
+  </svg>
+);
+
+const MeBubble = () => (
+  <div className="relative group">
+     <svg width="80" height="50" viewBox="0 0 80 50" fill="none" stroke="#FF5018" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+       <motion.path 
+         d="M10,5 L70,5 L70,35 L40,35 L30,45 L25,35 L10,35 Z"
+         variants={DrawVariant} initial="hidden" animate="visible"
+       />
+     </svg>
+     <span className="absolute top-2 left-6 text-[#FF5018] font-black text-lg">ME</span>
   </div>
 );
 
-// Messy oval for text highlight
+const SquiggleArrow = () => (
+  <svg width="60" height="60" viewBox="0 0 60 60" fill="none" stroke="#C2E812" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+    <motion.path
+      d="M10,50 Q30,10 50,30 T55,10"
+      variants={DrawVariant} initial="hidden" animate="visible"
+    />
+    <motion.path d="M45,5 L55,10 L50,20" variants={DrawVariant} initial="hidden" animate="visible" />
+  </svg>
+);
+
 const MessyOval = ({ width = 140, height = 65, color = "#0061FE" }) => (
   <svg width={width} height={height} viewBox="0 0 140 65" className="absolute -z-10 top-1/2 left-1/2 -translate-x-1/2 -translate-y-[45%] pointer-events-none">
     <motion.path
       d="M5,32.5 C5,10 35,5 70,5 C105,5 135,10 135,32.5 C135,55 105,60 70,60 C35,60 5,55 5,32.5 Z"
-      fill="none"
-      stroke={color}
-      strokeWidth="4"
-      initial={{ pathLength: 0 }}
-      animate={{ pathLength: 1 }}
-      transition={{ duration: 1.2, ease: "easeInOut" }}
+      fill="none" stroke={color} strokeWidth="4"
+      variants={DrawVariant} initial="hidden" animate="visible"
     />
   </svg>
 );
@@ -47,9 +76,7 @@ const HandDrawnCrown = () => (
   <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="#C2E812" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="transform -rotate-12">
     <motion.path
       d="M2 4l3 12h14l3-12-6 7-4-7-4 7-6-7zm3 16h14"
-      initial={{ pathLength: 0, opacity: 0 }}
-      animate={{ pathLength: 1, opacity: 1 }}
-      transition={{ duration: 1.5, ease: "easeOut" }}
+      variants={DrawVariant} initial="hidden" animate="visible"
     />
   </svg>
 );
@@ -72,13 +99,40 @@ const HandDrawnHeart = () => (
         transition={{ duration: 2, repeat: Infinity, repeatType: "reverse" }}
     />
   </svg>
-)
+);
 
-const HandDrawnStar = () => (
-  <svg width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="#FEEA3B" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="transform rotate-6">
-    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-  </svg>
-)
+// --- ANIMATED GRID SYSTEM (THE "FRAMEWORK") ---
+const FrameworkGrid = () => (
+  <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden h-full">
+    {/* Vertical Lines - Animated */}
+    <motion.div 
+      initial={{ height: 0 }} animate={{ height: "100%" }} transition={{ duration: 1.5, ease: "easeInOut" }}
+      className="w-px bg-[#0061FE]/40 absolute left-[40px] hidden md:block" 
+    />
+    <motion.div 
+      initial={{ height: 0 }} animate={{ height: "100%" }} transition={{ duration: 1.5, delay: 0.2, ease: "easeInOut" }}
+      className="w-px bg-[#0061FE]/40 absolute left-[40px] md:left-[260px]" 
+    />
+    <motion.div 
+      initial={{ height: 0 }} animate={{ height: "100%" }} transition={{ duration: 1.5, delay: 0.4, ease: "easeInOut" }}
+      className="w-px bg-[#0061FE]/30 absolute right-[40px] hidden lg:block" 
+    />
+    
+    {/* Horizontal Lines - Animated */}
+    <motion.div 
+      initial={{ width: 0 }} animate={{ width: "100%" }} transition={{ duration: 1.5, delay: 0.1, ease: "easeInOut" }}
+      className="absolute top-[180px] left-0 h-px bg-[#0061FE]/20" 
+    />
+    <motion.div 
+      initial={{ width: 0 }} animate={{ width: "100%" }} transition={{ duration: 1.5, delay: 0.3, ease: "easeInOut" }}
+      className="absolute top-[500px] left-0 h-px bg-[#0061FE]/20" 
+    />
+    <motion.div 
+      initial={{ width: 0 }} animate={{ width: "100%" }} transition={{ duration: 1.5, delay: 0.5, ease: "easeInOut" }}
+      className="absolute bottom-[100px] left-0 h-px bg-[#0061FE]/20" 
+    />
+  </div>
+);
 
 // --- MAIN COMPONENT ---
 
@@ -165,21 +219,27 @@ export default function UserMeetupsList() {
 
       <div className="min-h-screen bg-[#F7F5F2] font-sans text-[#1E1E1E] selection:bg-[#C2E812] selection:text-black overflow-x-hidden relative">
         
-        {/* --- BLUE GRID LINES (Full Height) --- */}
+        {/* --- ANIMATED BLUE GRID LINES --- */}
         <FrameworkGrid />
 
         {/* --- HERO SECTION --- */}
-        <div className="bg-[#1E1E1E] text-white pt-24 pb-48 px-6 relative overflow-hidden">
+        <div className="bg-[#1E1E1E] text-white pt-24 pb-48 px-6 relative overflow-hidden border-b border-[#0061FE]/20">
           
-          {/* Top Doodles */}
-          <motion.div className="absolute top-12 left-[280px]" animate={{ rotate: [-5, 5, -5] }} transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}>
+          {/* --- SCATTERED HAND-DRAWN ICONS --- */}
+          <motion.div className="absolute top-12 left-[280px] z-20" animate={{ rotate: [-5, 5, -5] }} transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}>
             <HandDrawnCrown />
           </motion.div>
-          <motion.div className="absolute top-20 right-[10%]" animate={{ y: [0, -15, 0] }} transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}>
+          <motion.div className="absolute top-20 right-[15%] z-20" animate={{ y: [0, -15, 0] }} transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}>
             <LightningBolt />
           </motion.div>
-          <motion.div className="absolute bottom-24 right-[20%]" animate={{ scale: [1, 1.1, 1] }} transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}>
-            <HandDrawnHeart />
+          <motion.div className="absolute top-40 right-[8%] z-20" animate={{ rotate: [0, 10, 0] }} transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}>
+            <MeBubble />
+          </motion.div>
+          <motion.div className="absolute bottom-12 left-[8%] z-20" animate={{ y: [0, -10, 0] }} transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}>
+            <HandDrawnFolder />
+          </motion.div>
+          <motion.div className="absolute bottom-32 left-[40%] z-20 opacity-60" animate={{ x: [0, 20, 0], y: [0, -20, 0] }} transition={{ duration: 8, repeat: Infinity, ease: "linear" }}>
+             <HandDrawnPlane />
           </motion.div>
 
           {/* LEFT ALIGNED CONTENT CONTAINER */}
@@ -197,7 +257,12 @@ export default function UserMeetupsList() {
               </h1>
             </motion.div>
 
-            <div className="flex flex-col md:flex-row gap-8 items-start mt-16 pt-8 border-t-2 border-white/10 max-w-4xl">
+            <div className="flex flex-col md:flex-row gap-8 items-start mt-16 pt-8 border-t-2 border-white/10 max-w-4xl relative">
+              {/* Squiggle connecting text */}
+              <div className="absolute -top-10 left-10">
+                 <SquiggleArrow />
+              </div>
+
               <div className="max-w-lg text-left">
                 <p className="text-2xl md:text-3xl font-bold leading-tight opacity-90">
                   How we all work today is <span className="relative inline-block text-[#C2E812]">
@@ -247,11 +312,15 @@ export default function UserMeetupsList() {
 
         {/* --- PAST EVENTS GALLERY --- */}
         <div className="w-full pl-[60px] md:pl-[260px] pr-4 md:pr-12 pb-24 relative text-left">
-           <div className="absolute -top-20 right-20 opacity-20 pointer-events-none">
-              <HandDrawnStar />
+           {/* More floating doodles for gallery */}
+           <div className="absolute -top-20 right-20 z-0">
+              <HandDrawnHeart />
+           </div>
+           <div className="absolute top-40 -left-10 z-0 opacity-50">
+              <SquiggleArrow />
            </div>
 
-          <div className="mb-12 text-left">
+          <div className="mb-12 text-left relative z-10">
             <h2 className="text-5xl md:text-6xl font-black tracking-tighter text-[#1E1E1E] mb-6 relative inline-block">
               PAST <span className="text-[#0061FE]">CHAOS</span>
             </h2>
@@ -261,7 +330,10 @@ export default function UserMeetupsList() {
           </div>
 
           {/* Featured Image - Rotated Frame */}
-          <div className="mb-16 max-w-5xl">
+          <div className="mb-16 max-w-5xl relative">
+            {/* Decorative Tape/Stickers */}
+            <div className="absolute -top-4 -right-4 w-16 h-16 bg-[#C2E812] rounded-full mix-blend-multiply opacity-80 animate-pulse"></div>
+
             <motion.div
               initial={{ opacity: 0, rotate: -1 }}
               whileInView={{ opacity: 1, rotate: -1 }}
@@ -295,7 +367,6 @@ export default function UserMeetupsList() {
           {/* Grid of smaller photos */}
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 max-w-6xl">
             {pastEvents.map((event, index) => {
-               // Slight random rotation for collage effect
                const rotation = index % 2 === 0 ? 2 : -2; 
                return (
               <motion.div
@@ -336,7 +407,6 @@ export default function UserMeetupsList() {
 const MeetupCard = ({ meetup, index, isRegistering, onToggleRegister, onRegisterConfirm, onViewTicket, user }) => {
   const startDate = new Date(meetup.start_date_time);
   const isRegistered = meetup.registered;
-  // Use index to alternate tilt slightly
   const rotation = index % 2 === 0 ? 1 : -1;
 
   return (

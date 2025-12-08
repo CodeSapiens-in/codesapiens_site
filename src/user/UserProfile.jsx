@@ -31,12 +31,72 @@ import {
   Code,
   BookOpen,
   ExternalLink,
+  Briefcase,
+  MapPin,
 } from "lucide-react";
 import { supabase } from "../lib/supabaseClient";
 import { useUser } from '@supabase/auth-helpers-react';
 import skillsList from "../assets/skills.json";
 import academicData from "../assets/academic.json";
 import "../styles/profile-animations.css";
+
+// --- CUSTOM VISUAL COMPONENTS ---
+
+const DrawVariant = {
+  hidden: { pathLength: 0, opacity: 0 },
+  visible: {
+    pathLength: 1,
+    opacity: 1,
+    transition: { duration: 1.5, ease: "easeInOut" }
+  }
+};
+
+const FrameworkGrid = () => (
+  <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden h-full">
+    {/* Vertical Lines - Animated */}
+    <motion.div
+      initial={{ height: 0 }} animate={{ height: "100%" }} transition={{ duration: 1.5, ease: "easeInOut" }}
+      className="w-px bg-[#0061FE]/40 absolute left-[40px] hidden md:block"
+    />
+    <motion.div
+      initial={{ height: 0 }} animate={{ height: "100%" }} transition={{ duration: 1.5, delay: 0.2, ease: "easeInOut" }}
+      className="w-px bg-[#0061FE]/40 absolute left-[40px] md:left-[260px]"
+    />
+    <motion.div
+      initial={{ height: 0 }} animate={{ height: "100%" }} transition={{ duration: 1.5, delay: 0.4, ease: "easeInOut" }}
+      className="w-px bg-[#0061FE]/30 absolute right-[40px] hidden lg:block"
+    />
+
+    {/* Horizontal Lines - Animated */}
+    <motion.div
+      initial={{ width: 0 }} animate={{ width: "100%" }} transition={{ duration: 1.5, delay: 0.1, ease: "easeInOut" }}
+      className="absolute top-[180px] left-0 h-px bg-[#0061FE]/20"
+    />
+    <motion.div
+      initial={{ width: 0 }} animate={{ width: "100%" }} transition={{ duration: 1.5, delay: 0.3, ease: "easeInOut" }}
+      className="absolute top-[500px] left-0 h-px bg-[#0061FE]/20"
+    />
+    <motion.div
+      initial={{ width: 0 }} animate={{ width: "100%" }} transition={{ duration: 1.5, delay: 0.5, ease: "easeInOut" }}
+      className="absolute bottom-[100px] left-0 h-px bg-[#0061FE]/20"
+    />
+  </div>
+);
+
+const HandDrawnCrown = () => (
+  <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="#C2E812" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="transform -rotate-12">
+    <motion.path
+      d="M2 4l3 12h14l3-12-6 7-4-7-4 7-6-7zm3 16h14"
+      variants={DrawVariant} initial="hidden" animate="visible"
+    />
+  </svg>
+);
+
+const MessyUnderline = () => (
+  <svg className="absolute -bottom-2 left-0 w-full" viewBox="0 0 100 10" preserveAspectRatio="none">
+    <path d="M0,5 Q50,10 100,5" stroke="#C2E812" strokeWidth="3" fill="none" />
+  </svg>
+);
 
 
 // Simple debounce function
@@ -104,8 +164,8 @@ const UserProfile = () => {
   const collegeInputRef = useRef(null);
   const collegeDropdownRef = useRef(null);
 
-  // Add "Attended Meetups" to tabs
-  const tabs = ["Overview", "Skills", "Achievements", "Activity", "Attended Meetups"];
+  // Tabs
+  const tabs = ["Overview", "Skills", "Activity", "Attended Meetups"];
 
   // Generate years from 2020 to 2040 for the dropdown
   const graduationYears = [
@@ -806,696 +866,429 @@ const UserProfile = () => {
 
   // Main JSX
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-white border-b">
-        <div className="px-3 sm:px-4 lg:px-6 py-4 sm:py-6 lg:py-8">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-4 sm:space-y-0 sm:space-x-6">
-            {/* Avatar */}
-            <div className="w-16 h-16 sm:w-20 sm:h-20 lg:w-24 lg:h-24 bg-gradient-to-br from-purple-500 to-blue-600 rounded-full flex items-center justify-center flex-shrink-0 shadow-lg overflow-hidden">
-              {userData.githubUrl && extractGithubUsername(userData.githubUrl) ? (
-                <img
-                  src={`https://avatars.githubusercontent.com/${extractGithubUsername(userData.githubUrl)}`}
-                  alt={userData.displayName}
-                  className="w-full h-full object-cover"
-                  onError={(e) => {
-                    console.error("[Frontend] : Failed to load GitHub avatar");
-                    e.target.onError = null;
-                    e.target.src = ''; // Clear the failed image
-                    // Fallback to initial letter
-                    e.target.style.display = 'none';
-                    e.target.parentElement.innerHTML = `<span class="text-white font-bold text-xl sm:text-2xl lg:text-3xl">
-                      ${userData.displayName?.charAt(0).toUpperCase() || "U"}
-                    </span>`;
-                  }}
-                />
-              ) : (
-                <span className="text-white font-bold text-xl sm:text-2xl lg:text-3xl">
-                  {userData.displayName?.charAt(0).toUpperCase() || "U"}
-                </span>
-              )}
-            </div>
+    <div className="min-h-screen bg-[#F7F5F2] font-sans text-[#1E1E1E] selection:bg-[#C2E812] selection:text-black relative overflow-x-hidden">
 
-            {/* Name, bio, contact */}
-            <div className="flex-1 min-w-0">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-3 mb-2">
-                <div className="flex items-center space-x-3 flex-1 min-w-0">
-                  {isEditing ? (
-                    <input
-                      type="text"
-                      name="displayName"
-                      value={editedData.displayName || ""}
-                      onChange={handleInputChange}
-                      className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 border-b-2 border-gray-300 focus:outline-none focus:border-blue-500 bg-transparent flex-1 min-w-0"
-                      placeholder="Enter display name"
-                    />
-                  ) : (
-                    <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 truncate">
-                      {userData.displayName} {userData.username ? `(@${userData.username})` : ""}
-                    </h1>
-                  )}
-                  {userData.emailVerified && (
-                    <span className="text-green-500 text-sm bg-green-50 px-2 py-1 rounded-full flex-shrink-0">Verified</span>
-                  )}
-                </div>
+      {/* --- HEADER SECTION --- */}
+      <div className="bg-[#1E1E1E] text-white pt-20 pb-32 px-6 relative overflow-visible">
+        <FrameworkGrid />
 
-                {/* Action buttons */}
-                <div className="flex items-center space-x-2 sm:space-x-3">
-                  {!isEditing ? (
-                    <>
-                      <button
-                        onClick={handleEditStart}
-                        className="flex items-center space-x-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors duration-200 text-sm font-medium"
-                        title="Edit profile"
-                      >
-                        <Edit className="w-5 h-5" />
-                        <span>Edit Profile</span>
-                      </button>
-
-                      {userData.isPublic && userData.username && (
-                        <button
-                          onClick={() => {
-                            const profileUrl = `${window.location.origin}/profile/${userData.username}`;
-                            navigator.clipboard.writeText(profileUrl);
-                            setIsCopied(true);
-                            setTimeout(() => setIsCopied(false), 2000);
-                          }}
-                          className={`flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 ${isCopied ? "bg-green-600 text-white" : "bg-green-500 text-white hover:bg-green-600"
-                            }`}
-                          title="Share public profile"
-                        >
-                          {isCopied ? (
-                            <>
-                              <Check className="w-5 h-5" />
-                              <span>Copied!</span>
-                            </>
-                          ) : (
-                            <>
-                              <Globe className="w-5 h-5" />
-                              <span>Share Profile</span>
-                            </>
-                          )}
-                        </button>
-                      )}
-                    </>
-                  ) : (
-                    <div className="flex space-x-2">
-                      <button
-                        onClick={handleSave}
-                        className={`flex items-center space-x-2 px-4 py-2 bg-green-500 text-white rounded-lg transition-colors duration-200 text-sm font-medium ${usernameError ? "opacity-50 cursor-not-allowed" : "hover:bg-green-600"
-                          }`}
-                        title="Save changes"
-                        disabled={!!usernameError}
-                      >
-                        <Save className="w-5 h-5" />
-                        <span>Save</span>
-                      </button>
-                      <button
-                        onClick={handleCancel}
-                        className="flex items-center space-x-2 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors duration-200 text-sm font-medium"
-                        title="Cancel editing"
-                      >
-                        <XCircle className="w-5 h-5" />
-                        <span>Cancel</span>
-                      </button>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {isEditing ? (
-                <textarea
-                  name="bio"
-                  value={editedData.bio || ""}
-                  onChange={handleInputChange}
-                  className="text-sm sm:text-base text-gray-600 mb-4 leading-relaxed w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                  rows="3"
-                  placeholder="Tell us about yourself..."
-                />
-              ) : (
-                <p className="text-sm sm:text-base text-gray-600 mb-4 leading-relaxed">{userData.bio}</p>
-              )}
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-4 text-xs sm:text-sm text-gray-600">
-                <div className="flex items-center space-x-2">
-                  <Mail className="w-4 h-4 text-gray-400 flex-shrink-0" />
-                  <span className="truncate">{userData.email}</span>
-                </div>
-                {isEditing ? (
-                  <div className="flex items-center space-x-2">
-                    <Phone className="w-4 h-4 text-gray-400 flex-shrink-0" />
-                    <input
-                      type="tel"
-                      name="phoneNumber"
-                      value={editedData.phoneNumber || ""}
-                      onChange={handleInputChange}
-                      className="border-b border-gray-300 focus:outline-none focus:border-blue-500 bg-transparent flex-1"
-                      placeholder="Phone number"
-                    />
-                  </div>
-                ) : (
-                  userData.phoneNumber && (
-                    <div className="flex items-center space-x-2">
-                      <Phone className="w-4 h-4 text-gray-400 flex-shrink-0" />
-                      <span>{userData.phoneNumber}</span>
-                    </div>
-                  )
-                )}
-              </div>
-
-              {isEditing && (
-                <div className="mt-4 flex items-center space-x-2">
-                  <input
-                    type="checkbox"
-                    id="isPublic"
-                    checked={editedData.isPublic || false}
-                    onChange={(e) => setEditedData((prev) => ({ ...prev, isPublic: e.target.checked }))}
-                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                  />
-                  <label htmlFor="isPublic" className="text-sm text-gray-600">
-                    Make my profile public (accessible via username)
-                  </label>
-                </div>
-              )}
-
-              {saveError && <p className="text-sm text-red-500 mt-2">{saveError}</p>}
-            </div>
-          </div>
+        {/* Doodles */}
+        <div className="absolute top-10 right-10 opacity-80 animate-pulse">
+          <HandDrawnCrown />
         </div>
 
-        <div className="px-3 sm:px-4 lg:px-6">
-          <div className="hidden sm:flex space-x-8">
-            {tabs.map((tab) => (
-              <button
-                key={tab}
-                onClick={() => setActiveTab(tab)}
-                className={`pb-3 text-sm font-medium border-b-2 transition-colors ${activeTab === tab ? "text-blue-600 border-blue-600" : "text-gray-500 border-transparent hover:text-gray-700"
-                  }`}
-              >
-                {tab}
-              </button>
-            ))}
+        {/* Header GIF */}
+        <div className="absolute top-0 right-0 h-full w-1/2 opacity-30 pointer-events-none mix-blend-screen overflow-hidden">
+          <img
+            src="https://cdn.prod.website-files.com/66c503d081b2f012369fc5d2/674664f62774f41bc13a74c1_ec9f58238cd0ef03e6ae0ba36c19e502.gif"
+            alt="Header Decoration"
+            className="w-full h-full object-cover"
+          />
+        </div>
+
+        {/* Animated Paper Rocket */}
+        <div className="absolute top-0 left-0 w-full h-full pointer-events-none z-0 overflow-hidden">
+          <motion.div
+            initial={{ x: "-10vw", y: 100, rotate: 45 }}
+            animate={{
+              x: "110vw",
+              y: [100, 50, 120, -20],
+              rotate: [45, 35, 50, 25]
+            }}
+            transition={{
+              duration: 20,
+              repeat: Infinity,
+              ease: "linear",
+              delay: 1
+            }}
+            className="absolute top-10"
+          >
+            <PaperRocket className="w-16 h-16 drop-shadow-lg" />
+          </motion.div>
+        </div>
+
+        <div className="max-w-7xl mx-auto relative z-10 flex flex-col md:flex-row justify-between items-end gap-8">
+
+          {/* Left: Profile Info */}
+          <div className="flex-1 w-full md:max-w-2xl">
+            <div className="mb-6">
+              {isEditing ? (
+                <input
+                  name="displayName"
+                  value={editedData.displayName}
+                  onChange={handleInputChange}
+                  className="bg-transparent border-b-2 border-[#0061FE] text-4xl md:text-6xl font-black text-white focus:outline-none w-full mb-2"
+                />
+              ) : (
+                <h1 className="text-4xl md:text-6xl font-black tracking-tighter mb-2 relative inline-block">
+                  {userData.displayName}
+                  <MessyUnderline />
+                </h1>
+              )}
+              <p className="text-[#0061FE] font-mono text-lg">@{userData.username || "username"}</p>
+            </div>
+
+            {isEditing ? (
+              <textarea
+                name="bio"
+                value={editedData.bio}
+                onChange={handleInputChange}
+                className="w-full bg-white/10 text-white p-3 rounded border border-white/20 focus:border-[#C2E812] outline-none mb-6"
+                rows="2"
+              />
+            ) : (
+              <p className="text-xl text-gray-300 leading-relaxed mb-6 max-w-xl">{userData.bio}</p>
+            )}
+
+            {/* Meta Data Row */}
+            <div className="flex flex-wrap gap-6 text-sm font-bold text-gray-400 uppercase tracking-wider">
+              <div className="flex items-center gap-2">
+                <Briefcase className="w-4 h-4 text-[#C2E812]" />
+                {isEditing ? <input name="major" value={editedData.major} onChange={handleInputChange} className="bg-transparent border-b border-gray-500 text-white w-32" /> : (userData.major || "N/A")}
+              </div>
+              <div className="flex items-center gap-2">
+                <MapPin className="w-4 h-4 text-[#0061FE]" />
+                India
+              </div>
+              <div className="flex items-center gap-2">
+                <Calendar className="w-4 h-4 text-[#FF5018]" />
+                Class of {isEditing ? <input name="graduatingyear" value={editedData.graduatingyear} onChange={handleInputChange} className="bg-transparent border-b border-gray-500 text-white w-20" /> : (userData.graduatingyear || "N/A")}
+              </div>
+            </div>
           </div>
-          <div className="sm:hidden">
-            <select
-              value={activeTab}
-              onChange={(e) => setActiveTab(e.target.value)}
-              className="w-full p-3 border border-gray-300 rounded-lg text-sm bg-white"
-            >
-              {tabs.map((tab) => (
-                <option key={tab} value={tab}>
-                  {tab}
-                </option>
-              ))}
-            </select>
+
+          {/* Right: Stats & Actions */}
+          <div className="flex flex-col items-end gap-6">
+            <div className="flex gap-8 text-center">
+              <div>
+                <div className="text-3xl font-black text-white">{userData.attendedMeetups.length}</div>
+                <div className="text-xs font-bold text-gray-500 uppercase tracking-widest">Meetups</div>
+              </div>
+              <div>
+                <div className="text-3xl font-black text-white">{userSkills.length}</div>
+                <div className="text-xs font-bold text-gray-500 uppercase tracking-widest">Skills</div>
+              </div>
+              <div>
+                <div className="text-3xl font-black text-white">0</div>
+                <div className="text-xs font-bold text-gray-500 uppercase tracking-widest">Projects</div>
+              </div>
+            </div>
+
+            <div className="flex gap-3">
+              {!isEditing ? (
+                <>
+                  <button
+                    onClick={handleEditStart}
+                    className="bg-white text-[#1E1E1E] px-6 py-3 font-bold rounded-xl hover:bg-[#C2E812] transition-colors shadow-[4px_4px_0px_0px_rgba(255,255,255,0.2)]"
+                  >
+                    Edit Profile
+                  </button>
+                  {userData.isPublic && userData.username && (
+                    <button
+                      onClick={() => {
+                        const profileUrl = `${window.location.origin}/profile/${userData.username}`;
+                        navigator.clipboard.writeText(profileUrl);
+                        setIsCopied(true);
+                        setTimeout(() => setIsCopied(false), 2000);
+                      }}
+                      className={`p-3 border-2 border-white/20 rounded-xl transition-colors ${isCopied ? "bg-[#C2E812] text-black border-[#C2E812]" : "hover:bg-white/10 text-white"}`}
+                      title="Copy Profile Link"
+                    >
+                      {isCopied ? <Check className="w-5 h-5" /> : <Globe className="w-5 h-5" />}
+                    </button>
+                  )}
+                </>
+              ) : (
+                <>
+                  <button onClick={handleSave} className="bg-[#C2E812] text-black px-6 py-3 font-bold rounded-xl hover:bg-[#aacc00]">Save</button>
+                  <button onClick={handleCancel} className="bg-white/10 text-white px-6 py-3 font-bold rounded-xl border border-white/20">Cancel</button>
+                </>
+              )}
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Main content */}
-      <main className="px-3 sm:px-4 lg:px-6 py-4 sm:py-6 lg:py-8">
-        {/* Overview Tab */}
-        {activeTab === "Overview" && (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
-            {/* Personal Information */}
-            <div className="bg-white rounded-lg shadow-sm border">
-              <div className="p-4 sm:p-6 border-b">
-                <h3 className="text-lg font-semibold text-gray-900">Personal Information</h3>
+      {/* --- OVERLAPPING AVATAR & CONTENT --- */}
+      <div className="max-w-7xl mx-auto px-6 relative z-20 -mt-20 mb-20">
+
+        {/* Avatar */}
+        <div className="relative inline-block mb-12">
+          <div className="w-40 h-40 md:w-48 md:h-48 bg-[#1E1E1E] rounded-full border-[6px] border-[#F7F5F2] overflow-hidden shadow-2xl relative z-10">
+            {userData.githubUrl ? (
+              <img
+                src={`https://avatars.githubusercontent.com/${extractGithubUsername(userData.githubUrl)}`}
+                alt="Profile"
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center text-5xl font-bold bg-[#FF5018] text-white">
+                {userData.displayName[0]}
               </div>
-              <div className="p-4 sm:p-6">
-                <div className="space-y-4">
-                  {personalInfo.map((info, index) => (
-                    <div key={index} className="flex flex-col sm:flex-row sm:justify-between py-2">
-                      <span className="text-sm font-medium text-gray-600 mb-1 sm:mb-0">{info.label}</span>
-                      {isEditing && info.editable ? (
-                        <div className="sm:text-right sm:max-w-xs w-full relative">
-                          {info.type === "college" ? (
-                            <div className="relative" ref={collegeInputRef}>
-                              <input
-                                ref={(el) => {
-                                  if (el) collegeInputRef.current = el;
-                                }}
-                                type="text"
-                                value={collegeSearch}
-                                onChange={handleCollegeChange}
-                                className={`text-sm text-gray-900 border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 w-full pr-8 ${collegeError ? "border-red-500 focus:border-red-500 focus:ring-red-500" : ""
-                                  }`}
-                                placeholder="Search college (min 3 characters)..."
-                              />
-                              {collegeLoading && (
-                                <div className="absolute right-2 top-1/2 transform -translate-y-1/2">
-                                  <Loader2 className="w-4 h-4 animate-spin text-gray-400" />
-                                </div>
-                              )}
-                              {!collegeLoading && collegeSearch.length >= 3 && (
-                                <ChevronDown className="absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-                              )}
-                              {showCollegeDropdown && collegeSearch.length >= 3 && (
-                                colleges.length > 0 ? (
-                                  <div
-                                    ref={collegeDropdownRef}
-                                    className="absolute z-20 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto mt-1"
-                                  >
-                                    {colleges.map((college, i) => (
-                                      <button
-                                        key={i}
-                                        onClick={(e) => handleCollegeSelect(e, college)}
-                                        className="w-full px-4 py-3 text-left text-sm text-gray-900 hover:bg-blue-50 focus:bg-blue-50 focus:outline-none border-b border-gray-100 last:border-b-0"
-                                      >
-                                        {college}
-                                      </button>
-                                    ))}
-                                  </div>
-                                ) : !collegeLoading ? (
-                                  <div
-                                    ref={collegeDropdownRef}
-                                    className="absolute z-20 w-full bg-white border border-gray-300 rounded-lg shadow-lg mt-1 p-4 text-center text-sm text-gray-500"
-                                  >
-                                    No colleges found
-                                  </div>
-                                ) : null
-                              )}
-                              {collegeError && <p className="text-sm text-red-500 mt-2 bg-red-50 px-3 py-1 rounded">{collegeError}</p>}
-                            </div>
-                          ) : info.type === "dropdown" ? (
-                            <div className="relative">
-                              <select
-                                name={info.name || info.label.toLowerCase().replace(" ", "")}
-                                value={editedData[info.name || info.label.toLowerCase().replace(" ", "")] || "Not specified"}
-                                onChange={handleInputChange}
-                                className="text-sm text-gray-900 border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 w-full pr-8 appearance-none"
-                              >
-                                <option value="Not specified">Select {info.label}</option>
-                                {info.options.map((option, i) => (
-                                  <option key={i} value={option}>
-                                    {option}
-                                  </option>
-                                ))}
-                              </select>
-                              <ChevronDown className="absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-                            </div>
-                          ) : (
-                            <div className="relative">
+            )}
+          </div>
+          {/* Verified Badge */}
+          <div className="absolute bottom-4 right-4 bg-[#0061FE] text-white p-2 rounded-full border-4 border-[#F7F5F2] z-20">
+            <Check className="w-5 h-5 stroke-[3]" />
+          </div>
+        </div>
+
+        {/* Tabs */}
+        <div className="flex gap-8 mb-8 border-b-2 border-[#1E1E1E]/10">
+          {tabs.map(tab => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              className={`pb-4 text-lg font-bold tracking-tight transition-all ${activeTab === tab
+                ? "text-[#1E1E1E] border-b-4 border-[#FF5018]"
+                : "text-gray-400 hover:text-[#1E1E1E]"
+                }`}
+            >
+              {tab}
+            </button>
+          ))}
+        </div>
+
+        {/* Grid Content */}
+        <div className="grid grid-cols-1 gap-8">
+
+          {/* LEFT COL (Full Width) */}
+          <div className="space-y-8">
+            {activeTab === "Overview" && (
+              <>
+                {/* Resume / Featured Project */}
+                <div className="bg-white rounded-3xl p-8 border border-gray-100 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group">
+                  <div className="absolute top-0 right-0 bg-[#C2E812] text-[#1E1E1E] text-xs font-black px-4 py-2 rounded-bl-2xl uppercase tracking-widest">Featured</div>
+                  <div className="flex items-start justify-between mb-6">
+                    <div>
+                      <h3 className="text-2xl font-black text-[#1E1E1E] mb-2">Resume & CV</h3>
+                      <p className="text-gray-500">Your professional journey, documented.</p>
+                    </div>
+                    <div className="bg-[#F7F5F2] p-4 rounded-2xl">
+                      <Briefcase className="w-8 h-8 text-[#1E1E1E]" />
+                    </div>
+                  </div>
+
+                  {userData.resumeUrl ? (
+                    <div className="flex items-center gap-4 bg-[#F7F5F2] p-4 rounded-2xl border border-gray-200">
+                      <div className="bg-[#FF5018] text-white p-3 rounded-xl">
+                        <Award className="w-6 h-6" />
+                      </div>
+                      <div className="flex-1">
+                        <p className="font-bold text-[#1E1E1E]">Resume.pdf</p>
+                        <p className="text-xs text-gray-500">Uploaded recently</p>
+                      </div>
+                      <div className="flex gap-2">
+                        <a href={userData.resumeUrl} target="_blank" className="p-2 hover:bg-white rounded-lg transition-colors text-[#0061FE]"><Eye className="w-5 h-5" /></a>
+                        <button onClick={handleRemoveResume} className="p-2 hover:bg-white rounded-lg transition-colors text-red-500"><Trash2 className="w-5 h-5" /></button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div
+                      className="border-2 border-dashed border-gray-200 rounded-2xl p-8 text-center hover:border-[#0061FE] hover:bg-[#0061FE]/5 transition-all cursor-pointer"
+                      onClick={() => document.getElementById('resume-upload').click()}
+                    >
+                      <Upload className="w-10 h-10 text-gray-300 mx-auto mb-4" />
+                      <p className="font-bold text-gray-600">Upload Resume</p>
+                      <p className="text-sm text-gray-400">PDF, max 5MB</p>
+                      <input id="resume-upload" type="file" className="hidden" accept=".pdf" onChange={(e) => handleFileSelect(e.target.files[0])} />
+                    </div>
+                  )}
+                </div>
+
+                {/* Personal Information */}
+                <div className="bg-white rounded-3xl p-8 border border-gray-100 shadow-sm">
+                  <h3 className="text-xl font-black text-[#1E1E1E] mb-6">Personal Details</h3>
+                  <div className="space-y-4">
+                    {personalInfo.map((info, index) => (
+                      <div key={index} className="flex flex-col sm:flex-row sm:justify-between py-2 border-b border-gray-50 last:border-0">
+                        <span className="font-bold text-gray-500 mb-1 sm:mb-0">{info.label}</span>
+                        {isEditing && info.editable ? (
+                          <div className="sm:text-right sm:max-w-xs w-full relative">
+                            {info.type === "college" ? (
+                              <div className="relative" ref={collegeInputRef}>
+                                <input
+                                  ref={(el) => { if (el) collegeInputRef.current = el; }}
+                                  type="text"
+                                  value={collegeSearch}
+                                  onChange={handleCollegeChange}
+                                  className={`bg-[#F7F5F2] border-none rounded-lg px-3 py-2 font-bold text-[#1E1E1E] focus:ring-2 focus:ring-[#0061FE] w-full outline-none ${collegeError ? "ring-2 ring-red-500" : ""}`}
+                                  placeholder="Search college..."
+                                />
+                                {collegeLoading && <div className="absolute right-2 top-1/2 -translate-y-1/2"><Loader2 className="w-4 h-4 animate-spin text-gray-400" /></div>}
+                                {showCollegeDropdown && collegeSearch.length >= 3 && (
+                                  colleges.length > 0 ? (
+                                    <div ref={collegeDropdownRef} className="absolute z-50 w-full bg-white border border-gray-200 rounded-lg shadow-xl max-h-60 overflow-y-auto mt-1 text-left">
+                                      {colleges.map((college, i) => (
+                                        <button key={i} onClick={(e) => handleCollegeSelect(e, college)} className="w-full px-4 py-3 text-left text-sm font-bold text-[#1E1E1E] hover:bg-[#F7F5F2] transition-colors border-b border-gray-50 last:border-0">
+                                          {college}
+                                        </button>
+                                      ))}
+                                    </div>
+                                  ) : !collegeLoading ? (
+                                    <div className="absolute z-50 w-full bg-white border border-gray-200 rounded-lg shadow-xl mt-1 p-4 text-center text-sm text-gray-500">No colleges found</div>
+                                  ) : null
+                                )}
+                              </div>
+                            ) : info.type === "dropdown" ? (
+                              <div className="relative">
+                                <select
+                                  name={info.name || info.label.toLowerCase().replace(" ", "")}
+                                  value={editedData[info.name || info.label.toLowerCase().replace(" ", "")] || "Not specified"}
+                                  onChange={handleInputChange}
+                                  className="bg-[#F7F5F2] border-none rounded-lg px-3 py-2 font-bold text-[#1E1E1E] focus:ring-2 focus:ring-[#0061FE] w-full outline-none appearance-none"
+                                >
+                                  <option value="Not specified">Select {info.label}</option>
+                                  {info.options.map((option, i) => <option key={i} value={option}>{option}</option>)}
+                                </select>
+                                <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                              </div>
+                            ) : (
                               <input
                                 type="text"
                                 name={info.label.toLowerCase().replace(" ", "")}
                                 value={editedData[info.label.toLowerCase().replace(" ", "")] || ""}
                                 onChange={handleInputChange}
-                                className={`text-sm text-gray-900 border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 w-full ${info.label === "Username" && usernameError ? "border-red-500 focus:border-red-500 focus:ring-red-500" : ""
-                                  }`}
-                                placeholder={info.label}
+                                className="bg-[#F7F5F2] border-none rounded-lg px-3 py-2 font-bold text-[#1E1E1E] focus:ring-2 focus:ring-[#0061FE] w-full outline-none"
                               />
-                              {info.label === "Username" && usernameError && (
-                                <p className="text-sm text-red-500 mt-2 bg-red-50 px-3 py-1 rounded w-full">{usernameError}</p>
-                              )}
-                            </div>
-                          )}
+                            )}
+                          </div>
+                        ) : (
+                          <span className="font-bold text-[#1E1E1E] sm:text-right sm:max-w-xs">{info.label === "Graduating Year" && !info.value ? "Not specified" : info.value}</span>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Recent Activity */}
+                <div className="bg-white rounded-3xl p-8 border border-gray-100 shadow-sm">
+                  <h3 className="text-xl font-black text-[#1E1E1E] mb-6">Recent Activity</h3>
+                  {userData.attendedMeetups.length > 0 ? (
+                    <div className="space-y-6 relative before:absolute before:left-4 before:top-2 before:bottom-2 before:w-0.5 before:bg-gray-100">
+                      {userData.attendedMeetups.slice(0, 3).map((m, i) => (
+                        <div key={i} className="relative pl-10">
+                          <div className="absolute left-2 top-1.5 w-4 h-4 bg-[#0061FE] rounded-full border-4 border-white shadow-sm"></div>
+                          <p className="font-bold text-[#1E1E1E] text-lg">{m.title}</p>
+                          <p className="text-sm text-gray-500 mb-1">{new Date(m.date).toLocaleDateString()}</p>
+                          <p className="text-sm text-gray-600 bg-[#F7F5F2] inline-block px-3 py-1 rounded-lg">📍 {m.venue || "Online"}</p>
                         </div>
-                      ) : (
-                        <span className="text-sm text-gray-900 sm:text-right sm:max-w-xs">
-                          {info.label === "Graduating Year" && !info.value ? "Not specified" : info.value}
-                        </span>
-                      )}
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-8 text-gray-400 italic">No recent activity to show.</div>
+                  )}
+                </div>
+              </>
+            )}
+
+            {activeTab === "Skills" && (
+              <div className="bg-white rounded-3xl p-8 border border-gray-100 shadow-sm">
+                <div className="flex justify-between items-center mb-8">
+                  <h3 className="text-2xl font-black">Skills & Expertise</h3>
+                  <div className="flex gap-2">
+                    <input
+                      value={newSkill}
+                      onChange={(e) => setNewSkill(e.target.value)}
+                      placeholder="Add skill..."
+                      className="bg-[#F7F5F2] border-none rounded-xl px-4 py-2 font-bold focus:ring-2 focus:ring-[#C2E812] outline-none"
+                    />
+                    <button onClick={handleAddSkill} className="bg-[#1E1E1E] text-white p-2 rounded-xl hover:bg-[#C2E812] hover:text-black transition-colors"><Plus /></button>
+                  </div>
+                </div>
+                <div className="flex flex-wrap gap-3">
+                  {userSkills.map((skill, i) => (
+                    <div key={i} className="bg-[#F7F5F2] px-5 py-3 rounded-xl font-bold text-[#1E1E1E] flex items-center gap-3 group hover:bg-[#1E1E1E] hover:text-white transition-colors cursor-default">
+                      {skill}
+                      <button onClick={() => handleDeleteSkill(i)} className="opacity-0 group-hover:opacity-100 text-red-500 hover:text-red-400 transition-opacity"><XCircle className="w-4 h-4" /></button>
                     </div>
                   ))}
                 </div>
               </div>
-            </div>
+            )}
 
-            {/* Social Links */}
-            <div className="bg-white rounded-lg shadow-sm border">
-              <div className="p-4 sm:p-6 border-b">
-                <h3 className="text-lg font-semibold text-gray-900">Social Links</h3>
-              </div>
-              <div className="p-4 sm:p-6">
-                <div className="space-y-4">
-                  {socialLinks.map((link, index) => {
-                    const IconComponent = link.icon;
-                    const isValidUrl = link.href && validateUrl(link.href) === link.href;
-                    console.log(`[Frontend] : Rendering social link - ${link.label}:`, {
-                      href: link.href,
-                      isValid: isValidUrl,
-                    });
-                    return (
-                      <div key={index} className="flex items-center justify-between py-2">
-                        <div className="flex items-center space-x-3">
-                          <div className="p-2 bg-gray-100 rounded-lg">
-                            <IconComponent className="w-4 h-4 text-gray-600" />
-                          </div>
-                          <span className="text-sm font-medium text-gray-700">{link.label}</span>
+            {activeTab === "Attended Meetups" && (
+              <div className="bg-white rounded-3xl p-8 border border-gray-100 shadow-sm">
+                <h3 className="text-xl font-black text-[#1E1E1E] mb-6">Attended Meetups</h3>
+                {userData.attendedMeetups && userData.attendedMeetups.length > 0 ? (
+                  <div className="grid grid-cols-1 gap-4">
+                    {userData.attendedMeetups.map((meetup, index) => (
+                      <div key={index} className="p-6 rounded-2xl border border-gray-100 bg-[#F7F5F2] hover:bg-white hover:shadow-md transition-all group">
+                        <h3 className="text-lg font-black text-[#1E1E1E] mb-2 group-hover:text-[#0061FE] transition-colors">{meetup.title}</h3>
+                        <div className="flex items-center gap-2 text-sm text-gray-500 mb-3">
+                          <Calendar className="w-4 h-4" />
+                          <span>{new Date(meetup.date).toLocaleDateString()}</span>
                         </div>
-                        {isEditing ? (
-                          <input
-                            type="url"
-                            name={link.name}
-                            value={editedData[link.name] || ""}
-                            onChange={handleInputChange}
-                            className="text-sm text-gray-900 border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 max-w-xs"
-                            placeholder="https://..."
-                          />
-                        ) : isValidUrl ? (
-                          <a
-                            href={link.href}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-blue-600 hover:text-blue-800 text-sm font-medium hover:underline"
-                            onClick={() => console.log(`[Frontend] : Navigating to ${link.label}: ${link.href}`)}
-                          >
-                            View
-                          </a>
-                        ) : (
-                          <span className="text-gray-400 text-sm">Not set</span>
+                        {meetup.venue && (
+                          <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">
+                            📍 {meetup.venue}
+                          </p>
                         )}
                       </div>
-                    );
-                  })}
-                </div>
-              </div>
-            </div>
-
-            {/* Resume */}
-            <div className="bg-white rounded-lg shadow-sm border lg:col-span-2">
-              <div className="p-4 sm:p-6 border-b">
-                <h3 className="text-lg font-semibold text-gray-900 flex items-center space-x-2">
-                  <Upload className="w-5 h-5" />
-                  <span>Resume</span>
-                </h3>
-              </div>
-              <div className="p-4 sm:p-6">
-                {resumeUrl ? (
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-gray-700">Current Resume:</span>
-                      <div className="flex items-center space-x-2">
-                        <a
-                          href={resumeUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex items-center space-x-1 text-blue-600 hover:text-blue-800 text-sm font-medium hover:underline"
-                        >
-                          <Eye className="w-4 h-4" />
-                          <span>View Resume</span>
-                        </a>
-                        <a
-                          href={resumeUrl}
-                          download
-                          className="flex items-center space-x-1 text-green-600 hover:text-green-800 text-sm font-medium hover:underline"
-                        >
-                          <Download className="w-4 h-4" />
-                          <span>Download</span>
-                        </a>
-                        <button
-                          onClick={handleRemoveResume}
-                          className="text-red-500 hover:text-red-700 text-sm font-medium"
-                        >
-                          Remove
-                        </button>
-                      </div>
-                    </div>
-                    <div className="border-t pt-4">
-                      <p className="text-sm text-red-600 mb-4 font-medium">
-                        There is already a resume uploaded. Uploading a new one will delete the existing resume.
-                      </p>
-                      <input
-                        type="file"
-                        id="resume-upload"
-                        accept=".pdf"
-                        onChange={(e) => handleFileSelect(e.target.files[0])}
-                        className="hidden"
-                      />
-                      <label
-                        htmlFor="resume-upload"
-                        className="block w-full p-4 border-2 border-dashed border-gray-300 rounded-lg text-center cursor-pointer hover:border-blue-400 transition-colors"
-                      >
-                        <Upload className="w-8 h-8 mx-auto mb-2 text-gray-400" />
-                        <p className="text-sm font-medium text-gray-700">Click to select new resume (will replace current)</p>
-                        <p className="text-xs text-gray-500 mt-1">PDF only, max 1MB</p>
-                      </label>
-                    </div>
-                    {resumeError && <p className="text-sm text-red-500 mt-2 bg-red-50 px-3 py-1 rounded">{resumeError}</p>}
-                  </div>
-                ) : (
-                  <div className="text-center py-8">
-                    <Upload className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                    <p className="text-gray-600 mb-2">No resume uploaded yet</p>
-                    <p className="text-sm text-gray-500 mb-6">Upload your resume to showcase your experience</p>
-                    <div
-                      ref={resumeDropRef}
-                      onDragEnter={handleDrag}
-                      onDragLeave={handleDrag}
-                      onDragOver={handleDrag}
-                      onDrop={handleDrop}
-                      className={`relative border-2 border-dashed rounded-lg p-6 cursor-pointer transition-colors ${dragActive ? "border-blue-400 bg-blue-50" : "border-gray-300 hover:border-gray-400"
-                        }`}
-                    >
-                      {uploadingResume ? (
-                        <div className="flex flex-col items-center space-y-2">
-                          <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
-                          <p className="text-sm text-blue-600">Uploading...</p>
-                        </div>
-                      ) : (
-                        <>
-                          <Upload className="w-8 h-8 mx-auto mb-2 text-gray-400" />
-                          <input
-                            type="file"
-                            id="resume-drop"
-                            accept=".pdf"
-                            onChange={(e) => handleFileSelect(e.target.files[0])}
-                            className="hidden"
-                          />
-                          <label htmlFor="resume-drop" className="cursor-pointer block">
-                            <p className="text-sm font-medium text-gray-700">Drag & drop your resume here, or click to select</p>
-                            <p className="text-xs text-gray-500 mt-1">PDF only, max 1MB</p>
-                          </label>
-                        </>
-                      )}
-                      {resumeError && <p className="text-sm text-red-500 mt-2 bg-red-50 px-3 py-1 rounded">{resumeError}</p>}
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Skills Tab */}
-        {activeTab === "Skills" && (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div className="bg-white rounded-lg shadow-sm border">
-              <div className="p-4 sm:p-6 border-b">
-                <h3 className="text-lg font-semibold text-gray-900">Technical Skills</h3>
-              </div>
-              <div className="p-4 sm:p-6">
-                {userSkills.length > 0 ? (
-                  <div className="space-y-4">
-                    {technicalSkills.map((item, index) => (
-                      <div key={index} className="space-y-2">
-                        <div className="flex justify-between items-center">
-                          {editingSkillIndex === index ? (
-                            <div className="flex items-center space-x-2 w-full relative">
-                              <select
-                                value={editingSkillValue}
-                                onChange={(e) => setEditingSkillValue(e.target.value)}
-                                className="text-sm text-gray-900 border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 flex-1 pr-8"
-                                onFocus={() => setShowEditSkillDropdown(true)}
-                              >
-                                <option value="">Select a skill</option>
-                                {skillsList.skills.map((skill, i) => (
-                                  <option key={i} value={skill}>
-                                    {skill}
-                                  </option>
-                                ))}
-                              </select>
-                              {showEditSkillDropdown && (
-                                <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-                              )}
-                              <button
-                                onClick={() => handleSaveSkill(index)}
-                                className="p-1 hover:bg-green-100 rounded-full transition-colors"
-                                title="Save skill"
-                              >
-                                <Save className="w-5 h-5 text-green-500 hover:text-green-600" />
-                              </button>
-                              <button
-                                onClick={() => {
-                                  setEditingSkillIndex(null);
-                                  setShowEditSkillDropdown(false);
-                                }}
-                                className="p-1 hover:bg-red-100 rounded-full transition-colors"
-                                title="Cancel editing"
-                              >
-                                <XCircle className="w-5 h-5 text-red-500 hover:text-red-600" />
-                              </button>
-                            </div>
-                          ) : (
-                            <>
-                              <span className="text-sm font-medium text-gray-700">{item.skill}</span>
-                              <div className="flex space-x-2">
-                                <button
-                                  onClick={() => handleEditSkill(index)}
-                                  className="p-1 hover:bg-gray-100 rounded-full transition-colors"
-                                  title="Edit skill"
-                                >
-                                  <Edit className="w-4 h-4 text-gray-500 hover:text-blue-500" />
-                                </button>
-                                <button
-                                  onClick={() => handleDeleteSkill(index)}
-                                  className="p-1 hover:bg-red-100 rounded-full transition-colors"
-                                  title="Delete skill"
-                                >
-                                  <Trash2 className="w-4 h-4 text-red-500 hover:text-red-600" />
-                                </button>
-                              </div>
-                            </>
-                          )}
-                        </div>
-                        <div className="w-full bg-gray-200 rounded-full h-2">
-                          <div
-                            className={`h-2 rounded-full ${item.color} transition-all duration-300`}
-                            style={{ width: `${item.level}%` }}
-                          ></div>
-                        </div>
-                      </div>
                     ))}
                   </div>
                 ) : (
-                  <div className="text-center py-8">
-                    <p className="text-gray-500 mb-4">No technical skills added yet</p>
+                  <div className="text-center py-12 bg-[#F7F5F2] rounded-2xl border-2 border-dashed border-gray-200">
+                    <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm">
+                      <Calendar className="w-8 h-8 text-gray-300" />
+                    </div>
+                    <p className="text-gray-500 font-bold">No meetups attended yet</p>
+                    <p className="text-sm text-gray-400 mt-1">Check in at events to see them here!</p>
                   </div>
                 )}
-                <div className="mt-6 flex items-center space-x-2 relative">
-                  <select
-                    value={newSkill}
-                    onChange={(e) => setNewSkill(e.target.value)}
-                    className="text-sm text-gray-900 border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 flex-1 pr-8"
-                    onFocus={() => setShowSkillDropdown(true)}
-                    onBlur={() => setTimeout(() => setShowSkillDropdown(false), 200)}
-                  >
-                    <option value="">Select a skill</option>
-                    {skillsList.skills.map((skill, i) => (
-                      <option key={i} value={skill}>
-                        {skill}
-                      </option>
-                    ))}
-                  </select>
-                  {showSkillDropdown && (
-                    <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-                  )}
-                  <button
-                    onClick={handleAddSkill}
-                    className="p-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors flex items-center"
-                    title="Add skill"
-                  >
-                    <Plus className="w-5 h-5" />
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Achievements Tab */}
-        {activeTab === "Achievements" && (
-          <div className="space-y-6">
-            <div className="bg-white rounded-lg shadow-sm border">
-              <div className="p-4 sm:p-6 border-b">
-                <h3 className="text-lg font-semibold text-gray-900">Achievements</h3>
-              </div>
-              <div className="p-4 sm:p-6">
-                <div className="text-center py-12">
-                  <Trophy className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                  <h4 className="text-lg font-semibold text-gray-700 mb-2">Achievements Coming Soon!</h4>
-                  <p className="text-gray-500 mb-4">We're working on an exciting achievements system with badges, certifications, and rewards.</p>
-                  <p className="text-sm text-gray-400">Stay tuned for updates!</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Activity Tab */}
-        {activeTab === "Activity" && (
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="p-2 bg-purple-100 rounded-lg text-purple-600">
-                <TrendingUp className="w-5 h-5" />
-              </div>
-              <h2 className="text-lg font-bold text-gray-900">Recent Activity</h2>
-            </div>
-
-            <div className="text-center py-12 bg-gray-50 rounded-xl border border-dashed border-gray-200">
-              <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                <TrendingUp className="w-6 h-6 text-gray-400" />
-              </div>
-              <p className="text-gray-500 font-medium">No recent activity</p>
-              <p className="text-sm text-gray-400 mt-1">Join events and hackathons to build your streak!</p>
-            </div>
-          </div>
-        )}
-
-        {/* Attended Meetups Tab */}
-        {activeTab === "Attended Meetups" && (
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="p-2 bg-indigo-100 rounded-lg text-indigo-600">
-                <Calendar className="w-5 h-5" />
-              </div>
-              <h2 className="text-lg font-bold text-gray-900">Attended Meetups</h2>
-            </div>
-
-            {userData.attendedMeetups && userData.attendedMeetups.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {userData.attendedMeetups.map((meetup, index) => (
-                  <div key={index} className="p-4 rounded-xl border border-gray-100 bg-gray-50 hover:bg-white hover:shadow-md transition-all">
-                    <h3 className="font-bold text-gray-900 mb-1">{meetup.title}</h3>
-                    <div className="flex items-center gap-2 text-sm text-gray-500 mb-2">
-                      <Calendar className="w-3 h-3" />
-                      <span>{new Date(meetup.date).toLocaleDateString()}</span>
-                    </div>
-                    {meetup.venue && (
-                      <p className="text-xs text-gray-400 mt-2 pt-2 border-t border-gray-200">
-                        📍 {meetup.venue}
-                      </p>
-                    )}
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-12 bg-gray-50 rounded-xl border border-dashed border-gray-200">
-                <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                  <Calendar className="w-6 h-6 text-gray-400" />
-                </div>
-                <p className="text-gray-500 font-medium">No meetups attended yet</p>
-                <p className="text-sm text-gray-400 mt-1">Check in at events to see them here!</p>
               </div>
             )}
           </div>
-        )}
-      </main>
 
-      {/* Mobile bottom navigation */}
-      < div className="fixed bottom-0 left-0 right-0 bg-white border-t px-3 py-2 sm:hidden z-40" >
-        <div className="flex justify-around">
-          {tabs.map((tab, index) => {
-            const icons = [TrendingUp, Award, Trophy, TrendingUp, Calendar];
-            const IconComponent = icons[index];
-            return (
-              <button
-                key={tab}
-                onClick={() => setActiveTab(tab)}
-                className={`flex flex-col items-center space-y-1 py-2 px-3 rounded-lg transition-colors ${activeTab === tab ? "text-blue-600 bg-blue-50" : "text-gray-600"
-                  }`}
-              >
-                <IconComponent className="w-5 h-5" />
-                <span className="text-xs font-medium">{tab}</span>
-              </button>
-            );
-          })}
+
+
         </div>
-      </div >
-      <div className="h-20 sm:hidden"></div>
-    </div >
+
+      </div>
+    </div>
   );
 };
+// --- HELPER COMPONENTS ---
+
+const InfoItem = ({ icon: Icon, label, value, isEditing, editInput }) => (
+  <div>
+    <div className="flex items-center gap-2 text-white/50 text-xs font-bold uppercase tracking-wider mb-1">
+      <Icon className="w-3 h-3" /> {label}
+    </div>
+    {isEditing && editInput ? editInput : (
+      <div className="text-white font-bold text-lg truncate">{value || "N/A"}</div>
+    )}
+  </div>
+);
+
+const SocialLink = ({ icon: Icon, label, url, isEditing }) => {
+  if (isEditing) {
+    return (
+      <div className="flex items-center gap-3 bg-[#F7F5F2] p-3 rounded-xl">
+        <Icon className="w-5 h-5 text-gray-400" />
+        <input placeholder={label} className="bg-transparent text-[#1E1E1E] text-sm w-full font-bold outline-none" defaultValue={url} />
+      </div>
+    )
+  }
+
+  if (!url) return null;
+
+  return (
+    <a href={url} target="_blank" rel="noreferrer" className="flex items-center gap-3 p-3 rounded-xl hover:bg-[#F7F5F2] transition-colors group">
+      <div className="bg-[#F7F5F2] p-2 rounded-lg group-hover:bg-white group-hover:shadow-sm transition-all">
+        <Icon className="w-5 h-5 text-[#1E1E1E]" />
+      </div>
+      <span className="font-bold text-sm text-gray-600 group-hover:text-[#1E1E1E]">{label}</span>
+      <ExternalLink className="w-4 h-4 text-gray-300 ml-auto group-hover:text-[#0061FE]" />
+    </a>
+  )
+};
+
+const PaperRocket = ({ className }) => (
+  <svg viewBox="0 0 24 24" fill="none" className={className} xmlns="http://www.w3.org/2000/svg">
+    <path d="M2 12L22 2L15 22L11 13L2 12Z" fill="#FF5018" stroke="#FF5018" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    <path d="M22 2L11 13" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="opacity-50" />
+  </svg>
+);
 
 export default UserProfile;

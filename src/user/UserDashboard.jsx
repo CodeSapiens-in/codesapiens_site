@@ -241,7 +241,9 @@ export default function UserDashboard() {
 
   return (
     <div className="min-h-screen bg-[#F7F5F2] text-[#2B2929] font-sans p-4 sm:p-8 lg:p-12 selection:bg-[#FFC845]">
+
       <TransitionOverlay data={transitionData} onComplete={handleTransitionComplete} />
+
 
       <div className="max-w-[1400px] mx-auto">
 
@@ -291,16 +293,7 @@ export default function UserDashboard() {
                   <h2 className="text-4xl font-bold mb-1 tracking-tight">{userData?.displayName}</h2>
                   <p className="text-white/60 text-lg mb-8 font-mono">{userData?.college}</p>
 
-                  <div className="grid grid-cols-2 gap-8 border-t border-white/20 pt-8">
-                    <div>
-                      <div className="text-[#C2E812] text-5xl font-black tracking-tighter">{userData?.points}</div>
-                      <div className="text-white/60 font-medium uppercase tracking-widest text-sm mt-1">Total Points</div>
-                    </div>
-                    <div>
-                      <div className="text-[#00C6F7] text-5xl font-black tracking-tighter">{meetups.length}</div>
-                      <div className="text-white/60 font-medium uppercase tracking-widest text-sm mt-1">Attended Meetups</div>
-                    </div>
-                  </div>
+
                 </div>
               </>
             )}
