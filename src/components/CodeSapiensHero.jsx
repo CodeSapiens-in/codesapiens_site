@@ -1,17 +1,15 @@
-import React, { useState, useEffect } from 'react';
-import { motion, useScroll, useTransform, useSpring } from 'framer-motion';
+import React, { useState, useEffect, useRef } from 'react';
+import { motion, useScroll, useTransform } from 'framer-motion';
 import { supabase } from '../lib/supabaseClient';
 import { useNavigate } from 'react-router-dom';
 import { ArrowRight, ChevronDown, Menu, X, Github, Linkedin, Youtube, Users, Calendar, Code, Award } from 'lucide-react';
-import { StickyScrollReveal } from './StickyScrollReveal';
 
+// --- Stats Section ---
 const StatsSection = () => {
     const [stats, setStats] = useState({ totalUsers: 0, totalColleges: 0, topColleges: [] });
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        // Use localhost for dev, or relative path if proxied. 
-        // For now hardcoding localhost as per session context.
         fetch('http://localhost:3001/api/public-stats')
             .then(res => res.json())
             .then(data => {
@@ -105,8 +103,8 @@ const StatsSection = () => {
     );
 };
 
+// --- Main Hero Component ---
 const CodeSapiensHero = () => {
-    // Force re-render for StickyScrollReveal update
     const navigate = useNavigate();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [hallOfFameEntries, setHallOfFameEntries] = useState([]);
@@ -127,11 +125,10 @@ const CodeSapiensHero = () => {
     // Scroll Progress
     const { scrollY } = useScroll();
 
-    // Geometric Shape Animation - "Minimize Mathematically"
-    // The shapes will scale down into a singular point/line as if folding
+    // Geometric Shape Animation
     const shapeScale = useTransform(scrollY, [0, 600], [1, 0.2]);
-    const shapeY = useTransform(scrollY, [0, 600], [0, 200]); // Move down slightly
-    const shapeOpacity = useTransform(scrollY, [0, 400], [0.8, 0]); // Fade out eventually
+    const shapeY = useTransform(scrollY, [0, 600], [0, 200]);
+    const shapeOpacity = useTransform(scrollY, [0, 400], [0.8, 0]);
 
     // Content for Sticky Scroll
     const visionContent = [
@@ -139,8 +136,8 @@ const CodeSapiensHero = () => {
             title: "Meetups",
             description: "Offline events and mini-hackathons where you build and launch projects in minutes. Connect with like-minded peers.",
             content: (
-                <div className="h-full w-full bg-[#0061FE] flex items-center justify-center text-white p-10">
-                    <Users size={100} />
+                <div className="h-full w-full bg-[#0061FE] flex items-center justify-center text-white p-0">
+                    <img src="https://res.cloudinary.com/dqudvximt/image/upload/v1765446924/Gemini_Generated_Image_g1g8reg1g8reg1g8_aqqe3e.png" alt="Meetups" className="w-full h-full object-cover" />
                 </div>
             )
         },
@@ -148,8 +145,8 @@ const CodeSapiensHero = () => {
             title: "Hackathons",
             description: "Fun, minimal hackathons to get hands-on experience and win prizes. Push your limits and build something amazing.",
             content: (
-                <div className="h-full w-full bg-[#9B0032] flex items-center justify-center text-white p-10">
-                    <Code size={100} />
+                <div className="h-full w-full bg-[#9B0032] flex items-center justify-center text-white p-0">
+                    <img src="https://res.cloudinary.com/dqudvximt/image/upload/v1765446926/Gemini_Generated_Image_7vm7h67vm7h67vm7_ixfxbu.png" alt="Hackathons" className="w-full h-full object-cover" />
                 </div>
             )
         },
@@ -157,8 +154,8 @@ const CodeSapiensHero = () => {
             title: "Nurturing Talent",
             description: "We help you discover your interests and build a unique profile that stands out. Mentorship from seniors and industry experts.",
             content: (
-                <div className="h-full w-full bg-[#FA5D00] flex items-center justify-center text-white p-10">
-                    <Award size={100} />
+                <div className="h-full w-full bg-[#FA5D00] flex items-center justify-center text-white p-0">
+                    <img src="https://res.cloudinary.com/dqudvximt/image/upload/v1765446901/Gemini_Generated_Image_j2rd2bj2rd2bj2rd_h2pygn.png" alt="Nurturing Talent" className="w-full h-full object-cover" />
                 </div>
             )
         },
@@ -166,14 +163,13 @@ const CodeSapiensHero = () => {
             title: "Curated Sessions",
             description: "Practical skills, code examples, and presentations based on community feedback. Learn what matters.",
             content: (
-                <div className="h-full w-full bg-purple-600 flex items-center justify-center text-white p-10">
-                    <Calendar size={100} />
+                <div className="h-full w-full bg-purple-600 flex items-center justify-center text-white p-0">
+                    <img src="https://res.cloudinary.com/dqudvximt/image/upload/v1765446916/Gemini_Generated_Image_3or3oi3or3oi3or3_htqozy.png" alt="Curated Sessions" className="w-full h-full object-cover" />
                 </div>
             )
         }
     ];
 
-    // Volunteers Data
     const volunteers = [
         { photo: "https://res.cloudinary.com/druvxcll9/image/upload/v1761122516/2ABMHfqOsrpoL3OV-WhatsApp202025-08-312010.33.52_a8a27bbd_vzcgzq_1_bm8zch.jpg", name: "Keerthana M G", link: "https://in.linkedin.com/in/keerthana-m-g-12ba59256" },
         { photo: "https://res.cloudinary.com/druvxcll9/image/upload/v1761122517/iAckgTxMcALuPbEx-IMG-20250112-WA0012_1_fwyhoa_oxegdx.jpg", name: "Mahaveer A", link: "https://www.linkedin.com/in/mahaveer1013" },
@@ -189,7 +185,6 @@ const CodeSapiensHero = () => {
 
     return (
         <div className="bg-[#F7F5F2] text-[#1E1919] min-h-screen font-sans overflow-x-hidden selection:bg-[#0061FE] selection:text-white">
-
             {/* Navigation - Dark Mode for Hero */}
             <nav className="fixed top-0 w-full z-50 mix-blend-difference text-white">
                 <div className="container mx-auto px-6 py-6 flex justify-between items-center">
@@ -197,7 +192,6 @@ const CodeSapiensHero = () => {
                         <img src="https://res.cloudinary.com/dqudvximt/image/upload/v1756797708/WhatsApp_Image_2025-09-02_at_12.45.18_b15791ea_rnlwrz.jpg" alt="CodeSapiens Logo" className="w-10 h-10 rounded-full object-cover" />
                         <span className="text-xl font-bold tracking-tight">CodeSapiens</span>
                     </div>
-
                     <div className="hidden md:flex items-center gap-8 font-medium text-sm">
                         <a href="#vision" className="hover:text-[#0061FE] transition-colors">Vision</a>
                         <a href="#events" className="hover:text-[#0061FE] transition-colors">Events</a>
@@ -207,7 +201,6 @@ const CodeSapiensHero = () => {
                             Get Started
                         </button>
                     </div>
-
                     <button className="md:hidden text-white" onClick={() => setIsMenuOpen(!isMenuOpen)}>
                         {isMenuOpen ? <X /> : <Menu />}
                     </button>
@@ -226,25 +219,19 @@ const CodeSapiensHero = () => {
                 </div>
             )}
 
-            {/* Hero Section - Dark Grid + Geometric Animation */}
+            {/* Hero Section */}
             <section className="relative min-h-screen bg-[#101010] text-white flex items-center overflow-hidden">
-                {/* Grid Background - Static but subtle */}
                 <div className="absolute inset-0 z-0 opacity-20"
                     style={{
                         backgroundImage: 'linear-gradient(#333 1px, transparent 1px), linear-gradient(90deg, #333 1px, transparent 1px)',
                         backgroundSize: '50px 50px'
                     }}>
                 </div>
-
-                {/* Geometric Shapes Animation - Responsive Positioning */}
-                {/* On Mobile: Positioned absolute center/bottom with lower opacity to not block text */}
-                {/* On Desktop: Positioned right side */}
                 <motion.div
                     className="absolute inset-0 md:right-0 md:left-auto md:w-1/2 h-full pointer-events-none z-0 flex items-center justify-center md:justify-end"
                     style={{ scale: shapeScale, y: shapeY, opacity: shapeOpacity }}
                 >
                     <svg viewBox="0 0 800 800" className="w-full h-full md:w-full md:h-full opacity-40 md:opacity-60">
-                        {/* Rhombus Stack */}
                         <motion.path
                             d="M400,200 L600,300 L400,400 L200,300 Z"
                             fill="none" stroke="#0061FE" strokeWidth="1.5"
@@ -266,7 +253,6 @@ const CodeSapiensHero = () => {
                             animate={{ pathLength: 1, opacity: 1 }}
                             transition={{ duration: 2, delay: 1, ease: "easeInOut" }}
                         />
-                        {/* Vertical Connectors */}
                         <motion.line x1="200" y1="300" x2="200" y2="700" stroke="#333" strokeWidth="1" initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 1.5, delay: 1 }} />
                         <motion.line x1="600" y1="300" x2="600" y2="700" stroke="#333" strokeWidth="1" initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 1.5, delay: 1 }} />
                         <motion.line x1="400" y1="400" x2="400" y2="600" stroke="#333" strokeWidth="1" initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 1.5, delay: 1 }} />
@@ -302,8 +288,6 @@ const CodeSapiensHero = () => {
                         </div>
                     </motion.div>
                 </div>
-
-                {/* Scroll Indicator */}
                 <motion.div
                     animate={{ y: [0, 10, 0] }}
                     transition={{ repeat: Infinity, duration: 2 }}
@@ -313,11 +297,11 @@ const CodeSapiensHero = () => {
                 </motion.div>
             </section>
 
-            {/* Scrollytelling / Vision Section */}
-            <section id="vision" className="bg-[#F7F5F2] text-[#1E1919] py-24 md:py-32 relative">
-                {/* Connecting Line from Hero */}
-                <div className="absolute top-0 left-1/2 -translate-x-1/2 h-32 w-px bg-gradient-to-b from-[#101010] to-[#0061FE]"></div>
 
+
+            {/* Vision Section */}
+            <section id="vision" className="bg-[#F7F5F2] text-[#1E1919] py-24 md:py-32 relative">
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 h-32 w-px bg-gradient-to-b from-[#101010] to-[#0061FE]"></div>
                 <div className="container mx-auto px-6">
                     <div className="grid md:grid-cols-2 gap-16 items-start">
                         <div className="sticky top-32">
@@ -340,6 +324,7 @@ const CodeSapiensHero = () => {
                                 </div>
                             </div>
                         </div>
+
                         <div className="relative rounded-2xl overflow-hidden shadow-2xl border border-gray-200">
                             <video
                                 src="https://res.cloudinary.com/dqudvximt/video/upload/v1765443313/66c503d081b2f012369fc5d2_674798e5512046ff64125032_Collaboration_Top-Down_Table-transcode_jgafvj.mp4"
@@ -350,17 +335,37 @@ const CodeSapiensHero = () => {
                                 className="w-full h-full object-cover"
                             />
                         </div>
+
                         <div className="col-span-2 mt-12">
-                            <StickyScrollReveal content={visionContent} />
+                            <div className="space-y-20">
+                                {visionContent.map((item, index) => (
+                                    <motion.div
+                                        key={index}
+                                        initial={{ opacity: 0, y: 20 }}
+                                        whileInView={{ opacity: 1, y: 0 }}
+                                        viewport={{ once: true }}
+                                        transition={{ delay: index * 0.1 }}
+                                        className="flex flex-col md:flex-row gap-10 items-center"
+                                    >
+                                        <div className="flex-1">
+                                            <h3 className="text-3xl font-bold mb-4 text-[#1E1919]">{item.title}</h3>
+                                            <p className="text-lg text-gray-600 leading-relaxed">{item.description}</p>
+                                        </div>
+                                        <div className="flex-1 h-64 w-full rounded-lg overflow-hidden shadow-lg transform hover:scale-105 transition-transform duration-300">
+                                            {item.content}
+                                        </div>
+                                    </motion.div>
+                                ))}
+                            </div>
                         </div>
                     </div>
                 </div>
             </section>
 
-            {/* Stats Section - Animated & Cool */}
+            {/* Stats Section */}
             <StatsSection />
 
-            {/* Events Section - Dark Mode Contrast */}
+            {/* Events Section */}
             <section id="events" className="py-24 md:py-32 bg-[#1E1919] text-[#F7F5F2]">
                 <div className="container mx-auto px-6">
                     <div className="flex flex-col md:flex-row justify-between items-end mb-16">
@@ -388,7 +393,7 @@ const CodeSapiensHero = () => {
                         ></iframe>
                     </div>
 
-                    {/* Past Events Gallery - Masonry Style */}
+                    {/* Past Events Gallery */}
                     <div className="flex items-center justify-between mb-12">
                         <h3 className="text-3xl font-bold">Community Moments</h3>
                         <div className="flex gap-2">
@@ -397,31 +402,37 @@ const CodeSapiensHero = () => {
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
                         {communityPhotos.slice(0, 6).map((photo, i) => (
                             <motion.div
                                 key={photo.id}
-                                initial={{ opacity: 0, rotate: -2 }}
-                                whileInView={{ opacity: 1, rotate: (i % 2 === 0 ? 2 : -2) }}
-                                transition={{ delay: i * 0.1 }}
-                                className="relative group cursor-pointer"
-                                style={{ transform: `rotate(${i % 2 === 0 ? 2 : -2}deg)` }}
+                                initial={{ opacity: 0, rotate: i % 2 === 0 ? 3 : -3, scale: 0.9 }}
+                                whileInView={{ opacity: 1, rotate: i % 2 === 0 ? 3 : -3, scale: 1 }}
+                                whileHover={{
+                                    scale: 1.05,
+                                    rotate: 0,
+                                    zIndex: 50,
+                                    transition: { duration: 0.2 }
+                                }}
+                                viewport={{ once: true, margin: "-50px" }}
+                                transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                                className="relative cursor-pointer"
                             >
                                 {/* Sticky Note Card */}
-                                <div className="bg-[#FFFBEA] border-2 border-[#D4A574] shadow-lg p-3 rounded-sm transform hover:scale-105 hover:rotate-0 transition-all duration-300 relative">
+                                <div className="bg-[#FFFBEA] border border-[#eaddc5] shadow-xl p-4 pb-8 rounded-sm relative">
                                     {/* Tape Effects */}
                                     <div className="absolute -top-3 -left-3 w-16 h-6 bg-gradient-to-b from-amber-200/80 to-amber-300/60 rounded-sm shadow-sm z-20" style={{ transform: 'rotate(-45deg)' }}></div>
                                     <div className="absolute -bottom-3 -right-3 w-16 h-6 bg-gradient-to-b from-amber-200/80 to-amber-300/60 rounded-sm shadow-sm z-20" style={{ transform: 'rotate(-45deg)' }}></div>
 
                                     {/* Photo */}
-                                    <div className="aspect-[4/3] overflow-hidden rounded-sm mb-3 border border-[#D4A574]/50 relative z-10">
+                                    <div className="aspect-[4/3] overflow-hidden rounded-sm mb-4 border-4 border-white shadow-inner relative z-10 bg-gray-100">
                                         <img src={photo.image_url} alt={photo.title} className="w-full h-full object-cover" />
                                     </div>
 
-                                    {/* Info - Always Visible */}
-                                    <div className="text-[#1E1919] relative z-10">
-                                        <p className="font-bold text-lg mb-1" style={{ fontFamily: 'Georgia, serif' }}>{photo.title}</p>
-                                        <p className="text-sm text-gray-600">{photo.description || photo.date}</p>
+                                    {/* Info - Handwritten Font Style */}
+                                    <div className="text-[#1E1919] relative z-10 text-center">
+                                        <p className="font-bold text-xl mb-1 text-gray-800" style={{ fontFamily: 'Georgia, serif' }}>{photo.title}</p>
+                                        <p className="text-sm text-gray-500 font-medium italic">{photo.description || photo.date}</p>
                                     </div>
                                 </div>
                             </motion.div>
@@ -430,7 +441,7 @@ const CodeSapiensHero = () => {
                 </div>
             </section>
 
-            {/* Hall of Fame - Big Bold Typography */}
+            {/* Hall of Fame */}
             <section className="py-32 bg-[#0061FE] text-white overflow-hidden relative">
                 <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(circle, #fff 1px, transparent 1px)', backgroundSize: '30px 30px' }}></div>
                 <div className="container mx-auto px-6 relative z-10">
@@ -481,7 +492,6 @@ const CodeSapiensHero = () => {
                             <p className="text-[#FA5D00] text-sm font-bold uppercase tracking-widest mb-3">Founder</p>
                             <a href="https://www.linkedin.com/in/thiyagab/" target="_blank" rel="noreferrer" className="text-gray-400 hover:text-[#0061FE] transition-colors"><Linkedin size={20} /></a>
                         </div>
-
                         {volunteers.map((vol, i) => (
                             <motion.div
                                 key={i}
@@ -524,7 +534,6 @@ const CodeSapiensHero = () => {
                                 <a href="https://discord.gg/codesapiens" className="text-gray-400 hover:text-white transition-colors"><Users size={20} /></a>
                             </div>
                         </div>
-
                         <div className="grid grid-cols-2 gap-16">
                             <div>
                                 <h4 className="text-white font-bold mb-6">Community</h4>
@@ -545,7 +554,6 @@ const CodeSapiensHero = () => {
                             </div>
                         </div>
                     </div>
-
                     <div className="mt-16 pt-8 border-t border-gray-900 flex flex-col md:flex-row justify-between items-center text-xs text-gray-600">
                         <p>© 2025 CodeSapiens Community. All rights reserved.</p>
                         <p>Designed & Built by Students.</p>
