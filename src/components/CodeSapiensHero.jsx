@@ -3,6 +3,7 @@ import { motion, useScroll, useTransform } from 'framer-motion';
 import { supabase } from '../lib/supabaseClient';
 import { useNavigate } from 'react-router-dom';
 import { ArrowRight, ChevronDown, Menu, X, Github, Linkedin, Youtube, Users, Calendar, Code, Award } from 'lucide-react';
+import { BACKEND_URL } from '../config';
 
 // --- Stats Section ---
 const StatsSection = () => {
@@ -10,7 +11,7 @@ const StatsSection = () => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        fetch('http://localhost:3001/api/public-stats')
+        fetch(`${BACKEND_URL}/api/public-stats`)
             .then(res => res.json())
             .then(data => {
                 if (data.success) {
@@ -75,25 +76,32 @@ const StatsSection = () => {
                             <Code className="text-[#0061FE]" /> Top Active Colleges
                         </h4>
                         <div className="space-y-4">
-                            {stats.topColleges.length > 0 ? (
-                                stats.topColleges.map((college, index) => (
-                                    <div key={index} className="relative">
-                                        <div className="flex justify-between text-sm mb-1">
-                                            <span className="font-medium text-gray-300 truncate w-3/4">{college.name}</span>
-                                            <span className="text-[#0061FE] font-bold">{college.count}</span>
-                                        </div>
-                                        <div className="h-2 bg-gray-800 rounded-full overflow-hidden">
-                                            <motion.div
-                                                initial={{ width: 0 }}
-                                                whileInView={{ width: `${(college.count / stats.topColleges[0].count) * 100}%` }}
-                                                transition={{ duration: 1, delay: index * 0.1 }}
-                                                className="h-full bg-gradient-to-r from-[#0061FE] to-[#00C6F7] rounded-full"
-                                            />
-                                        </div>
-                                    </div>
-                                ))
-                            ) : (
+                            {loading ? (
                                 <div className="text-center text-gray-500 py-10">Loading stats...</div>
+                            ) : stats.topColleges.filter(c => c.name && c.name !== "Not specified").length > 0 ? (
+                                stats.topColleges
+                                    .filter(c => c.name && c.name !== "Not specified")
+                                    .map((college, index) => (
+                                        <div key={index} className="relative">
+                                            <div className="flex justify-between text-sm mb-1">
+                                                <span className="font-medium text-gray-300 truncate w-3/4">{college.name}</span>
+                                                <span className="text-[#0061FE] font-bold">{college.count}</span>
+                                            </div>
+                                            <div className="h-2 bg-gray-800 rounded-full overflow-hidden">
+                                                <motion.div
+                                                    initial={{ width: 0 }}
+                                                    whileInView={{ width: `${(college.count / stats.topColleges[0].count) * 100}%` }}
+                                                    transition={{ duration: 1, delay: index * 0.1 }}
+                                                    className="h-full bg-gradient-to-r from-[#0061FE] to-[#00C6F7] rounded-full"
+                                                />
+                                            </div>
+                                        </div>
+                                    ))
+                            ) : (
+                                <div className="text-center text-gray-500 py-10">
+                                    <p>Stats currently unavailable</p>
+                                    <p className="text-xs mt-2">Backend: {BACKEND_URL}</p>
+                                </div>
                             )}
                         </div>
                     </div>
@@ -266,8 +274,8 @@ const CodeSapiensHero = () => {
                         transition={{ duration: 0.8, delay: 0.2 }}
                         className="max-w-4xl"
                     >
-                        <h1 className="text-6xl md:text-8xl lg:text-9xl font-bold leading-[1] tracking-tighter mb-8">
-                            Code<span className="text-[#0061FE]">Sapiens</span>.
+                        <h1 className="text-6xl md:text-8xl lg:text-9xl font-extrabold leading-[1] tracking-tighter mb-8 font-archivo-black">
+                            CodeSapiens<span className="text-[#0061FE]">.</span>
                         </h1>
                         <p className="text-xl md:text-2xl text-gray-400 max-w-3xl leading-relaxed mb-12 font-light">
                             The Biggest Student-Run Tech Community in TN.<br />
@@ -304,7 +312,7 @@ const CodeSapiensHero = () => {
                 <div className="absolute top-0 left-1/2 -translate-x-1/2 h-32 w-px bg-gradient-to-b from-[#101010] to-[#0061FE]"></div>
                 <div className="container mx-auto px-6">
                     <div className="grid md:grid-cols-2 gap-16 items-start">
-                        <div className="sticky top-32">
+                        <div className="relative md:sticky md:top-32">
                             <span className="text-[#0061FE] font-bold tracking-widest uppercase text-sm mb-4 block">Our Vision</span>
                             <h2 className="text-4xl md:text-6xl font-bold mb-8 leading-tight">
                                 Not just a club.<br />
@@ -325,14 +333,14 @@ const CodeSapiensHero = () => {
                             </div>
                         </div>
 
-                        <div className="relative rounded-2xl overflow-hidden shadow-2xl border border-gray-200">
+                        <div className="relative h-64 md:h-96 w-full rounded-lg overflow-hidden shadow-lg border border-gray-200">
                             <video
                                 src="https://res.cloudinary.com/dqudvximt/video/upload/v1765443313/66c503d081b2f012369fc5d2_674798e5512046ff64125032_Collaboration_Top-Down_Table-transcode_jgafvj.mp4"
                                 autoPlay
                                 loop
                                 muted
                                 playsInline
-                                className="w-full h-full object-cover"
+                                className="absolute inset-0 w-full h-full object-cover"
                             />
                         </div>
 
@@ -515,13 +523,23 @@ const CodeSapiensHero = () => {
                 </div>
             </section>
 
+            {/* Tagline Section */}
+            <section className="py-20 bg-black flex items-center justify-center">
+                <div className="container mx-auto px-6 text-center">
+                    <h2 className="text-5xl md:text-7xl lg:text-8xl font-black text-white tracking-tighter uppercase leading-none">
+                        Building Community <br />
+                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#0061FE] to-[#00C6F7]">Since 2023</span>
+                    </h2>
+                </div>
+            </section>
+
             {/* Footer */}
             <footer className="bg-[#101010] text-gray-400 py-16 border-t border-gray-900">
                 <div className="container mx-auto px-6">
                     <div className="flex flex-col md:flex-row justify-between items-start gap-12">
                         <div className="max-w-sm">
                             <div className="flex items-center gap-2 mb-6">
-                                <div className="w-6 h-6 bg-[#0061FE] rounded-sm"></div>
+                                <img src="https://res.cloudinary.com/druvxcll9/image/upload/v1761122530/WhatsApp_Image_2025-09-02_at_12.45.18_b15791ea_rnlwrz_3_r4kp2u.jpg" alt="CodeSapiens Logo" className="w-8 h-8 rounded-full object-cover" />
                                 <span className="text-2xl font-bold text-white tracking-tight">CodeSapiens</span>
                             </div>
                             <p className="text-gray-500 leading-relaxed mb-8">
@@ -534,7 +552,7 @@ const CodeSapiensHero = () => {
                                 <a href="https://discord.gg/codesapiens" className="text-gray-400 hover:text-white transition-colors"><Users size={20} /></a>
                             </div>
                         </div>
-                        <div className="grid grid-cols-2 gap-16">
+                        <div className="grid grid-cols-1 gap-16">
                             <div>
                                 <h4 className="text-white font-bold mb-6">Community</h4>
                                 <ul className="space-y-4 text-sm">
@@ -542,14 +560,6 @@ const CodeSapiensHero = () => {
                                     <li><a href="#events" className="hover:text-[#0061FE] transition-colors">Events</a></li>
                                     <li><a href="#community" className="hover:text-[#0061FE] transition-colors">Team</a></li>
                                     <li><a href="#" className="hover:text-[#0061FE] transition-colors">Join Discord</a></li>
-                                </ul>
-                            </div>
-                            <div>
-                                <h4 className="text-white font-bold mb-6">Legal</h4>
-                                <ul className="space-y-4 text-sm">
-                                    <li><a href="#" className="hover:text-[#0061FE] transition-colors">Privacy Policy</a></li>
-                                    <li><a href="#" className="hover:text-[#0061FE] transition-colors">Terms of Service</a></li>
-                                    <li><a href="#" className="hover:text-[#0061FE] transition-colors">Code of Conduct</a></li>
                                 </ul>
                             </div>
                         </div>

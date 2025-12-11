@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import { Upload, Trash2, Save, Loader2, Image as ImageIcon, CheckCircle, XCircle } from 'lucide-react';
 import AdminLayout from '../components/AdminLayout';
+import { BACKEND_URL } from '../config';
 
 const AdminHallOfFame = () => {
     const [entries, setEntries] = useState([]);
@@ -59,7 +60,7 @@ const AdminHallOfFame = () => {
     };
 
     // Backend API URL for Hall of Fame uploads
-    const BACKEND_URL = 'http://localhost:3001';
+    // const BACKEND_URL = 'http://localhost:3001';
 
     const handleSubmit = async (e) => {
         e.preventDefault();

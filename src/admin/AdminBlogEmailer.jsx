@@ -5,8 +5,9 @@ import {
 } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
 import { useNavigate, useParams } from 'react-router-dom';
+import { BACKEND_URL } from '../config';
 
-const API_BASE_URL = 'http://localhost:3001';
+const API_BASE_URL = BACKEND_URL;
 
 const AdminBlogEmailer = () => {
     const { id } = useParams();

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import { Upload, Trash2, Loader2, Image as ImageIcon, CheckCircle, XCircle, Users, Calendar, ArrowUp, ArrowDown } from 'lucide-react';
 import AdminLayout from '../components/AdminLayout';
+import { BACKEND_URL } from '../config';
 
 const AdminCommunityPhotos = () => {
     const [entries, setEntries] = useState([]);
@@ -20,7 +21,7 @@ const AdminCommunityPhotos = () => {
     const [previewUrl, setPreviewUrl] = useState(null);
 
     // Backend API URL
-    const BACKEND_URL = 'http://localhost:3001';
+    // const BACKEND_URL = 'http://localhost:3001';
 
     useEffect(() => {
         fetchEntries();
