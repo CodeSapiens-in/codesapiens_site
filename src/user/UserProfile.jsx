@@ -34,6 +34,7 @@ import {
   Briefcase,
   MapPin,
 } from "lucide-react";
+import { toast } from 'react-hot-toast';
 import { supabase } from "../lib/supabaseClient";
 import { useUser } from '@supabase/auth-helpers-react';
 import skillsList from "../assets/skills.json";
@@ -659,6 +660,7 @@ const UserProfile = () => {
     if (!username) {
       setUsernameError("Username is required.");
       setSaveError("Username is required.");
+      toast.error("Username is required");
       return;
     }
 
@@ -741,6 +743,7 @@ const UserProfile = () => {
       setCollegeError(null);
       setLastSelectedCollege(finalCollege);
       setUsernameError(null);
+      toast.success("Profile updated successfully!");
     } catch (err) {
       console.error("[Frontend] : Save error:", err.message);
       setSaveError(err.message || "Failed to save profile. Please try again.");
@@ -1098,7 +1101,7 @@ const UserProfile = () => {
                 </div>
 
                 {/* Personal Information */}
-                <div className="bg-white rounded-3xl p-8 border border-gray-100 shadow-sm">
+                <div className="bg-white rounded-3xl p-6 md:p-8 border border-gray-100 shadow-sm">
                   <h3 className="text-xl font-black text-[#1E1E1E] mb-6">Personal Details</h3>
                   <div className="space-y-4">
                     {personalInfo.map((info, index) => (
@@ -1163,7 +1166,7 @@ const UserProfile = () => {
                 </div>
 
                 {/* Recent Activity */}
-                <div className="bg-white rounded-3xl p-8 border border-gray-100 shadow-sm">
+                <div className="bg-white rounded-3xl p-6 md:p-8 border border-gray-100 shadow-sm">
                   <h3 className="text-xl font-black text-[#1E1E1E] mb-6">Recent Activity</h3>
                   {userData.attendedMeetups.length > 0 ? (
                     <div className="space-y-6 relative before:absolute before:left-4 before:top-2 before:bottom-2 before:w-0.5 before:bg-gray-100">
@@ -1184,7 +1187,7 @@ const UserProfile = () => {
             )}
 
             {activeTab === "Skills" && (
-              <div className="bg-white rounded-3xl p-8 border border-gray-100 shadow-sm">
+              <div className="bg-white rounded-3xl p-6 md:p-8 border border-gray-100 shadow-sm">
                 <div className="flex justify-between items-center mb-8">
                   <h3 className="text-2xl font-black">Skills & Expertise</h3>
                   <div className="flex gap-2">
@@ -1209,7 +1212,7 @@ const UserProfile = () => {
             )}
 
             {activeTab === "Attended Meetups" && (
-              <div className="bg-white rounded-3xl p-8 border border-gray-100 shadow-sm">
+              <div className="bg-white rounded-3xl p-6 md:p-8 border border-gray-100 shadow-sm">
                 <h3 className="text-xl font-black text-[#1E1E1E] mb-6">Attended Meetups</h3>
                 {userData.attendedMeetups && userData.attendedMeetups.length > 0 ? (
                   <div className="grid grid-cols-1 gap-4">

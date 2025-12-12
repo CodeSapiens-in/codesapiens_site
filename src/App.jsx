@@ -12,6 +12,7 @@ import { AnimatePresence } from 'framer-motion';
 import { Loader2 } from 'lucide-react';
 import PageTransition from './components/PageTransition';
 import AdminLayout from './components/AdminLayout';
+import { Toaster } from 'react-hot-toast';
 
 
 import Hero from './components/ui/Hero';
@@ -165,6 +166,7 @@ function Root() {
 export default function App() {
   return (
     <SessionContextProvider supabaseClient={supabase}>
+      <Toaster position="top-center" />
       <Root />
     </SessionContextProvider>
   );

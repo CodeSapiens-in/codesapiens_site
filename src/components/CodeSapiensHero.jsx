@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabaseClient';
 import { useNavigate } from 'react-router-dom';
 import { ArrowRight, ChevronDown, Menu, X, Github, Linkedin, Youtube, Users, Calendar, Code, Award } from 'lucide-react';
 import { BACKEND_URL } from '../config';
+import LandingPopup from './LandingPopup';
 
 // --- Stats Section ---
 const StatsSection = () => {
@@ -194,7 +195,7 @@ const CodeSapiensHero = () => {
     return (
         <div className="bg-[#F7F5F2] text-[#1E1919] min-h-screen font-sans overflow-x-hidden selection:bg-[#0061FE] selection:text-white">
             {/* Navigation - Dark Mode for Hero */}
-            <nav className="fixed top-0 w-full z-50 mix-blend-difference text-white">
+            <nav className="fixed top-0 w-full z-50 bg-[#101010]/90 backdrop-blur-md text-white border-b border-white/10">
                 <div className="container mx-auto px-6 py-6 flex justify-between items-center">
                     <div className="flex items-center gap-2">
                         <img src="https://res.cloudinary.com/dqudvximt/image/upload/v1756797708/WhatsApp_Image_2025-09-02_at_12.45.18_b15791ea_rnlwrz.jpg" alt="CodeSapiens Logo" className="w-10 h-10 rounded-full object-cover" />
@@ -570,6 +571,7 @@ const CodeSapiensHero = () => {
                     </div>
                 </div>
             </footer>
+            <LandingPopup />
         </div>
     );
 };
