@@ -179,6 +179,8 @@ npm --version   # Should be >= 10
 
 ### 1. Clone the Repository
 
+> **Note:** For a detailed step-by-step setup guide, including database initialization, please see [SETUP.md](./setup.md).
+
 ```bash
 git clone https://github.com/jayasurya261/Codesapiens_management_website.git
 cd Codesapiens_management_website
@@ -336,6 +338,7 @@ We welcome contributions from the community!
 
 - Follow [Conventional Commits](https://www.conventionalcommits.org/) for commit messages
 - Update documentation as needed
+- **Important:** If you modify the database schema, you **MUST** update `seed.sql`.
 - Be respectful and constructive in discussions
 
 ---
