@@ -1,65 +1,119 @@
 import React, { useState, useEffect } from 'react';
-import { Users, Search, BarChart3, Loader2, X, Award, Image, MessageSquare } from 'lucide-react';
+import {
+  Users,
+  BarChart3,
+  Loader2,
+  Award,
+  Image,
+  MessageSquare,
+  Zap,
+  Clock,
+  ArrowRight,
+  Activity,
+  Smile
+} from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
 import { useNavigate } from 'react-router-dom';
+import AdminLayout from '../components/AdminLayout';
+import { motion } from 'framer-motion';
+
+// --- CUSTOM HAND-DRAWN DOODLES (ANIMATED) ---
+const DrawVariant = {
+  hidden: { pathLength: 0, opacity: 0 },
+  visible: {
+    pathLength: 1,
+    opacity: 1,
+    transition: { duration: 1.5, ease: "easeInOut" }
+  }
+};
+
+const HandDrawnCrown = () => (
+  <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="#C2E812" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="transform -rotate-12">
+    <motion.path
+      d="M2 4l3 12h14l3-12-6 7-4-7-4 7-6-7zm3 16h14"
+      variants={DrawVariant} initial="hidden" animate="visible"
+    />
+  </svg>
+);
+
+const LightningBolt = () => (
+  <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="#FF5018" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="transform rotate-12">
+    <motion.path
+      d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"
+      animate={{ scale: [1, 1.1, 1], rotate: [12, 15, 12] }}
+      transition={{ duration: 1, repeat: Infinity, repeatType: "reverse" }}
+    />
+  </svg>
+);
+
+const MessyOval = ({ width = 140, height = 65, color = "#0061FE" }) => (
+  <svg width={width} height={height} viewBox="0 0 140 65" className="absolute -z-10 top-1/2 left-1/2 -translate-x-1/2 -translate-y-[45%] pointer-events-none">
+    <motion.path
+      d="M5,32.5 C5,10 35,5 70,5 C105,5 135,10 135,32.5 C135,55 105,60 70,60 C35,60 5,55 5,32.5 Z"
+      fill="none" stroke={color} strokeWidth="4"
+      variants={DrawVariant} initial="hidden" animate="visible"
+    />
+  </svg>
+);
+
+const SquiggleArrow = () => (
+  <svg width="60" height="60" viewBox="0 0 60 60" fill="none" stroke="#C2E812" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+    <motion.path
+      d="M10,50 Q30,10 50,30 T55,10"
+      variants={DrawVariant} initial="hidden" animate="visible"
+    />
+    <motion.path d="M45,5 L55,10 L50,20" variants={DrawVariant} initial="hidden" animate="visible" />
+  </svg>
+);
+
+const HandDrawnHeart = () => (
+  <svg width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="#D83B01" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="transform -rotate-6">
+    <motion.path
+      d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"
+      animate={{ scale: [1, 1.05, 1] }}
+      transition={{ duration: 2, repeat: Infinity, repeatType: "reverse" }}
+    />
+  </svg>
+);
+
+const FrameworkGrid = () => (
+  <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden h-full mix-blend-overlay opacity-20">
+    <div className="absolute top-0 left-0 w-full h-full bg-[url('https://www.transparenttextures.com/patterns/graphy.png')]"></div>
+  </div>
+);
 
 const Dashboard = () => {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filter, setFilter] = useState('');
   const [profile, setProfile] = useState(null);
   const [students, setStudents] = useState([]);
-  const [events, setEvents] = useState([]);
   const [stats, setStats] = useState({
     totalStudents: 0
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [authChecking, setAuthChecking] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
     const fetchAdminData = async () => {
       try {
-        setAuthChecking(true);
         setLoading(true);
         setError(null);
 
-        // Get the current authenticated user
+        const { data: { user }, error: authError } = await supabase.auth.getUser();
 
-        const {
-          data: { user },
-          error: authError,
-        } = await supabase.auth.getUser();
-        if (authError) {
-          console.error('Auth error:', authError);
+        if (authError || !user) {
           setIsAuthenticated(false);
-          setAuthChecking(false);
+          setLoading(false);
           return;
         }
 
-        if (!user) {
-          setIsAuthenticated(false);
-          setAuthChecking(false);
-          return;
-        }
-
-        // Fetch admin profile
         const { data: profileData, error: profileError } = await supabase
           .from('users')
           .select('*')
           .eq('uid', user.id)
           .single();
 
-        if (profileError) {
-          console.error('Error fetching profile:', profileError);
-          setError('Failed to fetch admin profile');
-          return;
-        }
-
-        // Check if user is admin
-        if (profileData?.role !== 'admin') {
-          // Redirect non-admin users to student dashboard
+        if (profileError || profileData?.role !== 'admin') {
           navigate('/');
           return;
         }
@@ -67,23 +121,14 @@ const Dashboard = () => {
         setProfile(profileData);
         setIsAuthenticated(true);
 
-        // Fetch all students data
         const { data: studentsData, error: studentsError } = await supabase
           .from('users')
           .select('*')
           .eq('role', 'student')
           .order('created_at', { ascending: false });
 
-        if (studentsError) {
-          console.error('Error fetching students:', studentsError);
-          setError('Failed to fetch students data');
-          return;
-        }
+        if (studentsError) throw studentsError;
 
-        // Skip events fetching for now since table doesn't exist
-        setEvents([]); // Set empty array for now
-
-        // Transform students data
         const transformedStudents = studentsData?.map((student, index) => ({
           id: student.uid,
           name: student.display_name || student.email?.split('@')[0] || `Student ${index + 1}`,
@@ -91,43 +136,26 @@ const Dashboard = () => {
           avatar: student.display_name?.charAt(0).toUpperCase() || student.email?.charAt(0).toUpperCase() || 'S',
           status: student.admin_approved ? 'active' : 'inactive',
           lastSeen: getRelativeTime(student.updated_at || student.created_at),
-          points: student.points || 0,
-          sessions: student.sessions_attended || 0,
-          badges: student.badges_earned || 0,
-          college: student.college,
-          adminApproved: student.admin_approved || false,
-          emailVerified: student.email_verified || false,
-          phoneVerified: student.phone_verified || false,
-          skills: student.skills || [],
-          bio: student.bio || '',
-          volunteeringHours: student.volunteering_hours || 0
+          role: student.role,
+          college: student.college
         })) || [];
 
         setStudents(transformedStudents);
-
-        // Calculate stats from actual data
-        const totalStudents = transformedStudents.length;
-
-        setStats({
-          totalStudents
-        });
+        setStats({ totalStudents: transformedStudents.length });
 
       } catch (err) {
+        console.error('Error fetching admin data:', err);
         setError(err.message);
-        console.error('Error in fetchAdminData:', err);
       } finally {
         setLoading(false);
-        setAuthChecking(false);
       }
     };
 
     fetchAdminData();
-  }, []);
+  }, [navigate]);
 
-  // Helper function to get relative time
   const getRelativeTime = (dateString) => {
     if (!dateString) return 'Never';
-
     const now = new Date();
     const date = new Date(dateString);
     const diffInSeconds = Math.floor((now - date) / 1000);
@@ -135,346 +163,234 @@ const Dashboard = () => {
     if (diffInSeconds < 60) return `${diffInSeconds}s ago`;
     if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`;
     if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h ago`;
-    if (diffInSeconds < 604800) return `${Math.floor(diffInSeconds / 86400)}d ago`;
-    return `${Math.floor(diffInSeconds / 604800)}w ago`;
+    return `${Math.floor(diffInSeconds / 86400)}d ago`;
   };
-
-  // Handle add student
-  const handleAddStudent = () => {
-    alert('Add Student functionality would be implemented here');
-  };
-
-  // Handle send notice
-  const handleSendNotice = () => {
-    alert('Send Notice functionality would be implemented here');
-  };
-
-  // Filter students based on search and filter
-  const filteredStudents = students.filter(student => {
-    const matchesSearch = student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      student.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (student.college && student.college.toLowerCase().includes(searchTerm.toLowerCase()));
-    const matchesFilter = filter === '' || student.status === filter;
-    return matchesSearch && matchesFilter;
-  });
 
   const quickActions = [
     {
+      icon: Users,
+      label: "MANAGE USERS",
+      desc: "Control the fleet",
+      color: "#0061FE",
+      onClick: () => navigate('/user-list')
+    },
+    {
       icon: BarChart3,
-      label: "View Analytics",
-      shortLabel: "Analytics",
-      color: "bg-purple-600 hover:bg-purple-700",
+      label: "DATA & INSIGHTS",
+      desc: "Growth metrics",
+      color: "#C2E812",
       onClick: () => navigate('/analytics')
     },
     {
       icon: Award,
-      label: "Hall of Fame",
-      shortLabel: "Hall of Fame",
-      color: "bg-yellow-500 hover:bg-yellow-600",
+      label: "HALL OF FAME",
+      desc: "Top performers",
+      color: "#FF5018",
       onClick: () => navigate('/admin/hall-of-fame')
     },
     {
       icon: Image,
-      label: "Community Photos",
-      shortLabel: "Photos",
-      color: "bg-teal-600 hover:bg-teal-700",
-      color: "bg-teal-600 hover:bg-teal-700",
+      label: "GALLERY",
+      desc: "Community shots",
+      color: "#F7F5F2",
+      textColor: "text-[#1E1E1E]",
       onClick: () => navigate('/admin/community-photos')
     },
     {
       icon: MessageSquare,
-      label: "User Feedback",
-      shortLabel: "Feedback",
-      color: "bg-pink-600 hover:bg-pink-700",
+      label: "FEEDBACK",
+      desc: "User voices",
+      color: "#1E1E1E",
+      textColor: "text-white",
       onClick: () => navigate('/admin/feedback')
     }
   ];
 
-  const statsCards = [
-    {
-      title: "Total Students",
-      value: stats.totalStudents.toString(),
-      change: "+12%",
-      icon: Users,
-      color: "bg-blue-100",
-      iconColor: "text-blue-600"
-    }
-  ];
-
-  // Auth checking state
-  if (authChecking) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <Loader2 className="w-12 h-12 animate-spin text-blue-500 mx-auto mb-4" />
-          <p className="text-gray-600">Loading...</p>
-        </div>
-      </div>
-    );
-  }
-
-  // Unauthenticated state
-  if (!isAuthenticated) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <X className="w-16 h-16 text-red-500 mx-auto mb-4" />
-          <h2 className="text-xl font-semibold text-gray-900 mb-2">Authentication Required</h2>
-          <p className="text-gray-600 mb-4">Please log in to access the admin dashboard.</p>
-          <button
-            onClick={() => window.location.href = '/login'}
-            className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors duration-200"
-          >
-            Go to Login
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  // Loading state
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50">
-        <div className="flex items-center justify-center min-h-screen">
-          <div className="text-center">
-            <Loader2 className="w-12 h-12 animate-spin text-blue-500 mx-auto mb-4" />
-            <p className="text-gray-600">Loading admin dashboard...</p>
-          </div>
-        </div>
+      <div className="min-h-screen flex items-center justify-center bg-[#1E1E1E]">
+        <Loader2 className="w-16 h-16 animate-spin text-[#C2E812]" />
       </div>
     );
   }
 
-  // Error state
-  if (error) {
-    return (
-      <div className="min-h-screen bg-gray-50">
-        <div className="flex items-center justify-center min-h-screen">
-          <div className="text-center">
-            <X className="w-16 h-16 text-red-500 mx-auto mb-4" />
-            <h2 className="text-xl font-semibold text-gray-900 mb-2">Error Loading Dashboard</h2>
-            <p className="text-gray-600 mb-4">{error}</p>
-            <button
-              onClick={() => window.location.reload()}
-              className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors duration-200"
-            >
-              Try Again
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  if (!isAuthenticated) return null;
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Main Content */}
-      <main className="p-3 sm:p-4 lg:p-6">
-        {/* Welcome Section */}
-        <div className="mb-6 sm:mb-8">
-          <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 mb-2 flex flex-col sm:flex-row sm:items-center">
-            <span>Welcome, {profile?.display_name || 'Administrator'}!</span>
-            <span className="text-2xl sm:ml-2">👋</span>
-          </h2>
-          <p className="text-gray-600 text-sm sm:text-base">Manage your student community, events, and track engagement metrics.</p>
-          {profile && (
-            <div className="mt-2 text-sm text-gray-500">
-              {profile.college} • {profile.email}
-            </div>
-          )}
-        </div>
+    <AdminLayout>
+      <div className="min-h-screen bg-[#F7F5F2] font-sans text-[#1E1E1E] selection:bg-[#C2E812] selection:text-black overflow-x-hidden relative p-4 md:p-8">
+        <FrameworkGrid />
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6 mb-6 sm:mb-8">
-          {statsCards.map((stat, index) => {
-            const IconComponent = stat.icon;
-            return (
-              <div key={index} className="bg-white rounded-lg p-3 sm:p-4 lg:p-6 shadow-sm border hover:shadow-md transition-shadow">
-                <div className="flex flex-col space-y-2 lg:flex-row lg:items-center lg:justify-between lg:space-y-0">
-                  <div className="flex-1">
-                    <p className="text-xs sm:text-sm font-medium text-gray-600 mb-1 leading-tight">{stat.title}</p>
-                    <div className="flex items-center space-x-2">
-                      <p className="text-lg sm:text-xl lg:text-3xl font-bold text-gray-900">{stat.value}</p>
-                      <span className="text-xs text-green-600 font-medium hidden sm:inline">{stat.change}</span>
-                    </div>
-                  </div>
-                  <div className={`p-2 lg:p-3 rounded-lg ${stat.color} self-end lg:self-auto`}>
-                    <IconComponent className={`w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 ${stat.iconColor}`} />
-                  </div>
-                </div>
+        {/* --- HEADER SECTION --- */}
+        <div className="relative mb-20 mt-12">
+          {/* Floating Doodles */}
+          <motion.div className="absolute -top-12 left-0 z-20" animate={{ rotate: [-5, 5, -5] }} transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}>
+            <HandDrawnCrown />
+          </motion.div>
+          <motion.div className="absolute top-10 right-10 md:right-32 z-20" animate={{ y: [0, -15, 0] }} transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}>
+            <LightningBolt />
+          </motion.div>
+
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }}>
+            <div className="flex items-center gap-4 mb-4">
+              <div className="bg-[#1E1E1E] text-[#C2E812] px-4 py-1.5 font-black uppercase tracking-widest text-sm transform -rotate-2">
+                Admin Panel
               </div>
-            );
-          })}
-        </div>
-
-        <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 sm:gap-6">
-          {/* Student Management */}
-          <div className="xl:col-span-2 order-2 xl:order-1">
-            <div className="bg-white rounded-lg shadow-sm border">
-              <div className="p-4 sm:p-6 border-b">
-                <div className="flex flex-col space-y-4 sm:space-y-0 sm:flex-row sm:items-center sm:justify-between mb-4">
-                  <div className="flex items-center space-x-3">
-                    <Users className="w-5 h-5 text-gray-600" />
-                    <h3 className="text-base sm:text-lg font-semibold text-gray-900">Student Management</h3>
-                    <span className="bg-blue-100 text-blue-800 text-xs font-medium px-2 py-1 rounded-full">
-                      {filteredStudents.length}
-                    </span>
-                  </div>
-                  <button className="bg-blue-600 text-white px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium hover:bg-blue-700 transition-colors w-full sm:w-auto" onClick={() => navigate('/user-list')}>
-                    + View All Students
-                  </button>
-                </div>
-
-                <div className="flex flex-col space-y-3 sm:space-y-0 sm:flex-row sm:space-x-4">
-                  <div className="relative flex-1">
-                    <Search className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                    <input
-                      type="text"
-                      placeholder="Search students by name, email, or college..."
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-                    />
-                  </div>
-                  <select
-                    value={filter}
-                    onChange={(e) => setFilter(e.target.value)}
-                    className="w-full sm:w-32 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-                  >
-                    <option value="">All Status</option>
-                    <option value="active">Active</option>
-                    <option value="inactive">Inactive</option>
-                  </select>
-                </div>
-              </div>
-
-              <div className="divide-y divide-gray-100 max-h-96 overflow-y-auto">
-                {filteredStudents.length === 0 ? (
-                  <div className="p-8 text-center">
-                    <Users className="w-12 h-12 text-gray-400 mx-auto mb-3" />
-                    <p className="text-gray-500">
-                      {students.length === 0 ? 'No students registered yet' : 'No students found matching your search'}
-                    </p>
-                  </div>
-                ) : (
-                  filteredStudents.map((student) => (
-                    <div key={student.id} className="p-3 sm:p-4 hover:bg-gray-50 transition-colors">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-3 min-w-0 flex-1">
-                          <div className="w-10 h-10 sm:w-12 sm:h-12 bg-blue-600 rounded-full flex items-center justify-center flex-shrink-0">
-                            <span className="text-white font-medium text-sm">{student.avatar}</span>
-                          </div>
-                          <div className="min-w-0 flex-1">
-                            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-                              <div className="min-w-0 flex-1">
-                                <h4 className="font-medium text-gray-900 text-sm sm:text-base truncate">{student.name}</h4>
-                                <p className="text-xs sm:text-sm text-gray-500 truncate">{student.email}</p>
-                                <div className="flex items-center space-x-2 text-xs text-gray-400 mt-1">
-                                  <span>{student.points} points</span>
-                                  <span>•</span>
-                                  <span>{student.sessions} sessions</span>
-                                  <span>•</span>
-                                  <span>{student.badges} badges</span>
-                                  {student.college && (
-                                    <>
-                                      <span>•</span>
-                                      <span className="truncate max-w-24">{student.college}</span>
-                                    </>
-                                  )}
-                                </div>
-                                {student.skills.length > 0 && (
-                                  <div className="flex flex-wrap gap-1 mt-1">
-                                    {student.skills.slice(0, 2).map((skill, idx) => (
-                                      <span key={idx} className="px-2 py-0.5 bg-blue-100 text-blue-700 text-xs rounded">
-                                        {skill}
-                                      </span>
-                                    ))}
-                                    {student.skills.length > 2 && (
-                                      <span className="px-2 py-0.5 bg-gray-100 text-gray-700 text-xs rounded">
-                                        +{student.skills.length - 2}
-                                      </span>
-                                    )}
-                                  </div>
-                                )}
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  ))
-                )}
+              <div className="font-bold text-[#1E1E1E] flex items-center gap-2">
+                <Clock className="w-4 h-4" />
+                {new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' })}
               </div>
             </div>
-          </div>
+            <h1 className="text-6xl md:text-8xl font-black tracking-tighter leading-[0.9] mb-8 relative z-10 text-left text-[#1E1E1E]">
+              WE <span className="relative inline-block text-[#0061FE] z-10">
+                MANAGE
+                <MessyOval width={240} height={110} color="#C2E812" />
+              </span>.<br />
+              WE BUILD.
+            </h1>
+            <p className="text-xl md:text-2xl font-bold max-w-2xl leading-tight">
+              Welcome back, <span className="px-2 bg-[#C2E812] text-black transform -skew-x-12 inline-block">{profile?.display_name?.split(' ')[0] || 'Admin'}</span>.
+              You have <span className="underline decoration-4 decoration-[#FF5018] underline-offset-4">{stats.totalStudents} chaos pilots</span> (students) onboard today.
+            </p>
+          </motion.div>
+        </div>
 
-          {/* Quick Actions Sidebar */}
-          <div className="space-y-4 sm:space-y-6 order-1 xl:order-2">
-            <div className="bg-white rounded-lg shadow-sm border p-4 sm:p-6">
-              <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
-              <div className="grid grid-cols-2 sm:grid-cols-2 xl:grid-cols-1 gap-2 sm:gap-3">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 relative z-10">
+
+          {/* LEFT COL: ACTIONS & FEED */}
+          <div className="lg:col-span-8 space-y-16">
+
+            {/* QUICK ACTIONS */}
+            <section>
+              <div className="flex items-center gap-4 mb-8">
+                <SquiggleArrow />
+                <h3 className="text-4xl font-black tracking-tighter text-[#1E1E1E]">QUICK COMMANDS</h3>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {quickActions.map((action, index) => {
-                  const IconComponent = action.icon;
+                  const Icon = action.icon;
                   return (
-                    <button
+                    <motion.button
                       key={index}
                       onClick={action.onClick}
-                      className={`flex flex-col sm:flex-row xl:flex-row items-center justify-center space-y-1 sm:space-y-0 sm:space-x-2 xl:space-x-2 ${action.color} text-white py-3 sm:py-2 xl:py-3 px-2 sm:px-3 xl:px-4 rounded-lg transition-colors text-xs sm:text-sm font-medium`}
+                      whileHover={{ y: -5, x: -5, boxShadow: "8px 8px 0px 0px rgba(0,0,0,1)" }}
+                      className={`relative group bg-white border-[3px] border-[#1E1E1E] p-6 text-left shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all duration-200`}
                     >
-                      <IconComponent className="w-4 h-4" />
-                      <span className="sm:hidden xl:inline">{action.label}</span>
-                      <span className="hidden sm:inline xl:hidden">{action.shortLabel}</span>
-                    </button>
+                      <div className="flex justify-between items-start mb-4">
+                        <div className={`p-3 border-[2px] border-[#1E1E1E] shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]`} style={{ backgroundColor: action.color }}>
+                          <Icon className={`w-6 h-6 ${action.textColor === 'text-white' ? 'text-white' : 'text-[#1E1E1E]'}`} />
+                        </div>
+                        <ArrowRight className="w-6 h-6 opacity-0 group-hover:opacity-100 transition-opacity -rotate-45 group-hover:rotate-0" />
+                      </div>
+                      <h4 className="text-xl font-black leading-none mb-1">{action.label}</h4>
+                      <p className="text-sm font-bold text-gray-500 uppercase tracking-wide">{action.desc}</p>
+                    </motion.button>
                   );
                 })}
               </div>
-            </div>
+            </section>
 
-            {/* Recent Activity - Hidden on mobile */}
-            <div className="bg-white rounded-lg shadow-sm border p-4 sm:p-6 hidden sm:block">
-              <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-4">Recent Activity</h3>
-              <div className="space-y-3">
-                {students.slice(0, 3).map((student, index) => (
-                  <div key={index} className="flex items-center space-x-3">
-                    <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                    <div className="flex-1">
-                      <p className="text-sm text-gray-900">{student.name} joined the community</p>
-                      <p className="text-xs text-gray-500">{student.lastSeen}</p>
+            {/* RECENT REGISTRATIONS (Brutalist List) */}
+            <section>
+              <div className="flex justify-between items-end mb-6 border-b-[3px] border-[#1E1E1E] pb-2">
+                <h3 className="text-4xl font-black tracking-tighter text-[#1E1E1E]">FRESH BLOOD</h3>
+                <button onClick={() => navigate('/user-list')} className="text-lg font-bold hover:bg-[#C2E812] px-2 transition-colors">VIEW ALL &rarr;</button>
+              </div>
+
+              <div className="space-y-4">
+                {students.slice(0, 5).map((student, idx) => (
+                  <motion.div
+                    key={student.id}
+                    initial={{ opacity: 0, x: -20 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    transition={{ delay: idx * 0.1 }}
+                    className="flex items-center gap-4 bg-white p-4 border-[3px] border-[#1E1E1E] shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-1 hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all"
+                  >
+                    <div className="w-12 h-12 bg-[#F7F5F2] border-[2px] border-[#1E1E1E] flex items-center justify-center font-black text-xl">
+                      {student.avatar}
                     </div>
-                  </div>
+                    <div className="flex-1">
+                      <h4 className="text-lg font-black leading-none">{student.name}</h4>
+                      <p className="text-xs font-bold text-gray-500 uppercase">{student.email}</p>
+                    </div>
+                    <div className="text-right flex flex-col items-end">
+                      <span className="bg-[#0061FE] text-white text-xs font-bold px-2 py-0.5 border border-black shadow-[1px_1px_0px_0px_black] mb-1">
+                        {student.college || 'NO COLLEGE'}
+                      </span>
+                      <span className="text-xs font-mono font-bold text-gray-400">{student.lastSeen}</span>
+                    </div>
+                  </motion.div>
                 ))}
                 {students.length === 0 && (
-                  <p className="text-sm text-gray-500">No recent activity</p>
+                  <div className="p-8 border-[3px] border-dashed border-[#1E1E1E] text-center bg-white">
+                    <Smile className="w-12 h-12 mx-auto mb-4 text-gray-400" />
+                    <p className="font-bold text-gray-500">No new recruits yet.</p>
+                  </div>
                 )}
               </div>
-            </div>
-          </div>
-        </div>
+            </section>
 
-        {/* Mobile Bottom Navigation */}
-        <div className="fixed bottom-0 left-0 right-0 bg-white border-t px-3 py-2 sm:hidden">
-          <div className="flex justify-around">
-            {quickActions.map((action, index) => {
-              const IconComponent = action.icon;
-              return (
-                <button
-                  key={index}
-                  onClick={action.onClick}
-                  className="flex flex-col items-center space-y-1 py-2 px-3"
-                >
-                  <IconComponent className="w-5 h-5 text-gray-600" />
-                  <span className="text-xs text-gray-600">{action.shortLabel}</span>
-                </button>
-              );
-            })}
           </div>
-        </div>
 
-        {/* Mobile padding bottom to account for fixed nav */}
-        <div className="h-16 sm:hidden"></div>
-      </main>
-    </div>
+          {/* RIGHT COL: FEED & WIDGETS */}
+          <div className="lg:col-span-4 space-y-12">
+
+            {/* ACTIVITY LOG */}
+            <section className="bg-[#1E1E1E] text-white p-6 border-[3px] border-[#1E1E1E] shadow-[8px_8px_0px_0px_#C2E812] relative overflow-hidden">
+              <div className="absolute top-0 right-0 p-4 opacity-20">
+                <Activity className="w-24 h-24" />
+              </div>
+              <h3 className="text-2xl font-black mb-6 tracking-tighter text-[#C2E812]">LIVE ENTROPY</h3>
+
+              <div className="space-y-8 relative pl-4 border-l-[3px] border-white/20">
+                {/* Fake System Event */}
+                <div className="relative">
+                  <div className="absolute -left-[23px] top-1 w-4 h-4 bg-[#0061FE] border-2 border-white rounded-full"></div>
+                  <p className="font-bold leading-tight">System backup completed.</p>
+                  <span className="text-xs font-mono text-gray-400">12:00 AM</span>
+                </div>
+
+                {students.slice(0, 4).map((student, idx) => (
+                  <div key={idx} className="relative">
+                    <div className="absolute -left-[23px] top-1 w-4 h-4 bg-[#FF5018] border-2 border-white rounded-full"></div>
+                    <p className="leading-tight text-sm">
+                      <span className="font-black text-[#C2E812]">{student.name}</span> <span className="font-medium text-gray-300">spawned in the world.</span>
+                    </p>
+                    <span className="text-xs font-mono text-gray-500">{student.lastSeen}</span>
+                  </div>
+                ))}
+              </div>
+            </section>
+
+            {/* PRO TIP WIDGET */}
+            <section className="bg-[#C2E812] p-6 border-[3px] border-[#1E1E1E] shadow-[8px_8px_0px_0px_#1E1E1E] relative">
+              <div className="absolute -top-6 -right-6 transform rotate-12">
+                <HandDrawnHeart />
+              </div>
+
+              <div className="flex items-center gap-3 mb-4">
+                <div className="bg-[#1E1E1E] p-2 text-white">
+                  <Zap className="w-6 h-6" />
+                </div>
+                <h3 className="text-xl font-black text-[#1E1E1E]">PRO TIP</h3>
+              </div>
+              <p className="font-bold text-lg leading-tight mb-6">
+                Engagement drops when you're boring. Reply to <span className="bg-white px-1">Community Photos</span> to keep the chaos alive.
+              </p>
+              <button
+                onClick={() => navigate('/analytics')}
+                className="w-full bg-[#1E1E1E] text-white font-black py-3 hover:bg-[#0061FE] transition-colors border-2 border-transparent hover:border-black"
+              >
+                CHECK STATS
+              </button>
+            </section>
+
+          </div>
+
+        </div>
+      </div>
+    </AdminLayout>
   );
 };
 

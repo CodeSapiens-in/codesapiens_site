@@ -27,6 +27,7 @@ import {
   GraduationCap,
   TrendingUp,
   TrendingDown,
+  Loader2
 } from "lucide-react";
 import { supabase } from "../lib/supabaseClient";
 import AdminLayout from '../components/AdminLayout';
@@ -302,92 +303,67 @@ export default function AnalyticsPage() {
     return `${growth >= 0 ? "+" : ""}${growth.toFixed(1)}%`;
   };
 
-  const totalStudents = analyticsData.overview.totalStudents;
-
-  const renderDistributionLegend = (data, title) => {
-    if (data.length === 0) return null;
-    const total = data.reduce((sum, item) => sum + item.value, 0);
-    return (
-      <div className="mt-4">
-        <h3 className="text-sm font-medium text-gray-600 mb-2">{title}</h3>
-        <ul className="space-y-2 max-h-32 overflow-y-auto">
-          {data.map((item) => {
-            const percentage = total > 0 ? ((item.value / total) * 100).toFixed(1) : 0;
-            return (
-              <li key={item.name} className="flex justify-between items-center text-xs">
-                <span className="flex items-center">
-                  <span
-                    className="w-2 h-2 rounded-full mr-2 flex-shrink-0"
-                    style={{ backgroundColor: item.color }}
-                  ></span>
-                  {item.name}
-                </span>
-                <span className="font-medium">
-                  {item.value} ({percentage}%)
-                </span>
-              </li>
-            );
-          })}
-        </ul>
-      </div>
-    );
+  // Enterprise Color Palette
+  const THEME = {
+    primary: "#4F46E5", // Indigo 600
+    secondary: "#64748B", // Slate 500
+    success: "#10B981", // Emerald 500
+    warning: "#F59E0B", // Amber 500
+    danger: "#EF4444", // Red 500
+    background: "#F8FAFC", // Slate 50
+    cardBg: "#FFFFFF",
+    border: "#E2E8F0", // Slate 200
+    textMain: "#0F172A", // Slate 900
+    textMuted: "#64748B", // Slate 500
   };
 
-  const renderSkillsLegend = (data, title) => {
-    if (data.length === 0) return null;
-    const totalMentions = data.reduce((sum, item) => sum + item.count, 0);
-    return (
-      <div className="mt-4">
-        <h3 className="text-sm font-medium text-gray-600 mb-2">{title}</h3>
-        <ul className="space-y-2 max-h-48 overflow-y-auto">
-          {data.map((item, index) => {
-            const percentage = totalMentions > 0 ? ((item.count / totalMentions) * 100).toFixed(1) : 0;
-            const color = ["#3B82F6", "#10B981", "#F59E0B", "#EF4444", "#8B5CF6", "#F97316"][index % 6];
-            return (
-              <li key={item.skill} className="flex justify-between items-center text-xs">
-                <span className="flex items-center">
-                  <span
-                    className="w-2 h-2 rounded-full mr-2 flex-shrink-0"
-                    style={{ backgroundColor: color }}
-                  ></span>
-                  <span className="truncate flex-1">{item.skill}</span>
-                </span>
-                <span className="font-medium ml-2">
-                  {item.count} ({percentage}%)
-                </span>
-              </li>
-            );
-          })}
-        </ul>
-      </div>
-    );
+  const COLORS = [THEME.primary, THEME.success, THEME.warning, THEME.danger, '#8B5CF6', '#EC4899'];
+
+  const CustomTooltip = ({ active, payload, label }) => {
+    if (active && payload && payload.length) {
+      return (
+        <div className="bg-white p-3 rounded shadow-lg border border-slate-200 text-xs text-slate-700">
+          <p className="font-semibold mb-1 border-b border-slate-100 pb-1">{label}</p>
+          {payload.map((entry, index) => (
+            <div key={index} className="flex items-center gap-2 mt-1">
+              <div className="w-2 h-2 rounded-full" style={{ backgroundColor: entry.color }}></div>
+              <span className="font-medium">{entry.name}:</span>
+              <span className="font-bold text-slate-900">{entry.value}</span>
+            </div>
+          ))}
+        </div>
+      );
+    }
+    return null;
   };
 
-  const renderGrowthSummary = () => {
-    const latest = analyticsData.studentGrowth[analyticsData.studentGrowth.length - 1];
-    if (!latest) return null;
-    return (
-      <div className="mt-4 p-3 bg-gray-50 rounded-lg">
-        <h3 className="text-sm font-medium text-gray-600 mb-2">Latest Period Summary</h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
-          <div>
-            <span className="text-gray-500">Total Students:</span> <span className="font-medium">{latest.students.toLocaleString()}</span>
-          </div>
-          <div>
-            <span className="text-gray-500">Active Students:</span> <span className="font-medium">{latest.active.toLocaleString()}</span>
-          </div>
+  const KPICard = ({ title, value, change, changeType, icon: Icon, trend }) => (
+    <div className="bg-white rounded-lg border border-slate-200 p-4 shadow-sm hover:shadow-md transition-shadow">
+      <div className="flex justify-between items-start mb-2">
+        <div>
+          <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">{title}</p>
+          <h3 className="text-2xl font-bold text-slate-900 mt-1">{value}</h3>
+        </div>
+        <div className={`p-2 rounded-md ${changeType === 'positive' ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-50 text-slate-600'}`}>
+          <Icon className="w-5 h-5" />
         </div>
       </div>
-    );
-  };
+      <div className="flex items-center mt-2">
+        <span className={`text-xs font-bold px-1.5 py-0.5 rounded ${changeType === 'positive' ? 'text-emerald-700 bg-emerald-50' :
+          changeType === 'negative' ? 'text-red-700 bg-red-50' : 'text-slate-600 bg-slate-100'
+          }`}>
+          {change}
+        </span>
+        <span className="text-xs text-slate-400 ml-2">vs last period</span>
+      </div>
+    </div>
+  );
 
   const overviewCards = [
     {
       title: "Total Students",
       value: analyticsData.overview.totalStudents.toLocaleString(),
-      icon: <Users className="w-6 h-6 text-blue-500" />,
-      bgColor: "bg-blue-50",
-      iconBg: "bg-blue-100",
+      icon: Users,
       change: calculateGrowthPercentage(
         analyticsData.overview.totalStudents,
         analyticsData.overview.previousTotal
@@ -395,182 +371,178 @@ export default function AnalyticsPage() {
       changeType: "positive",
     },
     {
-      title: "Active Students",
+      title: "Active Users",
       value: analyticsData.overview.activeStudents.toLocaleString(),
-      icon: <UserCheck className="w-6 h-6 text-green-500" />,
-      bgColor: "bg-green-50",
-      iconBg: "bg-green-100",
+      icon: UserCheck,
       change: calculateGrowthPercentage(
         analyticsData.overview.activeStudents,
         analyticsData.overview.previousActive
       ),
       changeType: analyticsData.overview.activeStudents >= analyticsData.overview.previousActive ? "positive" : "negative",
     },
+    {
+      title: "Growth Rate",
+      value: calculateGrowthPercentage(
+        analyticsData.overview.totalStudents,
+        analyticsData.overview.previousTotal
+      ),
+      icon: TrendingUp,
+      change: "Stable",
+      changeType: "neutral",
+    },
+    {
+      title: "Departments",
+      value: analyticsData.departmentDistribution.length.toString(),
+      icon: Building,
+      change: "+2 new", // Static for demo, dynamic in real app
+      changeType: "positive",
+    },
   ];
 
   return (
     <ErrorBoundary>
       <AdminLayout>
-        <div className="min-h-screen bg-gray-50">
+        <div className="min-h-screen bg-slate-50 font-sans">
           {loading && !refreshing ? (
-            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-              <div className="text-center">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
-                <p className="text-gray-600">Loading analytics...</p>
-              </div>
+            <div className="min-h-screen flex items-center justify-center">
+              <Loader2 className="w-8 h-8 text-indigo-600 animate-spin" />
             </div>
           ) : (
-            <main className="px-4 sm:px-6 lg:px-8 py-6 max-w-7xl mx-auto">
-              {/* Header */}
-              <div className="mb-8">
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-                  <div>
-                    <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
-                      Analytics Dashboard
-                    </h1>
-                    <p className="text-gray-600">
-                      Insights and metrics for your student community
-                    </p>
-                  </div>
-                  <div className="flex items-center space-x-3 mt-4 sm:mt-0 flex-wrap">
-                    <div className="relative">
-                      <Filter className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
-                      <select
-                        value={timeRange}
-                        onChange={(e) => setTimeRange(e.target.value)}
-                        className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none"
-                        aria-label="Select time range"
-                      >
-                        <option value="7">Last 7 days</option>
-                        <option value="30">Last 30 days</option>
-                        <option value="90">Last 90 days</option>
-                        <option value="365">Last year</option>
-                      </select>
-                    </div>
-                    <button
-                      onClick={handleRefresh}
-                      disabled={refreshing}
-                      className="px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors duration-200 flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                      aria-label="Refresh analytics data"
+            <main className="p-4 sm:p-6 lg:p-8 max-w-[1600px] mx-auto space-y-6">
+              {/* Header Toolbar */}
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-white p-4 rounded-lg border border-slate-200 shadow-sm gap-4">
+                <div>
+                  <h1 className="text-xl font-bold text-slate-900 flex items-center gap-2">
+                    <TrendingUp className="w-5 h-5 text-indigo-600" />
+                    Analytics Overview
+                  </h1>
+                  <p className="text-sm text-slate-500 mt-1">
+                    System performance and user engagement metrics
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-3 w-full sm:w-auto">
+                  <div className="relative flex-1 sm:flex-none">
+                    <Calendar className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+                    <select
+                      value={timeRange}
+                      onChange={(e) => setTimeRange(e.target.value)}
+                      className="w-full pl-9 pr-8 py-2 bg-white border border-slate-300 rounded-md text-sm font-medium text-slate-700 hover:border-slate-400 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
                     >
-                      <RefreshCw className={`w-4 h-4 ${refreshing ? "animate-spin" : ""}`} />
-                      <span>Refresh</span>
-                    </button>
-                    <button
-                      onClick={exportReport}
-                      className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors duration-200 flex items-center space-x-2"
-                      aria-label="Export analytics report"
-                    >
-                      <Download className="w-4 h-4" />
-                      <span>Export</span>
-                    </button>
+                      <option value="7">Last 7 Days</option>
+                      <option value="30">Last 30 Days</option>
+                      <option value="90">This Quarter</option>
+                      <option value="365">This Year</option>
+                    </select>
                   </div>
+
+                  <button
+                    onClick={handleRefresh}
+                    disabled={refreshing}
+                    className="p-2 text-slate-600 hover:text-indigo-600 hover:bg-indigo-50 rounded-md transition-colors disabled:opacity-50"
+                    title="Refresh Data"
+                  >
+                    <RefreshCw className={`w-5 h-5 ${refreshing ? "animate-spin" : ""}`} />
+                  </button>
+
+                  <button
+                    onClick={exportReport}
+                    className="flex items-center gap-2 px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white text-sm font-medium rounded-md shadow-sm transition-colors"
+                  >
+                    <Download className="w-4 h-4" />
+                    Export
+                  </button>
                 </div>
               </div>
 
               {error && (
-                <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
-                  <div className="flex items-center">
-                    <AlertCircle className="w-5 h-5 text-red-500 mr-2" />
-                    <p className="text-red-700">Error: {error}</p>
+                <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded-r shadow-sm">
+                  <div className="flex">
+                    <AlertCircle className="h-5 w-5 text-red-500" />
+                    <div className="ml-3">
+                      <p className="text-sm text-red-700 font-medium">{error}</p>
+                    </div>
                   </div>
-                  <button
-                    onClick={handleRefresh}
-                    className="mt-2 text-sm text-red-600 hover:text-red-800 underline"
-                    aria-label="Retry loading analytics data"
-                  >
-                    Try again
-                  </button>
                 </div>
               )}
 
-              {/* Overview Cards */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 mb-8">
+              {/* KPI Grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 {overviewCards.map((card, index) => (
-                  <div
-                    key={index}
-                    className={`${card.bgColor} rounded-xl p-4 sm:p-6 border border-gray-200 transition-shadow hover:shadow-md`}
-                    role="region"
-                    aria-label={`${card.title} overview`}
-                  >
-                    <div className="flex items-center justify-between mb-2">
-                      <div className={`${card.iconBg} p-3 rounded-lg`}>{card.icon}</div>
-                      {card.change && (
-                        <div
-                          className={`text-sm font-medium ${card.changeType === "positive" ? "text-green-600" : "text-red-600"
-                            }`}
-                        >
-                          {card.change}
-                        </div>
-                      )}
-                    </div>
-                    <h3 className="text-2xl font-bold text-gray-900">{card.value}</h3>
-                    <p className="text-gray-600 text-sm">{card.title}</p>
-                  </div>
+                  <KPICard key={index} {...card} />
                 ))}
               </div>
 
-              {/* Top Stats & Data Source Info */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                <div className="bg-teal-50 p-4 rounded-lg border border-teal-100">
-                  <h3 className="font-semibold text-teal-900 mb-2">Top Department</h3>
-                  <p className="text-teal-700 text-sm">
-                    {analyticsData.departmentDistribution.length > 0
-                      ? `${analyticsData.departmentDistribution[0]?.name || "Not Specified"} is the most common department`
-                      : "No department data available yet"}
-                  </p>
-                </div>
-                <div className="bg-indigo-50 p-4 rounded-lg border border-indigo-100">
-                  <h3 className="font-semibold text-indigo-900 mb-2">Top Major</h3>
-                  <p className="text-indigo-700 text-sm">
-                    {analyticsData.majorDistribution.length > 0
-                      ? `${analyticsData.majorDistribution[0]?.name || "Not Specified"} is the most popular major`
-                      : "No major data available yet"}
-                  </p>
-                </div>
-                {/* Data Source Info */}
-                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                  <div className="flex items-start">
-                    <BookOpen className="w-5 h-5 text-yellow-600 mr-2 mt-0.5" />
+              {/* Main Widgets Area */}
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+                {/* Growth Chart - 2 Cols */}
+                <div className="lg:col-span-2 bg-white rounded-lg border border-slate-200 shadow-sm p-5">
+                  <div className="flex justify-between items-center mb-6">
                     <div>
-                      <h3 className="font-medium text-yellow-800 mb-1">Data Integration Notes</h3>
-                      <ul className="text-sm text-yellow-700 space-y-1">
-                        <li>• User data is fetched from Supabase users table</li>
-                        <li>• Growth calculations are based on available data</li>
-                        <li>• Year, department, and major distributions included</li>
-                      </ul>
+                      <h3 className="text-base font-bold text-slate-900">Registration Trend</h3>
+                      <p className="text-xs text-slate-500">Student acquisition over the selected period</p>
+                    </div>
+                    {/* Tiny Legend */}
+                    <div className="flex gap-4 text-xs font-medium">
+                      <div className="flex items-center gap-1.5">
+                        <span className="w-2.5 h-2.5 rounded-full bg-indigo-500"></span> Total
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        <span className="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> Active
+                      </div>
                     </div>
                   </div>
-                </div>
-              </div>
-
-              {/* Charts Section */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-                <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
-                  <h2 className="text-lg font-semibold text-gray-900 mb-4">Student Growth Trend</h2>
-                  <div className="h-80">
+                  <div className="h-72 w-full">
                     <ResponsiveContainer width="100%" height="100%">
-                      <AreaChart data={analyticsData.studentGrowth}>
+                      <AreaChart data={analyticsData.studentGrowth} margin={{ top: 5, right: 0, left: -20, bottom: 0 }}>
                         <defs>
-                          <linearGradient id="colorStudents" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor="#3B82F6" stopOpacity={0.1} />
-                            <stop offset="95%" stopColor="#3B82F6" stopOpacity={0} />
+                          <linearGradient id="colorTotal" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor={THEME.primary} stopOpacity={0.1} />
+                            <stop offset="95%" stopColor={THEME.primary} stopOpacity={0} />
                           </linearGradient>
                         </defs>
-                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
-                        <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{ fill: '#6B7280', fontSize: 12 }} dy={10} />
-                        <YAxis axisLine={false} tickLine={false} tick={{ fill: '#6B7280', fontSize: 12 }} />
-                        <Tooltip contentStyle={{ backgroundColor: '#FFF', borderRadius: '8px', border: '1px solid #E5E7EB', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' }} />
-                        <Area type="monotone" dataKey="students" stroke="#3B82F6" strokeWidth={2} fillOpacity={1} fill="url(#colorStudents)" />
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={THEME.border} />
+                        <XAxis
+                          dataKey="period"
+                          axisLine={false}
+                          tickLine={false}
+                          tick={{ fill: THEME.textMuted, fontSize: 11 }}
+                          dy={10}
+                        />
+                        <YAxis
+                          axisLine={false}
+                          tickLine={false}
+                          tick={{ fill: THEME.textMuted, fontSize: 11 }}
+                        />
+                        <Tooltip content={<CustomTooltip />} />
+                        <Area
+                          type="monotone"
+                          dataKey="students"
+                          stroke={THEME.primary}
+                          strokeWidth={2}
+                          fill="url(#colorTotal)"
+                          name="Total Students"
+                          activeDot={{ r: 6, strokeWidth: 0 }}
+                        />
+                        <Area
+                          type="monotone"
+                          dataKey="active"
+                          stroke={THEME.success}
+                          strokeWidth={2}
+                          fill="none"
+                          name="Active Students"
+                          strokeDasharray="4 4"
+                        />
                       </AreaChart>
                     </ResponsiveContainer>
                   </div>
-                  {renderGrowthSummary()}
                 </div>
 
-                <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
-                  <h2 className="text-lg font-semibold text-gray-900 mb-4">Department Distribution</h2>
-                  <div className="h-80">
+                {/* Hybrid Widget: Department Distribution */}
+                <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-5 flex flex-col">
+                  <h3 className="text-base font-bold text-slate-900 mb-4">Department Distribution</h3>
+                  <div className="flex-1 relative min-h-[200px]">
                     <ResponsiveContainer width="100%" height="100%">
                       <PieChart>
                         <Pie
@@ -578,64 +550,125 @@ export default function AnalyticsPage() {
                           cx="50%"
                           cy="50%"
                           innerRadius={60}
-                          outerRadius={100}
-                          paddingAngle={5}
-                          dataKey="count"
+                          outerRadius={80}
+                          dataKey="value"
+                          paddingAngle={2}
                         >
                           {analyticsData.departmentDistribution.map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} strokeWidth={1} stroke="#fff" />
                           ))}
                         </Pie>
-                        <Tooltip />
+                        <Tooltip content={<CustomTooltip />} />
                       </PieChart>
                     </ResponsiveContainer>
+                    {/* Center Text */}
+                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                      <div className="text-center">
+                        <p className="text-2xl font-bold text-slate-900">{analyticsData.departmentDistribution.length}</p>
+                        <p className="text-[10px] text-slate-500 uppercase font-bold tracking-wider">Depts</p>
+                      </div>
+                    </div>
                   </div>
-                  {renderDistributionLegend(analyticsData.departmentDistribution, "Departments")}
+                  {/* Mini Data Table */}
+                  <div className="mt-4 border-t border-slate-100 pt-3">
+                    <table className="w-full text-sm text-left">
+                      <thead>
+                        <tr>
+                          <th className="pb-2 text-xs font-semibold text-slate-500">Dept</th>
+                          <th className="pb-2 text-xs font-semibold text-slate-500 text-right">Students</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {analyticsData.departmentDistribution.slice(0, 4).map((item, idx) => (
+                          <tr key={idx} className="border-b border-slate-50 last:border-0 hover:bg-slate-50 transition-colors">
+                            <td className="py-2 flex items-center gap-2">
+                              <span className="w-2 h-2 rounded-full" style={{ backgroundColor: COLORS[idx % COLORS.length] }}></span>
+                              <span className="text-slate-700 truncate max-w-[120px]" title={item.name}>{item.name}</span>
+                            </td>
+                            <td className="py-2 text-right font-medium text-slate-900">{item.value}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
-              </div>
 
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-                <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
-                  <h2 className="text-lg font-semibold text-gray-900 mb-4">Academic Year Distribution</h2>
-                  <div className="h-80">
+                {/* Hybrid Widget: Top Majors (Bar Chart + List) */}
+                <div className="lg:col-span-2 bg-white rounded-lg border border-slate-200 shadow-sm p-5">
+                  <div className="flex justify-between items-center mb-4">
+                    <h3 className="text-base font-bold text-slate-900">Popular Majors</h3>
+                    <button className="text-xs font-medium text-indigo-600 hover:text-indigo-800">View All</button>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="h-64">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <BarChart data={analyticsData.majorDistribution.slice(0, 5)} layout="vertical" margin={{ left: 0 }}>
+                          <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke={THEME.border} />
+                          <XAxis type="number" hide />
+                          <YAxis
+                            dataKey="name"
+                            type="category"
+                            axisLine={false}
+                            tickLine={false}
+                            width={120}
+                            tick={{ fill: THEME.textMuted, fontSize: 11 }}
+                          />
+                          <Tooltip content={<CustomTooltip />} />
+                          <Bar dataKey="value" fill={THEME.primary} radius={[0, 4, 4, 0]} barSize={24} name="Students">
+                            {analyticsData.majorDistribution.slice(0, 5).map((entry, index) => (
+                              <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                            ))}
+                          </Bar>
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </div>
+                    {/* Detailed List */}
+                    <div className="border rounded-md border-slate-100 overflow-hidden">
+                      <table className="w-full text-sm">
+                        <thead className="bg-slate-50">
+                          <tr>
+                            <th className="px-4 py-2 text-xs font-semibold text-slate-500 text-left">Rank</th>
+                            <th className="px-4 py-2 text-xs font-semibold text-slate-500 text-left">Major</th>
+                            <th className="px-4 py-2 text-xs font-semibold text-slate-500 text-right">Count</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-100">
+                          {analyticsData.majorDistribution.slice(0, 6).map((item, idx) => (
+                            <tr key={idx} className="hover:bg-slate-50">
+                              <td className="px-4 py-2 text-slate-400 font-mono text-xs">#{idx + 1}</td>
+                              <td className="px-4 py-2 text-slate-700 font-medium truncate max-w-[150px]">{item.name}</td>
+                              <td className="px-4 py-2 text-slate-900 font-bold text-right">{item.value}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Academic Year Stats */}
+                <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-5">
+                  <h3 className="text-base font-bold text-slate-900 mb-4">Academic Years</h3>
+                  <div className="h-64">
                     <ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={analyticsData.yearDistribution}>
-                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
-                        <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#6B7280', fontSize: 12 }} dy={10} />
-                        <YAxis axisLine={false} tickLine={false} tick={{ fill: '#6B7280', fontSize: 12 }} />
-                        <Tooltip cursor={{ fill: '#F3F4F6' }} contentStyle={{ backgroundColor: '#FFF', borderRadius: '8px', border: '1px solid #E5E7EB' }} />
-                        <Bar dataKey="count" fill="#8B5CF6" radius={[4, 4, 0, 0]} />
+                      <BarChart data={analyticsData.yearDistribution} barSize={32}>
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={THEME.border} />
+                        <XAxis
+                          dataKey="name"
+                          axisLine={false}
+                          tickLine={false}
+                          tick={{ fill: THEME.textMuted, fontSize: 11 }}
+                          dy={5}
+                        />
+                        <YAxis axisLine={false} tickLine={false} tick={{ fill: THEME.textMuted, fontSize: 11 }} />
+                        <Tooltip content={<CustomTooltip />} />
+                        <Bar dataKey="value" fill={THEME.success} radius={[4, 4, 0, 0]} name="Students" />
                       </BarChart>
                     </ResponsiveContainer>
                   </div>
                 </div>
 
-                <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
-                  <h2 className="text-lg font-semibold text-gray-900 mb-4">Major Distribution</h2>
-                  <div className="h-80">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <PieChart>
-                        <Pie
-                          data={analyticsData.majorDistribution}
-                          cx="50%"
-                          cy="50%"
-                          innerRadius={60}
-                          outerRadius={100}
-                          paddingAngle={5}
-                          dataKey="count"
-                        >
-                          {analyticsData.majorDistribution.map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                          ))}
-                        </Pie>
-                        <Tooltip />
-                      </PieChart>
-                    </ResponsiveContainer>
-                  </div>
-                  {renderDistributionLegend(analyticsData.majorDistribution, "Majors")}
-                </div>
               </div>
-
             </main>
           )}
         </div>

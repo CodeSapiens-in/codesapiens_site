@@ -11,22 +11,12 @@ const AdminLayout = ({ children }) => {
         const fetchProfile = async () => {
             try {
                 const { data: { user } } = await supabase.auth.getUser();
-                // if (!user) {
-                //     navigate('/');
-                //     return;
-                // }
-
                 if (user) {
                     const { data } = await supabase
                         .from('users')
                         .select('*')
                         .eq('uid', user.id)
                         .single();
-
-                    // if (data?.role !== 'admin') {
-                    //     navigate('/');
-                    //     return;
-                    // }
                 }
             } catch (error) {
                 console.error('Error fetching profile:', error);
@@ -40,14 +30,14 @@ const AdminLayout = ({ children }) => {
 
     if (loading) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-zinc-50">
-                <Loader2 className="w-8 h-8 animate-spin text-zinc-900" />
+            <div className="min-h-screen flex items-center justify-center bg-slate-50">
+                <Loader2 className="w-8 h-8 animate-spin text-indigo-600" />
             </div>
         );
     }
 
     return (
-        <div className="min-h-screen bg-zinc-50">
+        <div className="min-h-screen bg-slate-50">
             {/* Main Content Area */}
             <main className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto">
                 {children}
