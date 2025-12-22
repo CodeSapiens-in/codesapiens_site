@@ -1,0 +1,64 @@
+{
+    "id": 14,
+    "title": "Missing Number",
+    "difficulty": "Easy",
+    "description": "Given an array nums containing n distinct numbers in the range [0, n], return the only number in the range that is missing from the array.",
+    "constraints": [
+        "n == nums.length",
+        "1 <= n <= 10^4",
+        "0 <= nums[i] <= n",
+        "All the numbers of nums are unique."
+    ],
+    "examples": [
+        {
+            "input": "nums = [3,0,1]",
+            "output": "2",
+            "explanation": "n = 3 since there are 3 numbers, so all numbers are in the range [0,3]. 2 is the missing number in the range since it does not appear in nums."
+        },
+        {
+            "input": "nums = [0,1]",
+            "output": "2",
+            "explanation": "n = 2 since there are 2 numbers, so all numbers are in the range [0,2]. 2 is the missing number in the range since it does not appear in nums."
+        }
+    ],
+    "testCases": {
+        "public": [
+            {
+                "input": "3,0,1",
+                "expectedOutput": "2"
+            },
+            {
+                "input": "0,1",
+                "expectedOutput": "2"
+            }
+        ],
+        "hidden": [
+            {
+                "input": "9,6,4,2,3,5,7,0,1",
+                "expectedOutput": "8"
+            },
+            {
+                "input": "0",
+                "expectedOutput": "1"
+            },
+            {
+                "input": "1",
+                "expectedOutput": "0"
+            }
+        ]
+    },
+    "starterCode": {
+        "python": "class Solution:\n    def missingNumber(self, nums: List[int]) -> int:\n        ",
+        "c": "int missingNumber(int* nums, int numsSize) {\n    \n}",
+        "cpp": "class Solution {\npublic:\n    int missingNumber(vector<int>& nums) {\n        \n    }\n};",
+        "java": "class Solution {\n    public int missingNumber(int[] nums) {\n        \n    }\n}",
+        "rust": "impl Solution {\n    pub fn missing_number(nums: Vec<i32>) -> i32 {\n        \n    }\n}"
+    },
+    "driverCode": {
+        "python": "\nimport sys\nimport json\n\nif __name__ == '__main__':\n    line = sys.stdin.read().strip()\n    nums = json.loads('[' + line + ']')\n    sol = Solution()\n    print(sol.missingNumber(nums))",
+        "c": "\n#include <stdio.h>\n#include <stdlib.h>\n#include <string.h>\n\nint main() {\n    char line[50000];\n    if (fgets(line, sizeof(line), stdin)) {\n        int nums[10005];\n        int numsSize = 0;\n        char *token = strtok(line, \",\\n\");\n        while (token != NULL) {\n            nums[numsSize++] = atoi(token);\n            token = strtok(NULL, \",\\n\");\n        }\n        printf(\"%d\", missingNumber(nums, numsSize));\n    }\n    return 0;\n}",
+        "cpp": "\n#include <iostream>\n#include <vector>\n#include <sstream>\n#include <string>\n#include <algorithm>\n\nusing namespace std;\n\nint main() {\n    string line;\n    if (getline(cin, line)) {\n        vector<int> nums;\n        stringstream ss(line);\n        string segment;\n        while(getline(ss, segment, ',')) {\n            nums.push_back(stoi(segment));\n        }\n        Solution sol;\n        cout << sol.missingNumber(nums);\n    }\n    return 0;\n}",
+        "java": "\nimport java.util.*;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner scanner = new Scanner(System.in);\n        if (scanner.hasNextLine()) {\n            String line = scanner.nextLine();\n            String[] parts = line.split(\",\");\n            int[] nums = new int[parts.length];\n            for (int i = 0; i < parts.length; i++) {\n                nums[i] = Integer.parseInt(parts[i].trim());\n            }\n            Solution sol = new Solution();\n            System.out.print(sol.missingNumber(nums));\n        }\n    }\n}",
+        "rust": "\nuse std::io::{self, BufRead};\n\nfn main() {\n    let stdin = io::stdin();\n    let mut lines = stdin.lock().lines();\n    if let Some(Ok(line)) = lines.next() {\n        let nums: Vec<i32> = line.split(',')\n            .map(|s| s.trim().parse().unwrap())\n            .collect();\n        print!(\"{}\", Solution::missing_number(nums));\n    }\n}"
+    }
+}

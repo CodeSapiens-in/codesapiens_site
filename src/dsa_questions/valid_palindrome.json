@@ -1,0 +1,71 @@
+{
+    "id": 18,
+    "title": "Valid Palindrome",
+    "difficulty": "Easy",
+    "description": "A phrase is a palindrome if, after converting all uppercase letters into lowercase letters and removing all non-alphanumeric characters, it reads the same forward and backward. Alphanumeric characters include letters and numbers.\n\nGiven a string s, return true if it is a palindrome, or false otherwise.",
+    "constraints": [
+        "1 <= s.length <= 2 * 10^5",
+        "s consists only of printable ASCII characters."
+    ],
+    "examples": [
+        {
+            "input": "s = \"A man, a plan, a canal: Panama\"",
+            "output": "true",
+            "explanation": "\"amanaplanacanalpanama\" is a palindrome."
+        },
+        {
+            "input": "s = \"race a car\"",
+            "output": "false",
+            "explanation": "\"raceacar\" is not a palindrome."
+        },
+        {
+            "input": "s = \" \"",
+            "output": "true",
+            "explanation": "s is an empty string \"\" after removing non-alphanumeric characters.\nSince an empty string reads the same forward and backward, it is a palindrome."
+        }
+    ],
+    "testCases": {
+        "public": [
+            {
+                "input": "A man, a plan, a canal: Panama",
+                "expectedOutput": "true"
+            },
+            {
+                "input": "race a car",
+                "expectedOutput": "false"
+            },
+            {
+                "input": " ",
+                "expectedOutput": "true"
+            }
+        ],
+        "hidden": [
+            {
+                "input": "a.",
+                "expectedOutput": "true"
+            },
+            {
+                "input": "0P",
+                "expectedOutput": "false"
+            },
+            {
+                "input": "ab_a",
+                "expectedOutput": "true"
+            }
+        ]
+    },
+    "starterCode": {
+        "python": "class Solution:\n    def isPalindrome(self, s: str) -> bool:\n        ",
+        "c": "#include <stdbool.h>\n\nbool isPalindrome(char * s) {\n    \n}",
+        "cpp": "class Solution {\npublic:\n    bool isPalindrome(string s) {\n        \n    }\n};",
+        "java": "class Solution {\n    public boolean isPalindrome(String s) {\n        \n    }\n}",
+        "rust": "impl Solution {\n    pub fn is_palindrome(s: String) -> bool {\n        \n    }\n}"
+    },
+    "driverCode": {
+        "python": "\nimport sys\n\nif __name__ == '__main__':\n    s = sys.stdin.read()\n    if not s:\n        s = \"\"\n    else:\n        s = s.strip()\n        # Handle potentially empty input effectively for test cases like \" \" which might be read weirdly depending on piston env\n        # But \" \" stripped is \"\", and \" \" is palindrome. \"\" is palindrome.\n        # Wait, \" \" input in standard input might just be a whitespace char.\n        # Let's trust strip() unless it needs space preservation. The problem says \"non-alphanumeric\" removed. So space doesn't matter for logic, but being passed correctly matters.\n        # Actually, input is usually line based. For \" \", read() gives \" \".\n    \n    sol = Solution()\n    print(\"true\" if sol.isPalindrome(s) else \"false\")",
+        "c": "\n#include <stdio.h>\n#include <stdlib.h>\n\nint main() {\n    char s[200005];\n    if (fgets(s, sizeof(s), stdin)) {\n        // fgets keeps newline. Manual remove if strict match needed, but problem ignores non-alphanumeric anyway so newline is ignored by correct logic.\n        // But user implementation might rely on length. Let's removing trailing newline.\n        size_t len = strlen(s);\n        if (len > 0 && s[len-1] == '\\n') s[len-1] = '\\0';\n        \n        printf(\"%s\", isPalindrome(s) ? \"true\" : \"false\");\n    }\n    return 0;\n}",
+        "cpp": "\n#include <iostream>\n#include <string>\n\nusing namespace std;\n\nint main() {\n    string s;\n    getline(cin, s);\n    Solution sol;\n    cout << (sol.isPalindrome(s) ? \"true\" : \"false\");\n    return 0;\n}",
+        "java": "\nimport java.util.*;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner scanner = new Scanner(System.in);\n        if (scanner.hasNextLine()) {\n            String s = scanner.nextLine();\n            Solution sol = new Solution();\n            System.out.print(sol.isPalindrome(s) ? \"true\" : \"false\");\n        } else {\n             // Empty input case\n             Solution sol = new Solution();\n             System.out.print(sol.isPalindrome(\"\") ? \"true\" : \"false\");\n        }\n    }\n}",
+        "rust": "\nuse std::io::{self, Read};\n\nfn main() {\n    let mut buffer = String::new();\n    io::stdin().read_to_string(&mut buffer).unwrap();\n    let s = buffer.trim_end().to_string(); // trim_end to remove trailing newline potentially\n    print!(\"{}\", if Solution::is_palindrome(s) { \"true\" } else { \"false\" });\n}"
+    }
+}

@@ -1,0 +1,68 @@
+{
+    "id": 8,
+    "title": "Contains Duplicate",
+    "difficulty": "Easy",
+    "description": "Given an integer array nums, return true if any value appears at least twice in the array, and return false if every element is distinct.",
+    "constraints": [
+        "1 <= nums.length <= 10^5",
+        "-10^9 <= nums[i] <= 10^9"
+    ],
+    "examples": [
+        {
+            "input": "nums = [1,2,3,1]",
+            "output": "true"
+        },
+        {
+            "input": "nums = [1,2,3,4]",
+            "output": "false"
+        },
+        {
+            "input": "nums = [1,1,1,3,3,4,3,2,4,2]",
+            "output": "true"
+        }
+    ],
+    "testCases": {
+        "public": [
+            {
+                "input": "1,2,3,1",
+                "expectedOutput": "true"
+            },
+            {
+                "input": "1,2,3,4",
+                "expectedOutput": "false"
+            },
+            {
+                "input": "1,1,1,3,3,4,3,2,4,2",
+                "expectedOutput": "true"
+            }
+        ],
+        "hidden": [
+            {
+                "input": "1",
+                "expectedOutput": "false"
+            },
+            {
+                "input": "1,2,3,4,5,6,7,8,9,10",
+                "expectedOutput": "false"
+            },
+            {
+                "input": "1,2,3,4,5,1",
+                "expectedOutput": "true"
+            }
+        ]
+    },
+    "starterCode": {
+        "python": "class Solution:\n    def containsDuplicate(self, nums: List[int]) -> bool:\n        ",
+        "c": "#include <stdbool.h>\n\nbool containsDuplicate(int* nums, int numsSize) {\n    \n}",
+        "cpp": "class Solution {\npublic:\n    bool containsDuplicate(vector<int>& nums) {\n        \n    }\n};",
+        "java": "class Solution {\n    public boolean containsDuplicate(int[] nums) {\n        \n    }\n}",
+        "rust": "impl Solution {\n    pub fn contains_duplicate(nums: Vec<i32>) -> bool {\n        \n    }\n}"
+    },
+    "driverCode": {
+        "python": "\nimport sys\nimport json\n\nif __name__ == '__main__':\n    line = sys.stdin.read().strip()\n    nums = json.loads('[' + line + ']')\n    sol = Solution()\n    print(\"true\" if sol.containsDuplicate(nums) else \"false\")",
+        "c": "\n#include <stdio.h>\n#include <stdlib.h>\n#include <string.h>\n\nint cmpfunc (const void * a, const void * b) {\n   return ( *(int*)a - *(int*)b );\n}\n\nint main() {\n    char line[500000];\n    if (fgets(line, sizeof(line), stdin)) {\n        int nums[10000];\n        int numsSize = 0;\n        char *token = strtok(line, \",\\n\");\n        while (token != NULL) {\n            nums[numsSize++] = atoi(token);\n            token = strtok(NULL, \",\\n\");\n        }\n        // Note: Sort logic usually not needed if O(N) hash set used, but for C sort is common. \n        // But user implements func. Driver just calls it.\n        // Assuming user implements it.\n        printf(\"%s\", containsDuplicate(nums, numsSize) ? \"true\" : \"false\");\n    }\n    return 0;\n}",
+        "cpp": "\n#include <iostream>\n#include <vector>\n#include <sstream>\n#include <string>\n#include <algorithm>\n\nusing namespace std;\n\nint main() {\n    string line;\n    if (getline(cin, line)) {\n        vector<int> nums;\n        stringstream ss(line);\n        string segment;\n        while(getline(ss, segment, ',')) {\n            nums.push_back(stoi(segment));\n        }\n        Solution sol;\n        cout << (sol.containsDuplicate(nums) ? \"true\" : \"false\");\n    }\n    return 0;\n}",
+        "java": "\nimport java.util.*;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner scanner = new Scanner(System.in);\n        if (scanner.hasNextLine()) {\n            String line = scanner.nextLine();\n            String[] parts = line.split(\",\");\n            int[] nums = new int[parts.length];\n            for (int i = 0; i < parts.length; i++) {\n                nums[i] = Integer.parseInt(parts[i].trim());\n            }\n            Solution sol = new Solution();\n            System.out.print(sol.containsDuplicate(nums) ? \"true\" : \"false\");\n        }\n    }\n}",
+        "rust": "\nuse std::io::{self, BufRead};\n\nfn main() {\n    let stdin = io::stdin();\n    let mut lines = stdin.lock().lines();\n    if let Some(Ok(line)) = lines.next() {\n        let nums: Vec<i32> = line.split(',')\n            .map(|s| s.trim().parse().unwrap())\n            .collect();\n        print!(\"{}\", if Solution::contains_duplicate(nums) { \"true\" } else { \"false\" });\n    }\n}"
+    }
+}

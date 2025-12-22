@@ -1,0 +1,72 @@
+{
+    "id": 19,
+    "title": "Length of Last Word",
+    "difficulty": "Easy",
+    "description": "Given a string s consisting of words and spaces, return the length of the last word in the string.\n\nA word is a maximal substring consisting of non-space characters only.",
+    "constraints": [
+        "1 <= s.length <= 10^4",
+        "s consists of only English letters and spaces ' '.",
+        "There will be at least one word in s."
+    ],
+    "examples": [
+        {
+            "input": "s = \"Hello World\"",
+            "output": "5",
+            "explanation": "The last word is \"World\" with length 5."
+        },
+        {
+            "input": "s = \"   fly me   to   the moon  \"",
+            "output": "4",
+            "explanation": "The last word is \"moon\" with length 4."
+        },
+        {
+            "input": "s = \"luffy is still joyboy\"",
+            "output": "6",
+            "explanation": "The last word is \"joyboy\" with length 6."
+        }
+    ],
+    "testCases": {
+        "public": [
+            {
+                "input": "Hello World",
+                "expectedOutput": "5"
+            },
+            {
+                "input": "   fly me   to   the moon  ",
+                "expectedOutput": "4"
+            },
+            {
+                "input": "luffy is still joyboy",
+                "expectedOutput": "6"
+            }
+        ],
+        "hidden": [
+            {
+                "input": "a",
+                "expectedOutput": "1"
+            },
+            {
+                "input": "    day    ",
+                "expectedOutput": "3"
+            },
+            {
+                "input": "coding is fun",
+                "expectedOutput": "3"
+            }
+        ]
+    },
+    "starterCode": {
+        "python": "class Solution:\n    def lengthOfLastWord(self, s: str) -> int:\n        ",
+        "c": "int lengthOfLastWord(char * s) {\n    \n}",
+        "cpp": "class Solution {\npublic:\n    int lengthOfLastWord(string s) {\n        \n    }\n};",
+        "java": "class Solution {\n    public int lengthOfLastWord(String s) {\n        \n    }\n}",
+        "rust": "impl Solution {\n    pub fn length_of_last_word(s: String) -> i32 {\n        \n    }\n}"
+    },
+    "driverCode": {
+        "python": "\nimport sys\n\nif __name__ == '__main__':\n    s = sys.stdin.read().rstrip('\\n')\n    sol = Solution()\n    print(sol.lengthOfLastWord(s))",
+        "c": "\n#include <stdio.h>\n#include <stdlib.h>\n#include <string.h>\n\nint main() {\n    char s[10005];\n    if (fgets(s, sizeof(s), stdin)) {\n        size_t len = strlen(s);\n        if (len > 0 && s[len-1] == '\\n') s[len-1] = '\\0';\n        printf(\"%d\", lengthOfLastWord(s));\n    }\n    return 0;\n}",
+        "cpp": "\n#include <iostream>\n#include <string>\n\nusing namespace std;\n\nint main() {\n    string s;\n    getline(cin, s);\n    Solution sol;\n    cout << sol.lengthOfLastWord(s);\n    return 0;\n}",
+        "java": "\nimport java.util.*;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner scanner = new Scanner(System.in);\n        if (scanner.hasNextLine()) {\n            String s = scanner.nextLine();\n            Solution sol = new Solution();\n            System.out.print(sol.lengthOfLastWord(s));\n        }\n    }\n}",
+        "rust": "\nuse std::io::{self, Read};\n\nfn main() {\n    let mut buffer = String::new();\n    io::stdin().read_to_string(&mut buffer).unwrap();\n    let s = buffer.trim_end().to_string();\n    print!(\"{}\", Solution::length_of_last_word(s));\n}"
+    }
+}

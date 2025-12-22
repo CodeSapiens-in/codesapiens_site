@@ -1,0 +1,63 @@
+{
+    "id": 20,
+    "title": "Longest Common Prefix",
+    "difficulty": "Easy",
+    "description": "Write a function to find the longest common prefix string amongst an array of strings.\n\nIf there is no common prefix, return an empty string \"\".",
+    "constraints": [
+        "1 <= strs.length <= 200",
+        "0 <= strs[i].length <= 200",
+        "strs[i] consists of only lowercase English letters."
+    ],
+    "examples": [
+        {
+            "input": "strs = [\"flower\",\"flow\",\"flight\"]",
+            "output": "\"fl\"",
+            "explanation": "\"fl\" is the longest common prefix."
+        },
+        {
+            "input": "strs = [\"dog\",\"racecar\",\"car\"]",
+            "output": "\"\"",
+            "explanation": "There is no common prefix among the input strings."
+        }
+    ],
+    "testCases": {
+        "public": [
+            {
+                "input": "flower,flow,flight",
+                "expectedOutput": "fl"
+            },
+            {
+                "input": "dog,racecar,car",
+                "expectedOutput": ""
+            }
+        ],
+        "hidden": [
+            {
+                "input": "ab,a",
+                "expectedOutput": "a"
+            },
+            {
+                "input": "prefix,pre,pref",
+                "expectedOutput": "pre"
+            },
+            {
+                "input": "a,b,c",
+                "expectedOutput": ""
+            }
+        ]
+    },
+    "starterCode": {
+        "python": "class Solution:\n    def longestCommonPrefix(self, strs: List[str]) -> str:\n        ",
+        "c": "char * longestCommonPrefix(char ** strs, int strsSize) {\n    \n}",
+        "cpp": "class Solution {\npublic:\n    string longestCommonPrefix(vector<string>& strs) {\n        \n    }\n};",
+        "java": "class Solution {\n    public String longestCommonPrefix(String[] strs) {\n        \n    }\n}",
+        "rust": "impl Solution {\n    pub fn longest_common_prefix(strs: Vec<String>) -> String {\n        \n    }\n}"
+    },
+    "driverCode": {
+        "python": "\nimport sys\nimport json\n\nif __name__ == '__main__':\n    line = sys.stdin.read().strip()\n    # Simple CSV parser for input string array simulation\n    # Actually standard json parser might not work if it's just comma separated words without quotes/brackets in input test case\n    # The example input is \"flower,flow,flight\".\n    if line:\n        strs = line.split(',')\n        strs = [s.strip() for s in strs]\n        sol = Solution()\n        print(sol.longestCommonPrefix(strs))",
+        "c": "\n#include <stdio.h>\n#include <stdlib.h>\n#include <string.h>\n\nint main() {\n    char line[10000];\n    if (fgets(line, sizeof(line), stdin)) {\n        char *strs[205];\n        int strsSize = 0;\n        char *token = strtok(line, \",\\n\");\n        while (token != NULL) {\n            strs[strsSize] = malloc(strlen(token) + 1);\n            strcpy(strs[strsSize], token);\n            // trim optional newline\n             size_t len = strlen(strs[strsSize]);\n            if (len > 0 && strs[strsSize][len-1] == '\\n') strs[strsSize][len-1] = '\\0';\n            strsSize++;\n            token = strtok(NULL, \",\\n\");\n        }\n        char* res = longestCommonPrefix(strs, strsSize);\n        printf(\"%s\", res ? res : \"\");\n    }\n    return 0;\n}",
+        "cpp": "\n#include <iostream>\n#include <vector>\n#include <sstream>\n#include <string>\n#include <algorithm>\n\nusing namespace std;\n\nint main() {\n    string line;\n    if (getline(cin, line)) {\n        vector<string> strs;\n        stringstream ss(line);\n        string segment;\n        while(getline(ss, segment, ',')) {\n            // Remove potential trailing newline/cr\n             if (!segment.empty() && segment.back() == '\\r') segment.pop_back();\n            strs.push_back(segment);\n        }\n        Solution sol;\n        cout << sol.longestCommonPrefix(strs);\n    }\n    return 0;\n}",
+        "java": "\nimport java.util.*;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner scanner = new Scanner(System.in);\n        if (scanner.hasNextLine()) {\n            String line = scanner.nextLine();\n            String[] strs = line.split(\",\");\n             for (int i=0; i<strs.length; i++) strs[i] = strs[i].trim();\n            Solution sol = new Solution();\n            System.out.print(sol.longestCommonPrefix(strs));\n        }\n    }\n}",
+        "rust": "\nuse std::io::{self, BufRead};\n\nfn main() {\n    let stdin = io::stdin();\n    let mut lines = stdin.lock().lines();\n    if let Some(Ok(line)) = lines.next() {\n        let strs: Vec<String> = line.split(',')\n            .map(|s| s.trim().to_string())\n            .collect();\n        print!(\"{}\", Solution::longest_common_prefix(strs));\n    }\n}"
+    }
+}

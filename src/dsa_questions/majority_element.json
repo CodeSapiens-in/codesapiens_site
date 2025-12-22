@@ -1,0 +1,61 @@
+{
+    "id": 11,
+    "title": "Majority Element",
+    "difficulty": "Easy",
+    "description": "Given an array nums of size n, return the majority element.\n\nThe majority element is the element that appears more than \u230an / 2\u230b times. You may assume that the majority element always exists in the array.",
+    "constraints": [
+        "n == nums.length",
+        "1 <= n <= 5 * 10^4",
+        "-10^9 <= nums[i] <= 10^9"
+    ],
+    "examples": [
+        {
+            "input": "nums = [3,2,3]",
+            "output": "3"
+        },
+        {
+            "input": "nums = [2,2,1,1,1,2,2]",
+            "output": "2"
+        }
+    ],
+    "testCases": {
+        "public": [
+            {
+                "input": "3,2,3",
+                "expectedOutput": "3"
+            },
+            {
+                "input": "2,2,1,1,1,2,2",
+                "expectedOutput": "2"
+            }
+        ],
+        "hidden": [
+            {
+                "input": "1",
+                "expectedOutput": "1"
+            },
+            {
+                "input": "6,6,6,7,7",
+                "expectedOutput": "6"
+            },
+            {
+                "input": "8,8,7,7,7",
+                "expectedOutput": "7"
+            }
+        ]
+    },
+    "starterCode": {
+        "python": "class Solution:\n    def majorityElement(self, nums: List[int]) -> int:\n        ",
+        "c": "int majorityElement(int* nums, int numsSize) {\n    \n}",
+        "cpp": "class Solution {\npublic:\n    int majorityElement(vector<int>& nums) {\n        \n    }\n};",
+        "java": "class Solution {\n    public int majorityElement(int[] nums) {\n        \n    }\n}",
+        "rust": "impl Solution {\n    pub fn majority_element(nums: Vec<i32>) -> i32 {\n        \n    }\n}"
+    },
+    "driverCode": {
+        "python": "\nimport sys\nimport json\n\nif __name__ == '__main__':\n    line = sys.stdin.read().strip()\n    nums = json.loads('[' + line + ']')\n    sol = Solution()\n    print(sol.majorityElement(nums))",
+        "c": "\n#include <stdio.h>\n#include <stdlib.h>\n#include <string.h>\n\nint cmpfunc (const void * a, const void * b) {\n   return ( *(int*)a - *(int*)b );\n}\n\nint main() {\n    char line[500000];\n    if (fgets(line, sizeof(line), stdin)) {\n        int nums[50005];\n        int numsSize = 0;\n        char *token = strtok(line, \",\\n\");\n        while (token != NULL) {\n            nums[numsSize++] = atoi(token);\n            token = strtok(NULL, \",\\n\");\n        }\n        printf(\"%d\", majorityElement(nums, numsSize));\n    }\n    return 0;\n}",
+        "cpp": "\n#include <iostream>\n#include <vector>\n#include <sstream>\n#include <string>\n#include <algorithm>\n\nusing namespace std;\n\nint main() {\n    string line;\n    if (getline(cin, line)) {\n        vector<int> nums;\n        stringstream ss(line);\n        string segment;\n        while(getline(ss, segment, ',')) {\n            nums.push_back(stoi(segment));\n        }\n        Solution sol;\n        cout << sol.majorityElement(nums);\n    }\n    return 0;\n}",
+        "java": "\nimport java.util.*;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner scanner = new Scanner(System.in);\n        if (scanner.hasNextLine()) {\n            String line = scanner.nextLine();\n            String[] parts = line.split(\",\");\n            int[] nums = new int[parts.length];\n            for (int i = 0; i < parts.length; i++) {\n                nums[i] = Integer.parseInt(parts[i].trim());\n            }\n            Solution sol = new Solution();\n            System.out.print(sol.majorityElement(nums));\n        }\n    }\n}",
+        "rust": "\nuse std::io::{self, BufRead};\n\nfn main() {\n    let stdin = io::stdin();\n    let mut lines = stdin.lock().lines();\n    if let Some(Ok(line)) = lines.next() {\n        let nums: Vec<i32> = line.split(',')\n            .map(|s| s.trim().parse().unwrap())\n            .collect();\n        print!(\"{}\", Solution::majority_element(nums));\n    }\n}"
+    }
+}

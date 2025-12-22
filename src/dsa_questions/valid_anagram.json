@@ -1,0 +1,60 @@
+{
+    "id": 6,
+    "title": "Valid Anagram",
+    "difficulty": "Easy",
+    "description": "Given two strings s and t, return true if t is an anagram of s, and false otherwise.\n\nAn Anagram is a word or phrase formed by rearranging the letters of a different word or phrase, typically using all the original letters exactly once.",
+    "constraints": [
+        "1 <= s.length, t.length <= 5 * 10^4",
+        "s and t consist of lowercase English letters."
+    ],
+    "examples": [
+        {
+            "input": "s = \"anagram\", t = \"nagaram\"",
+            "output": "true"
+        },
+        {
+            "input": "s = \"rat\", t = \"car\"",
+            "output": "false"
+        }
+    ],
+    "testCases": {
+        "public": [
+            {
+                "input": "anagram\nnagaram",
+                "expectedOutput": "true"
+            },
+            {
+                "input": "rat\ncar",
+                "expectedOutput": "false"
+            }
+        ],
+        "hidden": [
+            {
+                "input": "ab\na",
+                "expectedOutput": "false"
+            },
+            {
+                "input": "listen\nsilent",
+                "expectedOutput": "true"
+            },
+            {
+                "input": "hello\nworld",
+                "expectedOutput": "false"
+            }
+        ]
+    },
+    "starterCode": {
+        "python": "class Solution:\n    def isAnagram(self, s: str, t: str) -> bool:\n        ",
+        "c": "#include <stdbool.h>\n\nbool isAnagram(char * s, char * t) {\n    \n}",
+        "cpp": "class Solution {\npublic:\n    bool isAnagram(string s, string t) {\n        \n    }\n};",
+        "java": "class Solution {\n    public boolean isAnagram(String s, String t) {\n        \n    }\n}",
+        "rust": "impl Solution {\n    pub fn is_anagram(s: String, t: String) -> bool {\n        \n    }\n}"
+    },
+    "driverCode": {
+        "python": "\nimport sys\n\nif __name__ == '__main__':\n    lines = sys.stdin.read().splitlines()\n    if len(lines) >= 2:\n        s = lines[0].strip()\n        t = lines[1].strip()\n        sol = Solution()\n        result = sol.isAnagram(s, t)\n        print(\"true\" if result else \"false\")",
+        "c": "\n#include <stdio.h>\n#include <stdlib.h>\n#include <string.h>\n\nint main() {\n    char s[50005], t[50005];\n    if (fgets(s, sizeof(s), stdin) && fgets(t, sizeof(t), stdin)) {\n        s[strcspn(s, \"\\n\")] = 0;\n        t[strcspn(t, \"\\n\")] = 0;\n        printf(\"%s\", isAnagram(s, t) ? \"true\" : \"false\");\n    }\n    return 0;\n}",
+        "cpp": "\n#include <iostream>\n#include <string>\n\nusing namespace std;\n\nint main() {\n    string s, t;\n    if (getline(cin, s) && getline(cin, t)) {\n        if (!s.empty() && s.back() == '\\r') s.pop_back();\n        if (!t.empty() && t.back() == '\\r') t.pop_back();\n        Solution sol;\n        cout << (sol.isAnagram(s, t) ? \"true\" : \"false\");\n    }\n    return 0;\n}",
+        "java": "\nimport java.util.*;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner scanner = new Scanner(System.in);\n        if (scanner.hasNextLine()) {\n            String s = scanner.nextLine().trim();\n            if (scanner.hasNextLine()) {\n                String t = scanner.nextLine().trim();\n                Solution sol = new Solution();\n                System.out.print(sol.isAnagram(s, t) ? \"true\" : \"false\");\n            }\n        }\n    }\n}",
+        "rust": "\nuse std::io::{self, BufRead};\n\nfn main() {\n    let stdin = io::stdin();\n    let mut lines = stdin.lock().lines();\n    if let Some(Ok(s)) = lines.next() {\n        let s = s.trim().to_string();\n        if let Some(Ok(t)) = lines.next() {\n            let t = t.trim().to_string();\n            print!(\"{}\", if Solution::is_anagram(s, t) { \"true\" } else { \"false\" });\n        }\n    }\n}"
+    }
+}

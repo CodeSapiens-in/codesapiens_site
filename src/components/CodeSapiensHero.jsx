@@ -72,74 +72,124 @@ const StatsSection = () => {
                     </div>
 
                     {/* Right: Top Colleges Chart */}
-                    <div className="bg-[#1E1919] p-8 rounded-2xl border border-gray-800 h-full">
-                        <h4 className="text-xl font-bold mb-6 flex items-center gap-2">
-                            <Code className="text-[#0061FE]" /> Top Active Colleges
-                        </h4>
-                        <div className="space-y-5">
-                            {loading ? (
-                                <div className="text-center text-gray-500 py-10">Loading stats...</div>
-                            ) : stats.topColleges.filter(c => c.name && c.name !== "Not specified").length > 0 ? (
-                                stats.topColleges
-                                    .filter(c => c.name && c.name !== "Not specified")
-                                    .slice(0, 5) // Show top 5
-                                    .map((college, index) => {
-                                        // Rank Styles
-                                        let rankColor = "text-gray-400";
-                                        let rankBg = "bg-gray-800";
-                                        let barGradient = "from-gray-600 to-gray-500";
-                                        let icon = null;
+                    <div className="col-span-2 md:col-span-1 h-full">
+                        <div className="bg-[#1E1919] p-8 rounded-2xl border border-gray-800 h-full flex flex-col relative overflow-hidden group">
+                            {/* Background Glow */}
+                            <div className="absolute top-0 right-0 w-64 h-64 bg-[#0061FE]/10 rounded-full blur-[80px] -z-10 group-hover:bg-[#0061FE]/20 transition-colors duration-500"></div>
 
-                                        if (index === 0) {
-                                            rankColor = "text-yellow-400";
-                                            rankBg = "bg-yellow-400/10";
-                                            barGradient = "from-yellow-400 to-orange-500";
-                                            icon = <Crown className="w-4 h-4 text-yellow-400 fill-yellow-400/20" />;
-                                        } else if (index === 1) {
-                                            rankColor = "text-gray-300";
-                                            rankBg = "bg-gray-300/10";
-                                            barGradient = "from-gray-300 to-gray-500";
-                                        } else if (index === 2) {
-                                            rankColor = "text-amber-600";
-                                            rankBg = "bg-amber-600/10";
-                                            barGradient = "from-amber-600 to-amber-800";
-                                        } else {
-                                            barGradient = "from-[#0061FE] to-[#00C6F7]";
-                                        }
+                            <h4 className="text-2xl font-bold mb-8 flex items-center gap-3">
+                                <span className="bg-[#0061FE]/20 p-2 rounded-lg text-[#0061FE]">
+                                    <Crown size={24} />
+                                </span>
+                                Top Active Colleges
+                            </h4>
 
-                                        return (
-                                            <div key={index} className="relative group">
-                                                <div className="flex items-center gap-3 mb-2">
-                                                    <div className={`w-8 h-8 flex items-center justify-center rounded-full font-bold text-sm ${rankBg} ${rankColor}`}>
-                                                        {index + 1}
+                            <div className="flex-1 flex flex-col justify-center">
+                                {loading ? (
+                                    <div className="text-center text-gray-500 py-10 animate-pulse">Loading leaderboards...</div>
+                                ) : stats.topColleges.filter(c => c.name && c.name !== "Not specified").length > 0 ? (
+                                    <div className="space-y-8">
+                                        {/* Top 3 Podium - Only show if we have enough data, else fallback to list */}
+                                        {stats.topColleges.filter(c => c.name && c.name !== "Not specified").length >= 3 ? (
+                                            <div className="flex items-end justify-center gap-4 mb-4 min-h-[180px]">
+                                                {/* 2nd Place */}
+                                                <motion.div
+                                                    initial={{ opacity: 0, y: 50 }}
+                                                    whileInView={{ opacity: 1, y: 0 }}
+                                                    transition={{ delay: 0.2 }}
+                                                    className="flex flex-col items-center w-1/3"
+                                                >
+                                                    <div className="text-center mb-2">
+                                                        <span className="text-gray-300 font-bold block text-sm sm:text-base line-clamp-2 min-h-[2.5em] leading-tight">
+                                                            {stats.topColleges.filter(c => c.name && c.name !== "Not specified")[1].name}
+                                                        </span>
+                                                        <span className="text-gray-500 text-xs font-mono mt-1 block">{stats.topColleges.filter(c => c.name && c.name !== "Not specified")[1].count} Students</span>
                                                     </div>
-                                                    <div className="flex-1 min-w-0">
-                                                        <div className="flex items-center gap-2">
-                                                            <span className={`font-medium truncate ${index === 0 ? 'text-white text-lg' : 'text-gray-300'}`}>
-                                                                {college.name}
-                                                            </span>
-                                                            {icon}
+                                                    <div className="w-full bg-gradient-to-t from-gray-800 to-gray-600/50 rounded-t-lg relative border-t border-x border-gray-600 h-24 flex items-end justify-center pb-2">
+                                                        <span className="text-3xl font-black text-gray-400/20 absolute top-2">2</span>
+                                                        <div className="w-8 h-8 rounded-full bg-gray-400 flex items-center justify-center text-black font-bold text-sm shadow-[0_0_15px_rgba(156,163,175,0.5)]">2</div>
+                                                    </div>
+                                                </motion.div>
+
+                                                {/* 1st Place */}
+                                                <motion.div
+                                                    initial={{ opacity: 0, y: 50 }}
+                                                    whileInView={{ opacity: 1, y: 0 }}
+                                                    transition={{ delay: 0.1 }}
+                                                    className="flex flex-col items-center w-1/3 -mt-4 z-10"
+                                                >
+                                                    <div className="text-center mb-2">
+                                                        <span className="text-yellow-400 font-bold block text-sm sm:text-lg line-clamp-2 min-h-[2.5em] leading-tight drop-shadow-[0_0_10px_rgba(250,204,21,0.3)]">
+                                                            {stats.topColleges.filter(c => c.name && c.name !== "Not specified")[0].name}
+                                                        </span>
+                                                        <span className="text-yellow-500/80 text-xs font-mono mt-1 block font-bold">{stats.topColleges.filter(c => c.name && c.name !== "Not specified")[0].count} Students</span>
+                                                    </div>
+                                                    <div className="w-full bg-gradient-to-t from-yellow-900/40 to-yellow-600/40 rounded-t-lg relative border-t border-x border-yellow-500 h-32 flex items-end justify-center pb-4 overflow-hidden">
+                                                        <div className="absolute inset-0 bg-yellow-400/10 animate-pulse"></div>
+                                                        <span className="text-4xl font-black text-yellow-400/20 absolute top-2">1</span>
+                                                        <div className="w-10 h-10 rounded-full bg-yellow-400 flex items-center justify-center text-black font-bold text-lg shadow-[0_0_20px_rgba(250,204,21,0.6)] relative z-10">
+                                                            <Crown size={20} />
                                                         </div>
                                                     </div>
-                                                    <span className={`font-bold ${rankColor}`}>{college.count}</span>
-                                                </div>
-                                                <div className="h-2 bg-gray-800 rounded-full overflow-hidden ml-11">
-                                                    <motion.div
-                                                        initial={{ width: 0 }}
-                                                        whileInView={{ width: `${(college.count / stats.topColleges[0].count) * 100}%` }}
-                                                        transition={{ duration: 1, delay: index * 0.1 }}
-                                                        className={`h-full bg-gradient-to-r ${barGradient} rounded-full`}
-                                                    />
-                                                </div>
+                                                </motion.div>
+
+                                                {/* 3rd Place */}
+                                                <motion.div
+                                                    initial={{ opacity: 0, y: 50 }}
+                                                    whileInView={{ opacity: 1, y: 0 }}
+                                                    transition={{ delay: 0.3 }}
+                                                    className="flex flex-col items-center w-1/3"
+                                                >
+                                                    <div className="text-center mb-2">
+                                                        <span className="text-amber-700 font-bold block text-sm sm:text-base line-clamp-2 min-h-[2.5em] leading-tight">
+                                                            {stats.topColleges.filter(c => c.name && c.name !== "Not specified")[2].name}
+                                                        </span>
+                                                        <span className="text-gray-500 text-xs font-mono mt-1 block">{stats.topColleges.filter(c => c.name && c.name !== "Not specified")[2].count} Students</span>
+                                                    </div>
+                                                    <div className="w-full bg-gradient-to-t from-amber-900/40 to-amber-700/40 rounded-t-lg relative border-t border-x border-amber-800 h-20 flex items-end justify-center pb-2">
+                                                        <span className="text-3xl font-black text-amber-800/20 absolute top-2">3</span>
+                                                        <div className="w-8 h-8 rounded-full bg-amber-700 flex items-center justify-center text-white font-bold text-sm shadow-[0_0_15px_rgba(180,83,9,0.5)]">3</div>
+                                                    </div>
+                                                </motion.div>
                                             </div>
-                                        );
-                                    })
-                            ) : (
-                                <div className="text-center text-gray-500 py-10">
-                                    <p>Stats currently unavailable</p>
-                                    <p className="text-xs mt-2">Backend: {BACKEND_URL}</p>
-                                </div>
-                            )}
+                                        ) : null}
+
+                                        {/* Remaining List (4th and 5th) */}
+                                        <div className="space-y-3 mt-4">
+                                            {stats.topColleges
+                                                .filter(c => c.name && c.name !== "Not specified")
+                                                .slice(stats.topColleges.filter(c => c.name && c.name !== "Not specified").length >= 3 ? 3 : 0, 5) // Skip top 3 if we showed podium, else show all
+                                                .map((college, index) => {
+                                                    const actualIndex = stats.topColleges.filter(c => c.name && c.name !== "Not specified").length >= 3 ? index + 3 : index;
+                                                    return (
+                                                        <motion.div
+                                                            key={index}
+                                                            initial={{ opacity: 0, x: -20 }}
+                                                            whileInView={{ opacity: 1, x: 0 }}
+                                                            transition={{ delay: 0.4 + (index * 0.1) }}
+                                                            className="flex items-center gap-4 p-3 rounded-xl bg-white/5 hover:bg-white/10 transition-colors border border-white/5"
+                                                        >
+                                                            <div className="w-8 h-8 rounded-full bg-[#1E1919] border border-gray-700 flex items-center justify-center text-gray-400 font-bold text-sm">
+                                                                {actualIndex + 1}
+                                                            </div>
+                                                            <div className="flex-1 min-w-0">
+                                                                <h5 className="font-medium text-gray-200 truncate">{college.name}</h5>
+                                                            </div>
+                                                            <div className="px-3 py-1 rounded-full bg-[#0061FE]/10 text-[#0061FE] text-xs font-bold">
+                                                                {college.count}
+                                                            </div>
+                                                        </motion.div>
+                                                    );
+                                                })}
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div className="text-center text-gray-500 py-10">
+                                        <p>Stats currently unavailable</p>
+                                        <p className="text-xs mt-2 opacity-50">Backend: {BACKEND_URL}</p>
+                                    </div>
+                                )}
+                            </div>
                         </div>
                     </div>
                 </div>

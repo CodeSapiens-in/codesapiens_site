@@ -1,0 +1,73 @@
+{
+    "id": 16,
+    "title": "Power of Two",
+    "difficulty": "Easy",
+    "description": "Given an integer n, return true if it is a power of two. Otherwise, return false.\n\nAn integer n is a power of two, if there exists an integer x such that n == 2^x.",
+    "constraints": [
+        "-2^31 <= n <= 2^31 - 1"
+    ],
+    "examples": [
+        {
+            "input": "n = 1",
+            "output": "true",
+            "explanation": "2^0 = 1"
+        },
+        {
+            "input": "n = 16",
+            "output": "true",
+            "explanation": "2^4 = 16"
+        },
+        {
+            "input": "n = 3",
+            "output": "false"
+        }
+    ],
+    "testCases": {
+        "public": [
+            {
+                "input": "1",
+                "expectedOutput": "true"
+            },
+            {
+                "input": "16",
+                "expectedOutput": "true"
+            },
+            {
+                "input": "3",
+                "expectedOutput": "false"
+            }
+        ],
+        "hidden": [
+            {
+                "input": "4",
+                "expectedOutput": "true"
+            },
+            {
+                "input": "5",
+                "expectedOutput": "false"
+            },
+            {
+                "input": "0",
+                "expectedOutput": "false"
+            },
+            {
+                "input": "-16",
+                "expectedOutput": "false"
+            }
+        ]
+    },
+    "starterCode": {
+        "python": "class Solution:\n    def isPowerOfTwo(self, n: int) -> bool:\n        ",
+        "c": "#include <stdbool.h>\n\nbool isPowerOfTwo(int n) {\n    \n}",
+        "cpp": "class Solution {\npublic:\n    bool isPowerOfTwo(int n) {\n        \n    }\n};",
+        "java": "class Solution {\n    public boolean isPowerOfTwo(int n) {\n        \n    }\n}",
+        "rust": "impl Solution {\n    pub fn is_power_of_two(n: i32) -> bool {\n        \n    }\n}"
+    },
+    "driverCode": {
+        "python": "\nimport sys\n\nif __name__ == '__main__':\n    line = sys.stdin.read().strip()\n    n = int(line)\n    sol = Solution()\n    print(\"true\" if sol.isPowerOfTwo(n) else \"false\")",
+        "c": "\n#include <stdio.h>\n#include <stdlib.h>\n\nint main() {\n    char line[100];\n    if (fgets(line, sizeof(line), stdin)) {\n        int n = atoi(line);\n        printf(\"%s\", isPowerOfTwo(n) ? \"true\" : \"false\");\n    }\n    return 0;\n}",
+        "cpp": "\n#include <iostream>\n\nusing namespace std;\n\nint main() {\n    int n;\n    if (cin >> n) {\n        Solution sol;\n        cout << (sol.isPowerOfTwo(n) ? \"true\" : \"false\");\n    }\n    return 0;\n}",
+        "java": "\nimport java.util.*;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner scanner = new Scanner(System.in);\n        if (scanner.hasNextInt()) {\n            int n = scanner.nextInt();\n            Solution sol = new Solution();\n            System.out.print(sol.isPowerOfTwo(n) ? \"true\" : \"false\");\n        }\n    }\n}",
+        "rust": "\nuse std::io::{self, BufRead};\n\nfn main() {\n    let stdin = io::stdin();\n    let mut lines = stdin.lock().lines();\n    if let Some(Ok(line)) = lines.next() {\n        let n: i32 = line.trim().parse().unwrap();\n        print!(\"{}\", if Solution::is_power_of_two(n) { \"true\" } else { \"false\" });\n    }\n}"
+    }
+}

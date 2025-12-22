@@ -1,0 +1,72 @@
+{
+    "id": 4,
+    "title": "Valid Parentheses",
+    "difficulty": "Easy",
+    "description": "Given a string s containing just the characters '(', ')', '{', '}', '[' and ']', determine if the input string is valid.\n\nAn input string is valid if:\n1. Open brackets must be closed by the same type of brackets.\n2. Open brackets must be closed in the correct order.\n3. Every close bracket has a corresponding open bracket of the same type.",
+    "constraints": [
+        "1 <= s.length <= 10^4",
+        "s consists of parentheses only '()[]{}'."
+    ],
+    "examples": [
+        {
+            "input": "s = \"()\"",
+            "output": "true"
+        },
+        {
+            "input": "s = \"()[]{}\"",
+            "output": "true"
+        },
+        {
+            "input": "s = \"(]\"",
+            "output": "false"
+        }
+    ],
+    "testCases": {
+        "public": [
+            {
+                "input": "()",
+                "expectedOutput": "true"
+            },
+            {
+                "input": "()[]{}",
+                "expectedOutput": "true"
+            },
+            {
+                "input": "(]",
+                "expectedOutput": "false"
+            }
+        ],
+        "hidden": [
+            {
+                "input": "([)]",
+                "expectedOutput": "false"
+            },
+            {
+                "input": "{[]}",
+                "expectedOutput": "true"
+            },
+            {
+                "input": "]",
+                "expectedOutput": "false"
+            },
+            {
+                "input": "",
+                "expectedOutput": "true"
+            }
+        ]
+    },
+    "starterCode": {
+        "python": "class Solution:\n    def isValid(self, s: str) -> bool:\n        ",
+        "c": "#include <stdbool.h>\n\nbool isValid(char * s) {\n    \n}",
+        "cpp": "class Solution {\npublic:\n    bool isValid(string s) {\n        \n    }\n};",
+        "java": "class Solution {\n    public boolean isValid(String s) {\n        \n    }\n}",
+        "rust": "impl Solution {\n    pub fn is_valid(s: String) -> bool {\n        \n    }\n}"
+    },
+    "driverCode": {
+        "python": "\nimport sys\n\nif __name__ == '__main__':\n    s = sys.stdin.read().strip()\n    sol = Solution()\n    result = sol.isValid(s)\n    print(\"true\" if result else \"false\")",
+        "c": "\n#include <stdio.h>\n#include <stdlib.h>\n#include <string.h>\n\nint main() {\n    char s[10005];\n    if (fgets(s, sizeof(s), stdin)) {\n        s[strcspn(s, \"\\n\")] = 0;\n        bool result = isValid(s);\n        printf(\"%s\", result ? \"true\" : \"false\");\n    }\n    return 0;\n}",
+        "cpp": "\n#include <iostream>\n#include <string>\n\nusing namespace std;\n\nint main() {\n    string s;\n    if (getline(cin, s)) {\n        if (!s.empty() && s[s.length()-1] == '\\n') s.erase(s.length()-1);\n         // Trim potential CR LF\n        if (!s.empty() && s[s.length()-1] == '\\r') s.erase(s.length()-1);\n\n        Solution sol;\n        bool result = sol.isValid(s);\n        cout << (result ? \"true\" : \"false\");\n    }\n    return 0;\n}",
+        "java": "\nimport java.util.*;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner scanner = new Scanner(System.in);\n        if (scanner.hasNextLine()) {\n            String s = scanner.nextLine().trim();\n            Solution sol = new Solution();\n            boolean result = sol.isValid(s);\n            System.out.print(result ? \"true\" : \"false\");\n        }\n    }\n}",
+        "rust": "\nuse std::io::{self, BufRead};\n\nfn main() {\n    let stdin = io::stdin();\n    let mut lines = stdin.lock().lines();\n    if let Some(Ok(s)) = lines.next() {\n        let s = s.trim().to_string();\n        let result = Solution::is_valid(s);\n        print!(\"{}\", if result { \"true\" } else { \"false\" });\n    }\n}"
+    }
+}

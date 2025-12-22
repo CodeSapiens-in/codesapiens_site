@@ -1,0 +1,63 @@
+{
+    "id": 22,
+    "title": "Remove Duplicates from Sorted Array",
+    "difficulty": "Easy",
+    "description": "Given an integer array nums sorted in non-decreasing order, remove the duplicates in-place such that each unique element appears only once. The relative order of the elements should be kept the same. Then return the number of unique elements in nums.\n\nConsider the number of unique elements of nums to be k, to get accepted, you need to do the following things:\n\n- Change the array nums such that the first k elements of nums contain the unique elements in the order they were present in nums initially. The remaining elements of nums are not important as well as the size of nums.\n- Return k.",
+    "constraints": [
+        "1 <= nums.length <= 3 * 10^4",
+        "-100 <= nums[i] <= 100",
+        "nums is sorted in non-decreasing order."
+    ],
+    "examples": [
+        {
+            "input": "nums = [1,1,2]",
+            "output": "2",
+            "explanation": "Your function should return k = 2, with the first two elements of nums being 1 and 2 respectively.\nIt does not matter what you leave beyond the returned k (hence they are underscores)."
+        },
+        {
+            "input": "nums = [0,0,1,1,1,2,2,3,3,4]",
+            "output": "5",
+            "explanation": "Your function should return k = 5, with the first five elements of nums being 0, 1, 2, 3, and 4 respectively."
+        }
+    ],
+    "testCases": {
+        "public": [
+            {
+                "input": "1,1,2",
+                "expectedOutput": "2"
+            },
+            {
+                "input": "0,0,1,1,1,2,2,3,3,4",
+                "expectedOutput": "5"
+            }
+        ],
+        "hidden": [
+            {
+                "input": "1,1",
+                "expectedOutput": "1"
+            },
+            {
+                "input": "1,2,3",
+                "expectedOutput": "3"
+            },
+            {
+                "input": "-1,0,0,0,0,3,3",
+                "expectedOutput": "3"
+            }
+        ]
+    },
+    "starterCode": {
+        "python": "class Solution:\n    def removeDuplicates(self, nums: List[int]) -> int:\n        ",
+        "c": "int removeDuplicates(int* nums, int numsSize) {\n    \n}",
+        "cpp": "class Solution {\npublic:\n    int removeDuplicates(vector<int>& nums) {\n        \n    }\n};",
+        "java": "class Solution {\n    public int removeDuplicates(int[] nums) {\n        \n    }\n}",
+        "rust": "impl Solution {\n    pub fn remove_duplicates(nums: &mut Vec<i32>) -> i32 {\n        \n    }\n}"
+    },
+    "driverCode": {
+        "python": "\nimport sys\nimport json\n\nif __name__ == '__main__':\n    line = sys.stdin.read().strip()\n    nums = json.loads('[' + line + ']')\n    sol = Solution()\n    print(sol.removeDuplicates(nums))",
+        "c": "\n#include <stdio.h>\n#include <stdlib.h>\n#include <string.h>\n\nint main() {\n    char line[100000];\n    if (fgets(line, sizeof(line), stdin)) {\n        int nums[30005];\n        int numsSize = 0;\n        char *token = strtok(line, \",\\n\");\n        while (token != NULL) {\n            nums[numsSize++] = atoi(token);\n            token = strtok(NULL, \",\\n\");\n        }\n        printf(\"%d\", removeDuplicates(nums, numsSize));\n    }\n    return 0;\n}",
+        "cpp": "\n#include <iostream>\n#include <vector>\n#include <sstream>\n#include <string>\n#include <algorithm>\n\nusing namespace std;\n\nint main() {\n    string line;\n    if (getline(cin, line)) {\n        vector<int> nums;\n        stringstream ss(line);\n        string segment;\n        while(getline(ss, segment, ',')) {\n            nums.push_back(stoi(segment));\n        }\n        Solution sol;\n        cout << sol.removeDuplicates(nums);\n    }\n    return 0;\n}",
+        "java": "\nimport java.util.*;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner scanner = new Scanner(System.in);\n        if (scanner.hasNextLine()) {\n            String line = scanner.nextLine();\n            String[] parts = line.split(\",\");\n            int[] nums = new int[parts.length];\n            for (int i = 0; i < parts.length; i++) {\n                nums[i] = Integer.parseInt(parts[i].trim());\n            }\n            Solution sol = new Solution();\n            System.out.print(sol.removeDuplicates(nums));\n        }\n    }\n}",
+        "rust": "\nuse std::io::{self, BufRead};\n\nfn main() {\n    let stdin = io::stdin();\n    let mut lines = stdin.lock().lines();\n    if let Some(Ok(line)) = lines.next() {\n        let mut nums: Vec<i32> = line.split(',')\n            .map(|s| s.trim().parse().unwrap())\n            .collect();\n        print!(\"{}\", Solution::remove_duplicates(&mut nums));\n    }\n}"
+    }
+}

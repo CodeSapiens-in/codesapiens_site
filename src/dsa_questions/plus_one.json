@@ -1,0 +1,72 @@
+{
+    "id": 15,
+    "title": "Plus One",
+    "difficulty": "Easy",
+    "description": "You are given a large integer represented as an integer array digits, where each digits[i] is the ith digit of the integer. The digits are ordered from most significant to least significant in left-to-right order. The large integer does not contain any leading 0's.\n\nIncrement the large integer by one and return the resulting array of digits.",
+    "constraints": [
+        "1 <= digits.length <= 100",
+        "0 <= digits[i] <= 9",
+        "digits does not contain any leading 0's."
+    ],
+    "examples": [
+        {
+            "input": "digits = [1,2,3]",
+            "output": "[1,2,4]",
+            "explanation": "The array represents the integer 123.\nIncrementing by one gives 123 + 1 = 124.\nThus, the result should be [1,2,4]."
+        },
+        {
+            "input": "digits = [4,3,2,1]",
+            "output": "[4,3,2,2]",
+            "explanation": "The array represents the integer 4321.\nIncrementing by one gives 4321 + 1 = 4322.\nThus, the result should be [4,3,2,2]."
+        },
+        {
+            "input": "digits = [9]",
+            "output": "[1,0]",
+            "explanation": "The array represents the integer 9.\nIncrementing by one gives 9 + 1 = 10.\nThus, the result should be [1,0]."
+        }
+    ],
+    "testCases": {
+        "public": [
+            {
+                "input": "1,2,3",
+                "expectedOutput": "[1, 2, 4]"
+            },
+            {
+                "input": "4,3,2,1",
+                "expectedOutput": "[4, 3, 2, 2]"
+            },
+            {
+                "input": "9",
+                "expectedOutput": "[1, 0]"
+            }
+        ],
+        "hidden": [
+            {
+                "input": "9,9",
+                "expectedOutput": "[1, 0, 0]"
+            },
+            {
+                "input": "1,9,9",
+                "expectedOutput": "[2, 0, 0]"
+            },
+            {
+                "input": "8,9,9",
+                "expectedOutput": "[9, 0, 0]"
+            }
+        ]
+    },
+    "starterCode": {
+        "python": "class Solution:\n    def plusOne(self, digits: List[int]) -> List[int]:\n        ",
+        "c": "/**\n * Note: The returned array must be malloced, assume caller calls free().\n */\nint* plusOne(int* digits, int digitsSize, int* returnSize) {\n    \n}",
+        "cpp": "class Solution {\npublic:\n    vector<int> plusOne(vector<int>& digits) {\n        \n    }\n};",
+        "java": "class Solution {\n    public int[] plusOne(int[] digits) {\n        \n    }\n}",
+        "rust": "impl Solution {\n    pub fn plus_one(digits: Vec<i32>) -> Vec<i32> {\n        \n    }\n}"
+    },
+    "driverCode": {
+        "python": "\nimport sys\nimport json\n\nif __name__ == '__main__':\n    line = sys.stdin.read().strip()\n    digits = json.loads('[' + line + ']')\n    sol = Solution()\n    result = sol.plusOne(digits)\n    print(json.dumps(result))",
+        "c": "\n#include <stdio.h>\n#include <stdlib.h>\n#include <string.h>\n\nint main() {\n    char line[1000];\n    if (fgets(line, sizeof(line), stdin)) {\n        int digits[105];\n        int digitsSize = 0;\n        char *token = strtok(line, \",\\n\");\n        while (token != NULL) {\n            digits[digitsSize++] = atoi(token);\n            token = strtok(NULL, \",\\n\");\n        }\n\n        int returnSize;\n        int* result = plusOne(digits, digitsSize, &returnSize);\n\n        printf(\"[\");\n        for (int i = 0; i < returnSize; i++) {\n            printf(\"%d%s\", result[i], (i < returnSize - 1) ? \", \" : \"\");\n        }\n        printf(\"]\");\n        free(result);\n    }\n    return 0;\n}",
+        "cpp": "\n#include <iostream>\n#include <vector>\n#include <sstream>\n#include <string>\n#include <algorithm>\n\nusing namespace std;\n\nint main() {\n    string line;\n    if (getline(cin, line)) {\n        vector<int> digits;\n        stringstream ss(line);\n        string segment;\n        while(getline(ss, segment, ',')) {\n            digits.push_back(stoi(segment));\n        }\n\n        Solution sol;\n        vector<int> result = sol.plusOne(digits);\n\n        cout << \"[\";\n        for(size_t i = 0; i < result.size(); ++i) {\n            cout << result[i] << (i < result.size() - 1 ? \", \" : \"\");\n        }\n        cout << \"]\";\n    }\n    return 0;\n}",
+        "java": "\nimport java.util.*;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner scanner = new Scanner(System.in);\n        if (scanner.hasNextLine()) {\n            String line = scanner.nextLine();\n            String[] parts = line.split(\",\");\n            int[] digits = new int[parts.length];\n            for (int i = 0; i < parts.length; i++) {\n                digits[i] = Integer.parseInt(parts[i].trim());\n            }\n            \n            Solution sol = new Solution();\n            int[] result = sol.plusOne(digits);\n            \n            System.out.print(\"[\");\n            for (int i = 0; i < result.length; i++) {\n                System.out.print(result[i] + (i < result.length - 1 ? \", \" : \"\"));\n            }\n            System.out.print(\"]\");\n        }\n    }\n}",
+        "rust": "\nuse std::io::{self, BufRead};\n\nfn main() {\n    let stdin = io::stdin();\n    let mut lines = stdin.lock().lines();\n    if let Some(Ok(line)) = lines.next() {\n        let digits: Vec<i32> = line.split(',')\n            .map(|s| s.trim().parse().unwrap())\n            .collect();\n            \n        let result = Solution::plus_one(digits);\n        \n        print!(\"[\");\n        for (i, num) in result.iter().enumerate() {\n            if i > 0 { print!(\", \"); }\n            print!(\"{}\", num);\n        }\n        print!(\"]\");\n    }\n}"
+    }
+}

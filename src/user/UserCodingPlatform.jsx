@@ -4,6 +4,26 @@ import { debounce } from 'lodash';
 import twoSumData from '../dsa_questions/two_sum.json';
 import palindromeData from '../dsa_questions/palindrome_number.json';
 import reverseStringData from '../dsa_questions/reverse_string.json';
+import validParenthesesData from '../dsa_questions/valid_parentheses.json';
+import bestTimeStockData from '../dsa_questions/best_time_to_buy_and_sell_stock.json';
+import validAnagramData from '../dsa_questions/valid_anagram.json';
+import maxSubArrayData from '../dsa_questions/maximum_subarray.json';
+import containsDuplicateData from '../dsa_questions/contains_duplicate.json';
+import climbingStairsData from '../dsa_questions/climbing_stairs.json';
+import singleNumberData from '../dsa_questions/single_number.json';
+import majorityElementData from '../dsa_questions/majority_element.json';
+import searchInsertData from '../dsa_questions/search_insert_position.json';
+import binarySearchData from '../dsa_questions/binary_search.json';
+import missingNumberData from '../dsa_questions/missing_number.json';
+import plusOneData from '../dsa_questions/plus_one.json';
+import powerOfTwoData from '../dsa_questions/power_of_two.json';
+import fibonacciData from '../dsa_questions/fibonacci_number.json';
+import validPalindromeData from '../dsa_questions/valid_palindrome.json';
+import lengthLastWordData from '../dsa_questions/length_of_last_word.json';
+import longestCommonPrefixData from '../dsa_questions/longest_common_prefix.json';
+import romanToIntData from '../dsa_questions/roman_to_integer.json';
+import removeDuplicatesData from '../dsa_questions/remove_duplicates_from_sorted_array.json';
+import mergeSortedArrayData from '../dsa_questions/merge_sorted_array.json';
 import { Loader2, Play, CheckCircle, XCircle, ChevronLeft, ChevronRight, Trophy } from 'lucide-react';
 import { supabase } from "../lib/supabaseClient";
 import { toast } from 'react-hot-toast';
@@ -65,7 +85,14 @@ const UserCodingPlatform = () => {
 
   useEffect(() => {
     // Load Questions
-    const loadedQuestions = [twoSumData, palindromeData, reverseStringData];
+    // Load Questions
+    const loadedQuestions = [
+      twoSumData, palindromeData, reverseStringData,
+      validParenthesesData, bestTimeStockData, validAnagramData, maxSubArrayData, containsDuplicateData,
+      climbingStairsData, singleNumberData, majorityElementData, searchInsertData, binarySearchData,
+      missingNumberData, plusOneData, powerOfTwoData, fibonacciData, validPalindromeData,
+      lengthLastWordData, longestCommonPrefixData, romanToIntData, removeDuplicatesData, mergeSortedArrayData
+    ];
     setQuestions(loadedQuestions);
     setSelectedQuestion(loadedQuestions[0]);
     setCode(loadedQuestions[0].starterCode);

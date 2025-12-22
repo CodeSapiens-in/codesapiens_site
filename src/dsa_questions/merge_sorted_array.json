@@ -1,0 +1,74 @@
+{
+    "id": 23,
+    "title": "Merge Sorted Array",
+    "difficulty": "Easy",
+    "description": "You are given two integer arrays nums1 and nums2, sorted in non-decreasing order, and two integers m and n, representing the number of elements in nums1 and nums2 respectively.\n\nMerge nums1 and nums2 into a single array sorted in non-decreasing order.\n\nThe final sorted array should not be returned by the function, but instead be stored inside the array nums1. To accommodate this, nums1 has a length of m + n, where the first m elements denote the elements that should be merged, and the last n elements are set to 0 and should be ignored. nums2 has a length of n.",
+    "constraints": [
+        "nums1.length == m + n",
+        "nums2.length == n",
+        "0 <= m, n <= 200",
+        "1 <= m + n <= 200",
+        "-10^9 <= nums1[i], nums2[j] <= 10^9"
+    ],
+    "examples": [
+        {
+            "input": "nums1 = [1,2,3,0,0,0], m = 3, nums2 = [2,5,6], n = 3",
+            "output": "[1,2,2,3,5,6]",
+            "explanation": "The arrays we are merging are [1,2,3] and [2,5,6].\nThe result of the merge is [1,2,2,3,5,6] with the underlined elements coming from nums1."
+        },
+        {
+            "input": "nums1 = [1], m = 1, nums2 = [], n = 0",
+            "output": "[1]",
+            "explanation": "The arrays we are merging are [1] and [].\nThe result of the merge is [1]."
+        },
+        {
+            "input": "nums1 = [0], m = 0, nums2 = [1], n = 1",
+            "output": "[1]",
+            "explanation": "The arrays we are merging are [] and [1].\nThe result of the merge is [1].\nNote that because m = 0, there are no elements in nums1. The 0 is only there to ensure the merge result can fit in nums1."
+        }
+    ],
+    "testCases": {
+        "public": [
+            {
+                "input": "1,2,3,0,0,0\n3\n2,5,6\n3",
+                "expectedOutput": "[1, 2, 2, 3, 5, 6]"
+            },
+            {
+                "input": "1\n1\n\n0",
+                "expectedOutput": "[1]"
+            },
+            {
+                "input": "0\n0\n1\n1",
+                "expectedOutput": "[1]"
+            }
+        ],
+        "hidden": [
+            {
+                "input": "2,0\n1\n1\n1",
+                "expectedOutput": "[1, 2]"
+            },
+            {
+                "input": "4,5,6,0,0,0\n3\n1,2,3\n3",
+                "expectedOutput": "[1, 2, 3, 4, 5, 6]"
+            },
+            {
+                "input": "0,0,0,0\n0\n1,2,3,4\n4",
+                "expectedOutput": "[1, 2, 3, 4]"
+            }
+        ]
+    },
+    "starterCode": {
+        "python": "class Solution:\n    def merge(self, nums1: List[int], m: int, nums2: List[int], n: int) -> None:\n        \"\"\"\n        Do not return anything, modify nums1 in-place.\n        \"\"\"\n        ",
+        "c": "void merge(int* nums1, int nums1Size, int m, int* nums2, int nums2Size, int n) {\n    \n}",
+        "cpp": "class Solution {\npublic:\n    void merge(vector<int>& nums1, int m, vector<int>& nums2, int n) {\n        \n    }\n};",
+        "java": "class Solution {\n    public void merge(int[] nums1, int m, int[] nums2, int n) {\n        \n    }\n}",
+        "rust": "impl Solution {\n    pub fn merge(nums1: &mut Vec<i32>, m: i32, nums2: &mut Vec<i32>, n: i32) {\n        \n    }\n}"
+    },
+    "driverCode": {
+        "python": "\nimport sys\nimport json\n\nif __name__ == '__main__':\n    lines = sys.stdin.read().splitlines()\n    # Handle potentially empty nums2 input line for n=0 cases where splitlines might skip empty line if it was strictly empty\n    # Ensuring we check length. Test cases use newline. \n    # Logic: Read 4 vars. line 0: nums1, line 1: m, line 2: nums2, line 3: n\n    if len(lines) >= 4:\n        nums1 = json.loads('[' + lines[0] + ']')\n        m = int(lines[1])\n        nums2_str = lines[2].strip()\n        if nums2_str:\n             nums2 = json.loads('[' + nums2_str + ']')\n        else:\n             nums2 = []\n        n = int(lines[3])\n        \n        sol = Solution()\n        sol.merge(nums1, m, nums2, n)\n        print(json.dumps(nums1))",
+        "c": "\n#include <stdio.h>\n#include <stdlib.h>\n#include <string.h>\n\nint main() {\n    char line[1000];\n    // Need to read 4 lines.\n    int* nums1 = malloc(205 * sizeof(int));\n    int m = 0, n = 0;\n    int* nums2 = malloc(205 * sizeof(int));\n    \n    // Reading logic simplified for C driver brevity in json\n    // Assuming standard valid input structure\n    // ... Implementation omitted for brevity in thought but writing minimal viable ...\n    // Let's assume standard reading\n    // (Actually writing full C parser for 4 lines is verbose. I'll rely on python for tricky parsing logic validation usually, but here I must provide C driver.)\n    // I will use a simple scanf approach or fgets loop.\n    \n    char buffer[1000];\n    if(fgets(buffer, 1000, stdin)) {\n        int nums1Size = 0;\n        char* token = strtok(buffer, \",\\n\");\n        while(token) { nums1[nums1Size++] = atoi(token); token = strtok(NULL, \",\\n\"); }\n        \n        if(fgets(buffer, 1000, stdin)) m = atoi(buffer);\n        \n        int nums2Size = 0;\n        if(fgets(buffer, 1000, stdin)) {\n             token = strtok(buffer, \",\\n\");\n             while(token) { nums2[nums2Size++] = atoi(token); token = strtok(NULL, \",\\n\"); }\n        }\n        \n        if(fgets(buffer, 1000, stdin)) n = atoi(buffer);\n        \n        merge(nums1, nums1Size, m, nums2, nums2Size, n);\n        \n        printf(\"[\");\n        for(int i=0; i<nums1Size; ++i) printf(\"%d%s\", nums1[i], (i<nums1Size-1)?\", \":\"\");\n        printf(\"]\");\n    }\n    return 0;\n}",
+        "cpp": "\n#include <iostream>\n#include <vector>\n#include <sstream>\n#include <string>\n#include <algorithm>\n\nusing namespace std;\n\nvector<int> parse(string s) {\n    vector<int> res;\n    stringstream ss(s);\n    string val;\n    while(getline(ss, val, ',')) if(!val.empty()) res.push_back(stoi(val));\n    return res;\n}\n\nint main() {\n    string s;\n    vector<int> nums1, nums2;\n    int m, n;\n    \n    if(getline(cin, s)) nums1 = parse(s);\n    if(getline(cin, s)) m = stoi(s);\n    if(getline(cin, s)) nums2 = parse(s);\n    if(getline(cin, s)) n = stoi(s);\n    \n    Solution sol;\n    sol.merge(nums1, m, nums2, n);\n    \n    cout << \"[\";\n    for(size_t i=0; i<nums1.size(); ++i) cout << nums1[i] << (i<nums1.size()-1?\", \":\"\");\n    cout << \"]\";\n    return 0;\n}",
+        "java": "\nimport java.util.*;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        if(sc.hasNextLine()) {\n            String[] p1 = sc.nextLine().split(\",\");\n            int[] nums1 = new int[p1.length];\n             // Handle empty split case if input is empty line (unlikely for nums1 with m+n size but possible for nums2)\n            for(int i=0; i<p1.length; i++) if(!p1[i].trim().isEmpty()) nums1[i] = Integer.parseInt(p1[i].trim());\n            \n            int m = Integer.parseInt(sc.nextLine().trim());\n            \n            String line2 = sc.nextLine();\n            int[] nums2 = new int[0];\n            if(!line2.trim().isEmpty()) {\n                String[] p2 = line2.split(\",\");\n                nums2 = new int[p2.length];\n                for(int i=0; i<p2.length; i++) nums2[i] = Integer.parseInt(p2[i].trim());\n            }\n            \n            int n = Integer.parseInt(sc.nextLine().trim());\n            \n            Solution sol = new Solution();\n            sol.merge(nums1, m, nums2, n);\n            \n            System.out.print(\"[\");\n            for(int i=0; i<nums1.length; i++) System.out.print(nums1[i] + (i<nums1.length-1?\", \":\"\"));\n            System.out.print(\"]\");\n        }\n    }\n}",
+        "rust": "\nuse std::io::{self, BufRead};\n\nfn main() {\n    let stdin = io::stdin();\n    let mut lines = stdin.lock().lines();\n    let line1 = lines.next().unwrap().unwrap();\n    let mut nums1: Vec<i32> = if line1.trim().is_empty() { vec![] } else { line1.split(',').map(|s| s.trim().parse().unwrap()).collect() };\n    \n    let m: i32 = lines.next().unwrap().unwrap().trim().parse().unwrap();\n    \n    let line3 = lines.next().unwrap().unwrap();\n    let mut nums2: Vec<i32> = if line3.trim().is_empty() { vec![] } else { line3.split(',').map(|s| s.trim().parse().unwrap()).collect() };\n    \n    let n: i32 = lines.next().unwrap().unwrap().trim().parse().unwrap();\n    \n    Solution::merge(&mut nums1, m, &mut nums2, n);\n    \n    print!(\"[\");\n    for (i, num) in nums1.iter().enumerate() {\n        if i > 0 { print!(\", \"); }\n        print!(\"{}\", num);\n    }\n    print!(\"]\");\n}"
+    }
+}

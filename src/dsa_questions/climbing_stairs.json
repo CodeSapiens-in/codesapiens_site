@@ -1,0 +1,65 @@
+{
+    "id": 9,
+    "title": "Climbing Stairs",
+    "difficulty": "Easy",
+    "description": "You are climbing a staircase. It takes n steps to reach the top.\n\nEach time you can either climb 1 or 2 steps. In how many distinct ways can you climb to the top?",
+    "constraints": [
+        "1 <= n <= 45"
+    ],
+    "examples": [
+        {
+            "input": "n = 2",
+            "output": "2",
+            "explanation": "There are two ways to climb to the top.\n1. 1 step + 1 step\n2. 2 steps"
+        },
+        {
+            "input": "n = 3",
+            "output": "3",
+            "explanation": "There are three ways to climb to the top.\n1. 1 step + 1 step + 1 step\n2. 1 step + 2 steps\n3. 2 steps + 1 step"
+        }
+    ],
+    "testCases": {
+        "public": [
+            {
+                "input": "2",
+                "expectedOutput": "2"
+            },
+            {
+                "input": "3",
+                "expectedOutput": "3"
+            }
+        ],
+        "hidden": [
+            {
+                "input": "4",
+                "expectedOutput": "5"
+            },
+            {
+                "input": "5",
+                "expectedOutput": "8"
+            },
+            {
+                "input": "1",
+                "expectedOutput": "1"
+            },
+            {
+                "input": "6",
+                "expectedOutput": "13"
+            }
+        ]
+    },
+    "starterCode": {
+        "python": "class Solution:\n    def climbStairs(self, n: int) -> int:\n        ",
+        "c": "int climbStairs(int n) {\n    \n}",
+        "cpp": "class Solution {\npublic:\n    int climbStairs(int n) {\n        \n    }\n};",
+        "java": "class Solution {\n    public int climbStairs(int n) {\n        \n    }\n}",
+        "rust": "impl Solution {\n    pub fn climb_stairs(n: i32) -> i32 {\n        \n    }\n}"
+    },
+    "driverCode": {
+        "python": "\nimport sys\n\nif __name__ == '__main__':\n    line = sys.stdin.read().strip()\n    n = int(line)\n    sol = Solution()\n    print(sol.climbStairs(n))",
+        "c": "\n#include <stdio.h>\n#include <stdlib.h>\n\nint main() {\n    char line[100];\n    if (fgets(line, sizeof(line), stdin)) {\n        int n = atoi(line);\n        printf(\"%d\", climbStairs(n));\n    }\n    return 0;\n}",
+        "cpp": "\n#include <iostream>\n\nusing namespace std;\n\nint main() {\n    int n;\n    if (cin >> n) {\n        Solution sol;\n        cout << sol.climbStairs(n);\n    }\n    return 0;\n}",
+        "java": "\nimport java.util.*;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner scanner = new Scanner(System.in);\n        if (scanner.hasNextInt()) {\n            int n = scanner.nextInt();\n            Solution sol = new Solution();\n            System.out.print(sol.climbStairs(n));\n        }\n    }\n}",
+        "rust": "\nuse std::io::{self, BufRead};\n\nfn main() {\n    let stdin = io::stdin();\n    let mut lines = stdin.lock().lines();\n    if let Some(Ok(line)) = lines.next() {\n        let n: i32 = line.trim().parse().unwrap();\n        print!(\"{}\", Solution::climb_stairs(n));\n    }\n}"
+    }
+}

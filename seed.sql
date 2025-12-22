@@ -586,3 +586,40 @@ END$$;
 -- Add last_feedback_at column to users table
 ALTER TABLE public.users 
 ADD COLUMN IF NOT EXISTS last_feedback_at timestamptz;
+
+-- =========================
+-- 10) User Solved Problems
+-- =========================
+CREATE TABLE IF NOT EXISTS public.user_solved_problems (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  user_id text NOT NULL,
+  question_id integer NOT NULL,
+  solved_at timestamp with time zone DEFAULT now(),
+  CONSTRAINT user_solved_problems_pkey PRIMARY KEY (id),
+  CONSTRAINT user_solved_problems_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(uid),
+  CONSTRAINT unique_user_question UNIQUE (user_id, question_id)
+);
+
+-- Enable RLS
+ALTER TABLE IF EXISTS public.user_solved_problems ENABLE ROW LEVEL SECURITY;
+
+-- Policies
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE schemaname = 'public' AND tablename = 'user_solved_problems' AND policyname = 'Users can insert their own solved problems') THEN
+    CREATE POLICY "Users can insert their own solved problems"
+    ON public.user_solved_problems
+    FOR INSERT
+    WITH CHECK (auth.uid()::text = user_id);
+  END IF;
+END$$;
+
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE schemaname = 'public' AND tablename = 'user_solved_problems' AND policyname = 'Users can view their own solved problems') THEN
+    CREATE POLICY "Users can view their own solved problems"
+    ON public.user_solved_problems
+    FOR SELECT
+    USING (auth.uid()::text = user_id);
+  END IF;
+END$$;
