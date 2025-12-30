@@ -31,7 +31,7 @@ const StatsSection = () => {
                 <div className="absolute bottom-1/4 right-1/4 w-64 h-64 bg-[#9B0032] rounded-full blur-[100px]"></div>
             </div>
 
-            <div className="container mx-auto px-6 relative z-10">
+            <div className="container mx-auto px-4 md:px-6 relative z-10">
                 <div className="mb-16 text-center">
                     <span className="text-[#0061FE] font-bold tracking-widest uppercase text-sm mb-4 block">Impact</span>
                     <h2 className="text-4xl md:text-6xl font-bold mb-6">By The Numbers</h2>
@@ -40,20 +40,20 @@ const StatsSection = () => {
                     </p>
                 </div>
 
-                <div className="grid md:grid-cols-2 gap-16 items-center">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-16 items-start md:items-center">
                     {/* Left: Big Numbers */}
-                    <div className="grid grid-cols-2 gap-8">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-8">
                         <motion.div
                             initial={{ opacity: 0, scale: 0.5 }}
                             whileInView={{ opacity: 1, scale: 1 }}
                             viewport={{ once: true }}
-                            className="bg-[#1E1919] p-8 rounded-2xl border border-gray-800 text-center"
+                            className="bg-[#1E1919] p-3 md:p-8 rounded-2xl border border-gray-800 text-center"
                         >
-                            <Users className="w-10 h-10 text-[#0061FE] mx-auto mb-4" />
-                            <h3 className="text-5xl font-black text-white mb-2">
+                            <Users className="w-8 h-8 md:w-10 md:h-10 text-[#0061FE] mx-auto mb-4" />
+                            <h3 className="text-3xl md:text-5xl font-black text-white mb-2">
                                 {stats.totalUsers > 0 ? stats.totalUsers : "1500+"}
                             </h3>
-                            <p className="text-gray-500 font-medium uppercase tracking-wider text-xs">Total Members</p>
+                            <p className="text-gray-500 font-medium uppercase tracking-normal md:tracking-wider text-[10px] sm:text-xs">Total Members</p>
                         </motion.div>
 
                         <motion.div
@@ -61,18 +61,18 @@ const StatsSection = () => {
                             whileInView={{ opacity: 1, scale: 1 }}
                             viewport={{ once: true }}
                             transition={{ delay: 0.1 }}
-                            className="bg-[#1E1919] p-8 rounded-2xl border border-gray-800 text-center"
+                            className="bg-[#1E1919] p-3 md:p-8 rounded-2xl border border-gray-800 text-center"
                         >
-                            <Award className="w-10 h-10 text-[#FA5D00] mx-auto mb-4" />
-                            <h3 className="text-5xl font-black text-white mb-2">
+                            <Award className="w-8 h-8 md:w-10 md:h-10 text-[#FA5D00] mx-auto mb-4" />
+                            <h3 className="text-3xl md:text-5xl font-black text-white mb-2">
                                 {stats.totalColleges > 0 ? stats.totalColleges : "50+"}
                             </h3>
-                            <p className="text-gray-500 font-medium uppercase tracking-wider text-xs">Colleges Reached</p>
+                            <p className="text-gray-500 font-medium uppercase tracking-normal md:tracking-wider text-[10px] sm:text-xs">Colleges Reached</p>
                         </motion.div>
                     </div>
 
                     {/* Right: Top Colleges Chart */}
-                    <div className="col-span-2 md:col-span-1 h-full">
+                    <div className="col-span-1 h-full w-full overflow-hidden">
                         <div className="bg-[#1E1919] p-8 rounded-2xl border border-gray-800 h-full flex flex-col relative overflow-hidden group">
                             {/* Background Glow */}
                             <div className="absolute top-0 right-0 w-64 h-64 bg-[#0061FE]/10 rounded-full blur-[80px] -z-10 group-hover:bg-[#0061FE]/20 transition-colors duration-500"></div>
@@ -91,7 +91,7 @@ const StatsSection = () => {
                                     <div className="space-y-8">
                                         {/* Top 3 Podium - Only show if we have enough data, else fallback to list */}
                                         {stats.topColleges.filter(c => c.name && c.name !== "Not specified").length >= 3 ? (
-                                            <div className="flex items-end justify-center gap-4 mb-4 min-h-[180px]">
+                                            <div className="flex items-end justify-center gap-2 md:gap-4 mb-4 min-h-[180px]">
                                                 {/* 2nd Place */}
                                                 <motion.div
                                                     initial={{ opacity: 0, y: 50 }}
@@ -476,7 +476,7 @@ const CodeSapiensHero = () => {
             {/* Events Section */}
             <section id="events" className="py-24 md:py-32 bg-[#1E1919] text-[#F7F5F2]">
                 <div className="container mx-auto px-6">
-                    <div className="flex flex-col md:flex-row justify-between items-end mb-16">
+                    <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-16">
                         <div>
                             <span className="text-[#0061FE] font-bold tracking-widest uppercase text-sm mb-4 block">Events</span>
                             <h2 className="text-4xl md:text-6xl font-bold text-white mb-4">What's Happening</h2>

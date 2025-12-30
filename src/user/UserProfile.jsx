@@ -157,6 +157,7 @@ const UserProfile = () => {
   const [resumeFile, setResumeFile] = useState(null);
   const [resumeUrl, setResumeUrl] = useState(null);
   const [uploadingResume, setUploadingResume] = useState(false);
+  const [deletingResume, setDeletingResume] = useState(false);
   const [resumeError, setResumeError] = useState(null);
   const [dragActive, setDragActive] = useState(false);
   const [usernameError, setUsernameError] = useState(null);
@@ -338,7 +339,7 @@ const UserProfile = () => {
           .select("username")
           .eq("username", username)
           .neq("uid", userData.uid)
-          .single();
+          .maybeSingle();
 
         if (existingUser) {
           setUsernameError("This username is already taken. Please choose another.");
@@ -495,6 +496,7 @@ const UserProfile = () => {
       }
 
       setResumeUrl(result.url);
+      setUserData((prev) => ({ ...prev, resumeUrl: result.url }));
       setResumeFile(null);
       console.log("[Frontend] : Resume uploaded successfully:", result.url);
     } catch (err) {
@@ -512,6 +514,7 @@ const UserProfile = () => {
     }
 
     setResumeError(null);
+    setDeletingResume(true);
 
     try {
       console.log("[Frontend] : Starting resume removal for userId:", userData.uid, "Resume URL:", resumeUrl);
@@ -541,10 +544,13 @@ const UserProfile = () => {
       }
 
       setResumeUrl(null);
+      setUserData((prev) => ({ ...prev, resumeUrl: null }));
       console.log("[Frontend] : Resume removed successfully.");
     } catch (err) {
       console.error("[Frontend] : Error removing resume:", err.message);
       setResumeError(err.message || "Failed to remove resume.");
+    } finally {
+      setDeletingResume(false);
     }
   };
 
@@ -678,7 +684,7 @@ const UserProfile = () => {
         .select("username")
         .eq("username", username)
         .neq("uid", userData.uid)
-        .single();
+        .maybeSingle();
 
       if (existingUser) {
         setUsernameError("This username is already taken. Please choose another.");
@@ -793,9 +799,9 @@ const UserProfile = () => {
   // Social links
   const socialLinks = userData
     ? [
-      { label: "GitHub Profile", icon: Github, href: userData.githubUrl, name: "githubUrl" },
-      { label: "LinkedIn Profile", icon: Linkedin, href: userData.linkedinUrl, name: "linkedinUrl" },
-      { label: "Portfolio Website", icon: Globe, href: userData.portfolioUrl, name: "portfolioUrl" },
+      { label: "GitHub Profile", icon: Github, url: userData.githubUrl, name: "githubUrl" },
+      { label: "LinkedIn Profile", icon: Linkedin, url: userData.linkedinUrl, name: "linkedinUrl" },
+      { label: "Portfolio Website", icon: Globe, url: userData.portfolioUrl, name: "portfolioUrl" },
     ]
     : [];
 
@@ -1074,7 +1080,12 @@ const UserProfile = () => {
                     </div>
                   </div>
 
-                  {userData.resumeUrl ? (
+                  {uploadingResume || deletingResume ? (
+                    <div className="flex flex-col items-center justify-center py-8 border-2 border-dashed border-gray-200 rounded-2xl bg-[#F7F5F2]/50">
+                      <Loader2 className="w-10 h-10 animate-spin text-[#0061FE] mb-3" />
+                      <p className="font-bold text-gray-600">{uploadingResume ? "Uploading Resume..." : "Removing Resume..."}</p>
+                    </div>
+                  ) : userData.resumeUrl ? (
                     <div className="flex items-center gap-4 bg-[#F7F5F2] p-4 rounded-2xl border border-gray-200">
                       <div className="bg-[#FF5018] text-white p-3 rounded-xl">
                         <Award className="w-6 h-6" />
@@ -1162,6 +1173,23 @@ const UserProfile = () => {
                           <span className="font-bold text-[#1E1E1E] sm:text-right sm:max-w-xs">{info.label === "Graduating Year" && !info.value ? "Not specified" : info.value}</span>
                         )}
                       </div>
+                    ))}
+                  </div>
+                </div>
+
+
+                {/* Social Profiles */}
+                <div className="bg-white rounded-3xl p-6 md:p-8 border border-gray-100 shadow-sm">
+                  <h3 className="text-xl font-black text-[#1E1E1E] mb-6">Social Profiles</h3>
+                  <div className="flex flex-col gap-4">
+                    {socialLinks.map((link, index) => (
+                      <SocialLink
+                        key={index}
+                        {...link}
+                        isEditing={isEditing}
+                        onChange={handleInputChange}
+                        value={editedData[link.name] || ""}
+                      />
                     ))}
                   </div>
                 </div>
@@ -1266,12 +1294,18 @@ const InfoItem = ({ icon: Icon, label, value, isEditing, editInput }) => (
   </div>
 );
 
-const SocialLink = ({ icon: Icon, label, url, isEditing }) => {
+const SocialLink = ({ icon: Icon, label, url, isEditing, name, onChange, value }) => {
   if (isEditing) {
     return (
       <div className="flex items-center gap-3 bg-[#F7F5F2] p-3 rounded-xl">
         <Icon className="w-5 h-5 text-gray-400" />
-        <input placeholder={label} className="bg-transparent text-[#1E1E1E] text-sm w-full font-bold outline-none" defaultValue={url} />
+        <input
+          name={name}
+          placeholder={label}
+          className="bg-transparent text-[#1E1E1E] text-sm w-full font-bold outline-none"
+          value={value}
+          onChange={onChange}
+        />
       </div>
     )
   }

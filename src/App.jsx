@@ -8,11 +8,12 @@ import {
 } from '@supabase/auth-helpers-react';
 import { supabase } from './lib/supabaseClient';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
-import { AnimatePresence } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 import { Loader2 } from 'lucide-react';
 import PageTransition from './components/PageTransition';
 import AdminLayout from './components/AdminLayout';
 import { Toaster } from 'react-hot-toast';
+
 
 
 import Hero from './components/ui/Hero';
@@ -138,21 +139,19 @@ function Root() {
   if (!session) {
     return (
       <div className="flex flex-col min-h-screen">
-        <Router>
-          <Routes>
-            <Route path="/" element={<CodeSapiensHero />} />
-            <Route path="/auth" element={<AuthForm />} />
-            <Route path="/admin/hall-of-fame" element={<AdminHallOfFame />} />
-            <Route path="/admin/community-photos" element={<AdminCommunityPhotos />} />
-            <Route path="/admin/feedback" element={<AdminFeedbackList />} />
-            <Route path="/profile/:username" element={<PublicProfile />} />
+        <Routes>
+          <Route path="/" element={<CodeSapiensHero />} />
+          <Route path="/auth" element={<AuthForm />} />
+          <Route path="/admin/hall-of-fame" element={<AdminHallOfFame />} />
+          <Route path="/admin/community-photos" element={<AdminCommunityPhotos />} />
+          <Route path="/admin/feedback" element={<AdminFeedbackList />} />
+          <Route path="/profile/:username" element={<PublicProfile />} />
 
-            <Route path="/forgot-password" element={<ResetPassword />} />
-            <Route path="/reset-password" element={<ResetPasswordConfirm />} />
-            <Route path="/test-analytics" element={<AdminLayout><AnalyticsPage /></AdminLayout>} />
-            <Route path="*" element={<NotFoundPage />} />
-          </Routes>
-        </Router>
+          <Route path="/forgot-password" element={<ResetPassword />} />
+          <Route path="/reset-password" element={<ResetPasswordConfirm />} />
+          <Route path="/test-analytics" element={<AdminLayout><AnalyticsPage /></AdminLayout>} />
+          <Route path="*" element={<NotFoundPage />} />
+        </Routes>
       </div>
     );
   }
@@ -161,20 +160,33 @@ function Root() {
   return (
     <div className="flex flex-col min-h-screen">
       <main className="flex-grow">
-        <Router>
-          <NavBar />
-          <AnimatedRoutes />
-        </Router>
+        <NavBar />
+        <AnimatedRoutes />
       </main>
     </div>
   );
 }
 
+import { LoadingProvider, useAppLoading } from "./context/LoadingContext";
+
+// Root Component wrapped in LoadingProvider context consumer
+const RootWithLoading = () => {
+  return (
+    <AnimatePresence mode="wait">
+      <Root />
+    </AnimatePresence>
+  );
+};
+
 export default function App() {
   return (
     <SessionContextProvider supabaseClient={supabase}>
-      <Toaster position="top-center" />
-      <Root />
+      <LoadingProvider>
+        <Router>
+          <RootWithLoading />
+          <Toaster position="top-center" />
+        </Router>
+      </LoadingProvider>
     </SessionContextProvider>
   );
 }

@@ -43,8 +43,8 @@ const qstashReceiver = new Receiver({
 const transporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
-    user: "suryasunrise261@gmail.com",
-    pass: "bgbd rdmx psjl rbfg ",
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
   },
 });
 

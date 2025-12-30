@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Send, MessageSquare } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
@@ -40,8 +41,8 @@ const FeedbackPopup = ({ onClose, userId }) => {
         }
     };
 
-    return (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+    return createPortal(
+        <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4">
             {/* Backdrop */}
             <motion.div
                 initial={{ opacity: 0 }}
@@ -101,7 +102,8 @@ const FeedbackPopup = ({ onClose, userId }) => {
                     </form>
                 </div>
             </motion.div>
-        </div>
+        </div>,
+        document.body
     );
 };
 

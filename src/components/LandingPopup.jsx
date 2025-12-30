@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, ArrowRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -24,7 +25,7 @@ const LandingPopup = () => {
         navigate('/auth');
     };
 
-    return (
+    return createPortal(
         <AnimatePresence>
             {isVisible && (
                 <div className="fixed inset-0 z-[100] flex items-end justify-center sm:items-center p-4 pointer-events-none">
@@ -81,7 +82,8 @@ const LandingPopup = () => {
                     </motion.div>
                 </div>
             )}
-        </AnimatePresence>
+        </AnimatePresence>,
+        document.body
     );
 };
 

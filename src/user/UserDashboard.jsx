@@ -72,34 +72,10 @@ const BentoCard = ({ children, className, onClick, delay = 0, hoverColor }) => {
   );
 };
 
-const BlogPopup = ({ onClose }) => (
-  <motion.div
-    initial={{ opacity: 0, y: 50, scale: 0.9 }}
-    animate={{ opacity: 1, y: 0, scale: 1 }}
-    exit={{ opacity: 0, y: 50, scale: 0.9 }}
-    className="fixed bottom-4 left-4 right-4 md:left-auto md:right-8 md:bottom-8 z-50 md:w-full md:max-w-sm bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden"
-  >
-    <div className="bg-[#FF5018] p-4 flex justify-between items-center text-white">
-      <div className="flex items-center gap-2">
-        <BookOpen className="w-5 h-5" />
-        <span className="font-bold">New Insights!</span>
-      </div>
-      <button onClick={onClose} className="hover:bg-white/20 p-1 rounded-full transition-colors">
-        <X className="w-5 h-5" />
-      </button>
-    </div>
-    <div className="p-6">
-      <h3 className="text-xl font-bold text-gray-900 mb-2">Explore Our Latest Blogs</h3>
-      <p className="text-gray-600 mb-4 text-sm">Discover stories, tutorials, and updates from the community.</p>
-      <a
-        href="/blogs"
-        className="block w-full text-center bg-[#2B2929] text-white py-3 rounded-xl font-bold hover:bg-gray-800 transition-colors"
-      >
-        Read Now
-      </a>
-    </div>
-  </motion.div>
-);
+import CompleteProfileDialog from "../components/CompleteProfileDialog";
+import FeedbackPopup from "../components/FeedbackPopup";
+import BlogPopup from "../components/BlogPopup";
+import { useAppLoading } from "../context/LoadingContext";
 
 const TransitionOverlay = ({ data, onComplete }) => {
   if (!data.isActive) return null;
@@ -124,11 +100,9 @@ const TransitionOverlay = ({ data, onComplete }) => {
   );
 };
 
-import CompleteProfileDialog from "../components/CompleteProfileDialog";
-import FeedbackPopup from "../components/FeedbackPopup";
-
 export default function UserDashboard() {
   const user = useUser();
+  const { isAppLoading } = useAppLoading();
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [meetups, setMeetups] = useState([]);
@@ -148,6 +122,8 @@ export default function UserDashboard() {
 
   // Show Feedback Popup after 10 seconds (if not given in last 10 days)
   useEffect(() => {
+    // Wait for app loading to finish
+    if (isAppLoading) return;
     if (!userData) return;
 
     const checkFeedbackEligibility = () => {
@@ -166,7 +142,7 @@ export default function UserDashboard() {
       }, 10000);
       return () => clearTimeout(timer);
     }
-  }, [userData]);
+  }, [userData, isAppLoading]); // Added isAppLoading dependency
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -240,11 +216,13 @@ export default function UserDashboard() {
 
   // Blog Popup Timer
   useEffect(() => {
+    if (isAppLoading) return;
+
     const timer = setTimeout(() => {
       setShowBlogPopup(true);
     }, 5000);
     return () => clearTimeout(timer);
-  }, []);
+  }, [isAppLoading]);
 
   // Handle Card Click for Transition
   const handleCardClick = (e, path, color) => {

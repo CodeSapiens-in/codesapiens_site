@@ -145,7 +145,7 @@ const CompleteProfileDialog = ({ isOpen, onClose, userId, onComplete, initialDat
                 initial={{ opacity: 0, scale: 0.9, y: 20 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                className="bg-[#F7F5F2] w-full max-w-lg overflow-visible relative shadow-2xl border-4 border-[#2B2929]"
+                className="bg-[#F7F5F2] w-full max-w-lg overflow-hidden relative shadow-2xl border-4 border-[#2B2929] max-h-[90vh] flex flex-col"
             >
                 {/* Decorative Header Bar */}
                 <div className="h-4 w-full bg-[#00C6F7] border-b-4 border-[#2B2929]" />
@@ -158,7 +158,7 @@ const CompleteProfileDialog = ({ isOpen, onClose, userId, onComplete, initialDat
                     <X className="w-6 h-6" />
                 </button>
 
-                <div className="p-8">
+                <div className="p-8 overflow-y-auto">
                     {/* Header Section */}
                     <div className="mb-8">
                         <h2 className="text-4xl font-black tracking-tighter text-[#2B2929] mb-2 uppercase">
