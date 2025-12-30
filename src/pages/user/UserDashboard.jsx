@@ -286,7 +286,7 @@ export default function UserDashboard() {
 
           {/* 1. PROFILE (The "Framework" Card) - Navy Blue */}
           <BentoCard
-            className="col-span-1 md:col-span-2 row-span-2 bg-[#1E293B] text-white relative group border-none"
+            className="col-span-1 md:col-span-2 bg-[#1E293B] text-white relative group border-none"
             onClick={(e) => handleCardClick(e, '/profile', '#1E293B')}
           >
             {(isHovered) => (
@@ -343,27 +343,7 @@ export default function UserDashboard() {
             )}
           </BentoCard>
 
-          {/* 3. RESUME BUILDER - Blue */}
-          <BentoCard
-            className="bg-[#0061FE] text-white"
-            onClick={(e) => handleCardClick(e, '/resume', '#0061FE')}
-            delay={0.2}
-          >
-            {(isHovered) => (
-              <>
-                <div className="flex justify-between items-start">
-                  <FileText className="w-10 h-10 stroke-[2]" />
-                  <motion.div animate={isHovered ? { y: -5 } : { y: 0 }}>
-                    <ArrowUpRight className="w-8 h-8" />
-                  </motion.div>
-                </div>
-                <div className="mt-auto">
-                  <h3 className="text-3xl font-bold mb-2">Resume<br />Builder</h3>
-                  <p className="text-white/80 font-medium">Create your professional CV</p>
-                </div>
-              </>
-            )}
-          </BentoCard>
+
 
           {/* 3.1 RESUME ANALYZER (New) - Purple */}
           <BentoCard

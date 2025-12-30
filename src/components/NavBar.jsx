@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Bell, Settings, Menu, X, ChevronDown, User, Loader2, Shield, Users, BarChart3, TextSearch, BookPlus, CalendarSearch, FileCheck2, Computer, BrainCircuit, Code, BookOpen, LayoutDashboard, FileText } from 'lucide-react';
+import BreadCrumbs from './ui/BreadCrumbs';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabaseClient';
 import { useUser } from '@supabase/auth-helpers-react';
@@ -634,6 +635,9 @@ export default function NavBar() {
             </p>
           </div>
         )}
+
+        {/* Breadcrumbs */}
+        <BreadCrumbs />
       </nav>
 
       {/* Profile Dropdown - Rendered as a portal */}

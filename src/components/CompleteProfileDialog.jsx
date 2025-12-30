@@ -5,7 +5,7 @@ import { Loader2, Building, GraduationCap, Calendar, ArrowRight, X, ChevronDown 
 import academicData from '../assets/academic.json';
 import { BACKEND_URL } from '../config';
 
-const CompleteProfileDialog = ({ isOpen, onClose, userId, onComplete, initialData }) => {
+const CompleteProfileDialog = ({ isOpen, userId, onComplete, initialData }) => {
     const [loading, setLoading] = useState(false);
     const [formData, setFormData] = useState({
         college: '',
@@ -128,8 +128,9 @@ const CompleteProfileDialog = ({ isOpen, onClose, userId, onComplete, initialDat
 
             if (updateError) throw updateError;
 
+
             if (onComplete) onComplete(formData);
-            onClose();
+            // onClose(); // No longer needed as parent should handle unmounting/redirect based on data
         } catch (err) {
             setError(err.message);
         } finally {
@@ -140,23 +141,17 @@ const CompleteProfileDialog = ({ isOpen, onClose, userId, onComplete, initialDat
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-[#2B2929]/60 backdrop-blur-md">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-[#2B2929]/90 backdrop-blur-md cursor-not-allowed">
             <motion.div
                 initial={{ opacity: 0, scale: 0.9, y: 20 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                className="bg-[#F7F5F2] w-full max-w-lg overflow-hidden relative shadow-2xl border-4 border-[#2B2929] max-h-[90vh] flex flex-col"
+                className="bg-[#F7F5F2] w-full max-w-lg overflow-hidden relative shadow-2xl border-4 border-[#2B2929] max-h-[90vh] flex flex-col cursor-auto"
             >
                 {/* Decorative Header Bar */}
                 <div className="h-4 w-full bg-[#00C6F7] border-b-4 border-[#2B2929]" />
 
-                {/* Close Button */}
-                <button
-                    onClick={onClose}
-                    className="absolute top-6 right-6 p-2 hover:bg-[#2B2929]/10 rounded-full transition-colors text-[#2B2929]"
-                >
-                    <X className="w-6 h-6" />
-                </button>
+
 
                 <div className="p-8 overflow-y-auto">
                     {/* Header Section */}
