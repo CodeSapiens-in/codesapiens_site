@@ -8,6 +8,7 @@ import Tesseract from 'tesseract.js';
 import * as pdfjsLib from 'pdfjs-dist/build/pdf';
 import ReactMarkdown from 'react-markdown';
 import { motion, AnimatePresence } from 'framer-motion';
+import { BACKEND_URL } from '../config';
 
 // Doodles removed
 
@@ -222,8 +223,7 @@ const ResumeAnalyzer = () => {
     // Configure pdf.js worker
     pdfjsLib.GlobalWorkerOptions.workerSrc = `/pdf.worker.min.mjs`;
 
-    const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
-    const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
+    // Gemini API logic moved to backend
 
     const handleFileChange = (e) => {
         const file = e.target.files[0];
@@ -294,7 +294,6 @@ const ResumeAnalyzer = () => {
     const handleAnalyze = async () => {
         if ((!resumeFile && !useProfileResume)) { setError('Please provide a resume.'); return; }
         if (analysisMode === 'jd' && !jobDescription.trim()) { setError('Please provide a job description for JD Match mode.'); return; }
-        if (!GEMINI_API_KEY) { setError('Gemini API Key is missing. Please check configuration.'); return; }
 
         setLoading(true);
         setError(null);
@@ -317,60 +316,46 @@ const ResumeAnalyzer = () => {
             }
 
             setParsingStatus('Analyzing with AI...');
-            let prompt = '';
-
-            if (analysisMode === 'jd') {
-                prompt = `
-                    You are an expert ATS (Applicant Tracking System) and Career Coach.
-                    Compare the following Resume text against the Job Description (JD).
-                    
-                    Resume Text:
-                    ${resumeText}
-                    
-                    Job Description:
-                    ${jobDescription}
-                    
-                    Provide a detailed analysis in strictly raw JSON format (no markdown code blocks, no explanation text).
-                    Ensure all strings are properly escaped.
-                    The JSON structure must be:
-                    {
-                      "matchPercentage": number (0-100),
-                      "summary": "string (brief overview of fit)",
-                      "strengths": "markdown string (bullet points)",
-                      "weaknesses": "markdown string (missing skills/experience)",
-                      "improvements": "markdown string (concrete suggestions to improve the resume for this JD)"
-                    }
-                `;
-            } else {
-                prompt = `
-                    You are an expert Career Coach and Resume Reviewer.
-                    Analyze the following Resume text to provide general feedback on how to improve it for a professional career.
-                    
-                    Resume Text:
-                    ${resumeText}
-                    
-                    Provide a detailed analysis in strictly raw JSON format (no markdown code blocks, no explanation text).
-                    Ensure all strings are properly escaped.
-                    The JSON structure must be:
-                    {
-                      "matchPercentage": number (0-100, representing overall resume quality score),
-                      "summary": "string (brief summary of the candidate's profile)",
-                      "strengths": "markdown string (strong points of the resume)",
-                      "weaknesses": "markdown string (formatting issues, missing sections, unclear descriptions)",
-                      "improvements": "markdown string (actionable tips to make the resume stand out generally)"
-                    }
-                `;
-            }
-
-            const response = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
+            const response = await fetch(`${BACKEND_URL}/api/analyze-resume`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+                body: JSON.stringify({
+                    resumeText,
+                    jobDescription: analysisMode === 'jd' ? jobDescription : '',
+                    analysisMode
+                })
             });
 
-            if (!response.ok) throw new Error(`AI Analysis failed: ${response.statusText}`);
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || `Analysis failed: ${response.statusText}`);
+            }
 
             const result = await response.json();
+
+            // The backend now returns the structured result directly
+            // But if the backend forwarded the raw Gemini response structure (which my code does not, it returns the result directly, wait let me check index.js)
+            // In index.js: const result = await response.json(); return res.json(result); 
+            // The result from Gemini is complex (candidates[0].content...)
+            // So the backend returns that complex object.
+            // I should handle the parsing here as before or move parsing to backend.
+            // The plan said "Return the JSON response to the frontend".
+            // Let's modify the backend to parse it or keep parsing here.
+            // The previous frontend code did:
+            // const result = await response.json();
+            // const generatedText = result.candidates[0].content.parts[0].text;
+            // ... parsing ...
+            // So if I return result from backend, I still need to parse here.
+
+            // However, it's better if backend returns the CLEAN structure.
+            // But I already wrote index.js to just return res.json(result) where result is gemini response.
+            // So I will keep the parsing logic here for now to be safe, or I can update index.js to parse it. 
+            // Updating index.js to parse would be cleaner but I already edited it.
+            // Let's check what I wrote in index.js
+            // I wrote: const result = await response.json(); return res.json(result);
+            // So it returns the raw Gemini response.
+            // So I must parse it here.
+
             const generatedText = result.candidates[0].content.parts[0].text;
             const cleanText = generatedText.replace(/```json\n?|\n?```/g, '').trim();
             const jsonMatch = cleanText.match(/\{[\s\S]*\}/);

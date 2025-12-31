@@ -25,45 +25,8 @@ const StatsSection = () => {
     }, []);
 
     return (
-        <section className="py-24 bg-[#101010] text-white relative overflow-hidden">
+        <section className="py-24 bg-gradient-to-br from-[#101010] via-[#050505] to-[#001a45] text-white relative overflow-hidden">
             {/* Background Elements */}
-            {/* Background Elements */}
-            <div className="absolute inset-0 w-full h-full overflow-hidden pointer-events-none">
-                {/* Moving Blob 1 - Blue (Large) */}
-                <motion.div
-                    animate={{
-                        x: [0, 100, -100, 0],
-                        y: [0, -100, 100, 0],
-                        scale: [1, 1.2, 0.8, 1],
-                        opacity: [0.4, 0.7, 0.4]
-                    }}
-                    transition={{
-                        duration: 15,
-                        repeat: Infinity,
-                        repeatType: "reverse",
-                        ease: "easeInOut"
-                    }}
-                    className="absolute top-[-20%] left-[-10%] w-[900px] h-[900px] bg-[#0061FE] rounded-full blur-[150px] mix-blend-screen opacity-40"
-                />
-
-                {/* Moving Blob 2 - Violet (Large) */}
-                <motion.div
-                    animate={{
-                        x: [0, -150, 100, 0],
-                        y: [0, 100, -50, 0],
-                        scale: [1, 1.3, 0.9, 1],
-                        opacity: [0.3, 0.6, 0.3]
-                    }}
-                    transition={{
-                        duration: 20,
-                        delay: 2,
-                        repeat: Infinity,
-                        repeatType: "reverse",
-                        ease: "easeInOut"
-                    }}
-                    className="absolute bottom-[-20%] right-[-10%] w-[1000px] h-[1000px] bg-[#7F00FF] rounded-full blur-[160px] mix-blend-screen opacity-30"
-                />
-            </div>
 
             <div className="container mx-auto px-4 md:px-6 relative z-10">
                 <div className="mb-16 text-center">
@@ -221,8 +184,7 @@ const StatsSection = () => {
                                     </div>
                                 ) : (
                                     <div className="text-center text-gray-500 py-10">
-                                        <p>Stats currently unavailable</p>
-                                        <p className="text-xs mt-2 opacity-50">Backend: {BACKEND_URL}</p>
+                                        <p>Stats will update soon</p>
                                     </div>
                                 )}
                             </div>

@@ -92,7 +92,8 @@ const allowedOrigins = [
   "https://codesapiens.in",
   "https://www.codesapiens.in",
   "http://localhost:5173",
-  "http://localhost:3000"
+  "http://localhost:3000",
+  "https://codesapiens-site.vercel.app"
 ];
 
 app.use(cors({

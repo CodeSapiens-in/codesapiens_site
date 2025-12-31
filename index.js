@@ -18,6 +18,7 @@ app.use(express.urlencoded({ limit: '50mb', extended: true }));
 // Supabase client - reads from your .env file
 const supabaseUrl = process.env.VITE_SUPABASE_URL;
 const supabaseKey = process.env.VITE_SUPABASE_ANON_KEY;
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 
 if (!supabaseUrl || !supabaseKey) {
   console.error("ERROR: Missing VITE_SUPABASE_URL or VITE_SUPABASE_ANON_KEY in .env file");
@@ -138,6 +139,86 @@ const generateBlogEmailHTML = (blog, unsubscribeLink = "#") => {
 // Health check
 app.get("/", (req, res) => {
   res.json({ status: "ok", message: "CodeSapiens Email API is running" });
+});
+
+// Gemini Wrapper Endpoint
+app.post("/api/analyze-resume", async (req, res) => {
+  try {
+    const { resumeText, jobDescription, analysisMode } = req.body;
+
+    if (!GEMINI_API_KEY) {
+      console.error("GEMINI_API_KEY is not set in environment variables");
+      return res.status(500).json({ error: "Server configuration error: Gemini API key missing" });
+    }
+
+    if (!resumeText) {
+      return res.status(400).json({ error: "Missing resume text" });
+    }
+
+    let prompt = '';
+
+    if (analysisMode === 'jd') {
+      prompt = `
+            You are an expert ATS (Applicant Tracking System) and Career Coach.
+            Compare the following Resume text against the Job Description (JD).
+            
+            Resume Text:
+            ${resumeText}
+            
+            Job Description:
+            ${jobDescription}
+            
+            Provide a detailed analysis in strictly raw JSON format (no markdown code blocks, no explanation text).
+            Ensure all strings are properly escaped.
+            The JSON structure must be:
+            {
+              "matchPercentage": number (0-100),
+              "summary": "string (brief overview of fit)",
+              "strengths": "markdown string (bullet points)",
+              "weaknesses": "markdown string (missing skills/experience)",
+              "improvements": "markdown string (concrete suggestions to improve the resume for this JD)"
+            }
+        `;
+    } else {
+      prompt = `
+            You are an expert Career Coach and Resume Reviewer.
+            Analyze the following Resume text to provide general feedback on how to improve it for a professional career.
+            
+            Resume Text:
+            ${resumeText}
+            
+            Provide a detailed analysis in strictly raw JSON format (no markdown code blocks, no explanation text).
+            Ensure all strings are properly escaped.
+            The JSON structure must be:
+            {
+              "matchPercentage": number (0-100, representing overall resume quality score),
+              "summary": "string (brief summary of the candidate's profile)",
+              "strengths": "markdown string (strong points of the resume)",
+              "weaknesses": "markdown string (formatting issues, missing sections, unclear descriptions)",
+              "improvements": "markdown string (actionable tips to make the resume stand out generally)"
+            }
+        `;
+    }
+
+    const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
+
+    const response = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+    });
+
+    if (!response.ok) {
+      throw new Error(`AI Analysis failed: ${response.statusText}`);
+    }
+
+    const result = await response.json();
+    return res.json(result);
+
+  } catch (error) {
+    console.error("Error in /api/analyze-resume:", error);
+    res.status(500).json({ error: error.message || "Internal Server Error" });
+  }
 });
 
 // Legacy email endpoint (keep for backward compatibility)
