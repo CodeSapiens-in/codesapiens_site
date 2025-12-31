@@ -1,14 +1,27 @@
 @import url('https://fonts.googleapis.com/css2?family=Google+Sans+Flex:opsz,wght@6..144,1..1000&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Archivo+Black&display=swap');
 @import "tailwindcss";
+
+/* THEME CONFIGURATION
+   Tailwind v4 detects these variables and automatically creates 
+   utility classes like 'text-golden-1', 'text-golden-2', etc.
+*/
+@theme {
+    /* Golden Ratio Scale (Base: 1rem) */
+    --text-golden-1: 1rem;
+    /* Body Text (approx 16px) */
+    --text-golden-2: 1.618rem;
+    /* Subheadings (approx 26px) */
+    --text-golden-3: 2.618rem;
+    /* Main Headings (approx 42px) */
+}
 
 :root {
     --brand-blue: #0061FE;
     --brand-dark: #1E1919;
     --brand-cream: #F7F5F2;
     --brand-orange: #9B0032;
-    /* Dropbox Maroon/Red accent */
     --brand-yellow: #FA5D00;
-    /* Dropbox Orange accent */
 }
 
 @layer base {
@@ -35,39 +48,30 @@
         cursor: url('/hover-cursor.png'), pointer !important;
     }
 
+    /* HEADINGS: Applying the new Golden Ratio sizes */
     h1 {
-        @apply text-golden-2 md:text-golden-3 font-bold mb-4;
+        @apply text-golden-3 font-bold mb-4 leading-tight;
     }
 
     h2 {
-        @apply text-golden-2 md:text-golden-3 font-bold mb-3;
+        /* Scales from golden-2 on mobile to golden-3 on desktop */
+        @apply text-golden-2 md:text-golden-3 font-bold mb-3 leading-tight;
     }
 
     h3 {
-        @apply text-golden-1 md:text-golden-2 font-bold mb-3;
+        @apply text-golden-2 font-bold mb-3 leading-snug;
     }
 
     h4 {
         @apply text-golden-1 md:text-golden-2 font-bold mb-2;
     }
 
-    h5 {
-        @apply text-golden-1 font-bold mb-2;
-    }
-
+    h5,
     h6 {
         @apply text-golden-1 font-bold mb-2;
     }
 
-    p,
-    li,
-    a,
-    span,
-    button,
-    input,
-    label {
-        @apply text-golden-1 leading-relaxed;
-    }
+
 }
 
 @layer utilities {
@@ -123,5 +127,3 @@
         scrollbar-width: none;
     }
 }
-
-@import url('https://fonts.googleapis.com/css2?family=Archivo+Black&display=swap');

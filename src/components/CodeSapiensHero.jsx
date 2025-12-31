@@ -389,7 +389,7 @@ const CodeSapiensHero = () => {
                             transition={{ duration: 0.8, delay: 0.2 }}
                             className="max-w-4xl"
                         >
-                            <h1 className="text-golden-2 md:text-golden-3 font-extrabold leading-[1] tracking-tighter mb-8 font-archivo-black">
+                            <h1 className="text-5xl md:text-7xl font-extrabold leading-[1] tracking-tighter mb-8 font-archivo-black">
                                 CodeSapiens<span className="text-[#0061FE]">.</span>
                             </h1>
                             <p className="text-golden-1 text-gray-400 max-w-2xl leading-relaxed mb-10 font-light">
