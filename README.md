@@ -6,6 +6,8 @@
 [![Supabase](https://img.shields.io/badge/Supabase-3ECF8E?logo=supabase&logoColor=white)](https://supabase.com/)
 [![Vercel](https://img.shields.io/badge/Vercel-000000?logo=vercel&logoColor=white)](https://vercel.com/)
 [![Node.js](https://img.shields.io/badge/Node.js-LTS-6DA55F?logo=node.js&logoColor=white)](https://nodejs.org/)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](http://makeapullrequest.com)
+[![Good First Issue](https://img.shields.io/badge/Good%20First%20Issue-Welcome-blue)](https://github.com/jayasurya261/Codesapiens_management_website/issues?q=is%3Aopen+is%3Aissue+label%3A%22good+first+issue%22)
 
 > A **JavaScript-based admin dashboard** for the **Codesapiens** platform. Manage users, projects, roles, and resources with a modern, responsive UI powered by **React 19**, **Tailwind CSS v4**, **Supabase**, and **Cloudinary**.
 
@@ -63,14 +65,14 @@ Built with modern tooling and best practices, it integrates seamlessly with **Su
 
 ## 🛠️ Tech Stack
 
-**Language:** JavaScript (ES6+)  
-**Framework:** [React 19.1.1](https://react.dev/)  
-**Styling:** [Tailwind CSS v4](https://tailwindcss.com/)  
-**Build Tool:** [Vite](https://vitejs.dev/)  
-**Backend:** [Supabase](https://supabase.com/) (Auth, DB, Realtime, Storage)  
-**Media:** [Cloudinary](https://cloudinary.com/) 
-**CAPTCHA:** [Cloudflare Turnstile](https://developers.cloudflare.com/turnstile/)  
-**State Management:** React Context / Zustand  
+**Language:** JavaScript (ES6+)
+**Framework:** [React 19.1.1](https://react.dev/)
+**Styling:** [Tailwind CSS v4](https://tailwindcss.com/)
+**Build Tool:** [Vite](https://vitejs.dev/)
+**Backend:** [Supabase](https://supabase.com/) (Auth, DB, Realtime, Storage)
+**Media:** [Cloudinary](https://cloudinary.com/)
+**CAPTCHA:** [Cloudflare Turnstile](https://developers.cloudflare.com/turnstile/)
+**State Management:** React Context / Zustand
 **Icons:** [Lucide React](https://lucide.dev/)
 
 > Full dependency list available in [`package.json`](./package.json)
@@ -81,73 +83,29 @@ Built with modern tooling and best practices, it integrates seamlessly with **Su
 
 ```
 Codesapiens_management_website/
-├── .deepsource.toml (115 bytes)
-├── .flowbite-react/
-│   ├── class-list.json (2 bytes)
-│   ├── config.json (189 bytes)
-│   └── init.tsx (490 bytes)
-├── .github/
-│   └── workflows/
-│       └── node.js.yml (844 bytes)
-├── .gitignore (259 bytes)
-├── ENVEXAMPLE (50 bytes)
-├── README.md (3808 bytes)
-├── eslint.config.js (763 bytes)
-├── index.html (360 bytes)
-├── package-lock.json (210603 bytes)
-├── package.json (1372 bytes)
-├── public/
-│   ├── logo.jpg (25536 bytes)
-│   └── vite.svg (1497 bytes)
-├── src/
-│   ├── App.jsx (4658 bytes)
-│   ├── admin/
-│   │   ├── AdminMeetup.jsx (9505 bytes)
-│   │   ├── AdminMeetupEdit.jsx (6720 bytes)
-│   │   ├── AdminMeetupList.jsx (10654 bytes)
-│   │   ├── AdminMentorshipSubmission.jsx (22416 bytes)
-│   │   ├── AdminScannerMeetup.jsx (7117 bytes)
-│   │   ├── AllUserList.jsx (37582 bytes)
-│   │   ├── AnalyticsPage.jsx (34761 bytes)
-│   │   └── Dashboard.jsx (19458 bytes)
-│   ├── assets/
-│   │   ├── academic.json (2608 bytes)
-│   │   ├── react.svg (4126 bytes)
-│   │   └── skills.json (4265 bytes)
-│   ├── components/
-│   │   ├── AuthForm.jsx (22858 bytes)
-│   │   ├── CodesapiensHero.jsx (35197 bytes)
-│   │   ├── LumaEmbed.jsx (503 bytes)
-│   │   ├── Navbar.jsx (23541 bytes)
-│   │   ├── PublicProfile.jsx (14214 bytes)
-│   │   ├── ResetPassword.jsx (3422 bytes)
-│   │   ├── ResetPasswordConfirm.jsx (2013 bytes)
-│   │   └── ui/
-│   │       └── NotFoundPage.jsx (1511 bytes)
-│   ├── index.css (114 bytes)
-│   ├── lib/
-│   │   ├── authContext.jsx (292 bytes)
-│   │   ├── authFetch.js (960 bytes)
-│   │   ├── supabaseClient.jsx (202 bytes)
-│   │   └── useAuth.js (960 bytes)
-│   ├── main.jsx (255 bytes)
-│   └── user/
-│       ├── UserCodingPlatform.jsx (7828 bytes)
-│       ├── UserDashboard.jsx (18401 bytes)
-│       ├── UserEvents.jsx (214 bytes)
-│       ├── UserMeetup.jsx (10358 bytes)
-│       ├── UserMeetupsList.jsx (11133 bytes)
-│       ├── UserMentorshipForm.jsx (18732 bytes)
-│       ├── UserMentorshipFormList.jsx (10321 bytes)
-│       ├── UserPlayGround.jsx (2564 bytes)
-│       ├── UserProfile.jsx (60884 bytes)
-│       ├── UserResource.jsx (299 bytes)
-│       └── UserResumeBuilder.jsx (307 bytes)
-├── tailwind.config.js (961 bytes)
-├── test-results/
-│   └── .last-run.json (45 bytes)
-├── vercel.json (70 bytes)
-└── vite.config.js (529 bytes)
+├── public/                 # Static assets served as-is
+├── src/                    # Application source code
+│   ├── assets/             # Images, fonts, static JSON
+│   ├── components/         # Reusable UI components
+│   ├── pages/              # Route-level pages/screens
+│   ├── layouts/            # Layout wrappers (Navbar, Sidebar)
+│   ├── hooks/              # Custom React hooks
+│   ├── context/            # React context providers
+│   ├── services/           # API calls and external services
+│   ├── utils/              # Helper functions and constants
+│   ├── styles/             # Global styles and Tailwind layers
+│   ├── routes/             # Route definitions
+│   ├── App.jsx             # Root application component
+│   └── main.jsx            # Vite entry point
+├── .env.example            # Environment variable template
+├── index.html              # HTML entry file
+├── package.json            # Dependencies and scripts
+├── vite.config.js          # Vite configuration
+├── tailwind.config.js      # Tailwind CSS config (if used)
+├── postcss.config.js       # PostCSS config (if used)
+├── eslint.config.js        # Linting rules
+├── vercel.json             # Deployment config (optional)
+└── README.md               # Documentation
 
 ---
 ```
@@ -165,6 +123,8 @@ You'll also need accounts and API keys for:
 - [Supabase](https://supabase.com/)
 - [Cloudinary](https://cloudinary.com/)
 - [Cloudflare Turnstile](https://developers.cloudflare.com/turnstile/)
+- [Google AI Studio](https://aistudio.google.com/) (for Gemini API)
+- [Upstash](https://upstash.com/) (for QStash)
 
 Verify your installations:
 
@@ -203,7 +163,18 @@ Edit `.env.local` with your actual API keys (see [Environment Variables](#enviro
 ### 4. Start Development Server
 
 ```bash
+```bash
 npm run dev
+```
+
+### 5. Start Backend Server (Required for API)
+
+Open a new terminal window and run:
+
+```bash
+node index.js
+# OR
+npm run server
 ```
 
 Open [http://localhost:5173](http://localhost:5173) in your browser.
@@ -233,7 +204,7 @@ REACT_APP_TURNSTILE_SITE_KEY=0x4AAAAAA...
 NODE_ENV=development
 ```
 
-**Important:** 
+**Important:**
 - Add `.env.local` to your `.gitignore`
 - See `EXAMPLEENV` for a complete template
 - Never commit sensitive keys to version control
@@ -267,12 +238,12 @@ import { useAuth } from './hooks/useAuth';
 
 function AdminPage() {
   const { user, loading } = useAuth();
-  
+
   if (loading) return <Spinner />;
   if (!user || user.role !== 'admin') {
     return <Navigate to="/login" />;
   }
-  
+
   return <Dashboard />;
 }
 ```
@@ -323,7 +294,7 @@ We welcome contributions from the community!
    git checkout -b feat/your-feature-name
    ```
 3. **Make your changes**
-  
+
 4. **Commit your changes:**
    ```bash
    git commit -m "feat: add user export functionality"
@@ -392,14 +363,14 @@ See [LICENSE](./LICENSE) for details.
 
 ## 📧 Contact
 
-**Maintainer:** [jayasurya261](https://github.com/jayasurya261)  
-**Issues:** [GitHub Issues](https://github.com/jayasurya261/Codesapiens_management_website/issues)  
+**Maintainer:** [jayasurya261](https://github.com/jayasurya261)
+**Issues:** [GitHub Issues](https://github.com/jayasurya261/Codesapiens_management_website/issues)
 **Discussions:** [GitHub Discussions](https://github.com/jayasurya261/Codesapiens_management_website/discussions)
 
 ---
 
 <div align="center">
-  
+
 **Made with ❤️ for the Codesapiens community**
 
 [⬆ Back to Top](#codesapiens-management-website)

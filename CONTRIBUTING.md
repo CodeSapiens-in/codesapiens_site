@@ -2,13 +2,10 @@
 
 First off, thank you for considering contributing to CodeSapiens! It's people like you that make the open-source community such an amazing place to learn, inspire, and create. We welcome contributions from everyone.
 
+
 ## 🤝 Code of Conduct
 
-By participating in this project, you are expected to uphold our Code of Conduct:
-*   Be respectful and inclusive.
-*   Accept constructive criticism gracefully.
-*   Focus on what is best for the community.
-*   Show empathy towards other community members.
+By participating in this project, you are expected to uphold our Code of Conduct. Please read the full [Code of Conduct](CODE_OF_CONDUCT.md) before contributing.
 
 ---
 

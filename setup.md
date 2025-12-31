@@ -60,6 +60,17 @@ Now, open `.env.local` in your editor and fill in the required keys:
 3.  Add a new site (use `localhost` for local development).
 4.  Copy the **Site Key** to `REACT_APP_TURNSTILE_SITE_KEY`.
 
+#### Gemini AI Setup (Optional - For Resume Analysis)
+1.  Go to [Google AI Studio](https://aistudio.google.com/).
+2.  Click **Get API key**.
+3.  Create a key in a new project.
+4.  Copy the key to `VITE_GEMINI_API_KEY` in `.env.local`.
+
+#### QStash Setup (Optional - For Email Queueing)
+1.  Create an account on [Upstash](https://upstash.com/).
+2.  Create a new **QStash** project.
+3.  Copy the **Token**, **URL**, **Current Signing Key**, and **Next Signing Key** to their respective fields in `.env.local`.
+
 ### 4. Database Initialization
 
 This step is crucial for the application to function correctly.
@@ -82,6 +93,16 @@ Now you are ready to run the application:
 ```bash
 npm run dev
 ```
+
+### 6. Start the Backend Server
+
+The application requires the backend server to be running for API calls (email, etc.). Open a **new terminal** window/tab and run:
+
+```bash
+npm run server
+```
+
+The backend server should be running at `http://localhost:3001` (or the port specified in your `.env`).
 
 The application should be running at `http://localhost:5173`.
 
