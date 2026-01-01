@@ -12,11 +12,11 @@ const AdminLayout = ({ children }) => {
             try {
                 const { data: { user } } = await supabase.auth.getUser();
                 if (user) {
-                    const { data } = await supabase
+                    const { data: rows } = await supabase
                         .from('users')
                         .select('*')
-                        .eq('uid', user.id)
-                        .single();
+                        .eq('uid', user.id);
+                    // Use rows?.[0] if needed in the future
                 }
             } catch (error) {
                 console.error('Error fetching profile:', error);

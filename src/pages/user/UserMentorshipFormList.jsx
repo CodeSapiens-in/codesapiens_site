@@ -69,11 +69,12 @@ const UserMentorshipFormList = () => {
 
         setIsAuthenticated(true);
 
-        const { data: userData, error: userError } = await supabase
+        const { data: userRows, error: userError } = await supabase
           .from('users')
           .select('mentorship_request')
-          .eq('uid', user.id)
-          .single();
+          .eq('uid', user.id);
+
+        const userData = userRows?.[0];
 
         if (userError) {
           setError(userError.message);

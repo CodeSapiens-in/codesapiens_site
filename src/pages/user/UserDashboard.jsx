@@ -120,13 +120,25 @@ export default function UserDashboard() {
     path: ""
   });
 
-  // Show Feedback Popup after 10 seconds (if not given in last 10 days)
+  // Show Feedback Popup after 10 seconds (if not given in last 10 days AND not dismissed in last 12 hours)
   useEffect(() => {
     // Wait for app loading to finish
     if (isAppLoading) return;
     if (!userData) return;
 
+    const TWELVE_HOURS_MS = 12 * 60 * 60 * 1000;
+
     const checkFeedbackEligibility = () => {
+      // Check localStorage dismissal first
+      const lastDismissed = localStorage.getItem('feedbackPopupDismissedAt');
+      if (lastDismissed) {
+        const dismissedTime = parseInt(lastDismissed, 10);
+        if (Date.now() - dismissedTime < TWELVE_HOURS_MS) {
+          return false; // Still within 12-hour cooldown
+        }
+      }
+
+      // Then check server-side last feedback
       if (!userData.last_feedback_at) return true;
 
       const lastFeedback = new Date(userData.last_feedback_at);
@@ -142,7 +154,7 @@ export default function UserDashboard() {
       }, 10000);
       return () => clearTimeout(timer);
     }
-  }, [userData, isAppLoading]); // Added isAppLoading dependency
+  }, [userData, isAppLoading]);
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -215,15 +227,45 @@ export default function UserDashboard() {
     fetchUserData();
   }, [user]);
 
-  // Blog Popup Timer
+  // Blog Popup Timer (with 12-hour localStorage cooldown)
   useEffect(() => {
     if (isAppLoading) return;
 
+    const TWELVE_HOURS_MS = 12 * 60 * 60 * 1000;
+    const lastDismissed = localStorage.getItem('blogPopupDismissedAt');
+    console.log('[Dashboard] Blog Popup Check:', { lastDismissed, now: Date.now() });
+
+    if (lastDismissed) {
+      const dismissedTime = parseInt(lastDismissed, 10);
+      const timeDiff = Date.now() - dismissedTime;
+      console.log('[Dashboard] Blog Popup Cooldown:', { timeDiff, required: TWELVE_HOURS_MS });
+
+      if (timeDiff < TWELVE_HOURS_MS) {
+        console.log('[Dashboard] Blog Popup BLOCKED by cooldown');
+        return; // Still within 12-hour cooldown, don't show
+      }
+    }
+
+    console.log('[Dashboard] Blog Popup SCHEDULED');
     const timer = setTimeout(() => {
+      console.log('[Dashboard] Blog Popup SHOWING now');
       setShowBlogPopup(true);
     }, 5000);
     return () => clearTimeout(timer);
   }, [isAppLoading]);
+
+  // Handlers to save dismissal to localStorage
+  const handleBlogPopupClose = () => {
+    console.log('[Dashboard] Blog Popup CLOSED - Saving timestamp:', Date.now());
+    localStorage.setItem('blogPopupDismissedAt', Date.now().toString());
+    setShowBlogPopup(false);
+  };
+
+  const handleFeedbackPopupClose = () => {
+    console.log('[Dashboard] Feedback Popup CLOSED - Saving timestamp:', Date.now());
+    localStorage.setItem('feedbackPopupDismissedAt', Date.now().toString());
+    setShowFeedbackPopup(false);
+  };
 
   // Handle Card Click for Transition
   const handleCardClick = (e, path, color) => {
@@ -256,11 +298,21 @@ export default function UserDashboard() {
     }, 500);
   };
 
+  // Redirect to landing page if not authenticated
+  useEffect(() => {
+    if (!isAppLoading && !user) {
+      navigate('/');
+    }
+  }, [user, isAppLoading, navigate]);
+
   if (loading) return (
     <div className="min-h-screen bg-[#F7F5F2] flex items-center justify-center">
       <div className="animate-spin w-12 h-12 border-4 border-[#00C6F7] border-t-transparent rounded-full" />
     </div>
   );
+
+  // Don't render dashboard content if not authenticated
+  if (!user) return null;
 
   return (
     <div className="min-h-screen bg-[#F7F5F2] text-[#2B2929] font-sans p-4 sm:p-8 lg:p-12 selection:bg-[#FFC845]">
@@ -511,7 +563,7 @@ export default function UserDashboard() {
       <AnimatePresence>
         {showBlogPopup && (
           <BlogPopup
-            onClose={() => setShowBlogPopup(false)}
+            onClose={handleBlogPopupClose}
           />
         )}
       </AnimatePresence>
@@ -521,7 +573,7 @@ export default function UserDashboard() {
         {showFeedbackPopup && userData && (
           <FeedbackPopup
             userId={userData.uid}
-            onClose={() => setShowFeedbackPopup(false)}
+            onClose={handleFeedbackPopupClose}
           />
         )}
       </AnimatePresence>

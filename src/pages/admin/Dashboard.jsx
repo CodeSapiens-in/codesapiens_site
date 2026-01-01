@@ -107,11 +107,12 @@ const Dashboard = () => {
           return;
         }
 
-        const { data: profileData, error: profileError } = await supabase
+        const { data: profileRows, error: profileError } = await supabase
           .from('users')
           .select('*')
-          .eq('uid', user.id)
-          .single();
+          .eq('uid', user.id);
+
+        const profileData = profileRows?.[0];
 
         if (profileError || profileData?.role !== 'admin') {
           navigate('/');

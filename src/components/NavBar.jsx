@@ -229,22 +229,35 @@ export default function NavBar() {
 
   const handleSignOut = async () => {
     try {
-      // Sign out from Supabase
-      const { error } = await supabase.auth.signOut();
+      // Clear any local state first
+      setUserData(null);
+      setIsMobileMenuOpen(false);
+      setIsProfileDropdownOpen(false);
+
+      // Sign out from Supabase with global scope to clear all sessions
+      const { error } = await supabase.auth.signOut({ scope: 'global' });
 
       if (error) {
         console.error('Error signing out:', error);
       }
 
-      // Clear any local state and redirect
-      setUserData(null);
-      setIsMobileMenuOpen(false);
-      setIsProfileDropdownOpen(false);
+      // Clear any localStorage items that might persist session-like data
+      localStorage.removeItem('blogPopupDismissedAt');
+      localStorage.removeItem('feedbackPopupDismissedAt');
 
-      // Redirect to login or home page
-      navigate('/');
+      // Manually clear Supabase auth tokens from localStorage
+      Object.keys(localStorage).forEach((key) => {
+        if (key.startsWith('sb-') || key.includes('auth-token') || key.includes('supabase')) {
+          localStorage.removeItem(key);
+        }
+      });
+
+      // Force a full page reload to clear all React state and reinitialize
+      window.location.href = '/';
     } catch (err) {
       console.error('Sign out error:', err);
+      // Even if there's an error, try to redirect
+      window.location.href = '/';
     }
   };
 
