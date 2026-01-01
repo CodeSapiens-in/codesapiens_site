@@ -43,7 +43,8 @@ const UserMentorshipForm = () => {
         setIsAuthenticated(true);
         setFormData((prev) => ({ ...prev, email: user.email || "" }));
 
-        const { data: userData } = await supabase.from("users").select("mentorship_request").eq("uid", user.id).single();
+        const { data: userRows } = await supabase.from("users").select("mentorship_request").eq("uid", user.id);
+        const userData = userRows?.[0];
 
         if (userData && userData.mentorship_request && Array.isArray(userData.mentorship_request)) {
           const latestRequest = userData.mentorship_request.reduce((latest, request) => !latest || new Date(request.created_at) > new Date(latest.created_at) ? request : latest, null);
@@ -104,7 +105,8 @@ const UserMentorshipForm = () => {
         created_at: new Date().toISOString(),
       };
 
-      const { data: existingData } = await supabase.from("users").select("mentorship_request").eq("uid", user.id).single();
+      const { data: existingRows } = await supabase.from("users").select("mentorship_request").eq("uid", user.id);
+      const existingData = existingRows?.[0];
       const updatedRequests = existingData?.mentorship_request ? [...existingData.mentorship_request, mentorshipRequest] : [mentorshipRequest];
 
       const { error } = await supabase.from("users").update({ mentorship_request: updatedRequests, updated_at: new Date().toISOString() }).eq("uid", user.id);

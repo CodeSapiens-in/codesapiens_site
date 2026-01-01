@@ -43,15 +43,16 @@ export default function NavBar() {
         setIsAuthenticated(true);
 
         // Fetch user profile from the users table
-        const { data, error: profileError } = await supabase
+        const { data: rows, error: profileError } = await supabase
           .from('users')
           .select('*')
-          .eq('uid', user.id)
-          .single();
+          .eq('uid', user.id);
 
         if (profileError) {
           throw new Error(`Failed to fetch user profile: ${profileError.message}`);
         }
+
+        const data = rows?.[0];
 
         if (!data) {
           throw new Error('User profile not found');

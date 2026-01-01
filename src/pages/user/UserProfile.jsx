@@ -32,7 +32,6 @@ import {
   BookOpen,
   ExternalLink,
   Briefcase,
-  MapPin,
 } from "lucide-react";
 import { toast } from 'react-hot-toast';
 import { supabase } from "../../lib/supabaseClient";
@@ -207,19 +206,20 @@ const UserProfile = () => {
 
         setIsAuthenticated(true);
 
-        const { data, error: profileError } = await supabase
+        const { data: rows, error: profileError } = await supabase
           .from("users")
           .select("*")
-          .eq("uid", user.id)
-          .single();
+          .eq("uid", user.id);
 
-        console.log("[Frontend] : Fetched profile:", data, "Error:", profileError);
+        console.log("[Frontend] : Fetched profile rows:", rows, "Error:", profileError);
 
         if (profileError) {
           console.error("[Frontend] : Error fetching profile:", profileError.message);
           setError(profileError.message);
           return;
         }
+
+        const data = rows?.[0];
 
         if (data) {
           const transformedUser = {
@@ -912,10 +912,6 @@ const UserProfile = () => {
               <div className="flex items-center gap-2">
                 <Briefcase className="w-4 h-4 text-[#C2E812]" />
                 {isEditingHeader ? <input name="major" value={editedData.major} onChange={handleInputChange} className="bg-transparent border-b border-gray-500 text-white w-32" /> : (userData.major || "N/A")}
-              </div>
-              <div className="flex items-center gap-2">
-                <MapPin className="w-4 h-4 text-[#0061FE]" />
-                India
               </div>
               <div className="flex items-center gap-2">
                 <Calendar className="w-4 h-4 text-[#FF5018]" />

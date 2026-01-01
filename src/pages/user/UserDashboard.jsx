@@ -151,11 +151,12 @@ export default function UserDashboard() {
         if (!user) return;
 
         // 1. Fetch User Profile
-        const { data: profile, error: profileError } = await supabase
+        const { data: profiles, error: profileError } = await supabase
           .from("users")
           .select("*")
-          .eq("uid", user.id)
-          .single();
+          .eq("uid", user.id);
+
+        const profile = profiles?.[0];
 
         if (profile) {
           console.log("Fetched Profile:", profile); // DEBUG LOG

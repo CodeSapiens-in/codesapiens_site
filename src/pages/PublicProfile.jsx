@@ -32,12 +32,13 @@ const PublicProfile = () => {
         setLoading(true);
         setError(null);
 
-        const { data, error } = await supabase
+        const { data: rows, error } = await supabase
           .from("users")
           .select("username, display_name, bio, skills, github_url, linkedin_url, portfolio_url, resume_url, college, major, year")
           .eq("username", username)
-          .eq("is_public", true)
-          .single();
+          .eq("is_public", true);
+
+        const data = rows?.[0];
 
         if (error || !data) {
           throw new Error("Profile not found or not public");
@@ -85,27 +86,27 @@ const PublicProfile = () => {
 
   const socialLinks = profile
     ? [
-        { label: "GitHub Profile", icon: Github, href: profile.githubUrl || "#", available: !!profile.githubUrl },
-        { label: "LinkedIn Profile", icon: Linkedin, href: profile.linkedinUrl || "#", available: !!profile.linkedinUrl },
-        { label: "Portfolio Website", icon: Globe, href: profile.portfolioUrl || "#", available: !!profile.portfolioUrl },
-      ]
+      { label: "GitHub Profile", icon: Github, href: profile.githubUrl || "#", available: !!profile.githubUrl },
+      { label: "LinkedIn Profile", icon: Linkedin, href: profile.linkedinUrl || "#", available: !!profile.linkedinUrl },
+      { label: "Portfolio Website", icon: Globe, href: profile.portfolioUrl || "#", available: !!profile.portfolioUrl },
+    ]
     : [];
 
   const technicalSkills =
     userSkills.length > 0
       ? userSkills.slice(0, 5).map((skill, index) => ({
-          skill,
-          level: 90 - index * 5,
-          color: ["bg-yellow-500", "bg-blue-500", "bg-green-500", "bg-green-600", "bg-purple-500"][index] || "bg-gray-500",
-        }))
+        skill,
+        level: 90 - index * 5,
+        color: ["bg-yellow-500", "bg-blue-500", "bg-green-500", "bg-green-600", "bg-purple-500"][index] || "bg-gray-500",
+      }))
       : [{ skill: "No skills added", level: 0, color: "bg-gray-300" }];
 
   const personalInfo = profile
     ? [
-        { label: "College", value: profile.college },
-        { label: "Graduating Year", value: profile.year || "Not specified" },
-        { label: "Major", value: profile.major },
-      ]
+      { label: "College", value: profile.college },
+      { label: "Graduating Year", value: profile.year || "Not specified" },
+      { label: "Major", value: profile.major },
+    ]
     : [];
 
   if (loading) {
@@ -175,9 +176,8 @@ const PublicProfile = () => {
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
-                className={`pb-3 text-sm font-medium border-b-2 transition-colors ${
-                  activeTab === tab ? "text-blue-600 border-blue-600" : "text-gray-500 border-transparent hover:text-gray-700"
-                }`}
+                className={`pb-3 text-sm font-medium border-b-2 transition-colors ${activeTab === tab ? "text-blue-600 border-blue-600" : "text-gray-500 border-transparent hover:text-gray-700"
+                  }`}
               >
                 {tab}
               </button>

@@ -50,8 +50,8 @@ export default function UserMeetupsList() {
     if (!user) { setUserProfile(null); return; }
     const fetchUserProfile = async () => {
       try {
-        const { data } = await supabase.from("users").select("display_name, email, avatar").eq("uid", user.id).single();
-        setUserProfile(data);
+        const { data: rows } = await supabase.from("users").select("display_name, email, avatar").eq("uid", user.id);
+        setUserProfile(rows?.[0] || null);
       } catch (err) { console.error(err); }
     };
     fetchUserProfile();
