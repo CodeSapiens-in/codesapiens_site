@@ -472,7 +472,7 @@ export default function NavBar() {
                   <FileCheck2 className="w-4 h-4 mr-3 flex-shrink-0" />
                   <span>My Submissions</span>
                 </button>
-                <button onClick={() => { setIsProfileDropdownOpen(false); navigate('/events'); }} className="w-full text-left flex items-center px-4 py-2 text-sm text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900 transition-colors">
+                <button onClick={() => { setIsProfileDropdownOpen(false); navigate('https://luma.com/codesapiens?period=past'); }} className="w-full text-left flex items-center px-4 py-2 text-sm text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900 transition-colors">
                   <CalendarSearch className="w-4 h-4 mr-3 flex-shrink-0" />
                   <span>Events</span>
                 </button>
