@@ -10,6 +10,17 @@ const LandingPopup = () => {
     const navigate = useNavigate();
 
     useEffect(() => {
+        // Check cooldown
+        const FIVE_MINUTES_MS = 5 * 60 * 1000;
+        const lastDismissed = localStorage.getItem('landingPopupDismissedAt');
+
+        if (lastDismissed) {
+            const dismissedTime = parseInt(lastDismissed, 10);
+            if (Date.now() - dismissedTime < FIVE_MINUTES_MS) {
+                return; // Still within cooldown
+            }
+        }
+
         // Show popup after 3 seconds
         const timer = setTimeout(() => {
             setIsVisible(true);
@@ -29,6 +40,7 @@ const LandingPopup = () => {
     }, [isVisible, timeLeft]);
 
     const handleClose = () => {
+        localStorage.setItem('landingPopupDismissedAt', Date.now().toString());
         setIsVisible(false);
     };
 
