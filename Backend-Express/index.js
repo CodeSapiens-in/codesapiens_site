@@ -96,6 +96,7 @@ const allowedOrigins = [
   "http://localhost:5173",
   "http://localhost:3000",
   "https://codesapiens-site.vercel.app",
+  "https://www.codesapiens.in",
   "https://colleges-name-api.vercel.app"
 ];
 
