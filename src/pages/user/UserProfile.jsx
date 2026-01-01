@@ -1206,14 +1206,27 @@ const UserProfile = () => {
             )}
 
             {activeTab === "Skills" && (
-              <div className="bg-white rounded-3xl p-12 border border-gray-100 shadow-sm text-center">
-                <div className="w-20 h-20 bg-[#F7F5F2] rounded-full flex items-center justify-center mx-auto mb-6">
-                  <Sparkles className="w-10 h-10 text-[#FF5018]" />
+              <div className="bg-white rounded-3xl p-6 md:p-8 border border-gray-100 shadow-sm">
+                <div className="flex justify-between items-center mb-8">
+                  <h3 className="text-2xl font-black">Skills & Expertise</h3>
+                  <div className="flex gap-2">
+                    <input
+                      value={newSkill}
+                      onChange={(e) => setNewSkill(e.target.value)}
+                      placeholder="Add skill..."
+                      className="bg-[#F7F5F2] border-none rounded-xl px-4 py-2 font-bold focus:ring-2 focus:ring-[#C2E812] outline-none"
+                    />
+                    <button onClick={handleAddSkill} className="bg-[#1E1E1E] text-white p-2 rounded-xl hover:bg-[#C2E812] hover:text-black transition-colors"><Plus /></button>
+                  </div>
                 </div>
-                <h3 className="text-3xl font-black text-[#1E1E1E] mb-2">Coming Soon!</h3>
-                <p className="text-gray-500 max-w-md mx-auto">
-                  We are revamping the Skills & Expertise section to better showcase your talents. Stay tuned!
-                </p>
+                <div className="flex flex-wrap gap-3">
+                  {userSkills.map((skill, i) => (
+                    <div key={i} className="bg-[#F7F5F2] px-5 py-3 rounded-xl font-bold text-[#1E1E1E] flex items-center gap-3 group hover:bg-[#1E1E1E] hover:text-white transition-colors cursor-default">
+                      {skill}
+                      <button onClick={() => handleDeleteSkill(i)} className="opacity-0 group-hover:opacity-100 text-red-500 hover:text-red-400 transition-opacity"><XCircle className="w-4 h-4" /></button>
+                    </div>
+                  ))}
+                </div>
               </div>
             )}
 

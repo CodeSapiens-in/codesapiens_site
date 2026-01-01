@@ -366,26 +366,37 @@ const ResumeAnalyzer = () => {
 
             const generatedText = result.candidates[0].content.parts[0].text;
 
-            // robust json extraction
-            const cleanText = generatedText.replace(/```json\n?|\n?```/g, '').trim();
-            const firstOpen = cleanText.indexOf('{');
-            const lastClose = cleanText.lastIndexOf('}');
+            // Robust JSON extraction using Regex
+            const jsonRegex = /```(?:json)?\s*([\s\S]*?)```/;
+            const match = generatedText.match(jsonRegex);
 
-            if (firstOpen === -1 || lastClose === -1) {
-                console.error("No JSON braces found in AI response:", generatedText);
-                throw new Error("AI response format was invalid (missing JSON structure).");
+            let cleanText = generatedText;
+            if (match && match[1]) {
+                cleanText = match[1].trim();
+            } else {
+                // Fallback: finding the first '{' and last '}'
+                const firstOpen = generatedText.indexOf('{');
+                const lastClose = generatedText.lastIndexOf('}');
+
+                if (firstOpen !== -1 && lastClose !== -1) {
+                    cleanText = generatedText.substring(firstOpen, lastClose + 1);
+                }
             }
 
-            const finalJson = cleanText.substring(firstOpen, lastClose + 1);
-
             try {
-                const parsedResult = JSON.parse(finalJson);
+                // Pre-cleaning: Remove potential control characters that break JSON.parse
+                // cleanText = cleanText.replace(/[\x00-\x1F\x7F-\x9F]/g, ""); 
+                // Note: The above might remove newlines which are valid in JSON strings. 
+                // Better to just try parsing first.
+
+                const parsedResult = JSON.parse(cleanText);
                 setAnalysisResult(parsedResult);
             } catch (jsonErr) {
                 console.error('JSON Parse Error:', jsonErr);
-                console.error('Offending JSON string:', finalJson);
+                console.error('Offending JSON string:', cleanText);
 
-                // Attempt to show what we have, or just fail
+                // Attempt one more cleanup: strict escape of newlines if they are unescaped inside strings? 
+                // For now, failure is safer than guessing wrong.
                 throw new Error("AI response contained invalid characters. Please try again (sometimes specialized formatting symbols cause this).");
             }
 
