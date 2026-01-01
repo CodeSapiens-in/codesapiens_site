@@ -1,5 +1,5 @@
 export const BACKEND_URL = import.meta.env.DEV
-    ? import.meta.env.VITE_BACKEND_URL
-    : "http://localhost:3001" ;
+    ? "http://localhost:3001"
+    : import.meta.env.VITE_BACKEND_URL ;
 
 
