@@ -8,6 +8,7 @@ import Tesseract from 'tesseract.js';
 import * as pdfjsLib from 'pdfjs-dist/build/pdf';
 import ReactMarkdown from 'react-markdown';
 import { motion, AnimatePresence } from 'framer-motion';
+import { authFetch } from '../lib/authFetch';
 import { BACKEND_URL } from '../config';
 
 // Doodles removed
@@ -316,7 +317,7 @@ const ResumeAnalyzer = () => {
             }
 
             setParsingStatus('Analyzing with AI...');
-            const response = await fetch(`${BACKEND_URL}/api/analyze-resume`, {
+            const response = await authFetch(`${BACKEND_URL}/api/analyze-resume`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({

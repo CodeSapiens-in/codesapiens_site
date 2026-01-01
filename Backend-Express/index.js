@@ -15,6 +15,8 @@ import { body, validationResult } from "express-validator";
 import helmet from "helmet";
 import timeout from "express-timeout-handler";
 
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+
 
 dotenv.config({ debug: true });
 
@@ -93,7 +95,8 @@ const allowedOrigins = [
   "https://www.codesapiens.in",
   "http://localhost:5173",
   "http://localhost:3000",
-  "https://codesapiens-site.vercel.app"
+  "https://codesapiens-site.vercel.app",
+  "https://colleges-name-api.vercel.app"
 ];
 
 app.use(cors({
@@ -595,7 +598,7 @@ app.options("/delete-resume", (req, res) => {
   res.set({
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Methods": "DELETE, OPTIONS",
-    "Access-Control-Allow-Headers": "Content-Type, Authorization",
+    "Access-Control-Allow-Headers": "Content-Type, Authorization, x-client-source",
   });
   res.sendStatus(204);
 });
@@ -798,6 +801,7 @@ app.post(
       const result = await cloudinary.uploader.upload(inputPath, {
         resource_type: "image",
         folder: "community-photos",
+
         transformation: [
           { width: 1200, height: 800, crop: "limit" },
           { quality: "auto:good" },
@@ -1101,6 +1105,86 @@ app.get("/api/public-stats", async (req, res) => {
   } catch (error) {
     console.error("[cAPi] : Stats error:", error);
     res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Gemini Wrapper Endpoint
+app.post("/api/analyze-resume", async (req, res) => {
+  try {
+    const { resumeText, jobDescription, analysisMode } = req.body;
+
+    if (!GEMINI_API_KEY) {
+      console.error("GEMINI_API_KEY is not set in environment variables");
+      return res.status(500).json({ error: "Server configuration error: Gemini API key missing" });
+    }
+
+    if (!resumeText) {
+      return res.status(400).json({ error: "Missing resume text" });
+    }
+
+    let prompt = '';
+
+    if (analysisMode === 'jd') {
+      prompt = `
+            You are an expert ATS (Applicant Tracking System) and Career Coach.
+            Compare the following Resume text against the Job Description (JD).
+            
+            Resume Text:
+            ${resumeText}
+            
+            Job Description:
+            ${jobDescription}
+            
+            Provide a detailed analysis in strictly raw JSON format (no markdown code blocks, no explanation text).
+            Ensure all strings are properly escaped.
+            The JSON structure must be:
+            {
+              "matchPercentage": number (0-100),
+              "summary": "string (brief overview of fit)",
+              "strengths": "markdown string (bullet points)",
+              "weaknesses": "markdown string (missing skills/experience)",
+              "improvements": "markdown string (concrete suggestions to improve the resume for this JD)"
+            }
+        `;
+    } else {
+      prompt = `
+            You are an expert Career Coach and Resume Reviewer.
+            Analyze the following Resume text to provide general feedback on how to improve it for a professional career.
+            
+            Resume Text:
+            ${resumeText}
+            
+            Provide a detailed analysis in strictly raw JSON format (no markdown code blocks, no explanation text).
+            Ensure all strings are properly escaped.
+            The JSON structure must be:
+            {
+              "matchPercentage": number (0-100, representing overall resume quality score),
+              "summary": "string (brief summary of the candidate's profile)",
+              "strengths": "markdown string (strong points of the resume)",
+              "weaknesses": "markdown string (formatting issues, missing sections, unclear descriptions)",
+              "improvements": "markdown string (actionable tips to make the resume stand out generally)"
+            }
+        `;
+    }
+
+    const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
+
+    const response = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+    });
+
+    if (!response.ok) {
+      throw new Error(`AI Analysis failed: ${response.statusText}`);
+    }
+
+    const result = await response.json();
+    return res.json(result);
+
+  } catch (error) {
+    console.error("Error in /api/analyze-resume:", error);
+    res.status(500).json({ error: error.message || "Internal Server Error" });
   }
 });
 
