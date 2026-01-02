@@ -51,7 +51,8 @@ const StatsSection = () => {
                             <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
 
                             <h3 className="text-golden-2 md:text-golden-3 font-black text-white mb-2 drop-shadow-lg">
-                                {stats.totalUsers > 0 ? stats.totalUsers : "1500+"}
+                                {/* {stats.totalUsers > 0 ? stats.totalUsers : "1500+"} */}
+                                2000+
                             </h3>
                             <p className="text-gray-400 font-medium uppercase tracking-normal md:tracking-wider text-golden-1">Total Members</p>
                         </motion.div>
@@ -67,7 +68,8 @@ const StatsSection = () => {
                             <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
 
                             <h3 className="text-golden-2 md:text-golden-3 font-black text-white mb-2 drop-shadow-lg">
-                                {stats.totalColleges > 0 ? stats.totalColleges : "50+"}
+                                {/* {stats.totalColleges > 0 ? stats.totalColleges : "50+"} */}
+                                50+
                             </h3>
                             <p className="text-gray-400 font-medium uppercase tracking-normal md:tracking-wider text-golden-1">Colleges Reached</p>
                         </motion.div>
@@ -421,7 +423,7 @@ const CodeSapiensHero = () => {
                             </p>
                             <div className="grid grid-cols-2 gap-8 border-t border-gray-200 pt-8">
                                 <div>
-                                    <h3 className="text-golden-3 font-bold text-[#FF0000] mb-2">1500+</h3>
+                                    <h3 className="text-golden-3 font-bold text-[#FF0000] mb-2">2000+</h3>
                                     <p className="text-golden-1 text-gray-500 uppercase tracking-widest">Active Members</p>
                                 </div>
                                 <div>
