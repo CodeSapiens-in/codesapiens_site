@@ -226,35 +226,7 @@ const CodeSapiensHero = () => {
     const shapeOpacity = useTransform(scrollY, [0, 400], [0.8, 0]);
 
     // Content for Sticky Scroll
-    const visionContent = [
-        {
-            title: "Meetups",
-            description: <span className="text-gray-600">Offline events and mini-hackathons where you build and launch projects in minutes. <span className="bg-yellow-300 text-black px-1 rounded-sm">Connect with like-minded peers.</span></span>,
-            content: (
-                <div className="w-full flex justify-center">
-                    <img src="https://res.cloudinary.com/dqudvximt/image/upload/v1759740834/users_cme79i2lk00qls401ar5qxqnc_OadwAYSr5ySuegEn-IMG-20250914-WA0012_gvyeye.jpg" alt="Meetups" className="w-full max-w-md h-auto rounded-lg" />
-                </div>
-            )
-        },
-        {
-            title: "Hackathons",
-            description: <span className="text-gray-600">Fun, minimal hackathons to get hands-on experience and win prizes. Push your limits and <span className="bg-yellow-300 text-black px-1 rounded-sm">build something amazing.</span></span>,
-            content: (
-                <div className="w-full flex justify-center">
-                    <img src="https://res.cloudinary.com/dqudvximt/image/upload/v1759740764/width_800_pmtms3.webp" alt="Hackathons" className="w-full max-w-md h-auto rounded-lg" />
-                </div>
-            )
-        },
-        {
-            title: "Nurturing Talent",
-            description: <span className="text-gray-600">We help you discover your interests and build a unique profile that stands out. <span className="bg-yellow-300 text-black px-1 rounded-sm">Mentorship from seniors and industry experts.</span></span>,
-            content: (
-                <div className="w-full flex justify-center">
-                    <img src="https://res.cloudinary.com/dqudvximt/image/upload/v1759741375/users_cme79i2lk00qls401ar5qxqnc_tYvYry0ll1qJY9Cr-sZlcWmpyKLCEVr3R-WhatsApp25202025-08-10252015.15.02_25567a3d_c0frk5.jpg" alt="Nurturing Talent" className="w-full max-w-md h-auto rounded-lg" />
-                </div>
-            )
-        }
-    ];
+
 
     const volunteers = [
         { photo: "https://res.cloudinary.com/druvxcll9/image/upload/v1761122516/2ABMHfqOsrpoL3OV-WhatsApp202025-08-312010.33.52_a8a27bbd_vzcgzq_1_bm8zch.jpg", name: "Keerthana M G", link: "https://in.linkedin.com/in/keerthana-m-g-12ba59256" },
@@ -434,47 +406,20 @@ const CodeSapiensHero = () => {
                         </div>
 
                         <div className="relative h-72 sm:h-80 md:h-96 w-full rounded-lg overflow-hidden shadow-lg border border-gray-200 mt-8 md:mt-0">
-                            <video
-                                src="https://res.cloudinary.com/dqudvximt/video/upload/v1765443313/66c503d081b2f012369fc5d2_674798e5512046ff64125032_Collaboration_Top-Down_Table-transcode_jgafvj.mp4"
-                                autoPlay
-                                loop
-                                muted
-                                playsInline
+                            <img
+                                src="https://res.cloudinary.com/dqudvximt/image/upload/v1767535873/1760365837828_vyrmco.jpg"
+
                                 className="absolute inset-0 w-full h-full object-cover"
                             />
                         </div>
 
-                        <div className="col-span-2 mt-4">
-                            <div className="space-y-8 md:space-y-16">
-                                {visionContent.map((item, index) => (
-                                    <motion.div
-                                        key={index}
-                                        initial={{ opacity: 0, y: 20 }}
-                                        whileInView={{ opacity: 1, y: 0 }}
-                                        viewport={{ once: true }}
-                                        transition={{ delay: index * 0.1 }}
-                                        className={`flex flex-col ${index % 2 === 0 ? 'md:flex-row' : 'md:flex-row-reverse'} gap-8 md:gap-12 items-center`}
-                                    >
-                                        <div className="w-full md:w-2/5 text-center md:text-left">
-                                            <h3 className="text-golden-2 font-bold mb-3 md:mb-4 text-[#1E1919]">{item.title}</h3>
-                                            <p className="text-golden-1 text-gray-600 leading-relaxed">{item.description}</p>
-                                        </div>
-                                        <div className="w-full md:w-3/5 h-auto flex items-center justify-center">
-                                            {item.content}
-                                        </div>
-                                    </motion.div>
-                                ))}
-                            </div>
-                        </div>
+
                     </div>
                 </div>
             </section>
 
-            {/* Stats Section */}
-            <StatsSection />
-
-            {/* Events Section */}
-            <section id="events" className="py-24 md:py-32 bg-[#1E1919] text-[#F7F5F2]">
+            {/* Events Section - Community Moments */}
+            <section id="events" className="py-24 md:py-32 bg-white text-[#1E1919]">
                 <div className="container mx-auto px-6">
 
 
@@ -519,6 +464,9 @@ const CodeSapiensHero = () => {
                     </div>
                 </div>
             </section>
+
+            {/* Stats Section */}
+            <StatsSection />
 
             {/* Hall of Fame */}
             <section className="py-32 bg-[#0061FE] text-white overflow-hidden relative">
