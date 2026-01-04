@@ -476,28 +476,7 @@ const CodeSapiensHero = () => {
             {/* Events Section */}
             <section id="events" className="py-24 md:py-32 bg-[#1E1919] text-[#F7F5F2]">
                 <div className="container mx-auto px-6">
-                    <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-16">
-                        <div>
-                            <span className="text-[#0061FE] font-bold tracking-widest uppercase text-golden-1 mb-4 block">Events</span>
-                            <h2 className="text-golden-2 md:text-golden-3 font-bold text-white mb-4">What's Happening</h2>
-                            <p className="text-golden-1 text-gray-400">Join us at our upcoming events.</p>
-                        </div>
 
-                    </div>
-
-                    {/* Luma Embed */}
-                    <div className="mb-24">
-                        <iframe
-                            src="https://luma.com/embed/calendar/cal-UvcJfwpSBZdMc61/events"
-                            width="100%"
-                            height="500"
-                            className="rounded-sm border border-gray-800 shadow-2xl bg-white"
-                            frameBorder="0"
-                            allowFullScreen=""
-                            aria-hidden="false"
-                            tabIndex="0"
-                        ></iframe>
-                    </div>
 
                     {/* Past Events Gallery */}
                     <div className="flex items-center justify-between mb-12">
@@ -508,38 +487,32 @@ const CodeSapiensHero = () => {
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                         {communityPhotos.slice(0, 6).map((photo, i) => (
                             <motion.div
                                 key={photo.id}
-                                initial={{ opacity: 0, rotate: i % 2 === 0 ? 3 : -3, scale: 0.9 }}
-                                whileInView={{ opacity: 1, rotate: i % 2 === 0 ? 3 : -3, scale: 1 }}
-                                whileHover={{
-                                    scale: 1.05,
-                                    rotate: 0,
-                                    zIndex: 50,
-                                    transition: { duration: 0.2 }
-                                }}
+                                initial={{ opacity: 0, y: 20 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                whileHover={{ y: -5 }}
                                 viewport={{ once: true, margin: "-50px" }}
-                                transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                                className="relative cursor-pointer"
+                                transition={{ duration: 0.5, delay: i * 0.1 }}
+                                className="group relative overflow-hidden rounded-xl bg-[#2A2A2A] border border-gray-800"
                             >
-                                {/* Sticky Note Card */}
-                                <div className="bg-[#FFFBEA] border border-[#eaddc5] shadow-xl p-4 pb-8 rounded-sm relative">
-                                    {/* Tape Effects */}
-                                    <div className="absolute -top-3 -left-3 w-16 h-6 bg-gradient-to-b from-amber-200/80 to-amber-300/60 rounded-sm shadow-sm z-20" style={{ transform: 'rotate(-45deg)' }}></div>
-                                    <div className="absolute -bottom-3 -right-3 w-16 h-6 bg-gradient-to-b from-amber-200/80 to-amber-300/60 rounded-sm shadow-sm z-20" style={{ transform: 'rotate(-45deg)' }}></div>
+                                {/* Photo */}
+                                <div className="aspect-[4/3] overflow-hidden">
+                                    <img
+                                        src={photo.image_url}
+                                        alt={photo.title}
+                                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                                    />
+                                    {/* Overlay */}
+                                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-60 group-hover:opacity-80 transition-opacity"></div>
+                                </div>
 
-                                    {/* Photo */}
-                                    <div className="aspect-[4/3] overflow-hidden rounded-sm mb-4 border-4 border-white shadow-inner relative z-10 bg-gray-100">
-                                        <img src={photo.image_url} alt={photo.title} className="w-full h-full object-cover" />
-                                    </div>
-
-                                    {/* Info - Handwritten Font Style */}
-                                    <div className="text-[#1E1919] relative z-10 text-center">
-                                        <p className="font-bold text-golden-1 mb-1 text-gray-800" style={{ fontFamily: 'Georgia, serif' }}>{photo.title}</p>
-                                        <p className="text-golden-1 text-gray-500 font-medium italic">{photo.description || photo.date}</p>
-                                    </div>
+                                {/* Content Overlay */}
+                                <div className="absolute bottom-0 left-0 w-full p-6">
+                                    <h4 className="text-white font-bold text-lg mb-1">{photo.title}</h4>
+                                    <p className="text-gray-300 text-sm">{photo.description || photo.date}</p>
                                 </div>
                             </motion.div>
                         ))}
@@ -580,23 +553,23 @@ const CodeSapiensHero = () => {
             </section>
 
             {/* Team / Mafia Gang */}
-            <section id="community" className="py-24 md:py-32 bg-[#F7F5F2] text-[#1E1919]">
+            <section id="community" className="py-8 md:py-16 bg-[#F7F5F2] text-[#1E1919]">
                 <div className="container mx-auto px-6 text-center">
-                    <span className="text-[#0061FE] font-bold tracking-widest uppercase text-golden-1 mb-4 block">Community</span>
-                    <h2 className="text-golden-2 md:text-golden-3 font-bold mb-6">The Mafia Gang</h2>
-                    <p className="text-golden-1 text-gray-600 max-w-2xl mx-auto mb-20">
+                    <span className="text-[#0061FE] font-bold tracking-widest uppercase text-xs md:text-sm text-golden-1 mb-2 block">Community</span>
+                    <h2 className="text-2xl md:text-4xl text-golden-2 md:text-golden-3 font-bold mb-3">The Mafia Gang</h2>
+                    <p className="text-golden-1 text-gray-600 text-sm md:text-base max-w-2xl mx-auto mb-8">
                         Meet the core members who run the community. We are students, just like you.
                     </p>
 
-                    <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-y-12 gap-x-8">
+                    <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-y-6 gap-x-2 md:gap-x-4">
                         {/* Founder */}
                         <div className="col-span-2 md:col-span-1 flex flex-col items-center group">
-                            <div className="w-40 h-40 rounded-full overflow-hidden mb-6 border-4 border-[#FA5D00] shadow-lg group-hover:scale-105 transition-transform">
+                            <div className="w-20 h-20 md:w-24 md:h-24 rounded-full overflow-hidden mb-3 border-4 border-[#FA5D00] shadow-lg group-hover:scale-105 transition-transform">
                                 <img src="https://res.cloudinary.com/druvxcll9/image/upload/v1761122517/1679197646322_n1svjq_s5w42a.jpg" alt="Thiyaga B" className="w-full h-full object-cover" />
                             </div>
-                            <h3 className="font-bold text-golden-2 mb-1">Thiyaga B</h3>
-                            <p className="text-[#FA5D00] text-golden-1 font-bold uppercase tracking-widest mb-3">Founder</p>
-                            <a href="https://www.linkedin.com/in/thiyagab/" target="_blank" rel="noreferrer" className="text-gray-400 hover:text-[#0061FE] transition-colors"><Linkedin size={20} /></a>
+                            <h3 className="font-bold text-golden-2 mb-0.5 text-sm md:text-base">Thiyaga B</h3>
+                            <p className="text-[#FA5D00] text-golden-1 font-bold uppercase tracking-widest text-[10px] md:text-xs mb-1">Founder</p>
+                            <a href="https://www.linkedin.com/in/thiyagab/" target="_blank" rel="noreferrer" className="text-gray-400 hover:text-[#0061FE] transition-colors"><Linkedin size={14} /></a>
                         </div>
                         {volunteers.map((vol, i) => (
                             <motion.div
@@ -606,13 +579,13 @@ const CodeSapiensHero = () => {
                                 transition={{ delay: i * 0.05 }}
                                 className="flex flex-col items-center group"
                             >
-                                <div className="w-32 h-32 rounded-full overflow-hidden mb-5 grayscale group-hover:grayscale-0 transition-all duration-500 border-2 border-transparent group-hover:border-[#0061FE] shadow-md">
+                                <div className="w-16 h-16 md:w-20 md:h-20 rounded-full overflow-hidden mb-2 grayscale group-hover:grayscale-0 transition-all duration-500 border-2 border-transparent group-hover:border-[#0061FE] shadow-md">
                                     <img src={vol.photo} alt={vol.name} className="w-full h-full object-cover" />
                                 </div>
-                                <h3 className="font-bold text-golden-1 mb-1">{vol.name}</h3>
+                                <h3 className="font-bold text-golden-1 mb-0.5 text-xs md:text-sm">{vol.name}</h3>
                                 {vol.link && (
-                                    <a href={vol.link} target="_blank" rel="noreferrer" className="text-gray-400 hover:text-[#0061FE] transition-colors mt-2">
-                                        <Linkedin size={18} />
+                                    <a href={vol.link} target="_blank" rel="noreferrer" className="text-gray-400 hover:text-[#0061FE] transition-colors mt-1">
+                                        <Linkedin size={12} />
                                     </a>
                                 )}
                             </motion.div>
