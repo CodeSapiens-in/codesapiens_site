@@ -70,23 +70,30 @@ app.use(timeout.handler({
 }));
 
 // Rate Limiting Middleware
+// Rate Limiting Middleware
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 100,
-  message: 'Too many requests from this IP, please try again later.',
+  message: { success: false, error: 'Too many requests from this IP, please try again later.' },
+  standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
+  legacyHeaders: false, // Disable the `X-RateLimit-*` headers
 });
 app.use(limiter);
 
 const uploadLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 5,
-  message: 'Too many upload requests, please try again later.',
+  max: 100, // Increased from 5 to 100 to allow bulk uploads/testing
+  message: { success: false, error: 'Too many upload requests, please try again later.' },
+  standardHeaders: true,
+  legacyHeaders: false,
 });
 
 const captchaLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 50,
-  message: 'Too many captcha verification requests, please try again later.',
+  message: { success: false, error: 'Too many captcha verification requests, please try again later.' },
+  standardHeaders: true,
+  legacyHeaders: false,
 });
 
 // CORS Configuration
