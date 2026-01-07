@@ -300,27 +300,19 @@ const CommunityPartners = () => {
 
                 <div className="flex flex-wrap justify-center gap-6 max-w-6xl mx-auto">
                     {partners.map((partner, idx) => (
-                        <a
+                        <div
                             key={idx}
-                            href={partner.link}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="relative group bg-white border border-gray-100 rounded-3xl p-6 w-full md:w-64 aspect-square flex flex-col justify-between hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 block"
+                            className="relative group bg-white border border-gray-100 rounded-3xl p-6 w-full md:w-64 aspect-square flex flex-col justify-center items-center hover:shadow-lg transition-all duration-300"
                         >
-                            {/* Top Right Arrow */}
-                            <div className="self-end p-2 bg-gray-50 rounded-full text-gray-400 group-hover:bg-[#0061FE] group-hover:text-white transition-colors">
-                                <ArrowUpRight size={18} />
-                            </div>
-
                             {/* Centered Image */}
-                            <div className="flex-1 flex items-center justify-center p-2">
+                            <div className="flex-1 flex items-center justify-center p-2 w-full">
                                 <img
                                     src={partner.image}
                                     alt="Community Partner"
-                                    className="max-w-[85%] max-h-[85%] object-contain drop-shadow-sm transition-all duration-500"
+                                    className="max-w-[85%] max-h-[85%] object-contain drop-shadow-sm"
                                 />
                             </div>
-                        </a>
+                        </div>
                     ))}
                 </div>
             </div>
