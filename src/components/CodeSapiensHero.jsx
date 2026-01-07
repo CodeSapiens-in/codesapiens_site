@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { supabase } from '../lib/supabaseClient';
 import { useNavigate } from 'react-router-dom';
-import { ArrowRight, ChevronDown, Menu, X, Github, Linkedin, Youtube, Users, Calendar, Code, Award, Crown } from 'lucide-react';
+import { ArrowRight, ChevronDown, Menu, X, Github, Linkedin, Youtube, Users, Calendar, Code, Award, Crown, Rocket, Zap, Globe, Cpu, Handshake, Heart, ArrowUpRight } from 'lucide-react';
 import { BACKEND_URL } from '../config';
 import { authFetch } from '../lib/authFetch';
 import LandingPopup from './LandingPopup';
@@ -25,11 +25,11 @@ const StatsSection = () => {
     }, []);
 
     return (
-        <section className="py-24 bg-gradient-to-br from-[#101010] via-[#050505] to-[#001a45] text-white relative overflow-hidden">
+        <section className="py-12 bg-gradient-to-br from-[#101010] via-[#050505] to-[#001a45] text-white relative overflow-hidden">
             {/* Background Elements */}
 
             <div className="container mx-auto px-4 md:px-6 relative z-10">
-                <div className="mb-16 text-center">
+                <div className="mb-8 text-center">
                     <span className="text-[#0061FE] font-bold tracking-widest uppercase text-golden-1 mb-4 block">Impact</span>
                     <h2 className="text-golden-2 md:text-golden-3 font-bold mb-6">By The Numbers</h2>
                     <p className="text-golden-1 text-gray-400 max-w-2xl mx-auto">
@@ -45,7 +45,7 @@ const StatsSection = () => {
                             initial={{ opacity: 0, scale: 0.5 }}
                             whileInView={{ opacity: 1, scale: 1 }}
                             viewport={{ once: true }}
-                            className="bg-black/40 backdrop-blur-3xl p-3 md:p-8 rounded-2xl border border-white/10 text-center shadow-[0_8px_32px_0_rgba(0,0,0,0.37)] relative overflow-hidden group"
+                            className="bg-black/40 backdrop-blur-3xl p-4 md:p-6 rounded-2xl border border-white/10 text-center shadow-[0_8px_32px_0_rgba(0,0,0,0.37)] relative overflow-hidden group"
                         >
                             {/* Specular Highlight */}
                             <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
@@ -62,7 +62,7 @@ const StatsSection = () => {
                             whileInView={{ opacity: 1, scale: 1 }}
                             viewport={{ once: true }}
                             transition={{ delay: 0.1 }}
-                            className="bg-black/40 backdrop-blur-3xl p-3 md:p-8 rounded-2xl border border-white/10 text-center shadow-[0_8px_32px_0_rgba(0,0,0,0.37)] relative overflow-hidden group"
+                            className="bg-black/40 backdrop-blur-3xl p-4 md:p-6 rounded-2xl border border-white/10 text-center shadow-[0_8px_32px_0_rgba(0,0,0,0.37)] relative overflow-hidden group"
                         >
                             {/* Specular Highlight */}
                             <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
@@ -77,11 +77,11 @@ const StatsSection = () => {
 
                     {/* Right: Top Colleges Chart */}
                     <div className="col-span-1 h-full w-full overflow-hidden">
-                        <div className="bg-black/40 backdrop-blur-3xl p-8 rounded-2xl border border-white/10 h-full flex flex-col relative overflow-hidden group shadow-[0_8px_32px_0_rgba(0,0,0,0.37)]">
+                        <div className="bg-black/40 backdrop-blur-3xl p-6 rounded-2xl border border-white/10 h-full flex flex-col relative overflow-hidden group shadow-[0_8px_32px_0_rgba(0,0,0,0.37)]">
                             {/* Specular Highlight */}
                             <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent pointer-events-none"></div>
 
-                            <h4 className="text-golden-2 font-bold mb-8 flex items-center gap-3">
+                            <h4 className="text-golden-2 font-bold mb-4 flex items-center gap-3">
                                 Top Active Colleges
                             </h4>
 
@@ -92,7 +92,7 @@ const StatsSection = () => {
                                     <div className="space-y-8">
                                         {/* Top 3 Podium - Only show if we have enough data, else fallback to list */}
                                         {stats.topColleges.filter(c => c.name && c.name !== "Not specified").length >= 3 ? (
-                                            <div className="flex items-end justify-center gap-2 md:gap-4 mb-4 min-h-[180px]">
+                                            <div className="flex items-end justify-center gap-2 md:gap-4 mb-4 min-h-[140px]">
                                                 {/* 2nd Place */}
                                                 <motion.div
                                                     initial={{ opacity: 0, y: 50 }}
@@ -197,6 +197,137 @@ const StatsSection = () => {
         </section>
     );
 };
+
+// --- Sponsor Section with Spotlight Effect ---
+const SponsorSection = () => {
+    const sponsors = [
+
+        {
+            name: "Mako IT Lab",
+            link: "https://www.makoitlab.com/",
+            image: "https://res.cloudinary.com/dqudvximt/image/upload/v1767816977/users_cme79i2lk00qls401ar5qxqnc_VGly5cMkz1ZxkXas-1_76R8XDxGiLgjc8BaeXApow_yzzhyw.webp",
+        },
+        {
+            name: "Yuniq",
+            link: "https://yuniq.co/",
+            image: "https://res.cloudinary.com/dqudvximt/image/upload/v1767817525/users_cme79i2lk00qls401ar5qxqnc_hBofB72xXBV4C0cL-users_clylc5w1v070to301jatq0e85_FVqmiMesQBlCZ0ZM-yuniq_njsnoy.jpg",
+        },
+        {
+            name: "Contentstack",
+            link: "https://www.contentstack.com/",
+            image: "https://res.cloudinary.com/dqudvximt/image/upload/v1767817529/users_cme79i2lk00qls401ar5qxqnc_DaxnHl7f0QdeQwgx-square-image_pvgube.jpg",
+        },
+        {
+            name: "Notion",
+            link: "https://www.notion.com/",
+            image: "https://res.cloudinary.com/dqudvximt/image/upload/v1767817532/users_cme79i2lk00qls401ar5qxqnc_891aQQNEpsjHP7Ef-notion-logo-png_seeklogo-425508_k0njb3.webp",
+        },
+    ];
+
+    return (
+        <section className="py-12 bg-white relative overflow-hidden">
+            <div className="container mx-auto px-6 relative z-10">
+                <div className="text-left mb-8">
+                    <span className="text-[#0061FE] font-bold tracking-widest uppercase text-golden-1 mb-2 block">Our Partners</span>
+                    <h2 className="text-golden-2 md:text-golden-3 font-bold mb-4 text-[#1E1919]">Backed By The <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#0061FE] to-[#00C6F7]">Best</span></h2>
+                </div>
+
+                <div className="flex flex-wrap justify-center gap-6 max-w-6xl mx-auto">
+                    {sponsors.map((sponsor, idx) => (
+                        <a
+                            key={idx}
+                            href={sponsor.link}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="relative group bg-white border border-gray-100 rounded-3xl p-6 w-full md:w-64 aspect-square flex flex-col justify-between hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 block"
+                        >
+                            {/* Top Right Arrow */}
+                            <div className="self-end p-2 bg-gray-50 rounded-full text-gray-400 group-hover:bg-[#0061FE] group-hover:text-white transition-colors">
+                                <ArrowUpRight size={18} />
+                            </div>
+
+                            {/* Centered Image */}
+                            <div className="flex-1 flex items-center justify-center p-2">
+                                <img
+                                    src={sponsor.image}
+                                    alt={sponsor.name}
+                                    className="max-w-[85%] max-h-[85%] object-contain drop-shadow-sm transition-all duration-500"
+                                />
+                            </div>
+
+                            {/* Name Badge */}
+                            <div className="self-start px-3 py-1 bg-gray-50 border border-gray-100 rounded-lg">
+                                <span className="font-bold text-gray-800 text-xs">{sponsor.name}</span>
+                            </div>
+                        </a>
+                    ))}
+                </div>
+            </div>
+        </section>
+    );
+};
+
+
+
+
+
+// --- Community Partners Section ---
+const CommunityPartners = () => {
+    const partners = [
+        {
+            image: "https://res.cloudinary.com/dqudvximt/image/upload/v1767817843/users_cme79i2lk00qls401ar5qxqnc_OGGz5HgXCzS9rI8H-users_clylc5w1v070to301jatq0e85_bNj4z9CoW02cMzqm-circle_rs5ttj.png",
+            link: "#"
+        },
+        {
+            image: "https://res.cloudinary.com/dqudvximt/image/upload/v1767817844/users_cme79i2lk00qls401ar5qxqnc_EMRqmDnatuO4Rk38-users_cm9cf3ngn02erro015wogiktk_8CHW9Warth4BkBG9-Blue_2520Minimalist_2520Simple_2520Technology_2520Logo_2520_2520_1_mqig9s.png",
+            link: "#"
+        },
+        {
+            image: "https://res.cloudinary.com/dqudvximt/image/upload/v1767817846/users_cme79i2lk00qls401ar5qxqnc_1KwVf1Iz3NmGXUQP-176333249_mhbrlj.webp",
+            link: "#"
+        }
+    ];
+
+    return (
+        <section className="py-12 bg-white relative overflow-hidden border-t border-gray-100">
+            <div className="container mx-auto px-6 relative z-10">
+                <div className="text-left mb-8">
+                    <div className="flex items-center gap-2 mb-2">
+                        <Users className="text-[#0061FE]" size={20} />
+                        <span className="text-[#0061FE] font-bold tracking-widest uppercase text-golden-1 block">Community Partners</span>
+                    </div>
+                </div>
+
+                <div className="flex flex-wrap justify-center gap-6 max-w-6xl mx-auto">
+                    {partners.map((partner, idx) => (
+                        <a
+                            key={idx}
+                            href={partner.link}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="relative group bg-white border border-gray-100 rounded-3xl p-6 w-full md:w-64 aspect-square flex flex-col justify-between hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 block"
+                        >
+                            {/* Top Right Arrow */}
+                            <div className="self-end p-2 bg-gray-50 rounded-full text-gray-400 group-hover:bg-[#0061FE] group-hover:text-white transition-colors">
+                                <ArrowUpRight size={18} />
+                            </div>
+
+                            {/* Centered Image */}
+                            <div className="flex-1 flex items-center justify-center p-2">
+                                <img
+                                    src={partner.image}
+                                    alt="Community Partner"
+                                    className="max-w-[85%] max-h-[85%] object-contain drop-shadow-sm transition-all duration-500"
+                                />
+                            </div>
+                        </a>
+                    ))}
+                </div>
+            </div>
+        </section>
+    );
+};
+
 
 // --- Main Hero Component ---
 const CodeSapiensHero = () => {
@@ -466,7 +597,13 @@ const CodeSapiensHero = () => {
             </section>
 
             {/* Stats Section */}
+            {/* Stats Section */}
             <StatsSection />
+
+            {/* Sponsor Section */}
+            {/* Sponsor Section */}
+            <SponsorSection />
+            <CommunityPartners />
 
             {/* Hall of Fame */}
             <section className="py-32 bg-[#0061FE] text-white overflow-hidden relative">
