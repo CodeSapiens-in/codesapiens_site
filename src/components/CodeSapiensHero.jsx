@@ -229,8 +229,8 @@ const SponsorSection = () => {
             <div className="container mx-auto px-6 relative z-10">
                 <div className="text-left mb-8">
                     <div className="flex items-center gap-2 mb-4">
-                        <h2 className="text-5xl md:text-6xl font-black text-black tracking-tight leading-none">OUR</h2>
-                        <h2 className="text-5xl md:text-6xl font-script text-[#2563ea] font-bold italic leading-none pt-2">sponsors</h2>
+                        <h2 className="text-4xl md:text-6xl font-black text-black tracking-tight leading-none">OUR</h2>
+                        <h2 className="text-4xl md:text-6xl font-script text-[#2563ea] font-bold italic leading-none pt-2">sponsors</h2>
                         <div className="h-px bg-gray-200 flex-1 ml-4 self-center mt-2"></div>
                     </div>
                     {/* <span className="text-[#0061FE] font-bold tracking-widest uppercase text-golden-1 mb-2 block">Our Partners</span> */}
@@ -240,14 +240,14 @@ const SponsorSection = () => {
                     </div>
                 </div>
 
-                <div className="flex flex-wrap justify-center gap-6 max-w-6xl mx-auto">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 w-full mx-auto">
                     {sponsors.map((sponsor, idx) => (
                         <a
                             key={idx}
                             href={sponsor.link}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="relative group bg-white border border-gray-100 rounded-3xl p-6 w-full md:w-64 aspect-square flex flex-col justify-between hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 block"
+                            className="relative group bg-white border border-gray-100 rounded-3xl p-4 md:p-6 w-full aspect-square flex flex-col justify-between hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 block"
                         >
                             {/* Top Right Arrow */}
                             <div className="self-end p-2 bg-gray-50 rounded-full text-gray-400 group-hover:bg-[#0061FE] group-hover:text-white transition-colors">
@@ -301,8 +301,8 @@ const CommunityPartners = () => {
             <div className="container mx-auto px-6 relative z-10">
                 <div className="text-left mb-8">
                     <div className="flex items-center gap-2 mb-4">
-                        <h2 className="text-5xl md:text-6xl font-black text-black tracking-tight leading-none">COMMUNITY</h2>
-                        <h2 className="text-5xl md:text-6xl font-script text-[#2563ea] font-bold italic leading-none pt-2">partners</h2>
+                        <h2 className="text-3xl md:text-6xl font-black text-black tracking-tight leading-none">COMMUNITY</h2>
+                        <h2 className="text-3xl md:text-6xl font-script text-[#2563ea] font-bold italic leading-none pt-2">partners</h2>
                         <div className="h-px bg-gray-200 flex-1 ml-4 self-center mt-2"></div>
                     </div>
                     <div className="flex items-center gap-2 mb-8">
@@ -311,11 +311,11 @@ const CommunityPartners = () => {
                     </div>
                 </div>
 
-                <div className="flex flex-wrap justify-center gap-6 max-w-6xl mx-auto">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 w-full mx-auto">
                     {partners.map((partner, idx) => (
                         <div
                             key={idx}
-                            className="relative group bg-white border border-gray-100 rounded-3xl p-6 w-full md:w-64 aspect-square flex flex-col justify-center items-center hover:shadow-lg transition-all duration-300"
+                            className="relative group bg-white border border-gray-100 rounded-3xl p-4 md:p-6 w-full aspect-square flex flex-col justify-center items-center hover:shadow-lg transition-all duration-300"
                         >
                             {/* Centered Image */}
                             <div className="flex-1 flex items-center justify-center p-2 w-full">
@@ -456,8 +456,8 @@ const SocialMediaSection = () => {
             <div className="container mx-auto px-6 relative z-10">
                 <div className="text-left mb-8">
                     <div className="flex items-center gap-2 mb-4">
-                        <h2 className="text-5xl md:text-6xl font-black text-black tracking-tight leading-none">SOCIAL</h2>
-                        <h2 className="text-5xl md:text-6xl font-script text-[#2563ea] font-bold italic leading-none pt-2">links</h2>
+                        <h2 className="text-4xl md:text-6xl font-black text-black tracking-tight leading-none">SOCIAL</h2>
+                        <h2 className="text-4xl md:text-6xl font-script text-[#2563ea] font-bold italic leading-none pt-2">links</h2>
                         <div className="h-px bg-gray-200 flex-1 ml-4 self-center mt-2"></div>
                     </div>
                     <div className="flex items-center gap-2 mb-8">
@@ -466,7 +466,7 @@ const SocialMediaSection = () => {
                     </div>
                 </div>
 
-                <div className="grid grid-cols-2 md:grid-cols-4 auto-rows-[200px] gap-6 w-full mx-auto">
+                <div className="grid grid-cols-2 md:grid-cols-4 auto-rows-[200px] gap-4 md:gap-6 w-full mx-auto">
                     {socials.map((social, idx) => (
                         <motion.a
                             key={idx}
@@ -515,6 +515,46 @@ const SocialMediaSection = () => {
     );
 };
 
+
+// --- Notice Section (Call for Speakers/Sponsors) ---
+// --- Notice Section (Call for Speakers/Sponsors) ---
+const NoticeSection = () => {
+    return (
+        <section className="py-4 bg-[#FFF8DC] relative overflow-hidden text-left">
+            <div className="container mx-auto px-6 relative z-10">
+                <div className="grid grid-cols-1 md:grid-cols-[auto_1fr] gap-4 md:gap-8 items-center max-w-4xl mx-auto">
+                    {/* Title (Left Side on Desktop) */}
+                    <div className="flex items-center gap-2 shrink-0">
+                        <h2 className="text-xl md:text-2xl font-black text-black tracking-tight leading-none">LATEST</h2>
+                        <h2 className="text-xl md:text-2xl font-script text-[#2563ea] font-bold italic leading-none pt-1">updates</h2>
+                        <div className="h-px bg-gray-200 w-12 self-center mt-1 md:hidden"></div>
+                    </div>
+
+                    {/* Images Grid */}
+                    <div className="grid grid-cols-2 gap-3 w-full">
+                        {/* Call for Speakers */}
+                        <div className="relative group bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300">
+                            <img
+                                src="https://res.cloudinary.com/dqudvximt/image/upload/v1767877162/users_cme79i2lk00qls401ar5qxqnc_N0bIjmMP0Ybxoznz-1753684368888_jda3us.jpg"
+                                alt="Call for Speakers"
+                                className="w-full h-auto object-cover"
+                            />
+                        </div>
+
+                        {/* Sponsors & Venue */}
+                        <div className="relative group bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300">
+                            <img
+                                src="https://res.cloudinary.com/dqudvximt/image/upload/v1767877178/users_cme79i2lk00qls401ar5qxqnc_KB4hFvAzhyqJF0xf-3a61cb74-01c9-4880-be04-a4036f32c4f9_t64kt9.jpg"
+                                alt="Call for Sponsors and Venue"
+                                className="w-full h-auto object-cover"
+                            />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    );
+};
 
 // --- Main Hero Component ---
 const CodeSapiensHero = () => {
@@ -792,6 +832,7 @@ const CodeSapiensHero = () => {
             <SponsorSection />
             <CommunityPartners />
             <SocialMediaSection />
+            <NoticeSection />
 
             {/* Hall of Fame */}
             <section className="py-32 bg-[#0061FE] text-white overflow-hidden relative">
