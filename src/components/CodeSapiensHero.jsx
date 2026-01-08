@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { supabase } from '../lib/supabaseClient';
 import { useNavigate } from 'react-router-dom';
-import { ArrowRight, ChevronDown, Menu, X, Github, Linkedin, Youtube, Users, Calendar, Code, Award, Crown, Rocket, Zap, Globe, Cpu, Handshake, Heart, ArrowUpRight } from 'lucide-react';
+import { ArrowRight, ChevronDown, Menu, X, Github, Linkedin, Youtube, Users, Calendar, Code, Award, Crown, Rocket, Zap, Globe, Cpu, Handshake, Heart, ArrowUpRight, Instagram, Twitter, MessageCircle, Megaphone, Sparkles } from 'lucide-react';
 import { BACKEND_URL } from '../config';
 import { authFetch } from '../lib/authFetch';
 import LandingPopup from './LandingPopup';
@@ -225,11 +225,19 @@ const SponsorSection = () => {
     ];
 
     return (
-        <section className="py-12 bg-white relative overflow-hidden">
+        <section className="py-12 bg-[#FFFFF0] relative overflow-hidden">
             <div className="container mx-auto px-6 relative z-10">
                 <div className="text-left mb-8">
-                    <span className="text-[#0061FE] font-bold tracking-widest uppercase text-golden-1 mb-2 block">Our Partners</span>
-                    <h2 className="text-golden-2 md:text-golden-3 font-bold mb-4 text-[#1E1919]">Backed By The <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#0061FE] to-[#00C6F7]">Best</span></h2>
+                    <div className="flex items-center gap-2 mb-4">
+                        <h2 className="text-5xl md:text-6xl font-black text-black tracking-tight leading-none">OUR</h2>
+                        <h2 className="text-5xl md:text-6xl font-script text-[#2563ea] font-bold italic leading-none pt-2">sponsors</h2>
+                        <div className="h-px bg-gray-200 flex-1 ml-4 self-center mt-2"></div>
+                    </div>
+                    {/* <span className="text-[#0061FE] font-bold tracking-widest uppercase text-golden-1 mb-2 block">Our Partners</span> */}
+                    <div className="flex items-center gap-2 mb-8">
+                        <span className="w-3 h-3 rounded-full bg-green-400 animate-pulse"></span>
+                        <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">BACKING THE FUTURE</span>
+                    </div>
                 </div>
 
                 <div className="flex flex-wrap justify-center gap-6 max-w-6xl mx-auto">
@@ -292,9 +300,14 @@ const CommunityPartners = () => {
         <section className="py-12 bg-white relative overflow-hidden border-t border-gray-100">
             <div className="container mx-auto px-6 relative z-10">
                 <div className="text-left mb-8">
-                    <div className="flex items-center gap-2 mb-2">
-                        <Users className="text-[#0061FE]" size={20} />
-                        <span className="text-[#0061FE] font-bold tracking-widest uppercase text-golden-1 block">Community Partners</span>
+                    <div className="flex items-center gap-2 mb-4">
+                        <h2 className="text-5xl md:text-6xl font-black text-black tracking-tight leading-none">COMMUNITY</h2>
+                        <h2 className="text-5xl md:text-6xl font-script text-[#2563ea] font-bold italic leading-none pt-2">partners</h2>
+                        <div className="h-px bg-gray-200 flex-1 ml-4 self-center mt-2"></div>
+                    </div>
+                    <div className="flex items-center gap-2 mb-8">
+                        <span className="w-3 h-3 rounded-full bg-green-400 animate-pulse"></span>
+                        <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">GROWING TOGETHER</span>
                     </div>
                 </div>
 
@@ -313,6 +326,188 @@ const CommunityPartners = () => {
                                 />
                             </div>
                         </div>
+                    ))}
+                </div>
+            </div>
+        </section>
+    );
+};
+
+// --- Social Media Bento Grid ---
+const SocialMediaSection = () => {
+    const socials = [
+        {
+            name: "LinkedIn",
+            icon: <Linkedin size={40} />,
+            link: "https://www.linkedin.com/company/codesapiens-community/posts/",
+            color: "bg-[#0077b5]",
+            textColor: "text-white",
+            span: "col-span-1",
+            badge: "@codesapiens-community",
+            isLarge: true,
+            backgroundImage: "url('https://res.cloudinary.com/dqudvximt/image/upload/v1767874220/users_cme79i2lk00qls401ar5qxqnc_n74cMGsKIBuvEzzj-users_cme5bsukl01binm014j8ioh2j_2SNEHA31eEqsxFRS-original-33f53dcd2f48e068523d32df0e5cc92f_xkirvh.gif') center/cover no-repeat"
+        },
+        {
+            name: "Luma",
+            icon: null,
+            link: "https://lu.ma/codesapiens",
+            color: "bg-black",
+            textColor: "text-white",
+            span: "col-span-1",
+            badge: null,
+            backgroundImage: "url('https://res.cloudinary.com/dqudvximt/image/upload/v1767875075/users_cme79i2lk00qls401ar5qxqnc_WI6Z0HVxNMCrvfgn-ETzJoQJr1aCFL2r7-rrDC9gCyIJ77RqVW-luma_cqxcny.jpg') center/cover no-repeat"
+        },
+        {
+            name: "WhatsApp",
+            icon: null,
+            link: "https://whatsapp.com/channel/0029Va570WlC1FuFlYtqWq37",
+            color: "bg-[#25D366]",
+            textColor: "text-white",
+            span: "col-span-1",
+            badge: null,
+            customContent: (
+                <div className="relative w-full h-full flex items-center justify-center">
+                    <img src="https://res.cloudinary.com/dqudvximt/image/upload/v1767875047/410201-PD391H-802_h7tcfj.jpg" alt="WhatsApp" className="w-24 h-24 object-contain rounded-xl" />
+                </div>
+            )
+        },
+        {
+            name: "Instagram",
+            icon: <Instagram size={32} />,
+            link: "https://www.instagram.com/codesapiens/",
+            color: "bg-white",
+            textColor: "text-black",
+            span: "col-span-1",
+            badge: null,
+            border: "border-gray-100 border",
+            customContent: (
+                <div className="relative w-full h-full flex items-center justify-center">
+                    <div className="absolute inset-0 flex items-center justify-center pb-6">
+                        <img src="https://res.cloudinary.com/dqudvximt/image/upload/v1767874489/users_cme79i2lk00qls401ar5qxqnc_3o1XM7ID2mXVDk6e-XeFzd3iFtoytJqTv-1497553304-104_84834_allkph.png" alt="Instagram" className="w-84 h-84 object-contain drop-shadow-xl" />
+                    </div>
+                    <div className="absolute bottom-0 left-0">
+                        <span className="inline-block px-3 py-1.5 rounded-lg text-xs font-bold bg-gray-100 text-gray-800">
+                            @Codesapiens.in
+                        </span>
+                    </div>
+                </div>
+            )
+        },
+        {
+            name: "Twitter",
+            icon: <Twitter size={32} className="text-[#1DA1F2]" />,
+            link: "https://twitter.com/codesapiens",
+            color: "bg-white",
+            textColor: "text-black",
+            span: "col-span-1",
+            badge: null,
+            border: "border-gray-100 border",
+            customContent: (
+                <div className="relative w-full h-full flex items-center justify-center">
+                    <div className="absolute inset-0 flex items-center justify-center pb-6">
+                        <img src="https://res.cloudinary.com/dqudvximt/image/upload/v1767874490/users_cme79i2lk00qls401ar5qxqnc_XgLMxxPTSSuuRKu5-users_cme5bsukl01binm014j8ioh2j_XQ7ryCBwyUFzFg6v-CLIPLY_372109260_TWITTER_LOGO_400_ptqbvv.gif" alt="Twitter" className="w-32 h-32 object-contain" />
+                    </div>
+                    <div className="absolute bottom-0 left-0">
+                        <span className="inline-block px-3 py-1.5 rounded-lg text-xs font-bold bg-gray-100 text-gray-800">
+                            @codesapiens_in
+                        </span>
+                    </div>
+                </div>
+            )
+        },
+        {
+            name: "Volunteers Needed",
+            icon: null,
+            link: "https://forms.gle/volunteer", // Placeholder link
+            color: "bg-black",
+            textColor: "text-white",
+            span: "col-span-1",
+            badge: null,
+            isLarge: false,
+            backgroundImage: "url('https://res.cloudinary.com/dqudvximt/image/upload/v1767876038/users_cme79i2lk00qls401ar5qxqnc_Hg7Si3j52FVfpQRN-image_x8wghd.png') center/cover no-repeat"
+        },
+        {
+            name: "GitHub",
+            icon: <Github size={40} />,
+            link: "https://github.com/Codesapiens-in",
+            color: "bg-black",
+            textColor: "text-white",
+            span: "col-span-1",
+            badge: "@Codesapiens-in",
+            isLarge: true,
+            backgroundImage: "url('https://res.cloudinary.com/dqudvximt/image/upload/v1767874482/users_cme79i2lk00qls401ar5qxqnc_MOSc1bv3RXu0WL5z-users_cme5bsukl01binm014j8ioh2j_7dOv2cTCX8B86u82-users_clylc5w1v070to301jatq0e85_AdzvY5ioFqaF37x5-github_dsjpx6.gif') center/cover no-repeat"
+        },
+        {
+            name: "YouTube",
+            icon: <Youtube size={40} className="text-red-600" />,
+            link: "https://youtube.com/@codesapiens-in?si=90EaPMYHcSZIHtMi",
+            color: "bg-white",
+            textColor: "text-black",
+            span: "col-span-1",
+            badge: "@Codesapiens",
+            border: "border-gray-100 border",
+            isLarge: true,
+            backgroundImage: "url('https://res.cloudinary.com/dqudvximt/image/upload/v1767874488/users_cme79i2lk00qls401ar5qxqnc_Ov9Ygh4NAQfPGktu-users_cme5bsukl01binm014j8ioh2j_5JQAosdeiVappI2y-users_clylc5w1v070to301jatq0e85_CCuEsN5SSMlu4LAN-youtube_aky1f3.gif') center/cover no-repeat"
+        }
+    ];
+
+    return (
+        <section className="py-20 bg-[#FAF9F6] relative overflow-hidden text-left">
+            <div className="container mx-auto px-6 relative z-10">
+                <div className="text-left mb-8">
+                    <div className="flex items-center gap-2 mb-4">
+                        <h2 className="text-5xl md:text-6xl font-black text-black tracking-tight leading-none">SOCIAL</h2>
+                        <h2 className="text-5xl md:text-6xl font-script text-[#2563ea] font-bold italic leading-none pt-2">links</h2>
+                        <div className="h-px bg-gray-200 flex-1 ml-4 self-center mt-2"></div>
+                    </div>
+                    <div className="flex items-center gap-2 mb-8">
+                        <Globe size={16} className="text-[#0061FE] animate-pulse" />
+                        <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">CONNECT WITH US</span>
+                    </div>
+                </div>
+
+                <div className="grid grid-cols-2 md:grid-cols-4 auto-rows-[200px] gap-6 w-full mx-auto">
+                    {socials.map((social, idx) => (
+                        <motion.a
+                            key={idx}
+                            href={social.link}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            initial={{ opacity: 0, y: 20 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            whileHover={{ scale: 1.02 }}
+                            transition={{ delay: idx * 0.05 }}
+                            className={`${social.span} ${social.color} ${social.textColor} ${social.border} rounded-3xl p-6 relative overflow-hidden group shadow-sm hover:shadow-xl flex flex-col justify-between transition-all`}
+                            style={social.backgroundImage ? { backgroundImage: social.color.includes('gradient') ? social.color : undefined } : {}}
+                        >
+                            {/* Custom Background Image if any */}
+                            {social.backgroundImage && (
+                                <div className="absolute inset-0" style={{ background: social.backgroundImage }}></div>
+                            )}
+
+                            {/* Top Right Arrow */}
+                            <div className={`absolute top-4 right-4 p-2 rounded-full ${social.textColor === 'text-white' ? 'bg-white/20 text-white' : 'bg-gray-100 text-gray-500'} opacity-0 group-hover:opacity-100 transition-opacity`}>
+                                <ArrowUpRight size={16} />
+                            </div>
+
+                            {/* Content */}
+                            {social.customContent ? (
+                                social.customContent
+                            ) : (
+                                <>
+                                    <div className="mb-auto">
+                                        {social.customIcon || social.icon}
+                                    </div>
+                                    <div className="z-10 mt-auto">
+                                        {social.badge && (
+                                            <span className={`inline-block px-3 py-1.5 rounded-lg text-xs font-bold ${social.textColor === 'text-white' ? 'bg-white text-black' : 'bg-gray-100 text-gray-800'}`}>
+                                                {social.badge}
+                                            </span>
+                                        )}
+                                    </div>
+                                </>
+                            )}
+                        </motion.a>
                     ))}
                 </div>
             </div>
@@ -596,6 +791,7 @@ const CodeSapiensHero = () => {
             {/* Sponsor Section */}
             <SponsorSection />
             <CommunityPartners />
+            <SocialMediaSection />
 
             {/* Hall of Fame */}
             <section className="py-32 bg-[#0061FE] text-white overflow-hidden relative">
