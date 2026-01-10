@@ -125,6 +125,10 @@ const AdminMeetupRegistrations = () => {
 
     // Handle Reject Registration
     const handleReject = async (regId) => {
+        // Find the registration to get details for email
+        const reg = registrations.find(r => r.id === regId);
+        if (!reg) return;
+
         try {
             const { error } = await supabase
                 .from("registrations")
@@ -136,7 +140,32 @@ const AdminMeetupRegistrations = () => {
             setRegistrations(prev =>
                 prev.map(r => r.id === regId ? { ...r, status: "rejected" } : r)
             );
-            toast.success("Registration rejected");
+
+            // Send rejection email
+            const email = reg.user_email || reg.email || reg.users?.email;
+            const userName = reg.user_name || reg.users?.display_name || "Attendee";
+
+            if (email && meetup) {
+                try {
+                    await authFetch(`${BACKEND_URL}/send-rejection-email`, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            email,
+                            userName,
+                            meetupTitle: meetup.title,
+                            meetupDate: new Date(meetup.start_date_time).toLocaleString(),
+                            meetupVenue: meetup.venue || "TBA",
+                        }),
+                    });
+                    toast.success(`Rejected & email sent to ${email}`);
+                } catch (emailErr) {
+                    console.error("Email send error:", emailErr);
+                    toast.success("Rejected! (Email failed to send)");
+                }
+            } else {
+                toast.success("Registration rejected");
+            }
         } catch (err) {
             console.error("Error rejecting:", err);
             toast.error("Failed to reject registration");
