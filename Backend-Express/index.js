@@ -1197,6 +1197,159 @@ app.post("/api/analyze-resume", async (req, res) => {
 });
 
 // Health check endpoint
+// ============================================
+// MEETUP REGISTRATION APPROVAL EMAIL
+// ============================================
+
+// Generate HTML email template for approval with QR code
+const generateApprovalEmailHTML = (data) => {
+  const { userName, meetupTitle, meetupDate, meetupVenue, token } = data;
+  const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(token)}`;
+
+  return `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Registration Approved!</title>
+</head>
+<body style="margin: 0; padding: 0; background-color: #f4f4f5; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
+  <table role="presentation" style="width: 100%; border-collapse: collapse;">
+    <tr>
+      <td style="padding: 40px 20px;">
+        <table role="presentation" style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);">
+          
+          <!-- Header -->
+          <tr>
+            <td style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); padding: 40px; text-align: center;">
+              <h1 style="margin: 0 0 8px 0; color: #ffffff; font-size: 28px; font-weight: 700;">🎉 Registration Approved!</h1>
+              <p style="margin: 0; color: rgba(255,255,255,0.9); font-size: 16px;">Your spot is confirmed</p>
+            </td>
+          </tr>
+          
+          <!-- Content -->
+          <tr>
+            <td style="padding: 40px;">
+              <p style="margin: 0 0 24px 0; color: #374151; font-size: 18px; line-height: 1.6;">
+                Hi <strong>${userName}</strong>,
+              </p>
+              
+              <p style="margin: 0 0 24px 0; color: #374151; font-size: 16px; line-height: 1.6;">
+                Great news! Your registration for <strong style="color: #059669;">${meetupTitle}</strong> has been approved by the admin.
+              </p>
+              
+              <!-- Event Details -->
+              <div style="background-color: #f9fafb; border-radius: 12px; padding: 24px; margin-bottom: 32px; border: 1px solid #e5e7eb;">
+                <h3 style="margin: 0 0 16px 0; color: #1f2937; font-size: 16px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Event Details</h3>
+                <table style="width: 100%;">
+                  <tr>
+                    <td style="padding: 8px 0; color: #6b7280; font-size: 14px;">📅 Date</td>
+                    <td style="padding: 8px 0; color: #1f2937; font-size: 14px; font-weight: 600;">${meetupDate}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 8px 0; color: #6b7280; font-size: 14px;">📍 Venue</td>
+                    <td style="padding: 8px 0; color: #1f2937; font-size: 14px; font-weight: 600;">${meetupVenue}</td>
+                  </tr>
+                </table>
+              </div>
+              
+              <!-- QR Code Section -->
+              <div style="text-align: center; margin-bottom: 32px;">
+                <p style="margin: 0 0 16px 0; color: #374151; font-size: 16px; font-weight: 600;">
+                  Your Entry Pass QR Code
+                </p>
+                <div style="background-color: #ffffff; border: 3px dashed #10b981; border-radius: 16px; padding: 24px; display: inline-block;">
+                  <img src="${qrCodeUrl}" alt="QR Code" style="width: 200px; height: 200px; display: block;" />
+                </div>
+                <p style="margin: 16px 0 0 0; color: #6b7280; font-size: 12px;">
+                  Token: <code style="background: #f3f4f6; padding: 4px 8px; border-radius: 4px; font-family: monospace;">${token.substring(0, 16)}...</code>
+                </p>
+              </div>
+              
+              <p style="margin: 0 0 16px 0; color: #374151; font-size: 14px; line-height: 1.6; background: #fef3c7; padding: 16px; border-radius: 8px; border-left: 4px solid #f59e0b;">
+                ⚠️ <strong>Important:</strong> Show this QR code at the venue for check-in. You can also view it in your dashboard.
+              </p>
+              
+              <!-- CTA Button -->
+              <table role="presentation" style="margin: 24px 0; width: 100%;">
+                <tr>
+                  <td style="text-align: center;">
+                    <a href="https://codesapiens.in/me/meetups" style="display: inline-block; background: linear-gradient(135deg, #10b981 0%, #059669 100%); padding: 16px 32px; color: #ffffff; text-decoration: none; font-weight: 600; font-size: 16px; border-radius: 8px;">
+                      View My Ticket →
+                    </a>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          
+          <!-- Footer -->
+          <tr>
+            <td style="background-color: #f9fafb; padding: 24px 40px; text-align: center; border-top: 1px solid #e5e7eb;">
+              <p style="margin: 0 0 8px 0; color: #6b7280; font-size: 14px;">
+                See you at the event! 🚀
+              </p>
+              <p style="margin: 0; color: #9ca3af; font-size: 12px;">
+                © ${new Date().getFullYear()} CodeSapiens. All rights reserved.
+              </p>
+            </td>
+          </tr>
+          
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+  `;
+};
+
+app.post(
+  "/send-approval-email",
+  verifyAuth,
+  [
+    body('email').isEmail().withMessage('Valid email is required'),
+    body('userName').notEmpty().withMessage('User name is required'),
+    body('meetupTitle').notEmpty().withMessage('Meetup title is required'),
+    body('meetupDate').notEmpty().withMessage('Meetup date is required'),
+    body('meetupVenue').notEmpty().withMessage('Meetup venue is required'),
+    body('token').notEmpty().withMessage('Token is required'),
+  ],
+  async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ success: false, errors: errors.array() });
+    }
+
+    const { email, userName, meetupTitle, meetupDate, meetupVenue, token } = req.body;
+
+    try {
+      const htmlContent = generateApprovalEmailHTML({
+        userName,
+        meetupTitle,
+        meetupDate,
+        meetupVenue,
+        token,
+      });
+
+      await transporter.sendMail({
+        from: '"CodeSapiens Meetups" <suryasunrise261@gmail.com>',
+        to: email,
+        subject: `✅ Registration Approved: ${meetupTitle}`,
+        html: htmlContent,
+      });
+
+      console.log(`[cAPi] : Approval email sent to ${email} for meetup: ${meetupTitle}`);
+      res.json({ success: true, message: `Approval email sent to ${email}` });
+    } catch (error) {
+      console.error("[cAPi] : Approval email error:", error.message);
+      res.status(500).json({ success: false, error: error.message });
+    }
+  }
+);
+
+// Health check endpoint
 app.get("/health", (req, res) => {
   res.json({
     status: "healthy",

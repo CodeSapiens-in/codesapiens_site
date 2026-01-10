@@ -7,7 +7,7 @@ import toast, { Toaster } from "react-hot-toast";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Calendar, Clock, MapPin, Loader2, CheckCircle, X,
-  Ticket, ArrowRight, Zap, Hexagon, MoveUpRight, Smile, PenTool, LayoutGrid
+  Ticket, ArrowRight, Zap, Hexagon, MoveUpRight, Smile, PenTool, LayoutGrid, Hourglass, CalendarX
 } from "lucide-react";
 
 // --- ANIMATED GRID SYSTEM (THE "FRAMEWORK") ---
@@ -72,7 +72,7 @@ export default function UserMeetupsList() {
         const { data: registrations } = await supabase.from("registrations").select("*").eq("user_id", user.id);
         const registeredMap = {};
         registrations?.forEach((reg) => {
-          registeredMap[reg.meetup_id] = { token: reg.token, name: reg.user_name, email: reg.user_email, registeredAt: reg.created_at };
+          registeredMap[reg.meetup_id] = { token: reg.token, name: reg.user_name, email: reg.user_email, registeredAt: reg.created_at, status: reg.status || "pending" };
         });
         enrichedMeetups = meetupsData.map((m) => ({ ...m, registered: !!registeredMap[m.id], registrationData: registeredMap[m.id] || null }));
       }
@@ -94,13 +94,12 @@ export default function UserMeetupsList() {
       if (error) throw error;
 
       setMeetups((prev) => prev.map((m) => m.id === meetupId ? {
-        ...m, registered: true, registrationData: { token: data.token, name: userProfile.display_name, email: userProfile.email, registeredAt: data.created_at }
+        ...m, registered: true, registrationData: { token: data.token, name: userProfile.display_name, email: userProfile.email, registeredAt: data.created_at, status: "pending" }
       } : m));
 
-      toast.success("Registration successful!");
+      toast.success("Registration submitted! Awaiting admin approval.");
       setExpandedRegisterId(null);
-      const m = meetups.find(x => x.id === meetupId);
-      if (m) setSelectedTicket({ ...m, registrationData: { token: data.token, name: userProfile.display_name } });
+      // Don't show ticket modal - wait for admin approval
 
     } catch (err) { toast.error(err.message || "Failed"); }
   };
@@ -149,22 +148,73 @@ export default function UserMeetupsList() {
 
         {/* --- CONTENT GRID --- */}
         <div className="w-full max-w-7xl mx-auto px-6 pb-24 relative z-20">
-          {meetups.length === 0 ? <EmptyState /> : (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
-              {meetups.map((meetup, index) => (
-                <MeetupCard
-                  key={meetup.id}
-                  meetup={meetup}
-                  index={index}
-                  user={user}
-                  isRegistering={expandedRegisterId === meetup.id}
-                  onToggleRegister={() => setExpandedRegisterId(expandedRegisterId === meetup.id ? null : meetup.id)}
-                  onRegisterConfirm={() => handleRegister(meetup.id)}
-                  onViewTicket={() => setSelectedTicket(meetup)}
-                />
-              ))}
-            </div>
-          )}
+          {(() => {
+            const now = new Date();
+            const upcomingMeetups = meetups.filter(m => new Date(m.end_date_time) > now);
+            const pastMeetups = meetups.filter(m => new Date(m.end_date_time) <= now);
+
+            if (meetups.length === 0) return <EmptyState />;
+
+            return (
+              <>
+                {/* Upcoming Meetups Section */}
+                {upcomingMeetups.length > 0 && (
+                  <div className="mb-16">
+                    <div className="mb-8">
+                      <h2 className="text-3xl md:text-4xl font-black tracking-tight text-[#1E1E1E] mb-2 flex items-center gap-3">
+                        <span className="w-3 h-3 bg-[#10b981] rounded-full animate-pulse"></span>
+                        Upcoming Meetups
+                      </h2>
+                      <p className="text-lg font-medium text-gray-500">Register now to secure your spot!</p>
+                    </div>
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
+                      {upcomingMeetups.map((meetup, index) => (
+                        <MeetupCard
+                          key={meetup.id}
+                          meetup={meetup}
+                          index={index}
+                          user={user}
+                          isRegistering={expandedRegisterId === meetup.id}
+                          onToggleRegister={() => setExpandedRegisterId(expandedRegisterId === meetup.id ? null : meetup.id)}
+                          onRegisterConfirm={() => handleRegister(meetup.id)}
+                          onViewTicket={() => setSelectedTicket(meetup)}
+                          isPast={false}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Past Meetups Section */}
+                {pastMeetups.length > 0 && (
+                  <div>
+                    <div className="mb-8">
+                      <h2 className="text-3xl md:text-4xl font-black tracking-tight text-[#1E1E1E] mb-2 flex items-center gap-3">
+                        <CalendarX className="w-8 h-8 text-gray-400" />
+                        Past Meetups
+                      </h2>
+                      <p className="text-lg font-medium text-gray-500">These events have ended.</p>
+                    </div>
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 opacity-75">
+                      {pastMeetups.map((meetup, index) => (
+                        <MeetupCard
+                          key={meetup.id}
+                          meetup={meetup}
+                          index={index + upcomingMeetups.length}
+                          user={user}
+                          isRegistering={false}
+                          onToggleRegister={() => { }}
+                          onRegisterConfirm={() => { }}
+                          onViewTicket={() => setSelectedTicket(meetup)}
+                          isPast={true}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </>
+            );
+          })()}
         </div>
 
         {/* --- PAST EVENTS GALLERY --- */}
@@ -240,7 +290,7 @@ export default function UserMeetupsList() {
 
 // --- SUB COMPONENTS ---
 
-const MeetupCard = ({ meetup, index, isRegistering, onToggleRegister, onRegisterConfirm, onViewTicket, user }) => {
+const MeetupCard = ({ meetup, index, isRegistering, onToggleRegister, onRegisterConfirm, onViewTicket, user, isPast = false }) => {
   const startDate = new Date(meetup.start_date_time);
   const isRegistered = meetup.registered;
   const rotation = index % 2 === 0 ? 1 : -1;
@@ -251,8 +301,8 @@ const MeetupCard = ({ meetup, index, isRegistering, onToggleRegister, onRegister
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-50px" }}
       transition={{ delay: index * 0.1, type: "spring", bounce: 0.2 }}
-      whileHover={{ y: -10, rotate: 0 }}
-      className="relative flex flex-col bg-white rounded-[2rem] border-[3px] border-[#1E1E1E] shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] overflow-hidden"
+      whileHover={isPast ? {} : { y: -10, rotate: 0 }}
+      className={`relative flex flex-col bg-white rounded-[2rem] border-[3px] border-[#1E1E1E] shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] overflow-hidden ${isPast ? 'grayscale-[30%]' : ''}`}
       style={{ rotate: `${rotation}deg` }}
     >
       {/* Banner */}
@@ -270,7 +320,11 @@ const MeetupCard = ({ meetup, index, isRegistering, onToggleRegister, onRegister
           </span>
         </div>
 
-        {isRegistered && (
+        {isPast ? (
+          <div className="absolute top-4 right-4 bg-gray-500 text-white px-3 py-1 text-xs font-black uppercase border-2 border-black shadow-[2px_2px_0px_0px_black]">
+            Ended
+          </div>
+        ) : isRegistered && (
           <div className="absolute top-4 right-4 bg-[#C2E812] text-[#1E1E1E] px-3 py-1 text-xs font-black uppercase border-2 border-black shadow-[2px_2px_0px_0px_black]">
             Going
           </div>
@@ -299,7 +353,12 @@ const MeetupCard = ({ meetup, index, isRegistering, onToggleRegister, onRegister
         </p>
 
         <div className="mt-auto pt-6 border-t-[3px] border-dashed border-[#1E1E1E]/20 text-left">
-          {isRegistering ? (
+          {isPast ? (
+            <div className="flex items-center gap-2 text-gray-500 font-bold">
+              <CalendarX className="w-5 h-5" />
+              <span>This event has ended</span>
+            </div>
+          ) : isRegistering ? (
             <div className="bg-[#F7F5F2] p-4 rounded-xl border-[3px] border-[#1E1E1E] animate-in slide-in-from-bottom-2">
               <p className="font-black text-sm mb-3">Secure your spot?</p>
               <div className="flex gap-2">
@@ -313,11 +372,23 @@ const MeetupCard = ({ meetup, index, isRegistering, onToggleRegister, onRegister
             </div>
           ) : (
             isRegistered ? (
-              <button onClick={onViewTicket} className="flex items-center gap-2 font-black text-[#1E1E1E] hover:text-[#0061FE] group/btn">
-                <Ticket className="w-6 h-6" />
-                <span className="text-lg">View Ticket</span>
-                <ArrowRight className="w-5 h-5 group-hover/btn:translate-x-2 transition-transform" />
-              </button>
+              meetup.registrationData?.status === "approved" ? (
+                <button onClick={onViewTicket} className="flex items-center gap-2 font-black text-[#1E1E1E] hover:text-[#0061FE] group/btn">
+                  <Ticket className="w-6 h-6" />
+                  <span className="text-lg">View Ticket</span>
+                  <ArrowRight className="w-5 h-5 group-hover/btn:translate-x-2 transition-transform" />
+                </button>
+              ) : meetup.registrationData?.status === "rejected" ? (
+                <div className="flex items-center gap-2 text-red-600 font-bold">
+                  <X className="w-5 h-5" />
+                  <span>Registration Rejected</span>
+                </div>
+              ) : (
+                <div className="flex items-center gap-2 text-amber-600 font-bold">
+                  <Hourglass className="w-5 h-5 animate-pulse" />
+                  <span>Pending Admin Approval</span>
+                </div>
+              )
             ) : (
               <button onClick={onToggleRegister} className="bg-[#1E1E1E] text-white px-6 py-3 rounded-xl font-black text-lg hover:bg-[#0061FE] transition-all shadow-[4px_4px_0px_0px_black] hover:-translate-y-1 hover:shadow-[6px_6px_0px_0px_black] flex items-center gap-2 w-fit">
                 Register Now <PenTool className="w-4 h-4" />

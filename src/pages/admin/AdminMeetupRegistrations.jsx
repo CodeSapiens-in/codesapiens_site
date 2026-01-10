@@ -2,8 +2,10 @@ import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "../../lib/supabaseClient";
 import AdminLayout from "../../components/AdminLayout";
-import { ArrowLeft, Download, Search, CheckCircle, XCircle, Clock, Mail, User } from "lucide-react";
+import { ArrowLeft, Download, Search, CheckCircle, XCircle, Clock, Mail, User, ThumbsUp, ThumbsDown, Ban, Loader2 } from "lucide-react";
 import toast, { Toaster } from "react-hot-toast";
+import { authFetch } from "../../lib/authFetch";
+import { BACKEND_URL } from "../../config";
 
 const AdminMeetupRegistrations = () => {
     const { id } = useParams();
@@ -70,6 +72,76 @@ const AdminMeetupRegistrations = () => {
             token.toLowerCase().includes(searchLower)
         );
     });
+
+    // Handle Approve Registration
+    const handleApprove = async (regId) => {
+        // Find the registration to get details for email
+        const reg = registrations.find(r => r.id === regId);
+        if (!reg) return;
+
+        try {
+            const { error } = await supabase
+                .from("registrations")
+                .update({ status: "approved" })
+                .eq("id", regId);
+
+            if (error) throw error;
+
+            setRegistrations(prev =>
+                prev.map(r => r.id === regId ? { ...r, status: "approved" } : r)
+            );
+
+            // Send approval email with QR code
+            const email = reg.user_email || reg.email || reg.users?.email;
+            const userName = reg.user_name || reg.users?.display_name || "Attendee";
+
+            if (email && meetup) {
+                try {
+                    await authFetch(`${BACKEND_URL}/send-approval-email`, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            email,
+                            userName,
+                            meetupTitle: meetup.title,
+                            meetupDate: new Date(meetup.start_date_time).toLocaleString(),
+                            meetupVenue: meetup.venue || "TBA",
+                            token: reg.token,
+                        }),
+                    });
+                    toast.success(`Approved & email sent to ${email}`);
+                } catch (emailErr) {
+                    console.error("Email send error:", emailErr);
+                    toast.success("Approved! (Email failed to send)");
+                }
+            } else {
+                toast.success("Registration approved!");
+            }
+        } catch (err) {
+            console.error("Error approving:", err);
+            toast.error("Failed to approve registration");
+        }
+    };
+
+    // Handle Reject Registration
+    const handleReject = async (regId) => {
+        try {
+            const { error } = await supabase
+                .from("registrations")
+                .update({ status: "rejected" })
+                .eq("id", regId);
+
+            if (error) throw error;
+
+            setRegistrations(prev =>
+                prev.map(r => r.id === regId ? { ...r, status: "rejected" } : r)
+            );
+            toast.success("Registration rejected");
+        } catch (err) {
+            console.error("Error rejecting:", err);
+            toast.error("Failed to reject registration");
+        }
+    };
 
     const exportCSV = () => {
         if (!registrations.length) return;
@@ -168,21 +240,22 @@ const AdminMeetupRegistrations = () => {
                                 <tr className="bg-gray-50 border-b border-gray-100 text-xs uppercase tracking-wider text-gray-500 font-semibold">
                                     <th className="px-6 py-4">Attendee</th>
                                     <th className="px-6 py-4">Token</th>
-                                    <th className="px-6 py-4">Status</th>
+                                    <th className="px-6 py-4">Approval</th>
+                                    <th className="px-6 py-4">Check-in</th>
                                     <th className="px-6 py-4">Registered At</th>
-                                    <th className="px-6 py-4">Check-in Time</th>
+                                    <th className="px-6 py-4">Actions</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-100">
                                 {loading ? (
                                     <tr>
-                                        <td colSpan="5" className="px-6 py-12 text-center text-gray-500">
+                                        <td colSpan="6" className="px-6 py-12 text-center text-gray-500">
                                             Loading registrations...
                                         </td>
                                     </tr>
                                 ) : filteredRegistrations.length === 0 ? (
                                     <tr>
-                                        <td colSpan="5" className="px-6 py-12 text-center text-gray-500">
+                                        <td colSpan="6" className="px-6 py-12 text-center text-gray-500">
                                             {searchTerm ? "No matches found" : "No one has registered yet"}
                                         </td>
                                     </tr>
@@ -211,9 +284,13 @@ const AdminMeetupRegistrations = () => {
                                                 </span>
                                             </td>
                                             <td className="px-6 py-4">
-                                                {reg.is_checked_in ? (
+                                                {reg.status === "approved" ? (
                                                     <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-green-50 text-green-700 border border-green-100">
-                                                        <CheckCircle className="w-3.5 h-3.5" /> Checked In
+                                                        <CheckCircle className="w-3.5 h-3.5" /> Approved
+                                                    </span>
+                                                ) : reg.status === "rejected" ? (
+                                                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-red-50 text-red-700 border border-red-100">
+                                                        <Ban className="w-3.5 h-3.5" /> Rejected
                                                     </span>
                                                 ) : (
                                                     <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-amber-50 text-amber-700 border border-amber-100">
@@ -221,16 +298,39 @@ const AdminMeetupRegistrations = () => {
                                                     </span>
                                                 )}
                                             </td>
+                                            <td className="px-6 py-4">
+                                                {reg.is_checked_in ? (
+                                                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-100">
+                                                        <CheckCircle className="w-3.5 h-3.5" /> Yes
+                                                    </span>
+                                                ) : (
+                                                    <span className="text-xs text-gray-400">—</span>
+                                                )}
+                                            </td>
                                             <td className="px-6 py-4 text-sm text-gray-500">
                                                 {new Date(reg.created_at).toLocaleDateString()}
                                             </td>
-                                            <td className="px-6 py-4 text-sm text-gray-500">
-                                                {reg.checked_in_at ? (
-                                                    <>
-                                                        <div>{new Date(reg.checked_in_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
-                                                        <div className="text-xs text-gray-400">{new Date(reg.checked_in_at).toLocaleDateString()}</div>
-                                                    </>
-                                                ) : "-"}
+                                            <td className="px-6 py-4">
+                                                <div className="flex items-center gap-2">
+                                                    {reg.status !== "approved" && (
+                                                        <button
+                                                            onClick={() => handleApprove(reg.id)}
+                                                            className="p-1.5 rounded-lg bg-green-50 text-green-600 hover:bg-green-100 transition-colors"
+                                                            title="Approve"
+                                                        >
+                                                            <ThumbsUp className="w-4 h-4" />
+                                                        </button>
+                                                    )}
+                                                    {reg.status !== "rejected" && (
+                                                        <button
+                                                            onClick={() => handleReject(reg.id)}
+                                                            className="p-1.5 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 transition-colors"
+                                                            title="Reject"
+                                                        >
+                                                            <ThumbsDown className="w-4 h-4" />
+                                                        </button>
+                                                    )}
+                                                </div>
                                             </td>
                                         </tr>
                                     ))

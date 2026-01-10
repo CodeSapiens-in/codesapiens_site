@@ -463,6 +463,20 @@ BEGIN
   END IF;
 END$$;
 
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE schemaname = 'public' AND tablename = 'registrations' AND policyname = 'registrations_select_admin') THEN
+    CREATE POLICY registrations_select_admin ON public.registrations FOR SELECT TO authenticated USING (public.is_admin());
+  END IF;
+END$$;
+
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE schemaname = 'public' AND tablename = 'registrations' AND policyname = 'registrations_update_admin') THEN
+    CREATE POLICY registrations_update_admin ON public.registrations FOR UPDATE TO authenticated USING (public.is_admin());
+  END IF;
+END$$;
+
 -- Users Policies
 DO $$
 BEGIN
@@ -570,6 +584,35 @@ DO $$
 BEGIN
   IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE schemaname = 'public' AND tablename = 'feedback' AND policyname = 'feedback_select_own') THEN
     CREATE POLICY feedback_select_own ON public.feedback FOR SELECT TO authenticated USING (user_id = auth.uid()::text);
+  END IF;
+END$$;
+
+-- Meetup Policies
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE schemaname = 'public' AND tablename = 'meetup' AND policyname = 'meetup_select_all') THEN
+    CREATE POLICY meetup_select_all ON public.meetup FOR SELECT TO anon, authenticated USING (true);
+  END IF;
+END$$;
+
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE schemaname = 'public' AND tablename = 'meetup' AND policyname = 'meetup_insert_admin') THEN
+    CREATE POLICY meetup_insert_admin ON public.meetup FOR INSERT TO authenticated WITH CHECK (public.is_admin());
+  END IF;
+END$$;
+
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE schemaname = 'public' AND tablename = 'meetup' AND policyname = 'meetup_update_admin') THEN
+    CREATE POLICY meetup_update_admin ON public.meetup FOR UPDATE TO authenticated USING (public.is_admin());
+  END IF;
+END$$;
+
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE schemaname = 'public' AND tablename = 'meetup' AND policyname = 'meetup_delete_admin') THEN
+    CREATE POLICY meetup_delete_admin ON public.meetup FOR DELETE TO authenticated USING (public.is_admin());
   END IF;
 END$$;
 
