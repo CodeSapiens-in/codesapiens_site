@@ -43,6 +43,7 @@ import AdminScannerMeetup from './pages/admin/AdminScannerMeetup';
 import AdminMeetupList from './pages/admin/AdminMeetupList';
 import AdminMeetup from './pages/admin/AdminMeetup';
 import AdminMeetupEdit from './pages/admin/AdminMeetupEdit';
+import AdminMeetupRegistrations from './pages/admin/AdminMeetupRegistrations';
 import UserMeetupsList from './pages/user/UserMeetupsList';
 import MentorshipLanding from './pages/user/MentorshipLanding';
 import AdminMentorshipPrograms from './pages/admin/AdminMentorshipPrograms';
@@ -89,6 +90,7 @@ const AnimatedRoutes = () => {
         <Route path="/admin/meetups" element={<PageTransition><AdminMeetupList /></PageTransition>} />
         <Route path="/admin/meetup/create" element={<PageTransition><AdminMeetup /></PageTransition>} />
         <Route path="/admin/meetup/edit/:meetupId" element={<PageTransition><AdminMeetupEdit /></PageTransition>} />
+        <Route path="/admin/meetup/registrations/:id" element={<PageTransition><AdminMeetupRegistrations /></PageTransition>} />
         <Route path="/meetups" element={<PageTransition><UserMeetupsList /></PageTransition>} />
         <Route path="/admin/mentorship-programs" element={<PageTransition><AdminMentorshipPrograms /></PageTransition>} />
         <Route path="/admin/mentorship/manage/:id" element={<PageTransition><AdminMentorshipManager /></PageTransition>} />
