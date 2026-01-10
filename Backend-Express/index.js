@@ -1275,7 +1275,7 @@ const generateApprovalEmailHTML = (data) => {
               <table role="presentation" style="margin: 24px 0; width: 100%;">
                 <tr>
                   <td style="text-align: center;">
-                    <a href="https://codesapiens.in/me/meetups" style="display: inline-block; background: linear-gradient(135deg, #10b981 0%, #059669 100%); padding: 16px 32px; color: #ffffff; text-decoration: none; font-weight: 600; font-size: 16px; border-radius: 8px;">
+                    <a href="https://codesapiens.in" style="display: inline-block; background: linear-gradient(135deg, #10b981 0%, #059669 100%); padding: 16px 32px; color: #ffffff; text-decoration: none; font-weight: 600; font-size: 16px; border-radius: 8px;">
                       View My Ticket →
                     </a>
                   </td>
@@ -1409,7 +1409,7 @@ const generateRejectionEmailHTML = (data) => {
               <table role="presentation" style="margin: 24px 0; width: 100%;">
                 <tr>
                   <td style="text-align: center;">
-                    <a href="https://codesapiens.in/me/meetups" style="display: inline-block; background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); padding: 16px 32px; color: #ffffff; text-decoration: none; font-weight: 600; font-size: 16px; border-radius: 8px;">
+                    <a href="https://codesapiens.in" style="display: inline-block; background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); padding: 16px 32px; color: #ffffff; text-decoration: none; font-weight: 600; font-size: 16px; border-radius: 8px;">
                       Browse Other Meetups →
                     </a>
                   </td>
