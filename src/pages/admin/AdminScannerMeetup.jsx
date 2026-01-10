@@ -7,7 +7,7 @@ import toast, { Toaster } from "react-hot-toast";
 import { ArrowLeft, QrCode, Check, X, AlertCircle, ScanLine, ArrowRight } from "lucide-react";
 
 export default function AdminScannerMeetup() {
-  const { meetupId } = useParams();
+  const { id: meetupId } = useParams();
   const navigate = useNavigate();
   const scannerRef = useRef(null);
   const timeoutRef = useRef(null);
