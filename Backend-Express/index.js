@@ -187,8 +187,8 @@ const transporter = nodemailer.createTransport({
   maxConnections: 5,
   maxMessages: 100,
   auth: {
-    user: "suryasunrise261@gmail.com",
-    pass: "bgbd rdmx psjl rbfg ",
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
   },
 });
 
