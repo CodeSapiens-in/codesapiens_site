@@ -80,11 +80,14 @@ const AdminMeetupRegistrations = () => {
         if (!reg) return;
 
         try {
-            const { error } = await supabase
+            console.log('[Approve] Updating registration:', regId, 'to approved');
+            const { data, error } = await supabase
                 .from("registrations")
                 .update({ status: "approved" })
-                .eq("id", regId);
+                .eq("id", regId)
+                .select();
 
+            console.log('[Approve] Update result:', { data, error });
             if (error) throw error;
 
             setRegistrations(prev =>
