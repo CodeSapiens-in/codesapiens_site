@@ -80,15 +80,22 @@ const AdminMeetupRegistrations = () => {
         if (!reg) return;
 
         try {
-            console.log('[Approve] Updating registration:', regId, 'to approved');
-            const { data, error } = await supabase
+            console.log("Attempting to approve registration:", regId);
+            const { data, error, count } = await supabase
                 .from("registrations")
                 .update({ status: "approved" })
                 .eq("id", regId)
-                .select();
+                .select(); // Add select() to get returned data
 
-            console.log('[Approve] Update result:', { data, error });
+            console.log("Update result:", { data, error, count });
+
             if (error) throw error;
+
+            if (!data || data.length === 0) {
+                console.warn("Update succeeded but no rows returned. Check RLS policies or if row exists.");
+                toast.error("Update failed - check console");
+                return;
+            }
 
             setRegistrations(prev =>
                 prev.map(r => r.id === regId ? { ...r, status: "approved" } : r)
