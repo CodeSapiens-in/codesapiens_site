@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Mail, Lock, Eye, EyeOff, ArrowRight, ArrowLeft } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSession } from '@supabase/auth-helpers-react';
 
@@ -20,7 +20,9 @@ export default function AuthForm() {
   // Listen to session state for navigation
   useEffect(() => {
     if (session) {
-      navigate('/');
+      const params = new URLSearchParams(window.location.search);
+      const redirectUrl = params.get('redirect') || '/';
+      navigate(redirectUrl);
     }
   }, [session, navigate]);
 
@@ -33,10 +35,13 @@ export default function AuthForm() {
   const signInWithGoogle = async () => {
     setLoading(true);
     setMessage(null);
+    // Preserve redirect param for Google OAuth
+    const params = new URLSearchParams(window.location.search);
+    const redirectUrl = params.get('redirect') || '/';
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: window.location.origin,
+        redirectTo: `${window.location.origin}${redirectUrl}`,
       },
     });
     if (error) {

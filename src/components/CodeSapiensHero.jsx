@@ -610,6 +610,7 @@ const CodeSapiensHero = () => {
                     </div>
                     <div className="hidden md:flex items-center gap-8 font-medium text-golden-1">
                         <a href="#vision" className="hover:text-[#0061FE] transition-colors">Vision</a>
+                        <a href="/meetups" className="hover:text-[#0061FE] transition-colors">Meetups</a>
                         <a href="#events" className="hover:text-[#0061FE] transition-colors">Events</a>
                         <a href="#community" className="hover:text-[#0061FE] transition-colors">Community</a>
                         <button onClick={() => navigate('/auth')} className="hover:text-[#0061FE]">Log in</button>
@@ -628,6 +629,7 @@ const CodeSapiensHero = () => {
                 <div className="fixed inset-0 z-40 bg-[#101010] text-white pt-24 px-6 md:hidden">
                     <div className="flex flex-col gap-6 text-golden-2 font-bold">
                         <a href="#vision" onClick={() => setIsMenuOpen(false)}>Vision</a>
+                        <a href="/meetups" onClick={() => setIsMenuOpen(false)}>Meetups</a>
                         <a href="#events" onClick={() => setIsMenuOpen(false)}>Events</a>
                         <a href="#community" onClick={() => setIsMenuOpen(false)}>Community</a>
                         <button onClick={() => navigate('/auth')} className="text-left text-[#0061FE]">Log in</button>

@@ -61,6 +61,7 @@ import BlogDetail from './pages/user/BlogDetail';
 import AdminHallOfFame from './pages/admin/AdminHallOfFame';
 import AdminCommunityPhotos from './pages/admin/AdminCommunityPhotos';
 import AdminFeedbackList from './pages/admin/AdminFeedbackList';
+import PublicMeetupPage from './pages/PublicMeetupPage';
 
 
 const AnimatedRoutes = () => {
@@ -148,6 +149,8 @@ function Root() {
           <Route path="/admin/community-photos" element={<AdminCommunityPhotos />} />
           <Route path="/admin/feedback" element={<AdminFeedbackList />} />
           <Route path="/profile/:username" element={<PublicProfile />} />
+          <Route path="/meetup/:id" element={<PublicMeetupPage />} />
+          <Route path="/meetups" element={<UserMeetupsList />} />
 
           <Route path="/forgot-password" element={<ResetPassword />} />
           <Route path="/reset-password" element={<ResetPasswordConfirm />} />

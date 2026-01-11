@@ -4,6 +4,7 @@ import { QRCodeCanvas } from "qrcode.react";
 import { useUser } from "@supabase/auth-helpers-react";
 import { supabase } from "../../lib/supabaseClient";
 import toast, { Toaster } from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Calendar, Clock, MapPin, Loader2, CheckCircle, X,
@@ -32,6 +33,7 @@ const FrameworkGrid = () => (
 
 export default function UserMeetupsList() {
   const user = useUser();
+  const navigate = useNavigate();
   const [meetups, setMeetups] = useState([]);
   const [loading, setLoading] = useState(true);
   const [userProfile, setUserProfile] = useState(null);
@@ -83,7 +85,11 @@ export default function UserMeetupsList() {
   }, [user]);
 
   const handleRegister = async (meetupId) => {
-    if (!user) return toast.error("Please log in to register");
+    if (!user) {
+      // Redirect to auth with return URL
+      navigate(`/auth?redirect=/meetups`);
+      return;
+    }
     if (!userProfile?.display_name) return toast.error("Please set your display name in your profile.");
 
     try {
