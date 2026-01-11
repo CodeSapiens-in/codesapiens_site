@@ -79,11 +79,13 @@ CREATE TABLE IF NOT EXISTS public.registrations (
   meetup_id uuid REFERENCES public.meetup(id) ON DELETE CASCADE,
   user_name text,
   user_email text,
+  user_phone text,
   token text UNIQUE DEFAULT public.random_token('tok'),
   is_checked_in boolean DEFAULT false,
   checked_in_at timestamptz,
   created_at timestamptz DEFAULT now(),
-  user_id text REFERENCES public.users(uid)
+  user_id text REFERENCES public.users(uid),
+  status text DEFAULT 'pending'
 );
 
 -- Mentorship Programs Table

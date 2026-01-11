@@ -8,7 +8,7 @@ import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Calendar, Clock, MapPin, Loader2, CheckCircle, X,
-  Ticket, ArrowRight, Zap, Hexagon, MoveUpRight, Smile, PenTool, LayoutGrid, Hourglass, CalendarX
+  Ticket, ArrowRight, Zap, Hexagon, MoveUpRight, Smile, PenTool, LayoutGrid, Hourglass, CalendarX, Phone
 } from "lucide-react";
 
 // --- ANIMATED GRID SYSTEM (THE "FRAMEWORK") ---
@@ -41,6 +41,12 @@ export default function UserMeetupsList() {
   const [expandedRegisterId, setExpandedRegisterId] = useState(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
+  // Registration modal state
+  const [showRegModal, setShowRegModal] = useState(false);
+  const [pendingMeetupId, setPendingMeetupId] = useState(null);
+  const [regFormData, setRegFormData] = useState({ displayName: "", phone: "" });
+  const [regSubmitting, setRegSubmitting] = useState(false);
+
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentImageIndex((prev) => (prev + 1) % pastEvents.length);
@@ -52,8 +58,15 @@ export default function UserMeetupsList() {
     if (!user) { setUserProfile(null); return; }
     const fetchUserProfile = async () => {
       try {
-        const { data: rows } = await supabase.from("users").select("display_name, email, avatar").eq("uid", user.id);
+        const { data: rows } = await supabase.from("users").select("display_name, email, avatar, phone_number").eq("uid", user.id);
         setUserProfile(rows?.[0] || null);
+        // Pre-fill modal form with existing data
+        if (rows?.[0]) {
+          setRegFormData({
+            displayName: rows[0].display_name || "",
+            phone: rows[0].phone_number || ""
+          });
+        }
       } catch (err) { console.error(err); }
     };
     fetchUserProfile();
@@ -90,24 +103,80 @@ export default function UserMeetupsList() {
       navigate(`/auth?redirect=/meetups`);
       return;
     }
-    if (!userProfile?.display_name) return toast.error("Please set your display name in your profile.");
 
+    // If missing display name or phone, show modal
+    if (!userProfile?.display_name || !userProfile?.phone_number) {
+      setPendingMeetupId(meetupId);
+      setShowRegModal(true);
+      return;
+    }
+
+    // Proceed with registration
+    await completeRegistration(meetupId, userProfile.display_name, userProfile.phone_number);
+  };
+
+  const completeRegistration = async (meetupId, displayName, phone) => {
     try {
       const { data, error } = await supabase.from("registrations").insert({
-        meetup_id: meetupId, user_name: userProfile.display_name, user_email: userProfile.email || user.email, user_id: user.id
+        meetup_id: meetupId,
+        user_name: displayName,
+        user_email: userProfile?.email || user.email,
+        user_id: user.id,
+        user_phone: phone
       }).select("token, created_at").single();
 
       if (error) throw error;
 
       setMeetups((prev) => prev.map((m) => m.id === meetupId ? {
-        ...m, registered: true, registrationData: { token: data.token, name: userProfile.display_name, email: userProfile.email, registeredAt: data.created_at, status: "pending" }
+        ...m, registered: true, registrationData: { token: data.token, name: displayName, email: userProfile?.email, registeredAt: data.created_at, status: "pending" }
       } : m));
 
       toast.success("Registration submitted! Awaiting admin approval.");
       setExpandedRegisterId(null);
-      // Don't show ticket modal - wait for admin approval
-
     } catch (err) { toast.error(err.message || "Failed"); }
+  };
+
+  const handleRegModalSubmit = async () => {
+    if (!regFormData.displayName.trim()) {
+      toast.error("Display name is required");
+      return;
+    }
+    if (!regFormData.phone.trim()) {
+      toast.error("Mobile number is required");
+      return;
+    }
+
+    setRegSubmitting(true);
+    try {
+      // Update user profile
+      const { error: updateError } = await supabase
+        .from("users")
+        .update({
+          display_name: regFormData.displayName.trim(),
+          phone_number: regFormData.phone.trim()
+        })
+        .eq("uid", user.id);
+
+      if (updateError) throw updateError;
+
+      // Update local state
+      setUserProfile(prev => ({
+        ...prev,
+        display_name: regFormData.displayName.trim(),
+        phone_number: regFormData.phone.trim()
+      }));
+
+      // Complete registration
+      await completeRegistration(pendingMeetupId, regFormData.displayName.trim(), regFormData.phone.trim());
+
+      // Close modal
+      setShowRegModal(false);
+      setPendingMeetupId(null);
+    } catch (err) {
+      toast.error(err.message || "Failed to update profile");
+    } finally {
+      setRegSubmitting(false);
+    }
   };
 
   if (loading) return <LoadingScreen />;
@@ -289,6 +358,89 @@ export default function UserMeetupsList() {
       {/* --- TICKET MODAL --- */}
       <AnimatePresence>
         {selectedTicket && <TicketModal meetup={selectedTicket} onClose={() => setSelectedTicket(null)} />}
+      </AnimatePresence>
+
+      {/* --- REGISTRATION MODAL --- */}
+      <AnimatePresence>
+        {showRegModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#1E1E1E]/90 backdrop-blur-md"
+          >
+            <motion.div
+              initial={{ scale: 0.9, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.9, y: 20 }}
+              className="bg-white rounded-[2rem] border-[3px] border-[#1E1E1E] shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] w-full max-w-md overflow-hidden"
+            >
+              {/* Header */}
+              <div className="bg-[#1E1E1E] p-6 text-white flex justify-between items-center">
+                <div>
+                  <h3 className="text-xl font-black">Complete Your Registration</h3>
+                  <p className="text-gray-400 text-sm mt-1">Enter your details to register for the meetup</p>
+                </div>
+                <button
+                  onClick={() => { setShowRegModal(false); setPendingMeetupId(null); }}
+                  className="p-2 bg-white/10 rounded-full hover:bg-white/20 transition"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              {/* Form */}
+              <div className="p-6 space-y-5">
+                <div>
+                  <label className="block text-sm font-bold text-gray-600 mb-2 uppercase tracking-wide">
+                    Display Name *
+                  </label>
+                  <input
+                    type="text"
+                    value={regFormData.displayName}
+                    onChange={(e) => setRegFormData(prev => ({ ...prev, displayName: e.target.value }))}
+                    placeholder="Your name"
+                    className="w-full px-4 py-3 border-[2px] border-[#1E1E1E] rounded-xl font-medium focus:outline-none focus:ring-2 focus:ring-[#0061FE] focus:border-transparent"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-bold text-gray-600 mb-2 uppercase tracking-wide">
+                    Mobile Number *
+                  </label>
+                  <div className="relative">
+                    <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                    <input
+                      type="tel"
+                      value={regFormData.phone}
+                      onChange={(e) => setRegFormData(prev => ({ ...prev, phone: e.target.value }))}
+                      placeholder="0000000000"
+                      className="w-full pl-12 pr-4 py-3 border-[2px] border-[#1E1E1E] rounded-xl font-medium focus:outline-none focus:ring-2 focus:ring-[#0061FE] focus:border-transparent"
+                    />
+                  </div>
+                </div>
+
+                <button
+                  onClick={handleRegModalSubmit}
+                  disabled={regSubmitting}
+                  className="w-full bg-[#1E1E1E] text-white py-4 rounded-xl font-black text-lg hover:bg-[#0061FE] transition-all shadow-[4px_4px_0px_0px_black] hover:-translate-y-1 hover:shadow-[6px_6px_0px_0px_black] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                >
+                  {regSubmitting ? (
+                    <>
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                      Registering...
+                    </>
+                  ) : (
+                    <>
+                      <Ticket className="w-5 h-5" />
+                      Register for Meetup
+                    </>
+                  )}
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
       </AnimatePresence>
     </>
   );

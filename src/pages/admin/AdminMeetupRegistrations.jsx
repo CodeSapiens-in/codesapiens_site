@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "../../lib/supabaseClient";
 import AdminLayout from "../../components/AdminLayout";
-import { ArrowLeft, Download, Search, CheckCircle, XCircle, Clock, Mail, User, ThumbsUp, ThumbsDown, Ban, Loader2 } from "lucide-react";
+import { ArrowLeft, Download, Search, CheckCircle, XCircle, Clock, Mail, User, ThumbsUp, ThumbsDown, Ban, Loader2, Phone } from "lucide-react";
 import toast, { Toaster } from "react-hot-toast";
 import { authFetch } from "../../lib/authFetch";
 import { BACKEND_URL } from "../../config";
@@ -175,13 +175,15 @@ const AdminMeetupRegistrations = () => {
     const exportCSV = () => {
         if (!registrations.length) return;
 
-        const headers = ["Name", "Email", "Token", "Checked In", "Check-in Time", "Registration Date"];
+        const headers = ["Name", "Email", "Phone", "Token", "Status", "Checked In", "Check-in Time", "Registration Date"];
         const csvRows = [headers.join(",")];
 
         registrations.forEach(reg => {
             const name = reg.user_name || reg.users?.display_name || "Unknown";
-            const email = reg.email || reg.users?.email || "N/A";
+            const email = reg.user_email || reg.users?.email || "N/A";
+            const phone = reg.user_phone || "N/A";
             const token = reg.token || "";
+            const status = reg.status || "pending";
             const checkedIn = reg.is_checked_in ? "Yes" : "No";
             const checkInTime = reg.checked_in_at ? new Date(reg.checked_in_at).toLocaleString() : "-";
             const regDate = new Date(reg.created_at).toLocaleDateString();
@@ -189,7 +191,9 @@ const AdminMeetupRegistrations = () => {
             const row = [
                 `"${name}"`,
                 `"${email}"`,
+                `"${phone}"`,
                 `"${token}"`,
+                `"${status}"`,
                 checkedIn,
                 `"${checkInTime}"`,
                 `"${regDate}"`
@@ -268,6 +272,7 @@ const AdminMeetupRegistrations = () => {
                             <thead>
                                 <tr className="bg-gray-50 border-b border-gray-100 text-xs uppercase tracking-wider text-gray-500 font-semibold">
                                     <th className="px-6 py-4">Attendee</th>
+                                    <th className="px-6 py-4">Phone</th>
                                     <th className="px-6 py-4">Token</th>
                                     <th className="px-6 py-4">Approval</th>
                                     <th className="px-6 py-4">Check-in</th>
@@ -278,13 +283,13 @@ const AdminMeetupRegistrations = () => {
                             <tbody className="divide-y divide-gray-100">
                                 {loading ? (
                                     <tr>
-                                        <td colSpan="6" className="px-6 py-12 text-center text-gray-500">
+                                        <td colSpan="7" className="px-6 py-12 text-center text-gray-500">
                                             Loading registrations...
                                         </td>
                                     </tr>
                                 ) : filteredRegistrations.length === 0 ? (
                                     <tr>
-                                        <td colSpan="6" className="px-6 py-12 text-center text-gray-500">
+                                        <td colSpan="7" className="px-6 py-12 text-center text-gray-500">
                                             {searchTerm ? "No matches found" : "No one has registered yet"}
                                         </td>
                                     </tr>
@@ -305,6 +310,12 @@ const AdminMeetupRegistrations = () => {
                                                             {reg.email || reg.users?.email || "No email"}
                                                         </div>
                                                     </div>
+                                                </div>
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                <div className="flex items-center gap-1.5 text-sm text-gray-600">
+                                                    <Phone className="w-3.5 h-3.5 text-gray-400" />
+                                                    {reg.user_phone || <span className="text-gray-400">—</span>}
                                                 </div>
                                             </td>
                                             <td className="px-6 py-4">
