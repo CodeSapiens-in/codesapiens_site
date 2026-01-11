@@ -16,15 +16,26 @@ export default function AuthForm() {
     password: '',
   });
   const navigate = useNavigate();
+  const location = useLocation();
 
   // Listen to session state for navigation
   useEffect(() => {
     if (session) {
-      const params = new URLSearchParams(window.location.search);
-      const redirectUrl = params.get('redirect') || '/';
-      navigate(redirectUrl);
+      // Check URL params first, then localStorage fallback for OAuth
+      const params = new URLSearchParams(location.search);
+      let redirectUrl = params.get('redirect');
+
+      // If no redirect in URL, check localStorage (set before OAuth)
+      if (!redirectUrl) {
+        redirectUrl = localStorage.getItem('authRedirect');
+        localStorage.removeItem('authRedirect'); // Clear after use
+      }
+
+      const finalUrl = redirectUrl || '/';
+      console.log('[Auth] Redirecting to:', finalUrl);
+      navigate(finalUrl, { replace: true });
     }
-  }, [session, navigate]);
+  }, [session, navigate, location.search]);
 
   const handleInputChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -35,13 +46,23 @@ export default function AuthForm() {
   const signInWithGoogle = async () => {
     setLoading(true);
     setMessage(null);
-    // Preserve redirect param for Google OAuth
+    // Preserve redirect param for Google OAuth - store in localStorage as backup
     const params = new URLSearchParams(window.location.search);
-    const redirectUrl = params.get('redirect') || '/';
+    const redirectParam = params.get('redirect');
+
+    // Store in localStorage as backup (URL params may be lost during OAuth)
+    if (redirectParam) {
+      localStorage.setItem('authRedirect', redirectParam);
+    }
+
+    // Redirect back to /auth with the redirect param
+    const callbackUrl = redirectParam
+      ? `${window.location.origin}/auth?redirect=${encodeURIComponent(redirectParam)}`
+      : `${window.location.origin}/`;
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: `${window.location.origin}${redirectUrl}`,
+        redirectTo: callbackUrl,
       },
     });
     if (error) {

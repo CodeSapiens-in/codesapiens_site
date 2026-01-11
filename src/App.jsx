@@ -118,6 +118,9 @@ const AnimatedRoutes = () => {
         <Route path="/admin/community-photos" element={<PageTransition><AdminCommunityPhotos /></PageTransition>} />
         <Route path="/admin/feedback" element={<PageTransition><AdminFeedbackList /></PageTransition>} />
 
+        {/* Auth route for OAuth callback handling */}
+        <Route path="/auth" element={<PageTransition><AuthForm /></PageTransition>} />
+
         <Route path="*" element={<PageTransition><NotFoundPage /></PageTransition>} />
       </Routes>
     </AnimatePresence>
