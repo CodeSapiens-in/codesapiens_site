@@ -519,16 +519,16 @@ export default function UserDashboard() {
         </div>
       </div>
 
-      {/* Blog Popup */}
+      {/* Blog Popup
       <AnimatePresence>
         {showBlogPopup && (
           <BlogPopup
             onClose={handleBlogPopupClose}
           />
         )}
-      </AnimatePresence>
+      </AnimatePresence> */}
 
-      {/* Feedback Popup */}
+      {/* Feedback Popup
       <AnimatePresence>
         {showFeedbackPopup && userData && (
           <FeedbackPopup
@@ -536,7 +536,7 @@ export default function UserDashboard() {
             onClose={handleFeedbackPopupClose}
           />
         )}
-      </AnimatePresence>
+      </AnimatePresence> */}
 
       {/* Profile Completion Dialog */}
       <AnimatePresence>

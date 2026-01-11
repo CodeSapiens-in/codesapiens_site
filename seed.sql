@@ -456,6 +456,11 @@ BEGIN
   IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE schemaname = 'public' AND tablename = 'registrations' AND policyname = 'registrations_insert_own') THEN
     CREATE POLICY registrations_insert_own ON public.registrations FOR INSERT TO authenticated WITH CHECK ((user_id IS NULL) OR (user_id = auth.uid()::text));
   END IF;
+
+  -- [NEW] Allow anonymous inserts for public meetup registration
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE schemaname = 'public' AND tablename = 'registrations' AND policyname = 'registrations_insert_anon') THEN
+    CREATE POLICY registrations_insert_anon ON public.registrations FOR INSERT TO anon WITH CHECK (true);
+  END IF;
 END$$;
 
 DO $$
@@ -638,6 +643,54 @@ BEGIN
     USING (auth.uid()::text = user_id);
   END IF;
 END$$;
+-- Mentorship Registrations Policies
+DO $$
+BEGIN
+  -- Allow authenticated users (team leaders) to insert registrations (including for others)
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE schemaname = 'public' AND tablename = 'mentorship_registrations' AND policyname = 'mentorship_registrations_insert_authenticated') THEN
+    CREATE POLICY mentorship_registrations_insert_authenticated ON public.mentorship_registrations FOR INSERT TO authenticated WITH CHECK (true);
+  END IF;
+
+  -- Users can view their own registrations
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE schemaname = 'public' AND tablename = 'mentorship_registrations' AND policyname = 'mentorship_registrations_select_own') THEN
+    CREATE POLICY mentorship_registrations_select_own ON public.mentorship_registrations FOR SELECT TO authenticated USING (user_id = auth.uid()::uuid);
+  END IF;
+
+  -- Users can update their own registrations (e.g. accept invite)
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE schemaname = 'public' AND tablename = 'mentorship_registrations' AND policyname = 'mentorship_registrations_update_own') THEN
+    CREATE POLICY mentorship_registrations_update_own ON public.mentorship_registrations FOR UPDATE TO authenticated USING (user_id = auth.uid()::uuid);
+  END IF;
+
+    -- Users can delete their own registrations (e.g. reject invite)
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE schemaname = 'public' AND tablename = 'mentorship_registrations' AND policyname = 'mentorship_registrations_delete_own') THEN
+    CREATE POLICY mentorship_registrations_delete_own ON public.mentorship_registrations FOR DELETE TO authenticated USING (user_id = auth.uid()::uuid);
+  END IF;
+
+  -- Admin Access
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE schemaname = 'public' AND tablename = 'mentorship_registrations' AND policyname = 'mentorship_registrations_all_admin') THEN
+    CREATE POLICY mentorship_registrations_all_admin ON public.mentorship_registrations FOR ALL TO authenticated USING (public.is_admin());
+  END IF;
+END$$;
+
+-- Mentorship Teams Policies
+DO $$
+BEGIN
+  -- Allow authenticated users to create teams
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE schemaname = 'public' AND tablename = 'mentorship_teams' AND policyname = 'mentorship_teams_insert_authenticated') THEN
+    CREATE POLICY mentorship_teams_insert_authenticated ON public.mentorship_teams FOR INSERT TO authenticated WITH CHECK (leader_id = auth.uid()::uuid);
+  END IF;
+
+  -- Allow users to view teams (needed for displaying team names in invites etc)
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE schemaname = 'public' AND tablename = 'mentorship_teams' AND policyname = 'mentorship_teams_select_authenticated') THEN
+    CREATE POLICY mentorship_teams_select_authenticated ON public.mentorship_teams FOR SELECT TO authenticated USING (true);
+  END IF;
+
+   -- Admin Access
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE schemaname = 'public' AND tablename = 'mentorship_teams' AND policyname = 'mentorship_teams_all_admin') THEN
+    CREATE POLICY mentorship_teams_all_admin ON public.mentorship_teams FOR ALL TO authenticated USING (public.is_admin());
+  END IF;
+END$$;
+
 
 -- ================================================================
 -- 9. Storage Buckets
