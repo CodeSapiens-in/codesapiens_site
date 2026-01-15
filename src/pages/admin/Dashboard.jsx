@@ -10,7 +10,8 @@ import {
   Clock,
   ArrowRight,
   Activity,
-  Smile
+  Smile,
+  PenTool
 } from 'lucide-react';
 import { supabase } from '../../lib/supabaseClient';
 import { useNavigate } from 'react-router-dom';
@@ -204,6 +205,13 @@ const Dashboard = () => {
       color: "#1E1E1E",
       textColor: "text-white",
       onClick: () => navigate('/admin/feedback')
+    },
+    {
+      icon: PenTool,
+      label: "MANAGE FORMS",
+      desc: "Create & View Submissions",
+      color: "#C2E812", // Lime
+      onClick: () => navigate('/admin/programs')
     }
   ];
 

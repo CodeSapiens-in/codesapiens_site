@@ -62,6 +62,11 @@ import AdminHallOfFame from './pages/admin/AdminHallOfFame';
 import AdminCommunityPhotos from './pages/admin/AdminCommunityPhotos';
 import AdminFeedbackList from './pages/admin/AdminFeedbackList';
 import PublicMeetupPage from './pages/PublicMeetupPage';
+import AdminFormBuilder from './pages/admin/AdminFormBuilder';
+import UserProgramsList from './pages/user/UserProgramsList';
+import UserFormView from './pages/user/UserFormView';
+import AdminProgramSubmissions from './pages/admin/AdminProgramSubmissions';
+import AdminProgramsList from './pages/admin/AdminProgramsList';
 
 
 const AnimatedRoutes = () => {
@@ -93,6 +98,10 @@ const AnimatedRoutes = () => {
         <Route path="/admin/meetup/edit/:meetupId" element={<PageTransition><AdminMeetupEdit /></PageTransition>} />
         <Route path="/admin/meetup/registrations/:id" element={<PageTransition><AdminMeetupRegistrations /></PageTransition>} />
         <Route path="/meetups" element={<PageTransition><UserMeetupsList /></PageTransition>} />
+        <Route path="/programs" element={<PageTransition><UserProgramsList /></PageTransition>} />
+        <Route path="/programs/:id" element={<PageTransition><UserFormView /></PageTransition>} />
+        <Route path="/admin/programs" element={<PageTransition><AdminProgramsList /></PageTransition>} />
+        <Route path="/admin/programs/:id/submissions" element={<PageTransition><AdminProgramSubmissions /></PageTransition>} />
         <Route path="/admin/mentorship-programs" element={<PageTransition><AdminMentorshipPrograms /></PageTransition>} />
         <Route path="/admin/mentorship/manage/:id" element={<PageTransition><AdminMentorshipManager /></PageTransition>} />
         <Route path="/admin/mentorship/create" element={<PageTransition><AdminMentorshipProgramEditor /></PageTransition>} />
@@ -117,6 +126,8 @@ const AnimatedRoutes = () => {
         {/* Community Photos */}
         <Route path="/admin/community-photos" element={<PageTransition><AdminCommunityPhotos /></PageTransition>} />
         <Route path="/admin/feedback" element={<PageTransition><AdminFeedbackList /></PageTransition>} />
+        <Route path="/admin/form-builder" element={<PageTransition><AdminFormBuilder /></PageTransition>} />
+        <Route path="/admin/form-builder/:id" element={<PageTransition><AdminFormBuilder /></PageTransition>} />
 
         <Route path="*" element={<PageTransition><NotFoundPage /></PageTransition>} />
       </Routes>
@@ -151,6 +162,9 @@ function Root() {
           <Route path="/profile/:username" element={<PublicProfile />} />
           <Route path="/meetup/:id" element={<PublicMeetupPage />} />
           <Route path="/meetups" element={<UserMeetupsList />} />
+
+          <Route path="/programs" element={<UserProgramsList />} />
+          <Route path="/programs/:id" element={<UserFormView />} />
 
           <Route path="/forgot-password" element={<ResetPassword />} />
           <Route path="/reset-password" element={<ResetPasswordConfirm />} />
