@@ -25,7 +25,7 @@ const StatsSection = () => {
     }, []);
 
     return (
-        <section className="py-12 bg-gradient-to-br from-[#101010] via-[#050505] to-[#001a45] text-white relative overflow-hidden">
+        <section id='impact' className="py-12 bg-gradient-to-br from-[#101010] via-[#050505] to-[#001a45] text-white relative overflow-hidden">
             {/* Background Elements */}
 
             <div className="container mx-auto px-4 md:px-6 relative z-10">
@@ -621,6 +621,7 @@ const CodeSapiensHero = () => {
                     </div>
                     <div className="hidden md:flex items-center gap-8 font-medium text-golden-1">
                         <a href="#vision" className="hover:text-[#0061FE] transition-colors">Vision</a>
+                        <a href="#impact" className="hover:text-[#0061FE] transition-colors">Impact</a>
                         <a href="/programs" className="hover:text-[#0061FE] transition-colors">Programs</a>
                         <a href="/meetups" className="hover:text-[#0061FE] transition-colors">Meetups</a>
                         <a href="#events" className="hover:text-[#0061FE] transition-colors">Events</a>
@@ -641,6 +642,7 @@ const CodeSapiensHero = () => {
                 <div className="fixed inset-0 z-40 bg-[#101010] text-white pt-24 px-6 md:hidden">
                     <div className="flex flex-col gap-6 text-golden-2 font-bold">
                         <a href="#vision" onClick={() => setIsMenuOpen(false)}>Vision</a>
+                        <a href="#impact" onClick={() => setIsMenuOpen(false)}>Impact</a>
                         <a href="/programs" onClick={() => setIsMenuOpen(false)}>Programs</a>
                         <a href="/meetups" onClick={() => setIsMenuOpen(false)}>Meetups</a>
                         <a href="#events" onClick={() => setIsMenuOpen(false)}>Events</a>
