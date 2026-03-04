@@ -14,6 +14,38 @@
     /* Subheadings (approx 26px) */
     --text-golden-3: 2.618rem;
     /* Main Headings (approx 42px) */
+
+    /* ── CodeSapiens Color Palette ── */
+    --color-cs-bg:            #0D0D1A;
+    --color-cs-surface:       #1A1A2E;
+    --color-cs-pink:          #FF2D78;
+    --color-cs-cyan:          #00D4FF;
+    --color-cs-white:         #FFFFFF;
+    --color-cs-muted:         #9BA3C7;
+
+    /* ── CodeSapiens Spacing ── */
+    --spacing-section-sm:     80px;
+    --spacing-section-lg:     120px;
+    --spacing-container:      1200px;
+    --spacing-card-sm:        24px;
+    --spacing-card-lg:        32px;
+    --spacing-btn-x:          28px;
+    --spacing-btn-y:          12px;
+    --spacing-gap-sm:         16px;
+    --spacing-gap-md:         24px;
+    --spacing-gap-lg:         48px;
+
+    /* ── CodeSapiens Border Radius ── */
+    --radius-card:            16px;
+    --radius-btn:             50px;
+    --radius-badge:           8px;
+
+    /* ── CodeSapiens Shadows ── */
+    --shadow-card:            0 4px 24px rgba(0, 0, 0, 0.4);
+    --shadow-pink-glow:       0 0 20px rgba(255, 45, 120, 0.4);
+    --shadow-cyan-glow:       0 0 20px rgba(0, 212, 255, 0.3);
+    --shadow-card-hover:      0 8px 40px rgba(255, 45, 120, 0.2);
+    --shadow-text-glow:       0 0 30px rgba(255, 45, 120, 0.5);
 }
 
 :root {
@@ -126,4 +158,66 @@
         -ms-overflow-style: none;
         scrollbar-width: none;
     }
+
+    /* ── CodeSapiens Color Utilities ── */
+    .bg-cs-bg       { background-color: var(--color-cs-bg); }
+    .bg-cs-surface  { background-color: var(--color-cs-surface); }
+    .bg-cs-pink     { background-color: var(--color-cs-pink); }
+    .bg-cs-cyan     { background-color: var(--color-cs-cyan); }
+    .text-cs-white  { color: var(--color-cs-white); }
+    .text-cs-muted  { color: var(--color-cs-muted); }
+    .text-cs-pink   { color: var(--color-cs-pink); }
+    .text-cs-cyan   { color: var(--color-cs-cyan); }
+
+    /* ── CodeSapiens Gradient Utilities ── */
+    .bg-cs-gradient {
+        background: linear-gradient(135deg, #FF2D78, #00D4FF);
+    }
+
+    .text-cs-gradient {
+        background: linear-gradient(135deg, #FF2D78, #00D4FF);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .border-cs-gradient {
+        border: 1px solid transparent;
+        background-image: linear-gradient(var(--color-cs-surface), var(--color-cs-surface)),
+                          linear-gradient(90deg, #FF2D78, #00D4FF);
+        background-origin: border-box;
+        background-clip: padding-box, border-box;
+    }
+
+    .divider-cs-gradient {
+        background: linear-gradient(90deg, transparent, #FF2D78, #00D4FF, transparent);
+        height: 1px;
+        border: none;
+    }
+
+    /* ── CodeSapiens Border Utilities ── */
+    .border-cs-card   { border: 1px solid rgba(255, 255, 255, 0.08); }
+    .border-cs-accent { border: 1px solid #FF2D78; }
+    .rounded-cs-card  { border-radius: var(--radius-card); }
+    .rounded-cs-btn   { border-radius: var(--radius-btn); }
+    .rounded-cs-badge { border-radius: var(--radius-badge); }
+
+    /* ── CodeSapiens Shadow Utilities ── */
+    .shadow-cs-card       { box-shadow: var(--shadow-card); }
+    .shadow-cs-pink-glow  { box-shadow: var(--shadow-pink-glow); }
+    .shadow-cs-cyan-glow  { box-shadow: var(--shadow-cyan-glow); }
+    .shadow-cs-card-hover { box-shadow: var(--shadow-card-hover); }
+    .shadow-cs-text-glow  { text-shadow: var(--shadow-text-glow); }
+
+    /* ── CodeSapiens Spacing Utilities ── */
+    .py-cs-section-sm   { padding-top: var(--spacing-section-sm); padding-bottom: var(--spacing-section-sm); }
+    .py-cs-section-lg   { padding-top: var(--spacing-section-lg); padding-bottom: var(--spacing-section-lg); }
+    .max-w-cs-container { max-width: var(--spacing-container); }
+    .p-cs-card-sm       { padding: var(--spacing-card-sm); }
+    .p-cs-card-lg       { padding: var(--spacing-card-lg); }
+    .gap-cs-sm          { gap: var(--spacing-gap-sm); }
+    .gap-cs-md          { gap: var(--spacing-gap-md); }
+    .gap-cs-lg          { gap: var(--spacing-gap-lg); }
+    .px-cs-btn          { padding-left: var(--spacing-btn-x); padding-right: var(--spacing-btn-x); }
+    .py-cs-btn          { padding-top: var(--spacing-btn-y); padding-bottom: var(--spacing-btn-y); }
 }
