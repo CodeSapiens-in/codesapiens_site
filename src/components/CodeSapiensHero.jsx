@@ -1,978 +1,1086 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { motion, useScroll, useTransform } from 'framer-motion';
-import { supabase } from '../lib/supabaseClient';
-import { useNavigate } from 'react-router-dom';
-import { ArrowRight, ChevronDown, Menu, X, Github, Linkedin, Youtube, Users, Calendar, Code, Award, Crown, Rocket, Zap, Globe, Cpu, Handshake, Heart, ArrowUpRight, Instagram, Twitter, MessageCircle, Megaphone, Sparkles } from 'lucide-react';
-import { BACKEND_URL } from '../config';
-import { authFetch } from '../lib/authFetch';
-import LandingPopup from './LandingPopup';
+import React from "react";
+import CountUp from "react-countup";
 
-// --- Stats Section ---
+import {
+BarChart,
+Bar,
+XAxis,
+YAxis,
+Tooltip,
+ResponsiveContainer,
+PieChart,
+Pie,
+Cell,
+Legend
+} from "recharts";
+
+
+
+/* ================= STATS SECTION ================= */
+
 const StatsSection = () => {
-    const [stats, setStats] = useState({ totalUsers: 0, totalColleges: 0, topColleges: [] });
-    const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        authFetch(`${BACKEND_URL}/api/public-stats`)
-            .then(res => res.json())
-            .then(data => {
-                if (data.success) {
-                    setStats(data.stats);
-                }
-            })
-            .catch(err => console.error("Stats fetch error:", err))
-            .finally(() => setLoading(false));
-    }, []);
+const collegeData = [
+{ name: "SSN", students: 320 },
+{ name: "VIT", students: 280 },
+{ name: "SRM", students: 240 },
+{ name: "MIT", students: 200 },
+{ name: "Others", students: 960 }
+];
 
-    return (
-        <section className="py-12 bg-gradient-to-br from-[#101010] via-[#050505] to-[#001a45] text-white relative overflow-hidden">
-            {/* Background Elements */}
+const pieData = [
+{ name: "SSN", value: 320 },
+{ name: "VIT", value: 280 },
+{ name: "SRM", value: 240 },
+{ name: "MIT", value: 200 },
+{ name: "Others", value: 960 }
+];
 
-            <div className="container mx-auto px-4 md:px-6 relative z-10">
-                <div className="mb-8 text-center">
-                    <span className="text-[#0061FE] font-bold tracking-widest uppercase text-golden-1 mb-4 block">Impact</span>
-                    <h2 className="text-golden-2 md:text-golden-3 font-bold mb-6">By The Numbers</h2>
-                    <p className="text-golden-1 text-gray-400 max-w-2xl mx-auto">
-                        We are growing fast. Join the movement.
-                    </p>
-                </div>
+const COLORS = [
+"#7C3AED",
+"#A855F7",
+"#C084FC",
+"#DDD6FE",
+"#4C1D95"
+];
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-16 items-start md:items-center">
-                    {/* Left: Big Numbers */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-8">
+return (
 
-                        <motion.div
-                            initial={{ opacity: 0, scale: 0.5 }}
-                            whileInView={{ opacity: 1, scale: 1 }}
-                            viewport={{ once: true }}
-                            className="bg-black/40 backdrop-blur-3xl p-4 md:p-6 rounded-2xl border border-white/10 text-center shadow-[0_8px_32px_0_rgba(0,0,0,0.37)] relative overflow-hidden group"
-                        >
-                            {/* Specular Highlight */}
-                            <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
+<section style={statsSection}>
 
-                            <h3 className="text-golden-2 md:text-golden-3 font-black text-white mb-2 drop-shadow-lg">
-                                {/* {stats.totalUsers > 0 ? stats.totalUsers : "1500+"} */}
-                                2000+
-                            </h3>
-                            <p className="text-gray-400 font-medium uppercase tracking-normal md:tracking-wider text-golden-1">Total Members</p>
-                        </motion.div>
+<div style={statsTitleBox}>
+<h2 style={statsTitle}>Community Impact</h2>
+<p style={statsSubtitle}>
+CodeSapiens is growing across colleges and communities
+</p>
+</div>
 
-                        <motion.div
-                            initial={{ opacity: 0, scale: 0.5 }}
-                            whileInView={{ opacity: 1, scale: 1 }}
-                            viewport={{ once: true }}
-                            transition={{ delay: 0.1 }}
-                            className="bg-black/40 backdrop-blur-3xl p-4 md:p-6 rounded-2xl border border-white/10 text-center shadow-[0_8px_32px_0_rgba(0,0,0,0.37)] relative overflow-hidden group"
-                        >
-                            {/* Specular Highlight */}
-                            <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
 
-                            <h3 className="text-golden-2 md:text-golden-3 font-black text-white mb-2 drop-shadow-lg">
-                                {/* {stats.totalColleges > 0 ? stats.totalColleges : "50+"} */}
-                                50+
-                            </h3>
-                            <p className="text-gray-400 font-medium uppercase tracking-normal md:tracking-wider text-golden-1">Colleges Reached</p>
-                        </motion.div>
-                    </div>
+<div style={statsGrid}>
 
-                    {/* Right: Top Colleges Chart */}
-                    <div className="col-span-1 h-full w-full overflow-hidden">
-                        <div className="bg-black/40 backdrop-blur-3xl p-6 rounded-2xl border border-white/10 h-full flex flex-col relative overflow-hidden group shadow-[0_8px_32px_0_rgba(0,0,0,0.37)]">
-                            {/* Specular Highlight */}
-                            <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent pointer-events-none"></div>
+<div style={statCard}>
+<h1 style={statNumber}>
+<CountUp end={2000} duration={3}/>+
+</h1>
+<p style={statText}>Total Members</p>
+</div>
 
-                            <h4 className="text-golden-2 font-bold mb-4 flex items-center gap-3">
-                                Top Active Colleges
-                            </h4>
+<div style={statCard}>
+<h1 style={statNumber}>
+<CountUp end={50} duration={3}/>+
+</h1>
+<p style={statText}>Colleges Reached</p>
+</div>
 
-                            <div className="flex-1 flex flex-col justify-center">
-                                {loading ? (
-                                    <div className="text-center text-gray-500 py-10 animate-pulse">Loading leaderboards...</div>
-                                ) : stats.topColleges.filter(c => c.name && c.name !== "Not specified").length > 0 ? (
-                                    <div className="space-y-8">
-                                        {/* Top 3 Podium - Only show if we have enough data, else fallback to list */}
-                                        {stats.topColleges.filter(c => c.name && c.name !== "Not specified").length >= 3 ? (
-                                            <div className="flex items-end justify-center gap-2 md:gap-4 mb-4 min-h-[140px]">
-                                                {/* 2nd Place */}
-                                                <motion.div
-                                                    initial={{ opacity: 0, y: 50 }}
-                                                    whileInView={{ opacity: 1, y: 0 }}
-                                                    transition={{ delay: 0.2 }}
-                                                    className="flex flex-col items-center w-1/3"
-                                                >
-                                                    <div className="text-center mb-2">
-                                                        <span className="text-gray-300 font-bold block text-sm sm:text-base line-clamp-2 min-h-[2.5em] leading-tight">
-                                                            {stats.topColleges.filter(c => c.name && c.name !== "Not specified")[1].name}
-                                                        </span>
-                                                        <span className="text-gray-500 text-xs font-mono mt-1 block">{stats.topColleges.filter(c => c.name && c.name !== "Not specified")[1].count} Students</span>
-                                                    </div>
-                                                    <div className="w-full bg-gradient-to-t from-gray-800 to-gray-600/50 rounded-t-lg relative border-t border-x border-gray-600 h-24 flex items-end justify-center pb-2">
-                                                        <span className="text-3xl font-black text-gray-400/20 absolute top-2">2</span>
-                                                        <div className="w-8 h-8 rounded-full bg-gray-400 flex items-center justify-center text-black font-bold text-sm shadow-[0_0_15px_rgba(156,163,175,0.5)]">2</div>
-                                                    </div>
-                                                </motion.div>
+<div style={statCard}>
+<h1 style={statNumber}>
+<CountUp end={15} duration={3}/>+
+</h1>
+<p style={statText}>Events Hosted</p>
+</div>
 
-                                                {/* 1st Place */}
-                                                <motion.div
-                                                    initial={{ opacity: 0, y: 50 }}
-                                                    whileInView={{ opacity: 1, y: 0 }}
-                                                    transition={{ delay: 0.1 }}
-                                                    className="flex flex-col items-center w-1/3 -mt-4 z-10"
-                                                >
-                                                    <div className="text-center mb-2">
-                                                        <span className="text-yellow-400 font-bold block text-sm sm:text-lg line-clamp-2 min-h-[2.5em] leading-tight drop-shadow-[0_0_10px_rgba(250,204,21,0.3)]">
-                                                            {stats.topColleges.filter(c => c.name && c.name !== "Not specified")[0].name}
-                                                        </span>
-                                                        <span className="text-yellow-500/80 text-xs font-mono mt-1 block font-bold">{stats.topColleges.filter(c => c.name && c.name !== "Not specified")[0].count} Students</span>
-                                                    </div>
-                                                    <div className="w-full bg-gradient-to-t from-yellow-900/40 to-yellow-600/40 rounded-t-lg relative border-t border-x border-yellow-500 h-32 flex items-end justify-center pb-4 overflow-hidden">
-                                                        <div className="absolute inset-0 bg-yellow-400/10 animate-pulse"></div>
-                                                        <span className="text-4xl font-black text-yellow-400/20 absolute top-2">1</span>
-                                                        <div className="w-10 h-10 rounded-full bg-yellow-400 flex items-center justify-center text-black font-bold text-lg shadow-[0_0_20px_rgba(250,204,21,0.6)] relative z-10">
-                                                            <Crown size={20} />
-                                                        </div>
-                                                    </div>
-                                                </motion.div>
+</div>
 
-                                                {/* 3rd Place */}
-                                                <motion.div
-                                                    initial={{ opacity: 0, y: 50 }}
-                                                    whileInView={{ opacity: 1, y: 0 }}
-                                                    transition={{ delay: 0.3 }}
-                                                    className="flex flex-col items-center w-1/3"
-                                                >
-                                                    <div className="text-center mb-2">
-                                                        <span className="text-amber-700 font-bold block text-sm sm:text-base line-clamp-2 min-h-[2.5em] leading-tight">
-                                                            {stats.topColleges.filter(c => c.name && c.name !== "Not specified")[2].name}
-                                                        </span>
-                                                        <span className="text-gray-500 text-xs font-mono mt-1 block">{stats.topColleges.filter(c => c.name && c.name !== "Not specified")[2].count} Students</span>
-                                                    </div>
-                                                    <div className="w-full bg-gradient-to-t from-amber-900/40 to-amber-700/40 rounded-t-lg relative border-t border-x border-amber-800 h-20 flex items-end justify-center pb-2">
-                                                        <span className="text-3xl font-black text-amber-800/20 absolute top-2">3</span>
-                                                        <div className="w-8 h-8 rounded-full bg-amber-700 flex items-center justify-center text-white font-bold text-sm shadow-[0_0_15px_rgba(180,83,9,0.5)]">3</div>
-                                                    </div>
-                                                </motion.div>
-                                            </div>
-                                        ) : null}
 
-                                        {/* Remaining List (4th and 5th) */}
-                                        <div className="space-y-3 mt-4">
-                                            {stats.topColleges
-                                                .filter(c => c.name && c.name !== "Not specified")
-                                                .slice(stats.topColleges.filter(c => c.name && c.name !== "Not specified").length >= 3 ? 3 : 0, 5) // Skip top 3 if we showed podium, else show all
-                                                .map((college, index) => {
-                                                    const actualIndex = stats.topColleges.filter(c => c.name && c.name !== "Not specified").length >= 3 ? index + 3 : index;
-                                                    return (
-                                                        <motion.div
-                                                            key={index}
-                                                            initial={{ opacity: 0, x: -20 }}
-                                                            whileInView={{ opacity: 1, x: 0 }}
-                                                            transition={{ delay: 0.4 + (index * 0.1) }}
-                                                            className="flex items-center gap-4 p-3 rounded-xl bg-white/5 hover:bg-white/10 transition-colors border border-white/5"
-                                                        >
-                                                            <div className="w-8 h-8 rounded-full bg-[#1E1919] border border-gray-700 flex items-center justify-center text-gray-400 font-bold text-sm">
-                                                                {actualIndex + 1}
-                                                            </div>
-                                                            <div className="flex-1 min-w-0">
-                                                                <h5 className="font-medium text-gray-200 truncate">{college.name}</h5>
-                                                            </div>
-                                                            <div className="px-3 py-1 rounded-full bg-[#0061FE]/10 text-[#0061FE] text-xs font-bold">
-                                                                {college.count}
-                                                            </div>
-                                                        </motion.div>
-                                                    );
-                                                })}
-                                        </div>
-                                    </div>
-                                ) : (
-                                    <div className="text-center text-gray-500 py-10">
-                                        <p>Stats will update soon</p>
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-    );
-};
+<div style={chartsContainer}>
 
-// --- Sponsor Section with Spotlight Effect ---
-const SponsorSection = () => {
-    const sponsors = [
+<div style={chartBox}>
 
-        {
-            name: "Mako IT Lab",
-            link: "https://www.makoitlab.com/",
-            image: "https://res.cloudinary.com/dqudvximt/image/upload/v1767816977/users_cme79i2lk00qls401ar5qxqnc_VGly5cMkz1ZxkXas-1_76R8XDxGiLgjc8BaeXApow_yzzhyw.webp",
-        },
-        {
-            name: "Yuniq",
-            link: "https://yuniq.co/",
-            image: "https://res.cloudinary.com/dqudvximt/image/upload/v1767817525/users_cme79i2lk00qls401ar5qxqnc_hBofB72xXBV4C0cL-users_clylc5w1v070to301jatq0e85_FVqmiMesQBlCZ0ZM-yuniq_njsnoy.jpg",
-        },
-        {
-            name: "Contentstack",
-            link: "https://www.contentstack.com/",
-            image: "https://res.cloudinary.com/dqudvximt/image/upload/v1767817529/users_cme79i2lk00qls401ar5qxqnc_DaxnHl7f0QdeQwgx-square-image_pvgube.jpg",
-        },
-        {
-            name: "Navan AI",
-            link: "https://navan.ai/",
-            image: "https://res.cloudinary.com/dqudvximt/image/upload/v1771507803/WhatsApp_Image_2026-02-19_at_4.28.11_PM_bxnzfc.jpg",
-        },
-        {
-            name: "Notion",
-            link: "https://www.notion.com/",
-            image: "https://res.cloudinary.com/dqudvximt/image/upload/v1767817532/users_cme79i2lk00qls401ar5qxqnc_891aQQNEpsjHP7Ef-notion-logo-png_seeklogo-425508_k0njb3.webp",
-        },
-        {
-            name: "Interview Buddy",
-            link: "https://interviewbuddy.net/",
-            image: "https://res.cloudinary.com/dqudvximt/image/upload/v1771508422/WhatsApp_Image_2026-02-19_at_4.28.12_PM_xxalgw.jpg",
-        },
-        
-    ];
+<ResponsiveContainer width="100%" height="100%">
+<BarChart data={collegeData}>
+<XAxis dataKey="name" stroke="#E5E7EB"/>
+<YAxis stroke="#E5E7EB"/>
+<Tooltip/>
+<Bar dataKey="students" fill="#7C3AED"/>
+</BarChart>
+</ResponsiveContainer>
 
-    return (
-        <section className="py-12 bg-[#FFFFF0] relative overflow-hidden">
-            <div className="container mx-auto px-6 relative z-10">
-                <div className="text-left mb-8">
-                    <div className="flex items-center gap-2 mb-4">
-                        <h2 className="text-4xl md:text-6xl font-black text-black tracking-tight leading-none">OUR</h2>
-                        <h2 className="text-4xl md:text-6xl font-script text-[#2563ea] font-bold italic leading-none pt-2">sponsors</h2>
-                        <div className="h-px bg-gray-200 flex-1 ml-4 self-center mt-2"></div>
-                    </div>
-                    {/* <span className="text-[#0061FE] font-bold tracking-widest uppercase text-golden-1 mb-2 block">Our Partners</span> */}
-                    <div className="flex items-center gap-2 mb-8">
-                        <span className="w-3 h-3 rounded-full bg-green-400 animate-pulse"></span>
-                        <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">BACKING THE FUTURE</span>
-                    </div>
-                </div>
+</div>
 
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 w-full mx-auto">
-                    {sponsors.map((sponsor, idx) => (
-                        <a
-                            key={idx}
-                            href={sponsor.link}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="relative group bg-white border border-gray-100 rounded-3xl p-4 md:p-6 w-full aspect-square flex flex-col justify-between hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 block"
-                        >
-                            {/* Top Right Arrow */}
-                            <div className="self-end p-2 bg-gray-50 rounded-full text-gray-400 group-hover:bg-[#0061FE] group-hover:text-white transition-colors">
-                                <ArrowUpRight size={18} />
-                            </div>
 
-                            {/* Centered Image */}
-                            <div className="flex-1 flex items-center justify-center p-2">
-                                <img
-                                    src={sponsor.image}
-                                    alt={sponsor.name}
-                                    className="max-w-[85%] max-h-[85%] object-contain drop-shadow-sm transition-all duration-500"
-                                />
-                            </div>
+<div style={chartBox}>
 
-                            {/* Name Badge */}
-                            <div className="self-start px-3 py-1 bg-gray-50 border border-gray-100 rounded-lg">
-                                <span className="font-bold text-gray-800 text-xs">{sponsor.name}</span>
-                            </div>
-                        </a>
-                    ))}
-                </div>
-            </div>
-        </section>
-    );
+<ResponsiveContainer width="100%" height="100%">
+<PieChart>
+
+<Pie
+data={pieData}
+dataKey="value"
+nameKey="name"
+cx="50%"
+cy="50%"
+outerRadius={120}
+innerRadius={70}
+label
+>
+
+{pieData.map((entry,index)=>(
+<Cell key={index} fill={COLORS[index % COLORS.length]}/>
+))}
+
+</Pie>
+
+<Tooltip/>
+<Legend/>
+
+</PieChart>
+</ResponsiveContainer>
+
+</div>
+
+</div>
+
+</section>
+
+);
 };
 
 
 
+/* ================= MAIN COMPONENT ================= */
+
+function CodeSapiensHero(){
+
+return(
+
+<div
+  style={{
+    minHeight: "100vh",
+    color: "#E5E7EB",
+    background: "linear-gradient(270deg,#0A0A0A,#3b0066,#7C3AED,#1a0033)",
+    backgroundSize: "600% 600%",
+    animation: "gradientMove 12s ease infinite",
+    position: "relative",
+    overflow: "hidden"
+  }}
+>
+{/* FLOATING SHAPES */}
+
+<div className="floating-shapes">
+  <span></span>
+  <span></span>
+  <span></span>
+  <span></span>
+  <span></span>
+  <span></span>
+  <span></span>
+  <span></span>
+</div>
+
+{/* NAVBAR */}
+
+<nav style={navStyle}>
+
+<div style={logoSection}>
+<img src="/logo.jpg" alt="logo" style={logoStyle}/>
+<span style={titleStyle}>CodeSapiens</span>
+</div>
+
+<div style={menuSection}>
+<a href="#" style={linkStyle}>Vision</a>
+<a href="#" style={linkStyle}>Programs</a>
+<a href="#" style={linkStyle}>Events</a>
+<a href="#" style={linkStyle}>Community</a>
+</div>
+
+<div style={rightSection}>
+<button style={loginStyle}>Login</button>
+<button style={buttonStyle}>Get Started</button>
+</div>
+
+</nav>
 
 
-// --- Community Partners Section ---
-const CommunityPartners = () => {
-    const partners = [
-        {
-            image: "https://res.cloudinary.com/dqudvximt/image/upload/v1767817843/users_cme79i2lk00qls401ar5qxqnc_OGGz5HgXCzS9rI8H-users_clylc5w1v070to301jatq0e85_bNj4z9CoW02cMzqm-circle_rs5ttj.png",
-            link: "#"
-        },
-        {
-            image: "https://res.cloudinary.com/dqudvximt/image/upload/v1767817844/users_cme79i2lk00qls401ar5qxqnc_EMRqmDnatuO4Rk38-users_cm9cf3ngn02erro015wogiktk_8CHW9Warth4BkBG9-Blue_2520Minimalist_2520Simple_2520Technology_2520Logo_2520_2520_1_mqig9s.png",
-            link: "#"
-        },
-        {
-            image: "https://res.cloudinary.com/dqudvximt/image/upload/v1767817846/users_cme79i2lk00qls401ar5qxqnc_1KwVf1Iz3NmGXUQP-176333249_mhbrlj.webp",
-            link: "#"
-        }
-    ];
 
-    return (
-        <section className="py-12 bg-white relative overflow-hidden border-t border-gray-100">
-            <div className="container mx-auto px-6 relative z-10">
-                <div className="text-left mb-8">
-                    <div className="flex items-center gap-2 mb-4">
-                        <h2 className="text-3xl md:text-6xl font-black text-black tracking-tight leading-none">COMMUNITY</h2>
-                        <h2 className="text-3xl md:text-6xl font-script text-[#2563ea] font-bold italic leading-none pt-2">partners</h2>
-                        <div className="h-px bg-gray-200 flex-1 ml-4 self-center mt-2"></div>
-                    </div>
-                    <div className="flex items-center gap-2 mb-8">
-                        <span className="w-3 h-3 rounded-full bg-green-400 animate-pulse"></span>
-                        <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">GROWING TOGETHER</span>
-                    </div>
-                </div>
+{/* HERO */}
 
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 w-full mx-auto">
-                    {partners.map((partner, idx) => (
-                        <div
-                            key={idx}
-                            className="relative group bg-white border border-gray-100 rounded-3xl p-4 md:p-6 w-full aspect-square flex flex-col justify-center items-center hover:shadow-lg transition-all duration-300"
-                        >
-                            {/* Centered Image */}
-                            <div className="flex-1 flex items-center justify-center p-2 w-full">
-                                <img
-                                    src={partner.image}
-                                    alt="Community Partner"
-                                    className="max-w-[85%] max-h-[85%] object-contain drop-shadow-sm"
-                                />
-                            </div>
-                        </div>
-                    ))}
-                </div>
-            </div>
-        </section>
-    );
+<section style={heroSection}>
+
+
+<h1 style={heroTitle}>CodeSapiens</h1>
+
+<h3>The biggest student-run tech community in Tamil Nadu</h3>
+
+<p style={heroSubtitle}>
+A student-powered developer community where programmers,
+innovators and builders collaborate and grow together.
+</p>
+
+<p style={{fontStyle:"italic",color:"#C084FC"}}>
+“Perusa Pannanum, but enna Pannanum Therla”
+</p>
+
+<p style={{color:"#6B7280"}}>
+("Want to do something big, but don't know what to do")
+</p>
+
+<div style={heroButtons}>
+
+<button style={heroPrimaryBtn}>
+Join Community 🚀
+</button>
+
+<button style={heroSecondaryBtn}>
+Explore Events
+</button>
+
+</div>
+
+</section>
+
+
+
+{/* FEATURES */}
+
+<section style={featuresSection}>
+
+<h2 style={featuresTitle}>What We Do</h2>
+
+<div style={featuresGrid}>
+
+<div style={featureCard}>
+<img src="https://cdn-icons-png.flaticon.com/512/2721/2721297.png" style={featureImage}/>
+<h3 style={featureHeading}>Workshops</h3>
+<p style={featureText}>Hands-on coding workshops.</p>
+</div>
+
+<div style={featureCard}>
+<img src="https://cdn-icons-png.flaticon.com/512/1055/1055687.png" style={featureImage}/>
+<h3 style={featureHeading}>Hackathons</h3>
+<p style={featureText}>Build innovative projects.</p>
+</div>
+
+<div style={featureCard}>
+<img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" style={featureImage}/>
+<h3 style={featureHeading}>Mentorship</h3>
+<p style={featureText}>Guidance from experienced developers.</p>
+</div>
+
+<div style={featureCard}>
+<img src="https://cdn-icons-png.flaticon.com/512/681/681494.png" style={featureImage}/>
+<h3 style={featureHeading}>Community</h3>
+<p style={featureText}>Connect with developers.</p>
+</div>
+
+</div>
+
+</section>
+
+
+
+{/* STATS */}
+
+<StatsSection/>
+
+
+
+
+{/* EVENTS */}
+
+<section style={eventsSection}>
+
+<h2 style={eventsTitle}>Community Events</h2>
+
+<p style={eventsSubtitle}>
+Meetups, hackathons and workshops conducted by CodeSapiens.
+</p>
+
+<div style={eventsGrid}>
+
+<div style={eventCard}>
+<img src="https://images.unsplash.com/photo-1518770660439-4636190af475" style={eventImage}/>
+<h3 style={eventHeading}>AI Workshop</h3>
+<p style={eventText}>Hands-on session on AI applications.</p>
+<span style={eventDate}>March 2025</span>
+</div>
+
+<div style={eventCard}>
+<img src="https://images.unsplash.com/photo-1531482615713-2afd69097998" style={eventImage}/>
+<h3 style={eventHeading}>Hackathon</h3>
+<p style={eventText}>24-hour coding competition.</p>
+<span style={eventDate}>April 2025</span>
+</div>
+
+<div style={eventCard}>
+<img src="https://images.unsplash.com/photo-1556761175-b413da4baf72" style={eventImage}/>
+<h3 style={eventHeading}>Developer Meetup</h3>
+<p style={eventText}>Networking and collaboration.</p>
+<span style={eventDate}>May 2025</span>
+</div>
+
+</div>
+
+</section>
+
+
+
+
+{/* SPONSORS */}
+
+<section style={sponsorsSection}>
+
+<h2 style={sponsorsTitle}>Our Sponsors</h2>
+
+<p style={sponsorsSubtitle}>
+Organizations supporting the CodeSapiens community
+</p>
+
+<div style={sponsorsGrid}>
+
+<div style={sponsorCard}>
+<img
+src="https://upload.wikimedia.org/wikipedia/commons/4/45/Notion_app_logo.png"
+style={sponsorLogo}
+/>
+<p style={sponsorName}>Notion</p>
+</div>
+
+<div style={sponsorCard}>
+<img
+src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png"
+style={sponsorLogo}
+/>
+<p style={sponsorName}>GitHub</p>
+</div>
+
+<div style={sponsorCard}>
+<img
+src="https://upload.wikimedia.org/wikipedia/commons/2/2f/Google_2015_logo.svg"
+style={sponsorLogo}
+/>
+<p style={sponsorName}>Google</p>
+</div>
+
+<div style={sponsorCard}>
+<img
+src="https://upload.wikimedia.org/wikipedia/commons/4/44/Microsoft_logo.svg"
+style={sponsorLogo}
+/>
+<p style={sponsorName}>Microsoft</p>
+</div>
+
+</div>
+
+</section>
+
+{/* PARTNERS */}
+
+<section style={partnersSection}>
+
+  <h2 style={partnersTitle}>
+    Community Partners
+  </h2>
+
+  <p style={partnersSubtitle}>
+    Organizations collaborating with CodeSapiens
+  </p>
+
+  <div style={partnersGrid}>
+
+    {/* NOTION */}
+    <div style={partnerCard}>
+      <img
+        src="https://upload.wikimedia.org/wikipedia/commons/4/45/Notion_app_logo.png"
+        alt="Notion"
+        style={partnerLogo}
+      />
+      <p style={partnerName}>Notion</p>
+    </div>
+
+
+    {/* CONTENTSTACK */}
+    <div style={partnerCard}>
+      <img
+        src="https://cdn.worldvectorlogo.com/logos/contentstack.svg"
+        alt="Contentstack"
+        style={partnerLogo}
+      />
+      <p style={partnerName}>Contentstack</p>
+    </div>
+
+
+    {/* AWS */}
+    <div style={partnerCard}>
+      <img
+        src="https://upload.wikimedia.org/wikipedia/commons/9/93/Amazon_Web_Services_Logo.svg"
+        alt="AWS"
+        style={partnerLogo}
+      />
+      <p style={partnerName}>AWS</p>
+    </div>
+
+
+    {/* GOOGLE DEVELOPERS */}
+    <div style={partnerCard}>
+      <img
+        src="https://developers.google.com/static/community/images/gdg-logo.png"
+        alt="Google Developers"
+        style={partnerLogo}
+      />
+      <p style={partnerName}>Google Developers</p>
+    </div>
+
+
+    {/* GITHUB */}
+    <div style={partnerCard}>
+      <img
+        src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png"
+        alt="GitHub"
+        style={partnerLogo}
+      />
+      <p style={partnerName}>GitHub</p>
+    </div>
+
+
+    {/* MICROSOFT */}
+    <div style={partnerCard}>
+      <img
+        src="https://upload.wikimedia.org/wikipedia/commons/4/44/Microsoft_logo.svg"
+        alt="Microsoft"
+        style={partnerLogo}
+      />
+      <p style={partnerName}>Microsoft</p>
+    </div>
+
+  </div>
+
+</section>
+
+{/* SOCIAL LINKS */}
+
+<section style={socialSection}>
+
+  <h2 style={socialTitle}>
+    Social <span style={{color:"#C084FC"}}>Links</span>
+  </h2>
+
+  <p style={socialSubtitle}>
+    Connect with the CodeSapiens community
+  </p>
+
+  <div style={socialGrid}>
+
+    {/* Instagram */}
+    <a href="#" style={socialCard}>
+      <img
+        src="https://cdn-icons-png.flaticon.com/512/2111/2111463.png"
+        style={socialIcon}
+      />
+      <span style={socialHandle}>@codesapiens.in</span>
+    </a>
+
+    {/* LinkedIn */}
+    <a href="#" style={socialCard}>
+      <img
+        src="https://cdn-icons-png.flaticon.com/512/3536/3536505.png"
+        style={socialIcon}
+      />
+      <span style={socialHandle}>CodeSapiens</span>
+    </a>
+
+    {/* Discord */}
+    <a href="#" style={socialCard}>
+      <img
+        src="https://cdn-icons-png.flaticon.com/512/2111/2111370.png"
+        style={socialIcon}
+      />
+      <span style={socialHandle}>Discord Community</span>
+    </a>
+
+    {/* GitHub */}
+    <a href="#" style={socialCard}>
+      <img
+        src="https://cdn-icons-png.flaticon.com/512/733/733553.png"
+        style={socialIcon}
+      />
+      <span style={socialHandle}>codesapiens</span>
+    </a>
+
+    {/* YouTube */}
+    <a href="#" style={socialCard}>
+      <img
+        src="https://cdn-icons-png.flaticon.com/512/1384/1384060.png"
+        style={socialIcon}
+      />
+      <span style={socialHandle}>CodeSapiens</span>
+    </a>
+
+    {/* Twitter / X */}
+    <a href="#" style={socialCard}>
+      <img
+        src="https://cdn-icons-png.flaticon.com/512/733/733579.png"
+        style={socialIcon}
+      />
+      <span style={socialHandle}>@codesapiens_in</span>
+    </a>
+
+    {/* WhatsApp */}
+    <a href="#" style={socialCard}>
+      <img
+        src="https://cdn-icons-png.flaticon.com/512/733/733585.png"
+        style={socialIcon}
+      />
+      <span style={socialHandle}>WhatsApp Community</span>
+    </a>
+
+    {/* Events / Luma */}
+    <a href="#" style={socialCard}>
+      <img
+        src="https://cdn-icons-png.flaticon.com/512/3659/3659898.png"
+        style={socialIcon}
+      />
+      <span style={socialHandle}>Events & Meetups</span>
+    </a>
+
+  </div>
+
+</section>
+
+{/* TEAM SECTION */}
+
+<section style={teamSection}>
+
+  <p style={teamTag}>COMMUNITY</p>
+
+  <h2 style={teamTitle}>The Mafia Gang</h2>
+
+  <p style={teamSubtitle}>
+    Meet the core members who run the community.
+  </p>
+
+  <div style={teamGrid}>
+
+    <TeamMember name="Member 1" seed="1" />
+    <TeamMember name="Member 2" seed="2" />
+    <TeamMember name="Member 3" seed="3" />
+    <TeamMember name="Member 4" seed="4" />
+    <TeamMember name="Member 5" seed="5" />
+    <TeamMember name="Member 6" seed="6" />
+    <TeamMember name="Member 7" seed="7" />
+    <TeamMember name="Member 8" seed="8" />
+    <TeamMember name="Member 9" seed="9" />
+    <TeamMember name="Member 10" seed="10" />
+    <TeamMember name="Member 11" seed="11" />
+
+  </div>
+
+</section>
+
+{/* CTA SECTION */}
+
+<section style={ctaSection}>
+
+  <h2 style={ctaTitle}>
+    Ready to Build Something Big?
+  </h2>
+
+  <p style={ctaSubtitle}>
+    Join CodeSapiens and connect with developers, innovators, and creators across colleges.
+  </p>
+
+  <div style={ctaButtons}>
+
+    <button style={ctaPrimary}>
+      Join Community 🚀
+    </button>
+
+    <button style={ctaSecondary}>
+      Explore Events
+    </button>
+
+  </div>
+
+</section>
+
+{/* FOOTER */}
+
+<footer style={footerSection}>
+
+  <div style={footerContainer}>
+
+    {/* LEFT SIDE */}
+
+    <div style={footerLeft}>
+
+      <div style={footerLogoBox}>
+        <img src="/logo.jpg" style={footerLogo} alt="logo"/>
+        <h3 style={footerTitle}>CodeSapiens</h3>
+      </div>
+
+      <p style={footerDescription}>
+        A student-run tech community helping developers learn,
+        build and grow together.
+      </p>
+
+    </div>
+
+
+    {/* QUICK LINKS */}
+
+    <div>
+
+      <h4 style={footerHeading}>Quick Links</h4>
+
+      <ul style={footerList}>
+        <li><a href="#" style={footerLink}>Vision</a></li>
+        <li><a href="#" style={footerLink}>Programs</a></li>
+        <li><a href="#" style={footerLink}>Events</a></li>
+        <li><a href="#" style={footerLink}>Community</a></li>
+      </ul>
+
+    </div>
+
+
+    {/* SOCIAL MEDIA */}
+
+    <div>
+
+      <h4 style={footerHeading}>Follow Us</h4>
+
+      <div style={footerSocial}>
+
+        <a href="#">
+          <img src="https://cdn-icons-png.flaticon.com/512/2111/2111463.png" style={footerIcon}/>
+        </a>
+
+        <a href="#">
+          <img src="https://cdn-icons-png.flaticon.com/512/3536/3536505.png" style={footerIcon}/>
+        </a>
+
+        <a href="#">
+          <img src="https://cdn-icons-png.flaticon.com/512/733/733553.png" style={footerIcon}/>
+        </a>
+
+        <a href="#">
+          <img src="https://cdn-icons-png.flaticon.com/512/1384/1384060.png" style={footerIcon}/>
+        </a>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  {/* COPYRIGHT */}
+
+  <div style={footerBottom}>
+    © {new Date().getFullYear()} CodeSapiens Community. All rights reserved.
+  </div>
+
+</footer>
+
+</div>
+
+);
+
+}
+
+
+
+/* ================= STYLES ================= */
+
+const navStyle={
+display:"flex",
+justifyContent:"space-between",
+padding:"18px 60px"
 };
 
-// --- Social Media Bento Grid ---
-const SocialMediaSection = () => {
-    const socials = [
-        {
-            name: "LinkedIn",
-            icon: <Linkedin size={40} />,
-            link: "https://www.linkedin.com/company/codesapiens-community/posts/",
-            color: "bg-[#0077b5]",
-            textColor: "text-white",
-            span: "col-span-1",
-            badge: "@codesapiens-community",
-            isLarge: true,
-            backgroundImage: "url('https://res.cloudinary.com/dqudvximt/image/upload/v1767874220/users_cme79i2lk00qls401ar5qxqnc_n74cMGsKIBuvEzzj-users_cme5bsukl01binm014j8ioh2j_2SNEHA31eEqsxFRS-original-33f53dcd2f48e068523d32df0e5cc92f_xkirvh.gif') center/cover no-repeat"
-        },
-        {
-            name: "Luma",
-            icon: null,
-            link: "https://lu.ma/codesapiens",
-            color: "bg-black",
-            textColor: "text-white",
-            span: "col-span-1",
-            badge: null,
-            backgroundImage: "url('https://res.cloudinary.com/dqudvximt/image/upload/v1767875075/users_cme79i2lk00qls401ar5qxqnc_WI6Z0HVxNMCrvfgn-ETzJoQJr1aCFL2r7-rrDC9gCyIJ77RqVW-luma_cqxcny.jpg') center/cover no-repeat"
-        },
-        {
-            name: "WhatsApp",
-            icon: null,
-            link: "https://chat.whatsapp.com/LLtoddmQx5rIRNb8WE6rqC?mode=ems_copy_t",
-            color: "bg-[#25D366]",
-            textColor: "text-white",
-            span: "col-span-1",
-            badge: null,
-            customContent: (
-                <div className="relative w-full h-full flex items-center justify-center">
-                    <img src="https://res.cloudinary.com/dqudvximt/image/upload/v1767875047/410201-PD391H-802_h7tcfj.jpg" alt="WhatsApp" className="w-24 h-24 object-contain rounded-xl" />
-                </div>
-            )
-        },
-        {
-            name: "Instagram",
-            icon: <Instagram size={32} />,
-            link: "https://www.instagram.com/codesapiens/",
-            color: "bg-white",
-            textColor: "text-black",
-            span: "col-span-1",
-            badge: null,
-            border: "border-gray-100 border",
-            customContent: (
-                <div className="relative w-full h-full flex items-center justify-center">
-                    <div className="absolute inset-0 flex items-center justify-center pb-6">
-                        <img src="https://res.cloudinary.com/dqudvximt/image/upload/v1767874489/users_cme79i2lk00qls401ar5qxqnc_3o1XM7ID2mXVDk6e-XeFzd3iFtoytJqTv-1497553304-104_84834_allkph.png" alt="Instagram" className="w-84 h-84 object-contain drop-shadow-xl" />
-                    </div>
-                    <div className="absolute bottom-0 left-0">
-                        <span className="inline-block px-3 py-1.5 rounded-lg text-xs font-bold bg-gray-100 text-gray-800">
-                            @Codesapiens.in
-                        </span>
-                    </div>
-                </div>
-            )
-        },
-        {
-            name: "Twitter",
-            icon: <Twitter size={32} className="text-[#1DA1F2]" />,
-            link: "https://twitter.com/codesapiens",
-            color: "bg-white",
-            textColor: "text-black",
-            span: "col-span-1",
-            badge: null,
-            border: "border-gray-100 border",
-            customContent: (
-                <div className="relative w-full h-full flex items-center justify-center">
-                    <div className="absolute inset-0 flex items-center justify-center pb-6">
-                        <img src="https://res.cloudinary.com/dqudvximt/image/upload/v1767874490/users_cme79i2lk00qls401ar5qxqnc_XgLMxxPTSSuuRKu5-users_cme5bsukl01binm014j8ioh2j_XQ7ryCBwyUFzFg6v-CLIPLY_372109260_TWITTER_LOGO_400_ptqbvv.gif" alt="Twitter" className="w-32 h-32 object-contain" />
-                    </div>
-                    <div className="absolute bottom-0 left-0">
-                        <span className="inline-block px-3 py-1.5 rounded-lg text-xs font-bold bg-gray-100 text-gray-800">
-                            @codesapiens_in
-                        </span>
-                    </div>
-                </div>
-            )
-        },
-        {
-            name: "Volunteers Needed",
-            icon: null,
-            link: "https://forms.gle/volunteer", // Placeholder link
-            color: "bg-black",
-            textColor: "text-white",
-            span: "col-span-1",
-            badge: null,
-            isLarge: false,
-            backgroundImage: "url('https://res.cloudinary.com/dqudvximt/image/upload/v1767876038/users_cme79i2lk00qls401ar5qxqnc_Hg7Si3j52FVfpQRN-image_x8wghd.png') center/cover no-repeat"
-        },
-        {
-            name: "GitHub",
-            icon: <Github size={40} />,
-            link: "https://github.com/Codesapiens-in",
-            color: "bg-black",
-            textColor: "text-white",
-            span: "col-span-1",
-            badge: "@Codesapiens-in",
-            isLarge: true,
-            backgroundImage: "url('https://res.cloudinary.com/dqudvximt/image/upload/v1767874482/users_cme79i2lk00qls401ar5qxqnc_MOSc1bv3RXu0WL5z-users_cme5bsukl01binm014j8ioh2j_7dOv2cTCX8B86u82-users_clylc5w1v070to301jatq0e85_AdzvY5ioFqaF37x5-github_dsjpx6.gif') center/cover no-repeat"
-        },
-        {
-            name: "YouTube",
-            icon: <Youtube size={40} className="text-red-600" />,
-            link: "https://youtube.com/@codesapiens-in?si=90EaPMYHcSZIHtMi",
-            color: "bg-white",
-            textColor: "text-black",
-            span: "col-span-1",
-            badge: "@Codesapiens",
-            border: "border-gray-100 border",
-            isLarge: true,
-            backgroundImage: "url('https://res.cloudinary.com/dqudvximt/image/upload/v1767874488/users_cme79i2lk00qls401ar5qxqnc_Ov9Ygh4NAQfPGktu-users_cme5bsukl01binm014j8ioh2j_5JQAosdeiVappI2y-users_clylc5w1v070to301jatq0e85_CCuEsN5SSMlu4LAN-youtube_aky1f3.gif') center/cover no-repeat"
-        }
-    ];
+const logoSection={display:"flex",alignItems:"center",gap:"10px"};
 
-    return (
-        <section className="py-20 bg-[#FAF9F6] relative overflow-hidden text-left">
-            <div className="container mx-auto px-6 relative z-10">
-                <div className="text-left mb-8">
-                    <div className="flex items-center gap-2 mb-4">
-                        <h2 className="text-4xl md:text-6xl font-black text-black tracking-tight leading-none">SOCIAL</h2>
-                        <h2 className="text-4xl md:text-6xl font-script text-[#2563ea] font-bold italic leading-none pt-2">links</h2>
-                        <div className="h-px bg-gray-200 flex-1 ml-4 self-center mt-2"></div>
-                    </div>
-                    <div className="flex items-center gap-2 mb-8">
-                        <Globe size={16} className="text-[#0061FE] animate-pulse" />
-                        <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">CONNECT WITH US</span>
-                    </div>
-                </div>
+const logoStyle={width:"42px",borderRadius:"50%"};
 
-                <div className="grid grid-cols-2 md:grid-cols-4 auto-rows-[200px] gap-4 md:gap-6 w-full mx-auto">
-                    {socials.map((social, idx) => (
-                        <motion.a
-                            key={idx}
-                            href={social.link}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            initial={{ opacity: 0, y: 20 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            whileHover={{ scale: 1.02 }}
-                            transition={{ delay: idx * 0.05 }}
-                            className={`${social.span} ${social.color} ${social.textColor} ${social.border} rounded-3xl p-6 relative overflow-hidden group shadow-sm hover:shadow-xl flex flex-col justify-between transition-all`}
-                            style={social.backgroundImage ? { backgroundImage: social.color.includes('gradient') ? social.color : undefined } : {}}
-                        >
-                            {/* Custom Background Image if any */}
-                            {social.backgroundImage && (
-                                <div className="absolute inset-0" style={{ background: social.backgroundImage }}></div>
-                            )}
+const titleStyle={fontSize:"22px",color:"#A855F7"};
 
-                            {/* Top Right Arrow */}
-                            <div className={`absolute top-4 right-4 p-2 rounded-full ${social.textColor === 'text-white' ? 'bg-white/20 text-white' : 'bg-gray-100 text-gray-500'} opacity-0 group-hover:opacity-100 transition-opacity`}>
-                                <ArrowUpRight size={16} />
-                            </div>
+const menuSection={display:"flex",gap:"32px"};
 
-                            {/* Content */}
-                            {social.customContent ? (
-                                social.customContent
-                            ) : (
-                                <>
-                                    <div className="mb-auto">
-                                        {social.customIcon || social.icon}
-                                    </div>
-                                    <div className="z-10 mt-auto">
-                                        {social.badge && (
-                                            <span className={`inline-block px-3 py-1.5 rounded-lg text-xs font-bold ${social.textColor === 'text-white' ? 'bg-white text-black' : 'bg-gray-100 text-gray-800'}`}>
-                                                {social.badge}
-                                            </span>
-                                        )}
-                                    </div>
-                                </>
-                            )}
-                        </motion.a>
-                    ))}
-                </div>
-            </div>
-        </section>
-    );
+const rightSection={display:"flex",gap:"16px"};
+
+const linkStyle={color:"#E5E7EB",textDecoration:"none"};
+
+const loginStyle={background:"transparent",border:"none",color:"#E5E7EB"};
+
+const buttonStyle={border:"1px solid #7C3AED",padding:"8px 18px",background:"transparent",color:"#C084FC"};
+
+const heroSection={textAlign:"center",padding:"80px 20px"};
+
+const heroTitle={fontSize:"72px",color:"#C084FC"};
+
+const heroSubtitle={color:"#9CA3AF"};
+
+const heroButtons={display:"flex",justifyContent:"center",gap:"20px"};
+
+const heroPrimaryBtn={background:"#7C3AED",padding:"14px 28px",color:"white"};
+
+const heroSecondaryBtn={border:"1px solid #A855F7",padding:"14px 28px",color:"#A855F7",background:"transparent"};
+
+const featuresSection={padding:"100px 60px",textAlign:"center"};
+
+const featuresTitle={fontSize:"40px",color:"#C084FC"};
+
+const featuresGrid={display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(250px,1fr))",gap:"40px"};
+
+const featureCard={background:"#111",padding:"30px",border:"1px solid #7C3AED"};
+
+const featureImage={width:"60px"};
+
+const featureHeading={color:"#A855F7"};
+
+const featureText={color:"#9CA3AF"};
+
+const statsSection={padding:"120px 20px"};
+
+const statsTitleBox={textAlign:"center"};
+
+const statsTitle={fontSize:"42px",color:"#C084FC"};
+
+const statsSubtitle={color:"#9CA3AF"};
+
+const statsGrid={display:"flex",justifyContent:"center",gap:"40px"};
+
+const statCard={background:"#111",padding:"40px",border:"1px solid #7C3AED"};
+
+const statNumber={fontSize:"48px",color:"#C084FC"};
+
+const statText={color:"#9CA3AF"};
+
+const chartsContainer={display:"flex",justifyContent:"center",gap:"80px"};
+
+const chartBox={width:"400px",height:"350px"};
+
+const eventsSection={padding:"120px 40px",textAlign:"center"};
+
+const eventsTitle={fontSize:"42px",color:"#C084FC"};
+
+const eventsSubtitle={color:"#9CA3AF"};
+
+const eventsGrid={display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(300px,1fr))",gap:"40px"};
+
+const eventCard={background:"#111",border:"1px solid #7C3AED"};
+
+const eventImage={width:"100%",height:"200px",objectFit:"cover"};
+
+const eventHeading={color:"#C084FC"};
+
+const eventText={color:"#9CA3AF"};
+
+const eventDate={color:"#A855F7"};
+
+const sponsorsSection={padding:"120px 40px",textAlign:"center"};
+
+const sponsorsTitle={fontSize:"42px",color:"#C084FC"};
+
+const sponsorsSubtitle={color:"#9CA3AF"};
+
+const sponsorsGrid={display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(200px,1fr))",gap:"40px"};
+
+const sponsorCard={
+background:"#111",
+padding:"40px",
+border:"1px solid #7C3AED",
+display:"flex",
+flexDirection:"column",
+alignItems:"center",
+gap:"15px"
+};
+
+const sponsorLogo={width:"100px",height:"80px",objectFit:"contain"};
+
+const sponsorName={color:"#C084FC"};
+
+const partnersSection = {
+  padding: "120px 40px",
+  textAlign: "center",
+  background: "#0A0A0A"
+};
+
+const partnersTitle = {
+  fontSize: "42px",
+  color: "#C084FC",
+  marginBottom: "10px"
+};
+
+const partnersSubtitle = {
+  color: "#9CA3AF",
+  marginBottom: "60px"
+};
+
+const partnersGrid = {
+  display: "grid",
+  gridTemplateColumns: "repeat(auto-fit, minmax(260px,1fr))",
+  gap: "40px"
+};
+
+const partnerCard = {
+  background: "#111",
+  padding: "40px",
+  borderRadius: "12px",
+  border: "1px solid #7C3AED",
+  display: "flex",
+  flexDirection: "column",
+  alignItems: "center",
+  justifyContent: "center",
+  gap: "20px"
+};
+
+const partnerLogo = {
+  width: "140px",
+  height: "80px",
+  objectFit: "contain"
+};
+
+const partnerName = {
+  color: "#C084FC",
+  fontWeight: "600",
+  fontSize: "18px"
+};
+
+const socialSection = {
+  padding: "120px 40px",
+  background: "#0A0A0A",
+  textAlign: "center"
+};
+
+const socialTitle = {
+  fontSize: "42px",
+  marginBottom: "10px",
+  color: "#E5E7EB"
+};
+
+const socialSubtitle = {
+  color: "#9CA3AF",
+  marginBottom: "60px"
+};
+
+const socialGrid = {
+  display: "grid",
+  gridTemplateColumns: "repeat(auto-fit, minmax(250px,1fr))",
+  gap: "40px"
+};
+
+const socialCard = {
+  background: "#111",
+  border: "1px solid #7C3AED",
+  borderRadius: "14px",
+  padding: "40px",
+  display: "flex",
+  flexDirection: "column",
+  alignItems: "center",
+  gap: "20px",
+  textDecoration: "none",
+  transition: "0.3s"
+};
+
+const socialIcon = {
+  width: "70px",
+  height: "70px",
+  objectFit: "contain"
+};
+
+const socialHandle = {
+  color: "#C084FC",
+  fontWeight: "600"
+};
+
+function TeamMember({ name, role, seed }) {
+
+  const avatar =
+    `https://api.dicebear.com/7.x/bottts-neutral/svg?seed=${seed}`;
+
+  return (
+    <div style={teamMember}>
+      <img src={avatar} style={teamImage} alt={name} />
+      <h3 style={teamName}>{name}</h3>
+      {role && <p style={teamRole}>{role}</p>}
+    </div>
+  );
+}
+
+const teamSection = {
+  padding: "120px 40px",
+  textAlign: "center",
+  background: "#0A0A0A"
+};
+
+const teamTag = {
+  color: "#3B82F6",
+  fontWeight: "600",
+  letterSpacing: "2px"
+};
+
+const teamTitle = {
+  fontSize: "48px",
+  marginTop: "10px",
+  marginBottom: "10px"
+};
+
+const teamSubtitle = {
+  color: "#9CA3AF",
+  marginBottom: "80px"
+};
+
+const teamGrid = {
+  display: "grid",
+  gridTemplateColumns: "repeat(auto-fit, minmax(180px,1fr))",
+  gap: "50px"
+};
+
+const teamMember = {
+  display: "flex",
+  flexDirection: "column",
+  alignItems: "center",
+  gap: "10px"
+};
+
+const teamImage = {
+  width: "130px",
+  height: "130px",
+  borderRadius: "50%",
+  border: "4px solid #7C3AED",
+  background: "#fff"
+};
+
+const teamName = {
+  fontSize: "16px",
+  fontWeight: "600"
+};
+
+const teamRole = {
+  color: "#F97316",
+  fontSize: "12px",
+  letterSpacing: "2px"
+};
+
+const ctaSection = {
+  padding: "120px 40px",
+  textAlign: "center",
+  background: "linear-gradient(135deg,#0A0A0A,#1a0033)"
+};
+
+const ctaTitle = {
+  fontSize: "48px",
+  color: "#C084FC",
+  marginBottom: "20px"
+};
+
+const ctaSubtitle = {
+  color: "#9CA3AF",
+  fontSize: "18px",
+  marginBottom: "40px",
+  maxWidth: "700px",
+  marginLeft: "auto",
+  marginRight: "auto"
+};
+
+const ctaButtons = {
+  display: "flex",
+  justifyContent: "center",
+  gap: "20px",
+  flexWrap: "wrap"
+};
+
+const ctaPrimary = {
+  background: "#7C3AED",
+  color: "white",
+  padding: "16px 32px",
+  borderRadius: "8px",
+  border: "none",
+  fontSize: "16px",
+  fontWeight: "600",
+  cursor: "pointer"
+};
+
+const ctaSecondary = {
+  background: "transparent",
+  border: "1px solid #7C3AED",
+  color: "#C084FC",
+  padding: "16px 32px",
+  borderRadius: "8px",
+  fontSize: "16px",
+  fontWeight: "600",
+  cursor: "pointer"
+};
+
+const footerSection = {
+  background: "#050505",
+  paddingTop: "80px",
+  borderTop: "1px solid #1F2937"
+};
+
+const footerContainer = {
+  maxWidth: "1200px",
+  margin: "auto",
+  padding: "0 40px",
+  display: "grid",
+  gridTemplateColumns: "repeat(auto-fit, minmax(250px,1fr))",
+  gap: "40px",
+  marginBottom: "40px"
+};
+
+const footerLeft = {
+  display: "flex",
+  flexDirection: "column",
+  gap: "15px"
+};
+
+const footerLogoBox = {
+  display: "flex",
+  alignItems: "center",
+  gap: "10px"
+};
+
+const footerLogo = {
+  width: "40px",
+  borderRadius: "50%"
+};
+
+const footerTitle = {
+  color: "#C084FC"
+};
+
+const footerDescription = {
+  color: "#9CA3AF",
+  fontSize: "14px"
+};
+
+const footerHeading = {
+  color: "#E5E7EB",
+  marginBottom: "15px"
+};
+
+const footerList = {
+  listStyle: "none",
+  padding: 0,
+  display: "flex",
+  flexDirection: "column",
+  gap: "10px"
+};
+
+const footerLink = {
+  color: "#9CA3AF",
+  textDecoration: "none",
+  fontSize: "14px"
+};
+
+const footerSocial = {
+  display: "flex",
+  gap: "15px"
+};
+
+const footerIcon = {
+  width: "28px",
+  height: "28px"
+};
+
+const footerBottom = {
+  textAlign: "center",
+  padding: "20px",
+  borderTop: "1px solid #1F2937",
+  color: "#6B7280",
+  fontSize: "14px"
 };
 
 
-// --- Notice Section (Call for Speakers/Sponsors) ---
-// --- Notice Section (Call for Speakers/Sponsors) ---
-const NoticeSection = () => {
-    return (
-        <section className="py-4 bg-[#FFF8DC] relative overflow-hidden text-left">
-            <div className="container mx-auto px-6 relative z-10">
-                <div className="grid grid-cols-1 md:grid-cols-[auto_1fr] gap-4 md:gap-8 items-center max-w-4xl mx-auto">
-                    {/* Title (Left Side on Desktop) */}
-                    <div className="flex items-center gap-2 shrink-0">
-                        <h2 className="text-xl md:text-2xl font-black text-black tracking-tight leading-none">LATEST</h2>
-                        <h2 className="text-xl md:text-2xl font-script text-[#2563ea] font-bold italic leading-none pt-1">updates</h2>
-                        <div className="h-px bg-gray-200 w-12 self-center mt-1 md:hidden"></div>
-                    </div>
 
-                    {/* Images Grid */}
-                    <div className="grid grid-cols-2 gap-3 w-full">
-                        {/* Call for Speakers */}
-                        <div className="relative group bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300">
-                            <img
-                                src="https://res.cloudinary.com/dqudvximt/image/upload/v1767877162/users_cme79i2lk00qls401ar5qxqnc_N0bIjmMP0Ybxoznz-1753684368888_jda3us.jpg"
-                                alt="Call for Speakers"
-                                className="w-full h-auto object-cover"
-                            />
-                        </div>
-
-                        {/* Sponsors & Venue */}
-                        <div className="relative group bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300">
-                            <img
-                                src="https://res.cloudinary.com/dqudvximt/image/upload/v1767877178/users_cme79i2lk00qls401ar5qxqnc_KB4hFvAzhyqJF0xf-3a61cb74-01c9-4880-be04-a4036f32c4f9_t64kt9.jpg"
-                                alt="Call for Sponsors and Venue"
-                                className="w-full h-auto object-cover"
-                            />
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-    );
-};
-
-// --- Main Hero Component ---
-const CodeSapiensHero = () => {
-    const navigate = useNavigate();
-    const [isMenuOpen, setIsMenuOpen] = useState(false);
-    const [hallOfFameEntries, setHallOfFameEntries] = useState([]);
-    const [communityPhotos, setCommunityPhotos] = useState([]);
-
-    // Data Fetching
-    useEffect(() => {
-        const fetchData = async () => {
-            const { data: hof } = await supabase.from('hall_of_fame').select('*').eq('is_active', true).order('created_at', { ascending: false });
-            if (hof) setHallOfFameEntries(hof);
-
-            const { data: photos } = await supabase.from('community_photos').select('*').eq('is_active', true).order('order_number', { ascending: true });
-            if (photos) setCommunityPhotos(photos);
-        };
-        fetchData();
-    }, []);
-
-    // Scroll Progress
-    const { scrollY } = useScroll();
-
-    // Geometric Shape Animation
-    const shapeScale = useTransform(scrollY, [0, 600], [1, 0.2]);
-    const shapeY = useTransform(scrollY, [0, 600], [0, 200]);
-    const shapeOpacity = useTransform(scrollY, [0, 400], [0.8, 0]);
-
-    // Content for Sticky Scroll
-
-
-    const volunteers = [
-        { photo: "https://res.cloudinary.com/druvxcll9/image/upload/v1761122516/2ABMHfqOsrpoL3OV-WhatsApp202025-08-312010.33.52_a8a27bbd_vzcgzq_1_bm8zch.jpg", name: "Keerthana M G", link: "https://in.linkedin.com/in/keerthana-m-g-12ba59256" },
-        { photo: "https://res.cloudinary.com/druvxcll9/image/upload/v1761122517/iAckgTxMcALuPbEx-IMG-20250112-WA0012_1_fwyhoa_oxegdx.jpg", name: "Mahaveer A", link: "https://www.linkedin.com/in/mahaveer1013" },
-        { photo: "https://res.cloudinary.com/druvxcll9/image/upload/v1761122517/4SrLYdwh0tpuLlkt-team_2.a2a0c6917be79e15dc29_wjosq7_ftgm6j.jpg", name: "Justin Benito", link: "https://www.linkedin.com/in/justinbenito" },
-        { photo: "https://res.cloudinary.com/druvxcll9/image/upload/v1761122517/nLDGxnsr6bZkCx0A-team_3.d2fd9099126beb0b86a1_vxhpxo_z3eods.jpg", name: "Koushik ram", link: "https://www.linkedin.com/in/koushik-ram-118495239" },
-        { photo: "https://res.cloudinary.com/druvxcll9/image/upload/v1761122517/Tlgueu6loMYMKJMs-team_1.150894ea4376f6423091_vrf0fr_weljyi.jpg", name: "Athiram R S", link: "https://www.linkedin.com/in/athi-ram-rs" },
-        { photo: "https://res.cloudinary.com/druvxcll9/image/upload/v1761122516/5NmVUZRZI8sRCrZA-1735300455766_h8dhm2_dnully.jpg", name: "Pranav Vikraman", link: "https://www.linkedin.com/in/pranav-vikraman-322020242" },
-        { photo: "https://res.cloudinary.com/druvxcll9/image/upload/v1761122531/JWz1OvtKurqSRsC7-WhatsApp202025-08-312011.22.52_bff7c8bd_mrok7q_b6meyd.jpg", name: "Vignesh R", link: "https://www.linkedin.com/in/vignesh-r-7727582b7" },
-        { photo: "https://res.cloudinary.com/druvxcll9/image/upload/v1761122532/3S8YnOu77Rt2wDJD-WhatsApp202025-08-312010.32.42_9b5cee10_puasao_zekkfa.jpg", name: "Anand S", link: "https://codesapiens-management-website.vercel.app" },
-        { photo: "https://res.cloudinary.com/druvxcll9/image/upload/v1761122531/q5tsA3KUOwgSOpIa-team_5.efc764325a5ffbaf1b6e_1_sidv9r_fhxmqv.jpg", name: "Subhaharini P", link: "https://www.linkedin.com/in/subhaharini-p-938568254" },
-        { photo: "https://res.cloudinary.com/druvxcll9/image/upload/v1761122531/1732031130575_b834gr_1_slc9fw.jpg", name: "Jayasurya R", link: "https://www.linkedin.com/in/jayasurya-r-b37997279/" }
-    ];
-
-    return (
-        <div className="bg-[#F7F5F2] text-[#1E1919] min-h-screen font-sans overflow-x-hidden selection:bg-[#0061FE] selection:text-white">
-            {/* Navigation - Dark Mode for Hero */}
-            <nav className="fixed top-0 w-full z-50 bg-[#101010]/90 backdrop-blur-md text-white border-b border-white/10">
-                <div className="container mx-auto px-6 py-6 flex justify-between items-center">
-                    <div className="flex items-center gap-2">
-                        <img src="https://res.cloudinary.com/dqudvximt/image/upload/v1756797708/WhatsApp_Image_2025-09-02_at_12.45.18_b15791ea_rnlwrz.jpg" alt="CodeSapiens Logo" className="w-10 h-10 rounded-full object-cover" />
-                        <span className="text-xl font-bold tracking-tight">CodeSapiens</span>
-                    </div>
-                    <div className="hidden md:flex items-center gap-8 font-medium text-golden-1">
-                        <a href="#vision" className="hover:text-[#0061FE] transition-colors">Vision</a>
-                        <a href="/programs" className="hover:text-[#0061FE] transition-colors">Programs</a>
-                        <a href="/meetups" className="hover:text-[#0061FE] transition-colors">Meetups</a>
-                        <a href="#events" className="hover:text-[#0061FE] transition-colors">Events</a>
-                        <a href="#community" className="hover:text-[#0061FE] transition-colors">Community</a>
-                        <button onClick={() => navigate('/auth')} className="hover:text-[#0061FE]">Log in</button>
-                        <button onClick={() => navigate('/auth')} className="bg-white text-black px-5 py-2.5 rounded-sm hover:bg-gray-200 transition-colors font-bold">
-                            Get Started
-                        </button>
-                    </div>
-                    <button className="md:hidden text-white" onClick={() => setIsMenuOpen(!isMenuOpen)}>
-                        {isMenuOpen ? <X /> : <Menu />}
-                    </button>
-                </div>
-            </nav>
-
-            {/* Mobile Menu */}
-            {isMenuOpen && (
-                <div className="fixed inset-0 z-40 bg-[#101010] text-white pt-24 px-6 md:hidden">
-                    <div className="flex flex-col gap-6 text-golden-2 font-bold">
-                        <a href="#vision" onClick={() => setIsMenuOpen(false)}>Vision</a>
-                        <a href="/programs" onClick={() => setIsMenuOpen(false)}>Programs</a>
-                        <a href="/meetups" onClick={() => setIsMenuOpen(false)}>Meetups</a>
-                        <a href="#events" onClick={() => setIsMenuOpen(false)}>Events</a>
-                        <a href="#community" onClick={() => setIsMenuOpen(false)}>Community</a>
-                        <button onClick={() => navigate('/auth')} className="text-left text-[#0061FE]">Log in</button>
-                    </div>
-                </div>
-            )}
-
-            {/* Hero Section */}
-            <section className="relative min-h-screen bg-[#101010] text-white flex items-center overflow-hidden">
-                <div className="absolute inset-0 z-0 opacity-20"
-                    style={{
-                        backgroundImage: 'linear-gradient(#333 1px, transparent 1px), linear-gradient(90deg, #333 1px, transparent 1px)',
-                        backgroundSize: '50px 50px'
-                    }}>
-                </div>
-                <motion.div
-                    className="absolute inset-0 md:right-0 md:left-auto md:w-1/2 h-full pointer-events-none z-0 flex items-center justify-center md:justify-end"
-                    style={{ scale: shapeScale, y: shapeY, opacity: shapeOpacity }}
-                >
-                    <svg viewBox="0 0 800 800" className="w-full h-full md:w-full md:h-full opacity-40 md:opacity-60">
-                        <motion.path
-                            d="M400,200 L600,300 L400,400 L200,300 Z"
-                            fill="none" stroke="#0061FE" strokeWidth="1.5"
-                            initial={{ pathLength: 0, opacity: 0 }}
-                            animate={{ pathLength: 1, opacity: 1 }}
-                            transition={{ duration: 2, ease: "easeInOut" }}
-                        />
-                        <motion.path
-                            d="M400,400 L600,500 L400,600 L200,500 Z"
-                            fill="none" stroke="#F7F5F2" strokeWidth="1.5"
-                            initial={{ pathLength: 0, opacity: 1 }}
-                            animate={{ pathLength: 1, opacity: 1 }}
-                            transition={{ duration: 2, delay: 0.5, ease: "easeInOut" }}
-                        />
-                        <motion.path
-                            d="M400,600 L600,700 L400,800 L200,700 Z"
-                            fill="none" stroke="#9B0032" strokeWidth="1.5"
-                            initial={{ pathLength: 0, opacity: 0 }}
-                            animate={{ pathLength: 1, opacity: 1 }}
-                            transition={{ duration: 2, delay: 1, ease: "easeInOut" }}
-                        />
-                        <motion.line x1="200" y1="300" x2="200" y2="700" stroke="#333" strokeWidth="1" initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 1.5, delay: 1 }} />
-                        <motion.line x1="600" y1="300" x2="600" y2="700" stroke="#333" strokeWidth="1" initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 1.5, delay: 1 }} />
-                        <motion.line x1="400" y1="400" x2="400" y2="600" stroke="#333" strokeWidth="1" initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 1.5, delay: 1 }} />
-                    </svg>
-                </motion.div>
-
-                <div className="container mx-auto px-6 relative z-10 pt-20">
-                    <div className="grid lg:grid-cols-2 gap-12 items-center">
-                        <motion.div
-                            initial={{ opacity: 0, y: 30 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.8, delay: 0.2 }}
-                            className="max-w-4xl"
-                        >
-                            <h1 className="text-5xl md:text-7xl font-extrabold leading-[1] tracking-tighter mb-8 font-archivo-black">
-                                CodeSapiens<span className="text-[#0061FE]">.</span>
-                            </h1>
-                            <p className="text-golden-1 text-gray-400 max-w-2xl leading-relaxed mb-10 font-light">
-                                The Biggest Student-Run Tech Community in TN.<br />
-                                <span className="text-white block mt-2">The only 'Inter-college students community' by the students for the students</span>
-                                <span className="text-gray-400 block mt-4 text-golden-1 italic">
-                                    We are here to help students build a career in Tech who say, <br />
-                                    <span className="text-white not-italic">“Perusa Pannanum, but enna Pannanum Therla”</span> <br />
-                                    ("Want to do something big, but don't know what to do").
-                                </span>
-                            </p>
-                            <div className="flex flex-col sm:flex-row gap-6">
-                                <button onClick={() => navigate('/auth')} className="bg-[#0061FE] text-white px-8 py-4 text-golden-1 font-bold rounded-sm hover:bg-[#0050d6] transition-all flex items-center justify-center gap-3 group">
-                                    Join Now <ArrowRight className="group-hover:translate-x-1 transition-transform" />
-                                </button>
-
-                            </div>
-                        </motion.div>
-
-                        {/* Right: Dashboard Preview Image */}
-                        <motion.div
-                            initial={{ opacity: 0, x: 50 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            transition={{ duration: 1, delay: 0.4 }}
-                            className="relative mt-12 lg:mt-0"
-                        >
-                            <div className="relative rounded-xl overflow-hidden shadow-2xl border border-gray-800 group transition-transform duration-500">
-                                <div className="absolute inset-0 bg-gradient-to-tr from-[#0061FE]/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-10 pointer-events-none"></div>
-                                <img
-                                    src="https://res.cloudinary.com/dqudvximt/image/upload/v1771005975/Gemini_Generated_Image_il0qzjil0qzjil0q_1_cfh7ix.png"
-                                    alt="CodeSapiens Dashboard"
-                                    className="w-full h-auto object-cover"
-                                />
-                            </div>
-                            {/* Decorative Elements */}
-                            <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-[#0061FE] rounded-full blur-[80px] opacity-30"></div>
-                            <div className="absolute -top-10 -left-10 w-40 h-40 bg-[#9B0032] rounded-full blur-[80px] opacity-30"></div>
-
-                            {/* Badge Text */}
-                            <p className="text-gray-400 text-golden-1 italic text-right mt-4">Designed and built by students, for students.</p>
-                        </motion.div>
-                    </div>
-                </div>
-                <motion.div
-                    animate={{ y: [0, 10, 0] }}
-                    transition={{ repeat: Infinity, duration: 2 }}
-                    className="absolute bottom-10 left-1/2 -translate-x-1/2 text-gray-500"
-                >
-                    <ChevronDown size={32} />
-                </motion.div>
-            </section>
-
-
-
-            {/* Vision Section */}
-            <section id="vision" className="bg-[#F7F5F2] text-[#1E1919] py-12 md:py-16 relative">
-                <div className="absolute top-0 left-1/2 -translate-x-1/2 h-32 w-px bg-gradient-to-b from-[#101010] to-[#0061FE]"></div>
-                <div className="container mx-auto px-6">
-                    <div className="grid md:grid-cols-2 gap-16 items-start">
-                        <div className="relative md:sticky md:top-32">
-                            <span className="text-[#0061FE] font-bold tracking-widest uppercase text-golden-1 mb-4 block">Our Vision</span>
-                            <h2 className="text-golden-2 md:text-golden-3 font-bold mb-8 leading-tight">
-                                <span className="text-[#FF5018]">Non-profit</span> community built by <span className="text-[#0061FE]">students</span>, for <span className="text-[#0061FE]">students</span>.
-                            </h2>
-                            <p className="text-golden-1 text-gray-600 leading-relaxed mb-8">
-                                Our vision is to bring students together to collaborate, share, and grow. We envision a platform managed by students, for students, where you can build your career based on your interests.
-                            </p>
-                            <div className="grid grid-cols-2 gap-8 border-t border-gray-200 pt-8">
-                                <div>
-                                    <h3 className="text-golden-3 font-bold text-[#FF0000] mb-2">2000+</h3>
-                                    <p className="text-golden-1 text-gray-500 uppercase tracking-widest">Active Members</p>
-                                </div>
-                                <div>
-                                    <h3 className="text-golden-3 font-bold text-[#FF0000] mb-2">15+</h3>
-                                    <p className="text-golden-1 text-gray-500 uppercase tracking-widest">Events Hosted</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="relative h-72 sm:h-80 md:h-96 w-full rounded-lg overflow-hidden shadow-lg border border-gray-200 mt-8 md:mt-0">
-                            <img
-                                src="https://res.cloudinary.com/dqudvximt/image/upload/v1767535873/1760365837828_vyrmco.jpg"
-
-                                className="absolute inset-0 w-full h-full object-cover"
-                            />
-                        </div>
-
-
-                    </div>
-                </div>
-            </section>
-
-            {/* Events Section - Community Moments */}
-            <section id="events" className="py-24 md:py-32 bg-white text-[#1E1919]">
-                <div className="container mx-auto px-6">
-
-
-                    {/* Past Events Gallery */}
-                    <div className="flex items-center justify-between mb-12">
-                        <h3 className="text-golden-2 font-bold">Community Moments</h3>
-                        <div className="flex gap-2">
-                            <button className="p-2 rounded-full border border-gray-700 hover:bg-white hover:text-black transition-colors"><ArrowRight className="rotate-180" /></button>
-                            <button className="p-2 rounded-full border border-gray-700 hover:bg-white hover:text-black transition-colors"><ArrowRight /></button>
-                        </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                        {communityPhotos.slice(0, 6).map((photo, i) => (
-                            <motion.div
-                                key={photo.id}
-                                initial={{ opacity: 0, y: 20 }}
-                                whileInView={{ opacity: 1, y: 0 }}
-                                whileHover={{ y: -5 }}
-                                viewport={{ once: true, margin: "-50px" }}
-                                transition={{ duration: 0.5, delay: i * 0.1 }}
-                                className="group relative overflow-hidden rounded-xl bg-[#2A2A2A] border border-gray-800"
-                            >
-                                {/* Photo */}
-                                <div className="aspect-[4/3] overflow-hidden">
-                                    <img
-                                        src={photo.image_url}
-                                        alt={photo.title}
-                                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                                    />
-                                    {/* Overlay */}
-                                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-60 group-hover:opacity-80 transition-opacity"></div>
-                                </div>
-
-                                {/* Content Overlay */}
-                                <div className="absolute bottom-0 left-0 w-full p-6">
-                                    <h4 className="text-white font-bold text-lg mb-1">{photo.title}</h4>
-                                    <p className="text-gray-300 text-sm">{photo.description || photo.date}</p>
-                                </div>
-                            </motion.div>
-                        ))}
-                    </div>
-                </div>
-            </section>
-
-            {/* Stats Section */}
-            {/* Stats Section */}
-            <StatsSection />
-
-            {/* Sponsor Section */}
-            {/* Sponsor Section */}
-            <SponsorSection />
-            <CommunityPartners />
-            <SocialMediaSection />
-            <NoticeSection />
-
-            {/* Hall of Fame */}
-            <section className="py-32 bg-[#0061FE] text-white overflow-hidden relative">
-                <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(circle, #fff 1px, transparent 1px)', backgroundSize: '30px 30px' }}></div>
-                <div className="container mx-auto px-6 relative z-10">
-                    <div className="text-center mb-20">
-                        <h2 className="text-golden-2 md:text-golden-3 font-bold mb-6">Hall of Fame</h2>
-                        <p className="text-golden-1 text-white/80 max-w-3xl mx-auto">Celebrating the outstanding achievements of our community members.</p>
-                    </div>
-
-                    <div className="flex flex-wrap justify-center gap-10">
-                        {hallOfFameEntries.map((entry, i) => (
-                            <motion.div
-                                key={entry.id}
-                                initial={{ opacity: 0, y: 50 }}
-                                whileInView={{ opacity: 1, y: 0 }}
-                                transition={{ delay: i * 0.1 }}
-                                className="bg-white text-[#1E1919] p-1 rounded-sm shadow-xl w-full max-w-xs transform hover:-translate-y-2 transition-transform duration-300"
-                            >
-                                <div className="h-64 overflow-hidden bg-gray-200 mb-4">
-                                    <img src={entry.image_url} alt={entry.student_name} className="w-full h-full object-cover" />
-                                </div>
-                                <div className="px-6 pb-8 text-center">
-                                    <h3 className="text-golden-2 font-bold mb-2">{entry.student_name}</h3>
-                                    <div className="w-12 h-1 bg-[#0061FE] mx-auto mb-4"></div>
-                                    <p className="text-gray-600 text-golden-1 italic leading-relaxed">"{entry.description}"</p>
-                                </div>
-                            </motion.div>
-                        ))}
-                    </div>
-                </div>
-            </section>
-
-            {/* Team / Mafia Gang */}
-            <section id="community" className="py-8 md:py-16 bg-[#F7F5F2] text-[#1E1919]">
-                <div className="container mx-auto px-6 text-center">
-                    <span className="text-[#0061FE] font-bold tracking-widest uppercase text-xs md:text-sm text-golden-1 mb-2 block">Community</span>
-                    <h2 className="text-2xl md:text-4xl text-golden-2 md:text-golden-3 font-bold mb-3">The Mafia Gang</h2>
-                    <p className="text-golden-1 text-gray-600 text-sm md:text-base max-w-2xl mx-auto mb-8">
-                        Meet the core members who run the community. We are students, just like you.
-                    </p>
-
-                    <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-y-6 gap-x-2 md:gap-x-4">
-                        {/* Founder */}
-                        <div className="col-span-2 md:col-span-1 flex flex-col items-center group">
-                            <div className="w-20 h-20 md:w-24 md:h-24 rounded-full overflow-hidden mb-3 border-4 border-[#FA5D00] shadow-lg group-hover:scale-105 transition-transform">
-                                <img src="https://res.cloudinary.com/druvxcll9/image/upload/v1761122517/1679197646322_n1svjq_s5w42a.jpg" alt="Thiyaga B" className="w-full h-full object-cover" />
-                            </div>
-                            <h3 className="font-bold text-golden-2 mb-0.5 text-sm md:text-base">Thiyaga B</h3>
-                            <p className="text-[#FA5D00] text-golden-1 font-bold uppercase tracking-widest text-[10px] md:text-xs mb-1">Founder</p>
-                            <a href="https://www.linkedin.com/in/thiyagab/" target="_blank" rel="noreferrer" className="text-gray-400 hover:text-[#0061FE] transition-colors"><Linkedin size={14} /></a>
-                        </div>
-                        {volunteers.map((vol, i) => (
-                            <motion.div
-                                key={i}
-                                initial={{ opacity: 0, scale: 0.8 }}
-                                whileInView={{ opacity: 1, scale: 1 }}
-                                transition={{ delay: i * 0.05 }}
-                                className="flex flex-col items-center group"
-                            >
-                                <div className="w-16 h-16 md:w-20 md:h-20 rounded-full overflow-hidden mb-2 grayscale group-hover:grayscale-0 transition-all duration-500 border-2 border-transparent group-hover:border-[#0061FE] shadow-md">
-                                    <img src={vol.photo} alt={vol.name} className="w-full h-full object-cover" />
-                                </div>
-                                <h3 className="font-bold text-golden-1 mb-0.5 text-xs md:text-sm">{vol.name}</h3>
-                                {vol.link && (
-                                    <a href={vol.link} target="_blank" rel="noreferrer" className="text-gray-400 hover:text-[#0061FE] transition-colors mt-1">
-                                        <Linkedin size={12} />
-                                    </a>
-                                )}
-                            </motion.div>
-                        ))}
-                    </div>
-                </div>
-            </section>
-
-            {/* Tagline Section */}
-            <section className="py-20 bg-black flex items-center justify-center">
-                <div className="container mx-auto px-6 text-center">
-                    <h2 className="text-golden-2 md:text-golden-3 font-black text-white tracking-tighter uppercase leading-none">
-                        Building Community <br />
-                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#0061FE] to-[#00C6F7]">Since 2023</span>
-                    </h2>
-                </div>
-            </section>
-
-            {/* Footer */}
-            <footer className="bg-[#101010] text-gray-400 py-16 border-t border-gray-900">
-                <div className="container mx-auto px-6">
-                    <div className="flex flex-col md:flex-row justify-between items-start gap-12">
-                        <div className="max-w-sm">
-                            <div className="flex items-center gap-2 mb-6">
-                                <img src="https://res.cloudinary.com/druvxcll9/image/upload/v1761122530/WhatsApp_Image_2025-09-02_at_12.45.18_b15791ea_rnlwrz_3_r4kp2u.jpg" alt="CodeSapiens Logo" className="w-8 h-8 rounded-full object-cover" />
-                                <span className="text-2xl font-bold text-white tracking-tight">CodeSapiens</span>
-                            </div>
-                            <p className="text-gray-500 leading-relaxed mb-8">
-                                Empowering students to build, learn, and grow together. Join the biggest student tech community in Tamil Nadu.
-                            </p>
-                            <div className="flex gap-6">
-                                <a href="https://github.com/Codesapiens-in" className="text-gray-400 hover:text-white transition-colors"><Github size={20} /></a>
-                                <a href="https://www.linkedin.com/company/codesapiens-community/posts/" className="text-gray-400 hover:text-white transition-colors"><Linkedin size={20} /></a>
-                                <a href="https://youtube.com/@codesapiens-in?si=90EaPMYHcSZIHtMi" className="text-gray-400 hover:text-white transition-colors"><Youtube size={20} /></a>
-                                <a href="https://discord.gg/codesapiens" className="text-gray-400 hover:text-white transition-colors"><Users size={20} /></a>
-                            </div>
-                        </div>
-                        <div className="grid grid-cols-1 gap-16">
-                            <div>
-                                <h4 className="text-white font-bold mb-6">Community</h4>
-                                <ul className="space-y-4 text-golden-1">
-                                    <li><a href="#vision" className="hover:text-[#0061FE] transition-colors">About Us</a></li>
-                                    <li><a href="#events" className="hover:text-[#0061FE] transition-colors">Events</a></li>
-                                    <li><a href="#community" className="hover:text-[#0061FE] transition-colors">Team</a></li>
-                                    <li><a href="#" className="hover:text-[#0061FE] transition-colors">Join Discord</a></li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-                    <div className="mt-16 pt-8 border-t border-gray-900 flex flex-col md:flex-row justify-between items-center text-golden-1 text-gray-600">
-                        <p>© 2025 CodeSapiens Community. All rights reserved.</p>
-                        <p>Designed & Built by Students.</p>
-                    </div>
-                </div>
-            </footer>
-            <LandingPopup />
-        </div>
-    );
-};
 
 export default CodeSapiensHero;
