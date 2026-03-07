@@ -4,6 +4,11 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Codesapiens — Build. Manage. Evolve.</title>
+<meta name="description" content="The all-in-one admin dashboard for modern engineering teams. Manage users, projects, roles, and resources with React 19, Supabase, and Tailwind CSS v4." />
+<meta name="theme-color" content="#080910" />
+<meta property="og:title" content="Codesapiens — Build. Manage. Evolve." />
+<meta property="og:description" content="Modern admin dashboard platform for engineering teams." />
+<meta property="og:type" content="website" />
 <!-- Anti-flash theme script — must run before any rendering -->
 <script>
   (function() {
@@ -12,9 +17,19 @@
     document.documentElement.setAttribute('data-theme', saved || prefer);
   })();
 </script>
+<!-- Preconnect for DNS early -->
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet" />
+<!-- Non-render-blocking font load -->
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@700;800&family=DM+Sans:opsz,wght@9..40,300;9..40,400&display=swap" onload="this.onload=null;this.rel='stylesheet'" />
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@700;800&family=DM+Sans:opsz,wght@9..40,300;9..40,400&display=swap" /></noscript>
+<!-- Critical font fallbacks while loading -->
+<style>
+  :root{--font-display:'Syne',system-ui,sans-serif;--font-mono:'Space Mono','Courier New',monospace;--font-body:'DM Sans',system-ui,sans-serif;}
+</style>
+<!-- DNS prefetch for third-party origins -->
+<link rel="dns-prefetch" href="https://fonts.googleapis.com" />
+<link rel="dns-prefetch" href="https://fonts.gstatic.com" />
 <style>
   :root {
     --bg: #080910;
@@ -54,17 +69,15 @@
     --muted2:     #4b5563;
   }
 
-  /* Smooth transition on theme switch for all elements */
-  *, *::before, *::after {
-    transition-property: background-color, border-color, color, box-shadow;
-    transition-duration: 0.3s;
-    transition-timing-function: ease;
+  /* Targeted theme transitions — only on elements that actually change */
+  body, nav, section, footer, .stats-bar,
+  .feature-card, .tool-card, .testi-card, .plan,
+  .mock-topbar, .mock-card, .mock-chart, .mock-table, .mock-tr, .mock-bar,
+  .mobile-nav, .auth-modal, .modal-overlay,
+  .layout-bar, .dashboard-mock,
+  h1,h2,h3,h4,h5,h6,p,span,a,li,label,div {
+    transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
   }
-
-  /* Override: don't slow down animations that need to be fast */
-  .hero-title, .hero-badge, .hero-sub, .hero-actions,
-  .mock-bar, .tech-track, .hamburger span,
-  .cursor, #cursor .dot, #cursor .ring { transition: none !important; }
 
   /* Light mode specific overrides */
   [data-theme="light"] .grid-bg {
@@ -84,6 +97,8 @@
   [data-theme="light"] .testi-card::before { color: rgba(0,184,122,0.1); }
   [data-theme="light"] .hero-glow { background: radial-gradient(ellipse at center, rgba(0,184,122,0.07) 0%, transparent 65%); }
   [data-theme="light"] #cursor .dot { background: var(--green); }
+  [data-theme="light"] .nav-logo .logo-mark::after { background: var(--bg); }
+  [data-theme="light"] .logo-svg path[d^="M18 2L32"] { fill-opacity: 0.15; }
   [data-theme="light"] #cursor .ring { border-color: var(--green); }
   [data-theme="light"] .mobile-nav { background: rgba(244,245,247,0.98); }
   [data-theme="light"] .btn-big-outline { color: var(--text); border-color: var(--border); }
@@ -141,6 +156,10 @@
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
   html { scroll-behavior: smooth; }
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+  }
 
   body {
     background: var(--bg);
@@ -159,15 +178,15 @@
   #cursor .dot {
     width: 8px; height: 8px; border-radius: 50%;
     background: var(--green);
-    position: absolute; transform: translate(-50%,-50%);
-    transition: transform 0.08s ease;
+    position: fixed; will-change: transform;
+    transition: none;
   }
   #cursor .ring {
     width: 36px; height: 36px; border-radius: 50%;
     border: 1px solid var(--green);
-    position: absolute; transform: translate(-50%,-50%);
-    transition: width 0.3s ease, height 0.3s ease, transform 0.12s ease, opacity 0.3s;
-    opacity: 0.5;
+    position: fixed; will-change: transform;
+    transition: width 0.3s ease, height 0.3s ease, opacity 0.3s;
+    opacity: 0.6;
   }
   body:hover #cursor .ring { opacity: 1; }
 
@@ -202,17 +221,57 @@
   @keyframes fadeDown { from { opacity:0; transform: translateY(-20px); } to { opacity:1; transform: translateY(0); } }
 
   .nav-logo {
-    display: flex; align-items: center; gap: 10px;
+    display: flex; align-items: center; gap: 11px;
     font-family: var(--font-display); font-weight: 800; font-size: 1.15rem;
-    letter-spacing: -0.02em; color: var(--text);
+    letter-spacing: -0.03em; color: var(--text);
     text-decoration: none;
+    user-select: none;
   }
   .nav-logo .logo-mark {
-    width: 32px; height: 32px; border-radius: 8px;
-    background: var(--green);
+    position: relative; flex-shrink: 0;
+    width: 36px; height: 36px;
     display: grid; place-items: center;
-    color: #000; font-family: var(--font-mono); font-size: 0.7rem; font-weight: 700;
-    flex-shrink: 0;
+  }
+  /* Rotating ring behind SVG */
+  .nav-logo .logo-mark::before {
+    content: '';
+    position: absolute; inset: -3px;
+    border-radius: 50%;
+    background: conic-gradient(from 0deg, transparent 60%, rgba(0,229,160,0.5) 80%, transparent 100%);
+    animation: logo-spin 3s linear infinite;
+    pointer-events: none;
+  }
+  /* Inner fill ring */
+  .nav-logo .logo-mark::after {
+    content: '';
+    position: absolute; inset: -1px;
+    border-radius: 50%;
+    background: var(--bg);
+    z-index: 0;
+  }
+  .logo-svg {
+    position: relative; z-index: 1;
+    transition: filter 0.3s ease;
+  }
+  .nav-logo:hover .logo-svg {
+    filter: drop-shadow(0 0 8px rgba(0,229,160,0.6));
+  }
+  .nav-logo:hover .logo-mark::before {
+    animation-duration: 1s;
+  }
+  @keyframes logo-spin {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+  }
+  /* Logo wordmark with gradient accent on last 2 chars */
+  .logo-word {
+    display: flex; align-items: baseline; gap: 0;
+  }
+  .logo-word .w1 { color: var(--text); }
+  .logo-word .w2 {
+    background: linear-gradient(90deg, var(--green), var(--blue));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text;
   }
   .nav-links {
     display: flex; gap: 36px; list-style: none;
@@ -272,6 +331,8 @@
     background: radial-gradient(ellipse at center, rgba(0,229,160,0.08) 0%, transparent 65%);
     pointer-events: none;
     animation: pulse 6s ease-in-out infinite;
+    will-change: transform, opacity;
+    contain: strict;
   }
   @keyframes pulse { 0%,100% { opacity:0.5; transform:translateX(-50%) scale(1); } 50% { opacity:1; transform:translateX(-50%) scale(1.06); } }
 
@@ -296,6 +357,8 @@
     line-height: 0.95;
     letter-spacing: -0.04em;
     animation: fadeUp 1s ease 0.35s both;
+    /* LCP element — hint browser to prioritize */
+    content-visibility: auto;
   }
   .hero-title .line1 { display: block; color: var(--text); }
   .hero-title .line2 {
@@ -370,6 +433,7 @@
   section {
     position: relative; z-index: 1;
     padding: 100px 5vw;
+    contain: layout style; /* limit reflow scope to each section */
   }
 
   .section-tag {
@@ -475,6 +539,8 @@
     width: max-content;
     animation: scroll-left 24s linear infinite;
     padding: 8px 0;
+    will-change: transform;
+    contain: layout style;
   }
   @keyframes scroll-left {
     0% { transform: translateX(0); }
@@ -502,6 +568,7 @@
   .preview-wrap {
     display: grid; grid-template-columns: 1fr 1.5fr; gap: 60px; align-items: center;
   }
+ 
 
   .dashboard-mock {
     border-radius: 16px;
@@ -767,13 +834,39 @@
     background: var(--surface); border: 1px solid var(--border);
     border-radius: 12px; padding: 18px 20px;
     transition: all 0.25s ease;
-    cursor: default;
+    cursor: pointer;
+    text-decoration: none;
+    color: inherit;
+    position: relative;
+    overflow: hidden;
+  }
+  .tool-card::after {
+    content: '';
+    position: absolute; inset: 0;
+    background: linear-gradient(135deg, rgba(0,229,160,0.04) 0%, transparent 60%);
+    opacity: 0;
+    transition: opacity 0.25s ease;
+    pointer-events: none;
   }
   .tool-card:hover {
-    border-color: rgba(0,229,160,0.2);
+    border-color: rgba(0,229,160,0.35);
     background: var(--surface2);
-    transform: translateY(-2px);
-    box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+    transform: translateY(-3px);
+    box-shadow: 0 12px 36px rgba(0,0,0,0.35), 0 0 0 1px rgba(0,229,160,0.1);
+    text-decoration: none;
+    color: inherit;
+  }
+  .tool-card:hover::after { opacity: 1; }
+  .tool-card:hover .tool-visit { opacity: 1; transform: translateY(0); }
+  .tool-card:hover .tool-name { color: var(--green); }
+
+  .tool-visit {
+    display: inline-block;
+    margin-top: 10px;
+    font-family: var(--font-mono); font-size: 0.65rem;
+    color: var(--green); letter-spacing: 0.08em;
+    opacity: 0; transform: translateY(4px);
+    transition: opacity 0.2s ease, transform 0.2s ease;
   }
 
   .tool-logo {
@@ -1041,7 +1134,9 @@
   @media (hover: none) {
     body { cursor: auto; }
     #cursor { display: none; }
-    .tool-card:hover { transform: none; }
+    .tool-card:hover { transform: none; box-shadow: none; }
+    .tool-card { cursor: pointer; }
+    .tool-visit { opacity: 1 !important; transform: translateY(0) !important; }
     .testi-card:hover { transform: none; }
     .plan:hover { transform: none; }
     .feature-card:hover::before { transform: scaleX(0); }
@@ -1049,6 +1144,11 @@
 </style>
 </head>
 <body>
+<!-- Critical inline style for LCP element — visible immediately without waiting for CSS parse -->
+<style>
+  #lcp-heading{font-size:clamp(3rem,7vw,7rem);font-weight:800;line-height:0.95;letter-spacing:-0.04em;color:#e8eaf0;font-family:system-ui,sans-serif;}
+  [data-theme="light"] #lcp-heading{color:#0f1117;}
+</style>
 
 <!-- Cursor -->
 <div id="cursor"><div class="dot"></div><div class="ring"></div></div>
@@ -1059,8 +1159,33 @@
 <!-- ── NAV ── -->
 <nav>
   <a href="#" class="nav-logo">
-    <div class="logo-mark">CS</div>
-    Codesapiens
+    <div class="logo-mark"><svg class="logo-svg" width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+  <defs>
+    <linearGradient id="lg1" x1="0" y1="0" x2="36" y2="36" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#00e5a0"/>
+      <stop offset="100%" stop-color="#4fa3ff"/>
+    </linearGradient>
+    <linearGradient id="lg2" x1="36" y1="0" x2="0" y2="36" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#00e5a0" stop-opacity="0.3"/>
+      <stop offset="100%" stop-color="#4fa3ff" stop-opacity="0.1"/>
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="1.5" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <path d="M18 2L32 10V26L18 34L4 26V10L18 2Z" fill="url(#lg2)" stroke="url(#lg1)" stroke-width="1.2"/>
+  <path d="M13 12L8 18L13 24" stroke="url(#lg1)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" filter="url(#glow)"/>
+  <path d="M23 12L28 18L23 24" stroke="url(#lg1)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" filter="url(#glow)"/>
+  <path d="M20 11L16 25" stroke="#00e5a0" stroke-width="1.8" stroke-linecap="round" filter="url(#glow)"/>
+  <circle cx="18" cy="2" r="1.5" fill="#00e5a0" opacity="0.8"/>
+  <circle cx="32" cy="10" r="1" fill="#4fa3ff" opacity="0.6"/>
+  <circle cx="32" cy="26" r="1" fill="#4fa3ff" opacity="0.6"/>
+  <circle cx="18" cy="34" r="1.5" fill="#00e5a0" opacity="0.8"/>
+  <circle cx="4" cy="26" r="1" fill="#4fa3ff" opacity="0.6"/>
+  <circle cx="4" cy="10" r="1" fill="#4fa3ff" opacity="0.6"/>
+</svg></div>
+    <span class="logo-word"><span class="w1">Code</span><span class="w2">sapiens</span></span>
   </a>
   <ul class="nav-links">
     <li><a href="#features">Features</a></li>
@@ -1109,10 +1234,10 @@
 </nav>
 
 <!-- ── HERO ── -->
-<section id="hero">
+<section id="hero" aria-label="Hero">
   <div class="hero-glow"></div>
   <div class="hero-badge"><span></span> Now in public beta — v2.0 released</div>
-  <h1 class="hero-title">
+  <h1 class="hero-title" id="lcp-heading">
     <span class="line1">Manage teams.</span>
     <span class="line2">Ship projects.</span>
     <span class="line3">Scale effortlessly.</span>
@@ -1249,7 +1374,7 @@
         <span class="tool-cat-name">UI &amp; Styling</span>
       </div>
       <div class="tool-cards">
-        <div class="tool-card">
+        <a class="tool-card" href="https://tailwindcss.com" target="_blank" rel="noopener noreferrer">
           <div class="tool-logo" style="background:rgba(56,189,248,0.12);border-color:rgba(56,189,248,0.25);">
             <svg width="22" height="22" viewBox="0 0 54 33" fill="none"><path fill-rule="evenodd" clip-rule="evenodd" d="M27 0C19.8 0 15.3 3.6 13.5 10.8c2.7-3.6 5.85-4.95 9.45-4.05 2.054.514 3.522 2.004 5.147 3.653C30.744 12.672 33.808 16 40.5 16c7.2 0 11.7-3.6 13.5-10.8-2.7 3.6-5.85 4.95-9.45 4.05-2.054-.514-3.522-2.004-5.147-3.653C37.256 3.328 34.192 0 27 0zM13.5 16C6.3 16 1.8 19.6 0 26.8c2.7-3.6 5.85-4.95 9.45-4.05 2.054.514 3.522 2.004 5.147 3.653C16.744 28.672 19.808 32 26.5 32c7.2 0 11.7-3.6 13.5-10.8-2.7 3.6-5.85 4.95-9.45 4.05-2.054-.514-3.522-2.004-5.147-3.653C23.756 19.328 20.692 16 13.5 16z" fill="#38BDF8"/></svg>
           </div>
@@ -1258,8 +1383,10 @@
             <div class="tool-desc">Utility-first CSS framework for rapid, consistent styling without leaving HTML.</div>
             <div class="tool-chips"><span class="chip chip-blue">Utility-first</span><span class="chip chip-blue">JIT</span></div>
           </div>
+        <span class="tool-visit">Visit ↗</span>
         </div>
-        <div class="tool-card">
+        </a>
+        <a class="tool-card" href="https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_grid_layout" target="_blank" rel="noopener noreferrer">
           <div class="tool-logo" style="background:rgba(0,229,160,0.1);border-color:rgba(0,229,160,0.2);">
             <span style="font-size:1.1rem;">⬡</span>
           </div>
@@ -1268,8 +1395,10 @@
             <div class="tool-desc">Native 2D layout system used for dashboard panels, feature grids, and pricing tables.</div>
             <div class="tool-chips"><span class="chip chip-green">2D Layout</span><span class="chip chip-green">Native CSS</span></div>
           </div>
+        <span class="tool-visit">Visit ↗</span>
         </div>
-        <div class="tool-card">
+        </a>
+        <a class="tool-card" href="https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_flexible_box_layout" target="_blank" rel="noopener noreferrer">
           <div class="tool-logo" style="background:rgba(79,163,255,0.1);border-color:rgba(79,163,255,0.2);">
             <span style="font-size:1.1rem;">↔</span>
           </div>
@@ -1278,8 +1407,10 @@
             <div class="tool-desc">CSS Flexible Box used for nav bars, button groups, cards, and all 1D alignment needs.</div>
             <div class="tool-chips"><span class="chip chip-blue">1D Layout</span><span class="chip chip-blue">Native CSS</span></div>
           </div>
+        <span class="tool-visit">Visit ↗</span>
         </div>
-        <div class="tool-card">
+        </a>
+        <a class="tool-card" href="https://fonts.google.com" target="_blank" rel="noopener noreferrer">
           <div class="tool-logo" style="background:rgba(245,166,35,0.1);border-color:rgba(245,166,35,0.2);">
             <span style="font-size:1.1rem;">Aa</span>
           </div>
@@ -1288,7 +1419,9 @@
             <div class="tool-desc">Syne (display), Space Mono (code), and DM Sans (body) loaded via Google Fonts CDN.</div>
             <div class="tool-chips"><span class="chip chip-amber">Typography</span><span class="chip chip-amber">CDN</span></div>
           </div>
+        <span class="tool-visit">Visit ↗</span>
         </div>
+        </a>
       </div>
     </div>
 
@@ -1299,7 +1432,7 @@
         <span class="tool-cat-name">Frontend Framework</span>
       </div>
       <div class="tool-cards">
-        <div class="tool-card">
+        <a class="tool-card" href="https://react.dev" target="_blank" rel="noopener noreferrer">
           <div class="tool-logo" style="background:rgba(97,218,251,0.1);border-color:rgba(97,218,251,0.25);">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="#61dafb"><circle cx="12" cy="11.999" r="2.147"/><path d="M12 6.382C9.338 3.72 6.817 2.064 5.003 2.064c-.773 0-1.43.232-1.95.695C1.613 3.983 1.52 6.6 2.803 9.895c.196.506.42 1.019.674 1.534a18.87 18.87 0 00-.674 1.538c-1.283 3.296-1.19 5.912.25 7.136.52.463 1.177.695 1.95.695 1.814 0 4.335-1.656 6.997-4.318 2.662 2.662 5.183 4.318 6.997 4.318.773 0 1.43-.232 1.95-.695 1.44-1.224 1.533-3.84.25-7.136a18.87 18.87 0 00-.674-1.538c.254-.515.478-1.028.674-1.534 1.283-3.295 1.19-5.912-.25-7.136-.52-.463-1.177-.695-1.95-.695-1.814 0-4.335 1.656-6.997 4.318z"/></svg>
           </div>
@@ -1308,8 +1441,10 @@
             <div class="tool-desc">Component-based UI library with hooks, concurrent rendering, and the new compiler.</div>
             <div class="tool-chips"><span class="chip chip-blue">Components</span><span class="chip chip-blue">Hooks</span><span class="chip chip-blue">Compiler</span></div>
           </div>
+        <span class="tool-visit">Visit ↗</span>
         </div>
-        <div class="tool-card">
+        </a>
+        <a class="tool-card" href="https://vitejs.dev" target="_blank" rel="noopener noreferrer">
           <div class="tool-logo" style="background:rgba(139,92,246,0.1);border-color:rgba(139,92,246,0.25);">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="#8b5cf6"><path d="M24 5.457v13.909c0 .904-.732 1.636-1.636 1.636h-3.819V11.73L12 16.64l-6.545-4.91v9.273H1.636A1.636 1.636 0 010 19.366V5.457c0-2.023 2.309-3.178 3.927-1.964L5.455 4.64 12 9.548l6.545-4.91 1.528-1.145C21.69 2.28 24 3.434 24 5.457z"/></svg>
           </div>
@@ -1318,8 +1453,10 @@
             <div class="tool-desc">Lightning-fast build tool and dev server powered by native ESM and esbuild.</div>
             <div class="tool-chips"><span class="chip chip-purple">Build Tool</span><span class="chip chip-purple">HMR</span></div>
           </div>
+        <span class="tool-visit">Visit ↗</span>
         </div>
-        <div class="tool-card">
+        </a>
+        <a class="tool-card" href="https://www.typescriptlang.org" target="_blank" rel="noopener noreferrer">
           <div class="tool-logo" style="background:rgba(34,197,94,0.1);border-color:rgba(34,197,94,0.25);">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="#3178c6"><path d="M1.125 0C.502 0 0 .502 0 1.125v21.75C0 23.498.502 24 1.125 24h21.75c.623 0 1.125-.502 1.125-1.125V1.125C24 .502 23.498 0 22.875 0zm17.363 9.75c.612 0 1.154.037 1.627.111a6.38 6.38 0 0 1 1.306.34v2.458a3.95 3.95 0 0 0-.643-.361 5.093 5.093 0 0 0-.717-.26 5.453 5.453 0 0 0-1.426-.2c-.3 0-.573.028-.819.086a2.1 2.1 0 0 0-.623.242c-.17.104-.3.229-.393.374a.888.888 0 0 0-.14.49c0 .196.053.373.156.529.104.156.252.304.443.444s.423.276.696.41c.273.135.582.274.926.416.47.197.892.407 1.266.628.374.222.695.473.963.753.268.279.472.598.614.957.142.359.214.776.214 1.253 0 .657-.125 1.21-.373 1.656a3.033 3.033 0 0 1-1.012 1.085 4.38 4.38 0 0 1-1.487.596c-.566.12-1.163.18-1.79.18a9.916 9.916 0 0 1-1.84-.164 5.544 5.544 0 0 1-1.512-.493v-2.63a5.033 5.033 0 0 0 3.237 1.2c.333 0 .624-.03.872-.09.249-.06.456-.144.623-.25.166-.108.29-.234.373-.38a1.023 1.023 0 0 0-.074-1.089 2.12 2.12 0 0 0-.537-.5 5.597 5.597 0 0 0-.807-.444 27.72 27.72 0 0 0-1.007-.436c-.918-.383-1.602-.852-2.053-1.405-.45-.553-.676-1.222-.676-2.005 0-.614.123-1.141.369-1.582.246-.441.58-.804 1.004-1.089a4.494 4.494 0 0 1 1.47-.629 7.536 7.536 0 0 1 1.77-.201zm-15.113.188h9.563v2.166H9.506v9.646H6.789v-9.646H3.375z"/></svg>
           </div>
@@ -1328,8 +1465,10 @@
             <div class="tool-desc">Strongly typed superset of JavaScript. Catches bugs at compile time across the entire codebase.</div>
             <div class="tool-chips"><span class="chip chip-green">Type Safety</span><span class="chip chip-green">DX</span></div>
           </div>
+        <span class="tool-visit">Visit ↗</span>
         </div>
-        <div class="tool-card">
+        </a>
+        <a class="tool-card" href="https://zustand-demo.pmnd.rs" target="_blank" rel="noopener noreferrer">
           <div class="tool-logo" style="background:rgba(167,139,250,0.1);border-color:rgba(167,139,250,0.25);">
             <span style="font-size:1rem;color:#a78bfa;font-family:var(--font-mono);font-weight:700;">ZS</span>
           </div>
@@ -1338,7 +1477,9 @@
             <div class="tool-desc">Minimalist state management for React. No boilerplate, no context providers — just clean stores.</div>
             <div class="tool-chips"><span class="chip chip-purple">State</span><span class="chip chip-purple">Zero boilerplate</span></div>
           </div>
+        <span class="tool-visit">Visit ↗</span>
         </div>
+        </a>
       </div>
     </div>
 
@@ -1349,7 +1490,7 @@
         <span class="tool-cat-name">Backend &amp; Data</span>
       </div>
       <div class="tool-cards">
-        <div class="tool-card">
+        <a class="tool-card" href="https://supabase.com" target="_blank" rel="noopener noreferrer">
           <div class="tool-logo" style="background:rgba(62,207,142,0.1);border-color:rgba(62,207,142,0.25);">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="#3ECF8E"><path d="M11.9 1.036c-.015-.986-1.26-1.41-1.874-.637L.764 12.05C.111 12.888.149 14.08.852 14.838l.017.018c1.07.52 2.252.782 3.448.769l.025.05c.167.032.34.05.517.05h7.037l-1.63 7.6c-.138.647.139 1.315.697 1.674.557.358 1.285.328 1.81-.075l10.537-7.934c.787-.593.907-1.727.261-2.469L12.59 2.56c-.178-.214-.398-.383-.638-.494l-.052-.03zm.052 3.41l7.552 8.83-9.022 6.79 1.47-6.854a1.302 1.302 0 00-1.27-1.594H4.34L11.952 4.446z"/></svg>
           </div>
@@ -1358,8 +1499,10 @@
             <div class="tool-desc">Open-source Firebase alternative — Postgres DB, Auth, Realtime subscriptions, and Storage.</div>
             <div class="tool-chips"><span class="chip chip-green">Auth</span><span class="chip chip-green">Realtime</span><span class="chip chip-green">Storage</span></div>
           </div>
+        <span class="tool-visit">Visit ↗</span>
         </div>
-        <div class="tool-card">
+        </a>
+        <a class="tool-card" href="https://expressjs.com" target="_blank" rel="noopener noreferrer">
           <div class="tool-logo" style="background:rgba(239,68,68,0.1);border-color:rgba(239,68,68,0.25);">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="#ef4444"><path d="M24 18.588a1.529 1.529 0 01-1.895-.72l-3.45-4.771-.5-.667-4.003 5.444a1.466 1.466 0 01-1.802.708l5.158-6.92-4.798-6.251a1.595 1.595 0 011.9.666l3.576 4.83 3.596-4.81a1.435 1.435 0 011.788-.668L21.708 7.9l-2.522 3.283a.666.666 0 000 .994l4.804 6.412zM.002 1.594l5.158 6.92-4.798 6.25a1.595 1.595 0 001.9-.666l3.576-4.83 3.596 4.81a1.435 1.435 0 001.788.668L.002 1.594z"/></svg>
           </div>
@@ -1368,8 +1511,10 @@
             <div class="tool-desc">Minimal Node.js web framework handling API routes, middleware, and server-side logic.</div>
             <div class="tool-chips"><span class="chip chip-red">REST API</span><span class="chip chip-red">Middleware</span></div>
           </div>
+        <span class="tool-visit">Visit ↗</span>
         </div>
-        <div class="tool-card">
+        </a>
+        <a class="tool-card" href="https://www.postgresql.org" target="_blank" rel="noopener noreferrer">
           <div class="tool-logo" style="background:rgba(14,165,233,0.1);border-color:rgba(14,165,233,0.25);">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="#0ea5e9"><path d="M17.128 0a10.134 10.134 0 00-2.755.403 11.34 11.34 0 00-4.627 2.507A12.11 12.11 0 007.32 5.138a12.059 12.059 0 00-1.658 3.33 10.785 10.785 0 00-.378 3.176 10.887 10.887 0 002.3 6.583L3.34 23.012A.5.5 0 003.69 24a.5.5 0 00.199-.05l5.386-2.514a10.7 10.7 0 005.827 1.675c5.793 0 10.5-4.708 10.5-10.5S22.92 2.11 17.128 2.11zm0 19.4a9.2 9.2 0 01-5.063-1.506l-.36-.233-3.725 1.74 1.607-3.617-.259-.38a9.4 9.4 0 01-1.806-5.528C7.522 7.093 11.9 2.72 17.128 2.72c5.228 0 9.5 4.372 9.5 9.39s-4.272 9.29-9.5 9.29z"/></svg>
           </div>
@@ -1378,8 +1523,10 @@
             <div class="tool-desc">World-class relational database powering Supabase. ACID-compliant with full SQL support.</div>
             <div class="tool-chips"><span class="chip chip-blue">Relational DB</span><span class="chip chip-blue">ACID</span></div>
           </div>
+        <span class="tool-visit">Visit ↗</span>
         </div>
-        <div class="tool-card">
+        </a>
+        <a class="tool-card" href="https://cloudinary.com" target="_blank" rel="noopener noreferrer">
           <div class="tool-logo" style="background:rgba(245,166,35,0.1);border-color:rgba(245,166,35,0.25);">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="#f59e0b"><path d="M11.5 0C5.149 0 0 5.149 0 11.5S5.149 23 11.5 23 23 17.851 23 11.5 17.851 0 11.5 0zm0 2c5.247 0 9.5 4.253 9.5 9.5S16.747 21 11.5 21 2 16.747 2 11.5 6.253 2 11.5 2zm0 3a1 1 0 00-1 1v6a1 1 0 00.293.707l3 3a1 1 0 001.414-1.414L13 12.586V6a1 1 0 00-1-1z"/></svg>
           </div>
@@ -1388,7 +1535,9 @@
             <div class="tool-desc">Cloud media platform for image/video upload, auto-optimization, transformations and CDN.</div>
             <div class="tool-chips"><span class="chip chip-amber">Media CDN</span><span class="chip chip-amber">Auto-optimize</span></div>
           </div>
+        <span class="tool-visit">Visit ↗</span>
         </div>
+        </a>
       </div>
     </div>
 
@@ -1399,7 +1548,7 @@
         <span class="tool-cat-name">DevOps &amp; Tooling</span>
       </div>
       <div class="tool-cards">
-        <div class="tool-card">
+        <a class="tool-card" href="https://vercel.com" target="_blank" rel="noopener noreferrer">
           <div class="tool-logo" style="background:rgba(255,255,255,0.06);border-color:rgba(255,255,255,0.12);">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="white"><path d="M24 22.525H0l12-21.05 12 21.05z"/></svg>
           </div>
@@ -1408,8 +1557,10 @@
             <div class="tool-desc">Zero-config deployment platform with edge network, auto CI/CD on every Git push.</div>
             <div class="tool-chips"><span class="chip chip-white">Deploy</span><span class="chip chip-white">Edge CDN</span><span class="chip chip-white">CI/CD</span></div>
           </div>
+        <span class="tool-visit">Visit ↗</span>
         </div>
-        <div class="tool-card">
+        </a>
+        <a class="tool-card" href="https://nodejs.org" target="_blank" rel="noopener noreferrer">
           <div class="tool-logo" style="background:rgba(104,160,99,0.1);border-color:rgba(104,160,99,0.25);">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="#68a063"><path d="M11.998.006C5.371.006.006 5.371.006 11.998c0 6.627 5.365 11.992 11.992 11.992 6.628 0 11.993-5.365 11.993-11.992C23.99 5.37 18.626.007 11.999.007zm-.31 2.438c.087 0 .174.002.264.007C9.336 4.367 7.2 7.458 7.2 11.081c0 .468.036.924.104 1.37H4.618a7.606 7.606 0 01-.211-1.77c0-4.032 3.129-7.337 7.28-7.337zm2.588.562c2.614.943 4.63 3.136 5.296 5.855H16.31c-.53-2.356-1.886-4.37-3.674-5.744l1.64-.111zm-5.8 7.185h6.058c.061.454.094.918.094 1.39 0 .455-.031.9-.088 1.337H8.485a9.618 9.618 0 01-.088-1.338c0-.471.032-.935.079-1.39zm-4.52.001h2.53c-.04.454-.063.912-.063 1.39 0 .461.02.912.055 1.337H4.456a7.544 7.544 0 01-.213-1.338c0-.475.082-.937.213-1.39zm13.086 0h2.453c.13.452.212.914.212 1.39 0 .458-.078.91-.212 1.337h-2.394c.035-.425.055-.877.055-1.338 0-.477-.04-.935-.114-1.39zm-11.86 4.065h3.337c.49 1.894 1.396 3.558 2.619 4.879-2.918-.679-5.298-2.679-5.956-4.879zm4.714 0h4.19c-.578 2.04-1.638 3.832-3.066 5.15a9.697 9.697 0 01-.083.007c-1.46-1.298-2.55-3.098-3.141-5.157h2.1zm5.57 0h3.23c-.657 2.2-3.032 4.2-5.946 4.878 1.224-1.32 2.13-2.985 2.716-4.878z"/></svg>
           </div>
@@ -1418,8 +1569,10 @@
             <div class="tool-desc">JavaScript runtime for the backend API layer, scripts, and build processes.</div>
             <div class="tool-chips"><span class="chip chip-green">Runtime</span><span class="chip chip-green">LTS</span></div>
           </div>
+        <span class="tool-visit">Visit ↗</span>
         </div>
-        <div class="tool-card">
+        </a>
+        <a class="tool-card" href="https://eslint.org" target="_blank" rel="noopener noreferrer">
           <div class="tool-logo" style="background:rgba(249,115,22,0.1);border-color:rgba(249,115,22,0.25);">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="#f97316"><path d="M7.257 9.132L11.816 6.5a.369.369 0 01.368 0l4.559 2.632a.369.369 0 01.184.32v5.096a.369.369 0 01-.184.32l-4.559 2.632a.369.369 0 01-.368 0L7.257 14.548a.369.369 0 01-.184-.32V9.452a.369.369 0 01.184-.32zM23.852 11.53l-5.446-9.376a.735.735 0 00-.636-.368H6.23a.735.735 0 00-.636.368L.148 11.53a.735.735 0 000 .736l5.446 9.376a.735.735 0 00.636.368h11.54a.735.735 0 00.636-.368l5.446-9.376a.735.735 0 000-.736z"/></svg>
           </div>
@@ -1428,8 +1581,10 @@
             <div class="tool-desc">Static analysis tool that enforces code style, catches bugs, and keeps the codebase consistent.</div>
             <div class="tool-chips"><span class="chip chip-amber">Linting</span><span class="chip chip-amber">Code Quality</span></div>
           </div>
+        <span class="tool-visit">Visit ↗</span>
         </div>
-        <div class="tool-card">
+        </a>
+        <a class="tool-card" href="https://developer.mozilla.org/en-US/docs/Web/CSS/Using_CSS_custom_properties" target="_blank" rel="noopener noreferrer">
           <div class="tool-logo" style="background:rgba(0,229,160,0.08);border-color:rgba(0,229,160,0.2);">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="#00e5a0"><path d="M0 0h24v24H0z" fill="none"/><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 4l6 2.67v4.72c0 3.47-2.3 6.79-6 7.93-3.7-1.14-6-4.46-6-7.93V7.67L12 5z"/></svg>
           </div>
@@ -1438,7 +1593,9 @@
             <div class="tool-desc">Native CSS variables used for theming — colors, fonts, spacing all driven by a single :root block.</div>
             <div class="tool-chips"><span class="chip chip-green">Theming</span><span class="chip chip-green">Native CSS</span></div>
           </div>
+        <span class="tool-visit">Visit ↗</span>
         </div>
+        </a>
       </div>
     </div>
 
@@ -1686,8 +1843,33 @@
   <div class="footer-top">
     <div class="footer-brand">
       <a href="#" class="nav-logo" style="text-decoration:none">
-        <div class="logo-mark">CS</div>
-        Codesapiens
+        <div class="logo-mark"><svg class="logo-svg" width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+  <defs>
+    <linearGradient id="lg1" x1="0" y1="0" x2="36" y2="36" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#00e5a0"/>
+      <stop offset="100%" stop-color="#4fa3ff"/>
+    </linearGradient>
+    <linearGradient id="lg2" x1="36" y1="0" x2="0" y2="36" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#00e5a0" stop-opacity="0.3"/>
+      <stop offset="100%" stop-color="#4fa3ff" stop-opacity="0.1"/>
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="1.5" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <path d="M18 2L32 10V26L18 34L4 26V10L18 2Z" fill="url(#lg2)" stroke="url(#lg1)" stroke-width="1.2"/>
+  <path d="M13 12L8 18L13 24" stroke="url(#lg1)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" filter="url(#glow)"/>
+  <path d="M23 12L28 18L23 24" stroke="url(#lg1)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" filter="url(#glow)"/>
+  <path d="M20 11L16 25" stroke="#00e5a0" stroke-width="1.8" stroke-linecap="round" filter="url(#glow)"/>
+  <circle cx="18" cy="2" r="1.5" fill="#00e5a0" opacity="0.8"/>
+  <circle cx="32" cy="10" r="1" fill="#4fa3ff" opacity="0.6"/>
+  <circle cx="32" cy="26" r="1" fill="#4fa3ff" opacity="0.6"/>
+  <circle cx="18" cy="34" r="1.5" fill="#00e5a0" opacity="0.8"/>
+  <circle cx="4" cy="26" r="1" fill="#4fa3ff" opacity="0.6"/>
+  <circle cx="4" cy="10" r="1" fill="#4fa3ff" opacity="0.6"/>
+</svg></div>
+        <span class="logo-word"><span class="w1">Code</span><span class="w2">sapiens</span></span>
       </a>
       <p>A modern admin dashboard platform for engineering teams. Built with ♥ and open-source tools.</p>
     </div>
@@ -1732,22 +1914,31 @@
 </footer>
 
 <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
-  // ── CUSTOM CURSOR ──
+  // ── CUSTOM CURSOR (GPU-composited transform, touch-device safe) ──
+  const isTouchOnly = window.matchMedia('(hover: none)').matches;
   const cursor = document.getElementById('cursor');
-  const dot = cursor.querySelector('.dot');
-  const ring = cursor.querySelector('.ring');
-  let mx = 0, my = 0, rx = 0, ry = 0;
-  document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; dot.style.left = mx + 'px'; dot.style.top = my + 'px'; });
-  function animRing() {
-    rx += (mx - rx) * 0.12; ry += (my - ry) * 0.12;
-    ring.style.left = rx + 'px'; ring.style.top = ry + 'px';
-    requestAnimationFrame(animRing);
+  if (!isTouchOnly && cursor) {
+    const dot = cursor.querySelector('.dot');
+    const ring = cursor.querySelector('.ring');
+    let mx = 0, my = 0, rx = 0, ry = 0;
+    // Use transform instead of left/top — stays on compositor thread
+    document.addEventListener('mousemove', e => {
+      mx = e.clientX; my = e.clientY;
+      dot.style.transform = 'translate(calc(' + mx + 'px - 50%), calc(' + my + 'px - 50%))';
+    }, { passive: true });
+    function animRing() {
+      rx += (mx - rx) * 0.12; ry += (my - ry) * 0.12;
+      ring.style.transform = 'translate(calc(' + rx + 'px - 50%), calc(' + ry + 'px - 50%))';
+      requestAnimationFrame(animRing);
+    }
+    animRing();
+    document.querySelectorAll('a, button, input, .feature-card, .testi-card, .plan').forEach(el => {
+      el.addEventListener('mouseenter', () => { ring.style.width = '56px'; ring.style.height = '56px'; }, { passive: true });
+      el.addEventListener('mouseleave', () => { ring.style.width = '36px'; ring.style.height = '36px'; }, { passive: true });
+    });
+  } else if (cursor) {
+    cursor.style.display = 'none';
   }
-  animRing();
-  document.querySelectorAll('a, button, input, .feature-card, .testi-card, .plan').forEach(el => {
-    el.addEventListener('mouseenter', () => { ring.style.width = '56px'; ring.style.height = '56px'; });
-    el.addEventListener('mouseleave', () => { ring.style.width = '36px'; ring.style.height = '36px'; });
-  });
 
   // ── SCROLL REVEAL ──
   const observer = new IntersectionObserver(entries => {
@@ -1789,16 +1980,34 @@
   }, { threshold: 0.3 });
   document.querySelectorAll('.stats-bar').forEach(el => statsObserver.observe(el));
 
-  // ── SMOOTH NAV ACTIVE ──
-  const sections = document.querySelectorAll('section[id], div[id]');
+  // ── SMOOTH NAV ACTIVE (RAF-throttled, no forced reflow) ──
+  const sections = document.querySelectorAll('section[id]');
   const navLinks = document.querySelectorAll('.nav-links a');
+  // Pre-cache offsets to avoid repeated reflows
+  let sectionOffsets = [];
+  function cacheSectionOffsets() {
+    sectionOffsets = Array.from(sections).map(s => ({ id: s.id, top: s.offsetTop }));
+  }
+  cacheSectionOffsets();
+  window.addEventListener('resize', cacheSectionOffsets, { passive: true });
+
+  let scrollTicking = false;
   window.addEventListener('scroll', () => {
-    let current = '';
-    sections.forEach(s => { if (window.scrollY >= s.offsetTop - 120) current = s.id; });
-    navLinks.forEach(a => {
-      a.style.color = a.getAttribute('href') === '#' + current ? 'var(--green)' : '';
-    });
-  });
+    if (!scrollTicking) {
+      requestAnimationFrame(() => {
+        const scrollY = window.scrollY;
+        let current = '';
+        for (let i = sectionOffsets.length - 1; i >= 0; i--) {
+          if (scrollY >= sectionOffsets[i].top - 130) { current = sectionOffsets[i].id; break; }
+        }
+        navLinks.forEach(a => {
+          a.style.color = a.getAttribute('href') === '#' + current ? 'var(--green)' : '';
+        });
+        scrollTicking = false;
+      });
+      scrollTicking = true;
+    }
+  }, { passive: true });
 
   // ── SIGN IN MODAL ── (deferred until full DOM is ready)
   document.addEventListener('DOMContentLoaded', function() {
@@ -1852,10 +2061,11 @@
       toggleMenu(false); // close drawer + clear body overflow
       const target = document.querySelector(href);
       if (target) {
-        // Wait for drawer slide-out (350ms) then scroll
+        // Wait for drawer slide-out (350ms) then scroll using cached offsets (no reflow)
         setTimeout(() => {
           const navHeight = window.innerWidth <= 640 ? 64 : 72;
-          const top = target.getBoundingClientRect().top + window.pageYOffset - navHeight;
+          // Use offsetTop which is already available without forcing a reflow at this moment
+          const top = target.offsetTop - navHeight;
           window.scrollTo({ top, behavior: 'smooth' });
         }, 380);
       }
@@ -2092,7 +2302,8 @@
     font-family: var(--font-display); font-weight: 800; font-size: 1rem;
     margin-bottom: 28px;
   }
-  .auth-logo .logo-mark { width: 28px; height: 28px; border-radius: 7px; background: var(--green); display: grid; place-items: center; color:#000; font-family: var(--font-mono); font-size:0.65rem; font-weight:700; }
+  .auth-logo .logo-mark { width: 28px; height: 28px; display: grid; place-items: center; background: none; border: none; }
+  .auth-logo .logo-mark::before, .auth-logo .logo-mark::after { display: none; }
 
   .auth-tabs {
     display: flex; gap: 0;
@@ -2177,8 +2388,23 @@
   <div class="auth-modal" id="authModal" onclick="event.stopPropagation()">
     <button class="modal-close" id="modalClose">✕</button>
     <div class="auth-logo">
-      <div class="logo-mark">CS</div>
-      Codesapiens
+      <div class="logo-mark"><svg class="logo-svg" width="28" height="28" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="alg1" x1="0" y1="0" x2="36" y2="36" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#00e5a0"/><stop offset="100%" stop-color="#4fa3ff"/>
+    </linearGradient>
+    <linearGradient id="alg2" x1="36" y1="0" x2="0" y2="36" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#00e5a0" stop-opacity="0.3"/><stop offset="100%" stop-color="#4fa3ff" stop-opacity="0.1"/>
+    </linearGradient>
+  </defs>
+  <path d="M18 2L32 10V26L18 34L4 26V10L18 2Z" fill="url(#alg2)" stroke="url(#alg1)" stroke-width="1.2"/>
+  <path d="M13 12L8 18L13 24" stroke="url(#alg1)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M23 12L28 18L23 24" stroke="url(#alg1)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M20 11L16 25" stroke="#00e5a0" stroke-width="1.8" stroke-linecap="round"/>
+  <circle cx="18" cy="2" r="1.5" fill="#00e5a0" opacity="0.8"/>
+  <circle cx="18" cy="34" r="1.5" fill="#00e5a0" opacity="0.8"/>
+</svg></div>
+      <span class="logo-word"><span class="w1">Code</span><span class="w2">sapiens</span></span>
     </div>
     <div class="auth-tabs">
       <button class="auth-tab active" data-tab="loginForm">Sign in</button>
