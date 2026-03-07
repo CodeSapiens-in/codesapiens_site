@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { supabase } from '../lib/supabaseClient';
 import { useNavigate } from 'react-router-dom';
-import { ArrowRight, ChevronDown, Menu, X, Github, Linkedin, Youtube, Users, Calendar, Code, Award, Crown, Rocket, Zap, Globe, Cpu, Handshake, Heart, ArrowUpRight, Instagram, Twitter, MessageCircle, Megaphone, Sparkles } from 'lucide-react';
+import { ArrowRight, ChevronDown, Menu, X, Github, Linkedin, Youtube, Users, Calendar, Code, Award, Crown } from 'lucide-react';
 import { BACKEND_URL } from '../config';
 import { authFetch } from '../lib/authFetch';
 import LandingPopup from './LandingPopup';
@@ -25,11 +25,48 @@ const StatsSection = () => {
     }, []);
 
     return (
-        <section className="py-12 bg-gradient-to-br from-[#101010] via-[#050505] to-[#001a45] text-white relative overflow-hidden">
+        <section className="py-24 bg-[#101010] text-white relative overflow-hidden">
             {/* Background Elements */}
+            {/* Background Elements */}
+            <div className="absolute inset-0 w-full h-full overflow-hidden pointer-events-none">
+                {/* Moving Blob 1 - Blue (Large) */}
+                <motion.div
+                    animate={{
+                        x: [0, 100, -100, 0],
+                        y: [0, -100, 100, 0],
+                        scale: [1, 1.2, 0.8, 1],
+                        opacity: [0.4, 0.7, 0.4]
+                    }}
+                    transition={{
+                        duration: 15,
+                        repeat: Infinity,
+                        repeatType: "reverse",
+                        ease: "easeInOut"
+                    }}
+                    className="absolute top-[-20%] left-[-10%] w-[900px] h-[900px] bg-[#0061FE] rounded-full blur-[150px] mix-blend-screen opacity-40"
+                />
+
+                {/* Moving Blob 2 - Violet (Large) */}
+                <motion.div
+                    animate={{
+                        x: [0, -150, 100, 0],
+                        y: [0, 100, -50, 0],
+                        scale: [1, 1.3, 0.9, 1],
+                        opacity: [0.3, 0.6, 0.3]
+                    }}
+                    transition={{
+                        duration: 20,
+                        delay: 2,
+                        repeat: Infinity,
+                        repeatType: "reverse",
+                        ease: "easeInOut"
+                    }}
+                    className="absolute bottom-[-20%] right-[-10%] w-[1000px] h-[1000px] bg-[#7F00FF] rounded-full blur-[160px] mix-blend-screen opacity-30"
+                />
+            </div>
 
             <div className="container mx-auto px-4 md:px-6 relative z-10">
-                <div className="mb-8 text-center">
+                <div className="mb-16 text-center">
                     <span className="text-[#0061FE] font-bold tracking-widest uppercase text-golden-1 mb-4 block">Impact</span>
                     <h2 className="text-golden-2 md:text-golden-3 font-bold mb-6">By The Numbers</h2>
                     <p className="text-golden-1 text-gray-400 max-w-2xl mx-auto">
@@ -45,14 +82,13 @@ const StatsSection = () => {
                             initial={{ opacity: 0, scale: 0.5 }}
                             whileInView={{ opacity: 1, scale: 1 }}
                             viewport={{ once: true }}
-                            className="bg-black/40 backdrop-blur-3xl p-4 md:p-6 rounded-2xl border border-white/10 text-center shadow-[0_8px_32px_0_rgba(0,0,0,0.37)] relative overflow-hidden group"
+                            className="bg-black/40 backdrop-blur-3xl p-3 md:p-8 rounded-2xl border border-white/10 text-center shadow-[0_8px_32px_0_rgba(0,0,0,0.37)] relative overflow-hidden group"
                         >
                             {/* Specular Highlight */}
                             <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
 
                             <h3 className="text-golden-2 md:text-golden-3 font-black text-white mb-2 drop-shadow-lg">
-                                {/* {stats.totalUsers > 0 ? stats.totalUsers : "1500+"} */}
-                                2000+
+                                {stats.totalUsers > 0 ? stats.totalUsers : "1500+"}
                             </h3>
                             <p className="text-gray-400 font-medium uppercase tracking-normal md:tracking-wider text-golden-1">Total Members</p>
                         </motion.div>
@@ -62,14 +98,13 @@ const StatsSection = () => {
                             whileInView={{ opacity: 1, scale: 1 }}
                             viewport={{ once: true }}
                             transition={{ delay: 0.1 }}
-                            className="bg-black/40 backdrop-blur-3xl p-4 md:p-6 rounded-2xl border border-white/10 text-center shadow-[0_8px_32px_0_rgba(0,0,0,0.37)] relative overflow-hidden group"
+                            className="bg-black/40 backdrop-blur-3xl p-3 md:p-8 rounded-2xl border border-white/10 text-center shadow-[0_8px_32px_0_rgba(0,0,0,0.37)] relative overflow-hidden group"
                         >
                             {/* Specular Highlight */}
                             <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
 
                             <h3 className="text-golden-2 md:text-golden-3 font-black text-white mb-2 drop-shadow-lg">
-                                {/* {stats.totalColleges > 0 ? stats.totalColleges : "50+"} */}
-                                50+
+                                {stats.totalColleges > 0 ? stats.totalColleges : "50+"}
                             </h3>
                             <p className="text-gray-400 font-medium uppercase tracking-normal md:tracking-wider text-golden-1">Colleges Reached</p>
                         </motion.div>
@@ -77,11 +112,11 @@ const StatsSection = () => {
 
                     {/* Right: Top Colleges Chart */}
                     <div className="col-span-1 h-full w-full overflow-hidden">
-                        <div className="bg-black/40 backdrop-blur-3xl p-6 rounded-2xl border border-white/10 h-full flex flex-col relative overflow-hidden group shadow-[0_8px_32px_0_rgba(0,0,0,0.37)]">
+                        <div className="bg-black/40 backdrop-blur-3xl p-8 rounded-2xl border border-white/10 h-full flex flex-col relative overflow-hidden group shadow-[0_8px_32px_0_rgba(0,0,0,0.37)]">
                             {/* Specular Highlight */}
                             <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent pointer-events-none"></div>
 
-                            <h4 className="text-golden-2 font-bold mb-4 flex items-center gap-3">
+                            <h4 className="text-golden-2 font-bold mb-8 flex items-center gap-3">
                                 Top Active Colleges
                             </h4>
 
@@ -92,7 +127,7 @@ const StatsSection = () => {
                                     <div className="space-y-8">
                                         {/* Top 3 Podium - Only show if we have enough data, else fallback to list */}
                                         {stats.topColleges.filter(c => c.name && c.name !== "Not specified").length >= 3 ? (
-                                            <div className="flex items-end justify-center gap-2 md:gap-4 mb-4 min-h-[140px]">
+                                            <div className="flex items-end justify-center gap-2 md:gap-4 mb-4 min-h-[180px]">
                                                 {/* 2nd Place */}
                                                 <motion.div
                                                     initial={{ opacity: 0, y: 50 }}
@@ -186,379 +221,11 @@ const StatsSection = () => {
                                     </div>
                                 ) : (
                                     <div className="text-center text-gray-500 py-10">
-                                        <p>Stats will update soon</p>
+                                        <p>Stats currently unavailable</p>
+                                        <p className="text-xs mt-2 opacity-50">Backend: {BACKEND_URL}</p>
                                     </div>
                                 )}
                             </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-    );
-};
-
-// --- Sponsor Section with Spotlight Effect ---
-const SponsorSection = () => {
-    const sponsors = [
-
-        {
-            name: "Mako IT Lab",
-            link: "https://www.makoitlab.com/",
-            image: "https://res.cloudinary.com/dqudvximt/image/upload/v1767816977/users_cme79i2lk00qls401ar5qxqnc_VGly5cMkz1ZxkXas-1_76R8XDxGiLgjc8BaeXApow_yzzhyw.webp",
-        },
-        {
-            name: "Yuniq",
-            link: "https://yuniq.co/",
-            image: "https://res.cloudinary.com/dqudvximt/image/upload/v1767817525/users_cme79i2lk00qls401ar5qxqnc_hBofB72xXBV4C0cL-users_clylc5w1v070to301jatq0e85_FVqmiMesQBlCZ0ZM-yuniq_njsnoy.jpg",
-        },
-        {
-            name: "Contentstack",
-            link: "https://www.contentstack.com/",
-            image: "https://res.cloudinary.com/dqudvximt/image/upload/v1767817529/users_cme79i2lk00qls401ar5qxqnc_DaxnHl7f0QdeQwgx-square-image_pvgube.jpg",
-        },
-        {
-            name: "Navan AI",
-            link: "https://navan.ai/",
-            image: "https://res.cloudinary.com/dqudvximt/image/upload/v1771507803/WhatsApp_Image_2026-02-19_at_4.28.11_PM_bxnzfc.jpg",
-        },
-        {
-            name: "Notion",
-            link: "https://www.notion.com/",
-            image: "https://res.cloudinary.com/dqudvximt/image/upload/v1767817532/users_cme79i2lk00qls401ar5qxqnc_891aQQNEpsjHP7Ef-notion-logo-png_seeklogo-425508_k0njb3.webp",
-        },
-        {
-            name: "Interview Buddy",
-            link: "https://interviewbuddy.net/",
-            image: "https://res.cloudinary.com/dqudvximt/image/upload/v1771508422/WhatsApp_Image_2026-02-19_at_4.28.12_PM_xxalgw.jpg",
-        },
-        
-    ];
-
-    return (
-        <section className="py-12 bg-[#FFFFF0] relative overflow-hidden">
-            <div className="container mx-auto px-6 relative z-10">
-                <div className="text-left mb-8">
-                    <div className="flex items-center gap-2 mb-4">
-                        <h2 className="text-4xl md:text-6xl font-black text-black tracking-tight leading-none">OUR</h2>
-                        <h2 className="text-4xl md:text-6xl font-script text-[#2563ea] font-bold italic leading-none pt-2">sponsors</h2>
-                        <div className="h-px bg-gray-200 flex-1 ml-4 self-center mt-2"></div>
-                    </div>
-                    {/* <span className="text-[#0061FE] font-bold tracking-widest uppercase text-golden-1 mb-2 block">Our Partners</span> */}
-                    <div className="flex items-center gap-2 mb-8">
-                        <span className="w-3 h-3 rounded-full bg-green-400 animate-pulse"></span>
-                        <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">BACKING THE FUTURE</span>
-                    </div>
-                </div>
-
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 w-full mx-auto">
-                    {sponsors.map((sponsor, idx) => (
-                        <a
-                            key={idx}
-                            href={sponsor.link}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="relative group bg-white border border-gray-100 rounded-3xl p-4 md:p-6 w-full aspect-square flex flex-col justify-between hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 block"
-                        >
-                            {/* Top Right Arrow */}
-                            <div className="self-end p-2 bg-gray-50 rounded-full text-gray-400 group-hover:bg-[#0061FE] group-hover:text-white transition-colors">
-                                <ArrowUpRight size={18} />
-                            </div>
-
-                            {/* Centered Image */}
-                            <div className="flex-1 flex items-center justify-center p-2">
-                                <img
-                                    src={sponsor.image}
-                                    alt={sponsor.name}
-                                    className="max-w-[85%] max-h-[85%] object-contain drop-shadow-sm transition-all duration-500"
-                                />
-                            </div>
-
-                            {/* Name Badge */}
-                            <div className="self-start px-3 py-1 bg-gray-50 border border-gray-100 rounded-lg">
-                                <span className="font-bold text-gray-800 text-xs">{sponsor.name}</span>
-                            </div>
-                        </a>
-                    ))}
-                </div>
-            </div>
-        </section>
-    );
-};
-
-
-
-
-
-// --- Community Partners Section ---
-const CommunityPartners = () => {
-    const partners = [
-        {
-            image: "https://res.cloudinary.com/dqudvximt/image/upload/v1767817843/users_cme79i2lk00qls401ar5qxqnc_OGGz5HgXCzS9rI8H-users_clylc5w1v070to301jatq0e85_bNj4z9CoW02cMzqm-circle_rs5ttj.png",
-            link: "#"
-        },
-        {
-            image: "https://res.cloudinary.com/dqudvximt/image/upload/v1767817844/users_cme79i2lk00qls401ar5qxqnc_EMRqmDnatuO4Rk38-users_cm9cf3ngn02erro015wogiktk_8CHW9Warth4BkBG9-Blue_2520Minimalist_2520Simple_2520Technology_2520Logo_2520_2520_1_mqig9s.png",
-            link: "#"
-        },
-        {
-            image: "https://res.cloudinary.com/dqudvximt/image/upload/v1767817846/users_cme79i2lk00qls401ar5qxqnc_1KwVf1Iz3NmGXUQP-176333249_mhbrlj.webp",
-            link: "#"
-        }
-    ];
-
-    return (
-        <section className="py-12 bg-white relative overflow-hidden border-t border-gray-100">
-            <div className="container mx-auto px-6 relative z-10">
-                <div className="text-left mb-8">
-                    <div className="flex items-center gap-2 mb-4">
-                        <h2 className="text-3xl md:text-6xl font-black text-black tracking-tight leading-none">COMMUNITY</h2>
-                        <h2 className="text-3xl md:text-6xl font-script text-[#2563ea] font-bold italic leading-none pt-2">partners</h2>
-                        <div className="h-px bg-gray-200 flex-1 ml-4 self-center mt-2"></div>
-                    </div>
-                    <div className="flex items-center gap-2 mb-8">
-                        <span className="w-3 h-3 rounded-full bg-green-400 animate-pulse"></span>
-                        <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">GROWING TOGETHER</span>
-                    </div>
-                </div>
-
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 w-full mx-auto">
-                    {partners.map((partner, idx) => (
-                        <div
-                            key={idx}
-                            className="relative group bg-white border border-gray-100 rounded-3xl p-4 md:p-6 w-full aspect-square flex flex-col justify-center items-center hover:shadow-lg transition-all duration-300"
-                        >
-                            {/* Centered Image */}
-                            <div className="flex-1 flex items-center justify-center p-2 w-full">
-                                <img
-                                    src={partner.image}
-                                    alt="Community Partner"
-                                    className="max-w-[85%] max-h-[85%] object-contain drop-shadow-sm"
-                                />
-                            </div>
-                        </div>
-                    ))}
-                </div>
-            </div>
-        </section>
-    );
-};
-
-// --- Social Media Bento Grid ---
-const SocialMediaSection = () => {
-    const socials = [
-        {
-            name: "LinkedIn",
-            icon: <Linkedin size={40} />,
-            link: "https://www.linkedin.com/company/codesapiens-community/posts/",
-            color: "bg-[#0077b5]",
-            textColor: "text-white",
-            span: "col-span-1",
-            badge: "@codesapiens-community",
-            isLarge: true,
-            backgroundImage: "url('https://res.cloudinary.com/dqudvximt/image/upload/v1767874220/users_cme79i2lk00qls401ar5qxqnc_n74cMGsKIBuvEzzj-users_cme5bsukl01binm014j8ioh2j_2SNEHA31eEqsxFRS-original-33f53dcd2f48e068523d32df0e5cc92f_xkirvh.gif') center/cover no-repeat"
-        },
-        {
-            name: "Luma",
-            icon: null,
-            link: "https://lu.ma/codesapiens",
-            color: "bg-black",
-            textColor: "text-white",
-            span: "col-span-1",
-            badge: null,
-            backgroundImage: "url('https://res.cloudinary.com/dqudvximt/image/upload/v1767875075/users_cme79i2lk00qls401ar5qxqnc_WI6Z0HVxNMCrvfgn-ETzJoQJr1aCFL2r7-rrDC9gCyIJ77RqVW-luma_cqxcny.jpg') center/cover no-repeat"
-        },
-        {
-            name: "WhatsApp",
-            icon: null,
-            link: "https://chat.whatsapp.com/LLtoddmQx5rIRNb8WE6rqC?mode=ems_copy_t",
-            color: "bg-[#25D366]",
-            textColor: "text-white",
-            span: "col-span-1",
-            badge: null,
-            customContent: (
-                <div className="relative w-full h-full flex items-center justify-center">
-                    <img src="https://res.cloudinary.com/dqudvximt/image/upload/v1767875047/410201-PD391H-802_h7tcfj.jpg" alt="WhatsApp" className="w-24 h-24 object-contain rounded-xl" />
-                </div>
-            )
-        },
-        {
-            name: "Instagram",
-            icon: <Instagram size={32} />,
-            link: "https://www.instagram.com/codesapiens/",
-            color: "bg-white",
-            textColor: "text-black",
-            span: "col-span-1",
-            badge: null,
-            border: "border-gray-100 border",
-            customContent: (
-                <div className="relative w-full h-full flex items-center justify-center">
-                    <div className="absolute inset-0 flex items-center justify-center pb-6">
-                        <img src="https://res.cloudinary.com/dqudvximt/image/upload/v1767874489/users_cme79i2lk00qls401ar5qxqnc_3o1XM7ID2mXVDk6e-XeFzd3iFtoytJqTv-1497553304-104_84834_allkph.png" alt="Instagram" className="w-84 h-84 object-contain drop-shadow-xl" />
-                    </div>
-                    <div className="absolute bottom-0 left-0">
-                        <span className="inline-block px-3 py-1.5 rounded-lg text-xs font-bold bg-gray-100 text-gray-800">
-                            @Codesapiens.in
-                        </span>
-                    </div>
-                </div>
-            )
-        },
-        {
-            name: "Twitter",
-            icon: <Twitter size={32} className="text-[#1DA1F2]" />,
-            link: "https://twitter.com/codesapiens",
-            color: "bg-white",
-            textColor: "text-black",
-            span: "col-span-1",
-            badge: null,
-            border: "border-gray-100 border",
-            customContent: (
-                <div className="relative w-full h-full flex items-center justify-center">
-                    <div className="absolute inset-0 flex items-center justify-center pb-6">
-                        <img src="https://res.cloudinary.com/dqudvximt/image/upload/v1767874490/users_cme79i2lk00qls401ar5qxqnc_XgLMxxPTSSuuRKu5-users_cme5bsukl01binm014j8ioh2j_XQ7ryCBwyUFzFg6v-CLIPLY_372109260_TWITTER_LOGO_400_ptqbvv.gif" alt="Twitter" className="w-32 h-32 object-contain" />
-                    </div>
-                    <div className="absolute bottom-0 left-0">
-                        <span className="inline-block px-3 py-1.5 rounded-lg text-xs font-bold bg-gray-100 text-gray-800">
-                            @codesapiens_in
-                        </span>
-                    </div>
-                </div>
-            )
-        },
-        {
-            name: "Volunteers Needed",
-            icon: null,
-            link: "https://forms.gle/volunteer", // Placeholder link
-            color: "bg-black",
-            textColor: "text-white",
-            span: "col-span-1",
-            badge: null,
-            isLarge: false,
-            backgroundImage: "url('https://res.cloudinary.com/dqudvximt/image/upload/v1767876038/users_cme79i2lk00qls401ar5qxqnc_Hg7Si3j52FVfpQRN-image_x8wghd.png') center/cover no-repeat"
-        },
-        {
-            name: "GitHub",
-            icon: <Github size={40} />,
-            link: "https://github.com/Codesapiens-in",
-            color: "bg-black",
-            textColor: "text-white",
-            span: "col-span-1",
-            badge: "@Codesapiens-in",
-            isLarge: true,
-            backgroundImage: "url('https://res.cloudinary.com/dqudvximt/image/upload/v1767874482/users_cme79i2lk00qls401ar5qxqnc_MOSc1bv3RXu0WL5z-users_cme5bsukl01binm014j8ioh2j_7dOv2cTCX8B86u82-users_clylc5w1v070to301jatq0e85_AdzvY5ioFqaF37x5-github_dsjpx6.gif') center/cover no-repeat"
-        },
-        {
-            name: "YouTube",
-            icon: <Youtube size={40} className="text-red-600" />,
-            link: "https://youtube.com/@codesapiens-in?si=90EaPMYHcSZIHtMi",
-            color: "bg-white",
-            textColor: "text-black",
-            span: "col-span-1",
-            badge: "@Codesapiens",
-            border: "border-gray-100 border",
-            isLarge: true,
-            backgroundImage: "url('https://res.cloudinary.com/dqudvximt/image/upload/v1767874488/users_cme79i2lk00qls401ar5qxqnc_Ov9Ygh4NAQfPGktu-users_cme5bsukl01binm014j8ioh2j_5JQAosdeiVappI2y-users_clylc5w1v070to301jatq0e85_CCuEsN5SSMlu4LAN-youtube_aky1f3.gif') center/cover no-repeat"
-        }
-    ];
-
-    return (
-        <section className="py-20 bg-[#FAF9F6] relative overflow-hidden text-left">
-            <div className="container mx-auto px-6 relative z-10">
-                <div className="text-left mb-8">
-                    <div className="flex items-center gap-2 mb-4">
-                        <h2 className="text-4xl md:text-6xl font-black text-black tracking-tight leading-none">SOCIAL</h2>
-                        <h2 className="text-4xl md:text-6xl font-script text-[#2563ea] font-bold italic leading-none pt-2">links</h2>
-                        <div className="h-px bg-gray-200 flex-1 ml-4 self-center mt-2"></div>
-                    </div>
-                    <div className="flex items-center gap-2 mb-8">
-                        <Globe size={16} className="text-[#0061FE] animate-pulse" />
-                        <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">CONNECT WITH US</span>
-                    </div>
-                </div>
-
-                <div className="grid grid-cols-2 md:grid-cols-4 auto-rows-[200px] gap-4 md:gap-6 w-full mx-auto">
-                    {socials.map((social, idx) => (
-                        <motion.a
-                            key={idx}
-                            href={social.link}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            initial={{ opacity: 0, y: 20 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            whileHover={{ scale: 1.02 }}
-                            transition={{ delay: idx * 0.05 }}
-                            className={`${social.span} ${social.color} ${social.textColor} ${social.border} rounded-3xl p-6 relative overflow-hidden group shadow-sm hover:shadow-xl flex flex-col justify-between transition-all`}
-                            style={social.backgroundImage ? { backgroundImage: social.color.includes('gradient') ? social.color : undefined } : {}}
-                        >
-                            {/* Custom Background Image if any */}
-                            {social.backgroundImage && (
-                                <div className="absolute inset-0" style={{ background: social.backgroundImage }}></div>
-                            )}
-
-                            {/* Top Right Arrow */}
-                            <div className={`absolute top-4 right-4 p-2 rounded-full ${social.textColor === 'text-white' ? 'bg-white/20 text-white' : 'bg-gray-100 text-gray-500'} opacity-0 group-hover:opacity-100 transition-opacity`}>
-                                <ArrowUpRight size={16} />
-                            </div>
-
-                            {/* Content */}
-                            {social.customContent ? (
-                                social.customContent
-                            ) : (
-                                <>
-                                    <div className="mb-auto">
-                                        {social.customIcon || social.icon}
-                                    </div>
-                                    <div className="z-10 mt-auto">
-                                        {social.badge && (
-                                            <span className={`inline-block px-3 py-1.5 rounded-lg text-xs font-bold ${social.textColor === 'text-white' ? 'bg-white text-black' : 'bg-gray-100 text-gray-800'}`}>
-                                                {social.badge}
-                                            </span>
-                                        )}
-                                    </div>
-                                </>
-                            )}
-                        </motion.a>
-                    ))}
-                </div>
-            </div>
-        </section>
-    );
-};
-
-
-// --- Notice Section (Call for Speakers/Sponsors) ---
-// --- Notice Section (Call for Speakers/Sponsors) ---
-const NoticeSection = () => {
-    return (
-        <section className="py-4 bg-[#FFF8DC] relative overflow-hidden text-left">
-            <div className="container mx-auto px-6 relative z-10">
-                <div className="grid grid-cols-1 md:grid-cols-[auto_1fr] gap-4 md:gap-8 items-center max-w-4xl mx-auto">
-                    {/* Title (Left Side on Desktop) */}
-                    <div className="flex items-center gap-2 shrink-0">
-                        <h2 className="text-xl md:text-2xl font-black text-black tracking-tight leading-none">LATEST</h2>
-                        <h2 className="text-xl md:text-2xl font-script text-[#2563ea] font-bold italic leading-none pt-1">updates</h2>
-                        <div className="h-px bg-gray-200 w-12 self-center mt-1 md:hidden"></div>
-                    </div>
-
-                    {/* Images Grid */}
-                    <div className="grid grid-cols-2 gap-3 w-full">
-                        {/* Call for Speakers */}
-                        <div className="relative group bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300">
-                            <img
-                                src="https://res.cloudinary.com/dqudvximt/image/upload/v1767877162/users_cme79i2lk00qls401ar5qxqnc_N0bIjmMP0Ybxoznz-1753684368888_jda3us.jpg"
-                                alt="Call for Speakers"
-                                className="w-full h-auto object-cover"
-                            />
-                        </div>
-
-                        {/* Sponsors & Venue */}
-                        <div className="relative group bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300">
-                            <img
-                                src="https://res.cloudinary.com/dqudvximt/image/upload/v1767877178/users_cme79i2lk00qls401ar5qxqnc_KB4hFvAzhyqJF0xf-3a61cb74-01c9-4880-be04-a4036f32c4f9_t64kt9.jpg"
-                                alt="Call for Sponsors and Venue"
-                                className="w-full h-auto object-cover"
-                            />
                         </div>
                     </div>
                 </div>
@@ -595,7 +262,35 @@ const CodeSapiensHero = () => {
     const shapeOpacity = useTransform(scrollY, [0, 400], [0.8, 0]);
 
     // Content for Sticky Scroll
-
+    const visionContent = [
+        {
+            title: "Meetups",
+            description: <span className="text-gray-600">Offline events and mini-hackathons where you build and launch projects in minutes. <span className="bg-yellow-300 text-black px-1 rounded-sm">Connect with like-minded peers.</span></span>,
+            content: (
+                <div className="w-full flex justify-center">
+                    <img src="https://res.cloudinary.com/dqudvximt/image/upload/v1759740834/users_cme79i2lk00qls401ar5qxqnc_OadwAYSr5ySuegEn-IMG-20250914-WA0012_gvyeye.jpg" alt="Meetups" className="w-full max-w-md h-auto rounded-lg" />
+                </div>
+            )
+        },
+        {
+            title: "Hackathons",
+            description: <span className="text-gray-600">Fun, minimal hackathons to get hands-on experience and win prizes. Push your limits and <span className="bg-yellow-300 text-black px-1 rounded-sm">build something amazing.</span></span>,
+            content: (
+                <div className="w-full flex justify-center">
+                    <img src="https://res.cloudinary.com/dqudvximt/image/upload/v1759740764/width_800_pmtms3.webp" alt="Hackathons" className="w-full max-w-md h-auto rounded-lg" />
+                </div>
+            )
+        },
+        {
+            title: "Nurturing Talent",
+            description: <span className="text-gray-600">We help you discover your interests and build a unique profile that stands out. <span className="bg-yellow-300 text-black px-1 rounded-sm">Mentorship from seniors and industry experts.</span></span>,
+            content: (
+                <div className="w-full flex justify-center">
+                    <img src="https://res.cloudinary.com/dqudvximt/image/upload/v1759741375/users_cme79i2lk00qls401ar5qxqnc_tYvYry0ll1qJY9Cr-sZlcWmpyKLCEVr3R-WhatsApp25202025-08-10252015.15.02_25567a3d_c0frk5.jpg" alt="Nurturing Talent" className="w-full max-w-md h-auto rounded-lg" />
+                </div>
+            )
+        }
+    ];
 
     const volunteers = [
         { photo: "https://res.cloudinary.com/druvxcll9/image/upload/v1761122516/2ABMHfqOsrpoL3OV-WhatsApp202025-08-312010.33.52_a8a27bbd_vzcgzq_1_bm8zch.jpg", name: "Keerthana M G", link: "https://in.linkedin.com/in/keerthana-m-g-12ba59256" },
@@ -620,11 +315,9 @@ const CodeSapiensHero = () => {
                         <span className="text-xl font-bold tracking-tight">CodeSapiens</span>
                     </div>
                     <div className="hidden md:flex items-center gap-8 font-medium text-golden-1">
-                        <a href="#vision" className="hover:text-[#0061FE] transition-colors">Vision</a>
-                        <a href="/programs" className="hover:text-[#0061FE] transition-colors">Programs</a>
-                        <a href="/meetups" className="hover:text-[#0061FE] transition-colors">Meetups</a>
-                        <a href="#events" className="hover:text-[#0061FE] transition-colors">Events</a>
-                        <a href="#community" className="hover:text-[#0061FE] transition-colors">Community</a>
+                        <a href="#vision" className="hover:text-[#0061FE] transition-colors">About</a>
+                        <a href="#events" className="hover:text-[#0061FE] transition-colors">Highlights</a>
+                        <a href="#community" className="hover:text-[#0061FE] transition-colors">Team</a>
                         <button onClick={() => navigate('/auth')} className="hover:text-[#0061FE]">Log in</button>
                         <button onClick={() => navigate('/auth')} className="bg-white text-black px-5 py-2.5 rounded-sm hover:bg-gray-200 transition-colors font-bold">
                             Get Started
@@ -641,8 +334,6 @@ const CodeSapiensHero = () => {
                 <div className="fixed inset-0 z-40 bg-[#101010] text-white pt-24 px-6 md:hidden">
                     <div className="flex flex-col gap-6 text-golden-2 font-bold">
                         <a href="#vision" onClick={() => setIsMenuOpen(false)}>Vision</a>
-                        <a href="/programs" onClick={() => setIsMenuOpen(false)}>Programs</a>
-                        <a href="/meetups" onClick={() => setIsMenuOpen(false)}>Meetups</a>
                         <a href="#events" onClick={() => setIsMenuOpen(false)}>Events</a>
                         <a href="#community" onClick={() => setIsMenuOpen(false)}>Community</a>
                         <button onClick={() => navigate('/auth')} className="text-left text-[#0061FE]">Log in</button>
@@ -728,7 +419,7 @@ const CodeSapiensHero = () => {
                             <div className="relative rounded-xl overflow-hidden shadow-2xl border border-gray-800 group transition-transform duration-500">
                                 <div className="absolute inset-0 bg-gradient-to-tr from-[#0061FE]/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-10 pointer-events-none"></div>
                                 <img
-                                    src="https://res.cloudinary.com/dqudvximt/image/upload/v1771005975/Gemini_Generated_Image_il0qzjil0qzjil0q_1_cfh7ix.png"
+                                    src="https://res.cloudinary.com/dqudvximt/image/upload/v1766304825/preview-4_qcqokz.png"
                                     alt="CodeSapiens Dashboard"
                                     className="w-full h-auto object-cover"
                                 />
@@ -768,7 +459,7 @@ const CodeSapiensHero = () => {
                             </p>
                             <div className="grid grid-cols-2 gap-8 border-t border-gray-200 pt-8">
                                 <div>
-                                    <h3 className="text-golden-3 font-bold text-[#FF0000] mb-2">2000+</h3>
+                                    <h3 className="text-golden-3 font-bold text-[#FF0000] mb-2">1500+</h3>
                                     <p className="text-golden-1 text-gray-500 uppercase tracking-widest">Active Members</p>
                                 </div>
                                 <div>
@@ -779,22 +470,70 @@ const CodeSapiensHero = () => {
                         </div>
 
                         <div className="relative h-72 sm:h-80 md:h-96 w-full rounded-lg overflow-hidden shadow-lg border border-gray-200 mt-8 md:mt-0">
-                            <img
-                                src="https://res.cloudinary.com/dqudvximt/image/upload/v1767535873/1760365837828_vyrmco.jpg"
-
+                            <video
+                                src="https://res.cloudinary.com/dqudvximt/video/upload/v1765443313/66c503d081b2f012369fc5d2_674798e5512046ff64125032_Collaboration_Top-Down_Table-transcode_jgafvj.mp4"
+                                autoPlay
+                                loop
+                                muted
+                                playsInline
                                 className="absolute inset-0 w-full h-full object-cover"
                             />
                         </div>
 
-
+                        <div className="col-span-2 mt-4">
+                            <div className="space-y-8 md:space-y-16">
+                                {visionContent.map((item, index) => (
+                                    <motion.div
+                                        key={index}
+                                        initial={{ opacity: 0, y: 20 }}
+                                        whileInView={{ opacity: 1, y: 0 }}
+                                        viewport={{ once: true }}
+                                        transition={{ delay: index * 0.1 }}
+                                        className={`flex flex-col ${index % 2 === 0 ? 'md:flex-row' : 'md:flex-row-reverse'} gap-8 md:gap-12 items-center`}
+                                    >
+                                        <div className="w-full md:w-2/5 text-center md:text-left">
+                                            <h3 className="text-golden-2 font-bold mb-3 md:mb-4 text-[#1E1919]">{item.title}</h3>
+                                            <p className="text-golden-1 text-gray-600 leading-relaxed">{item.description}</p>
+                                        </div>
+                                        <div className="w-full md:w-3/5 h-auto flex items-center justify-center">
+                                            {item.content}
+                                        </div>
+                                    </motion.div>
+                                ))}
+                            </div>
+                        </div>
                     </div>
                 </div>
             </section>
 
-            {/* Events Section - Community Moments */}
-            <section id="events" className="py-24 md:py-32 bg-white text-[#1E1919]">
-                <div className="container mx-auto px-6">
+            {/* Stats Section */}
+            <StatsSection />
 
+            {/* Events Section */}
+            <section id="events" className="py-24 md:py-32 bg-[#1E1919] text-[#F7F5F2]">
+                <div className="container mx-auto px-6">
+                    <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-16">
+                        <div>
+                            <span className="text-[#0061FE] font-bold tracking-widest uppercase text-golden-1 mb-4 block">Events</span>
+                            <h2 className="text-golden-2 md:text-golden-3 font-bold text-white mb-4">What's Happening</h2>
+                            <p className="text-golden-1 text-gray-400">Join us at our upcoming events.</p>
+                        </div>
+
+                    </div>
+
+                    {/* Luma Embed */}
+                    <div className="mb-24">
+                        <iframe
+                            src="https://luma.com/embed/calendar/cal-UvcJfwpSBZdMc61/events"
+                            width="100%"
+                            height="500"
+                            className="rounded-sm border border-gray-800 shadow-2xl bg-white"
+                            frameBorder="0"
+                            allowFullScreen=""
+                            aria-hidden="false"
+                            tabIndex="0"
+                        ></iframe>
+                    </div>
 
                     {/* Past Events Gallery */}
                     <div className="flex items-center justify-between mb-12">
@@ -805,32 +544,38 @@ const CodeSapiensHero = () => {
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
                         {communityPhotos.slice(0, 6).map((photo, i) => (
                             <motion.div
                                 key={photo.id}
-                                initial={{ opacity: 0, y: 20 }}
-                                whileInView={{ opacity: 1, y: 0 }}
-                                whileHover={{ y: -5 }}
+                                initial={{ opacity: 0, rotate: i % 2 === 0 ? 3 : -3, scale: 0.9 }}
+                                whileInView={{ opacity: 1, rotate: i % 2 === 0 ? 3 : -3, scale: 1 }}
+                                whileHover={{
+                                    scale: 1.05,
+                                    rotate: 0,
+                                    zIndex: 50,
+                                    transition: { duration: 0.2 }
+                                }}
                                 viewport={{ once: true, margin: "-50px" }}
-                                transition={{ duration: 0.5, delay: i * 0.1 }}
-                                className="group relative overflow-hidden rounded-xl bg-[#2A2A2A] border border-gray-800"
+                                transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                                className="relative cursor-pointer"
                             >
-                                {/* Photo */}
-                                <div className="aspect-[4/3] overflow-hidden">
-                                    <img
-                                        src={photo.image_url}
-                                        alt={photo.title}
-                                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                                    />
-                                    {/* Overlay */}
-                                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-60 group-hover:opacity-80 transition-opacity"></div>
-                                </div>
+                                {/* Sticky Note Card */}
+                                <div className="bg-[#FFFBEA] border border-[#eaddc5] shadow-xl p-4 pb-8 rounded-sm relative">
+                                    {/* Tape Effects */}
+                                    <div className="absolute -top-3 -left-3 w-16 h-6 bg-gradient-to-b from-amber-200/80 to-amber-300/60 rounded-sm shadow-sm z-20" style={{ transform: 'rotate(-45deg)' }}></div>
+                                    <div className="absolute -bottom-3 -right-3 w-16 h-6 bg-gradient-to-b from-amber-200/80 to-amber-300/60 rounded-sm shadow-sm z-20" style={{ transform: 'rotate(-45deg)' }}></div>
 
-                                {/* Content Overlay */}
-                                <div className="absolute bottom-0 left-0 w-full p-6">
-                                    <h4 className="text-white font-bold text-lg mb-1">{photo.title}</h4>
-                                    <p className="text-gray-300 text-sm">{photo.description || photo.date}</p>
+                                    {/* Photo */}
+                                    <div className="aspect-[4/3] overflow-hidden rounded-sm mb-4 border-4 border-white shadow-inner relative z-10 bg-gray-100">
+                                        <img src={photo.image_url} alt={photo.title} className="w-full h-full object-cover" />
+                                    </div>
+
+                                    {/* Info - Handwritten Font Style */}
+                                    <div className="text-[#1E1919] relative z-10 text-center">
+                                        <p className="font-bold text-golden-1 mb-1 text-gray-800" style={{ fontFamily: 'Georgia, serif' }}>{photo.title}</p>
+                                        <p className="text-golden-1 text-gray-500 font-medium italic">{photo.description || photo.date}</p>
+                                    </div>
                                 </div>
                             </motion.div>
                         ))}
@@ -838,16 +583,303 @@ const CodeSapiensHero = () => {
                 </div>
             </section>
 
-            {/* Stats Section */}
-            {/* Stats Section */}
-            <StatsSection />
+            {/* Sponsors Section */}
+            <section className="py-20 bg-[#FFFEF9] relative overflow-hidden">
+                <div className="container mx-auto px-6">
+                    <div className="mb-12">
+                        <h2 className="text-5xl font-black mb-2">
+                            <span className="text-black">OUR</span>
+                            <span className="text-[#0061FE]">sponsors</span>
+                        </h2>
+                        <p className="text-[#00D9A3] font-medium uppercase tracking-wider text-sm">● BACKING THE FUTURE</p>
+                    </div>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                        {[
+                            { name: "Make IT Lab", logo: "https://res.cloudinary.com/druvxcll9/image/upload/v1761122534/codesapiens_3_md0nvd_ceyry4.png", link: "https://makeitlab.in" },
+                            { name: "YuniQ", logo: "https://res.cloudinary.com/druvxcll9/image/upload/v1761122532/width_800_pmtms3_cqtzrn.webp", link: "https://yuniq.in" },
+                            { name: "Contentstack", logo: "https://res.cloudinary.com/druvxcll9/image/upload/v1761122991/1753106111524_wqepam_wam1st.jpg", link: "https://www.contentstack.com" },
+                            { name: "Navan AI", logo: "https://res.cloudinary.com/druvxcll9/image/upload/v1761122957/users_cme79i2lk00qls401ar5qxqnc_OadwAYSr5ySuegEn-IMG-20250914-WA0012_gvyeye_n1s3az.jpg", link: "https://navan.ai" },
+                            { name: "Notion", logo: "https://res.cloudinary.com/druvxcll9/image/upload/v1761122531/users_cme79i2lk00qls401ar5qxqnc_tYvYry0ll1qJY9Cr-sZlcWmpyKLCEVr3R-WhatsApp25202025-08-10252015.15.02_25567a3d_c0frk5_dpl25k.jpg", link: "https://www.notion.so" },
+                            { name: "Interview Buddy", logo: "https://res.cloudinary.com/dqudvximt/image/upload/v1759740834/users_cme79i2lk00qls401ar5qxqnc_OadwAYSr5ySuegEn-IMG-20250914-WA0012_gvyeye.jpg", link: "https://interviewbuddy.in" }
+                        ].map((sponsor, i) => (
+                            <a
+                                key={i}
+                                href={sponsor.link}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                            >
+                                <motion.div
+                                    initial={{ opacity: 0, y: 20 }}
+                                    whileInView={{ opacity: 1, y: 0 }}
+                                    viewport={{ once: true }}
+                                    transition={{ delay: i * 0.1 }}
+                                    className="bg-white rounded-2xl p-8 shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 group relative overflow-hidden cursor-pointer h-full"
+                                >
+                                    <div className="absolute top-3 right-3 text-gray-300 group-hover:text-[#0061FE] transition-colors">
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                            <path d="M7 17L17 7M17 7H7M17 7V17" />
+                                        </svg>
+                                    </div>
+                                    <div className="aspect-square flex items-center justify-center mb-4">
+                                        <img src={sponsor.logo} alt={sponsor.name} className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300" />
+                                    </div>
+                                    <p className="text-center text-sm font-medium text-gray-700 group-hover:text-[#0061FE] transition-colors">{sponsor.name}</p>
+                                </motion.div>
+                            </a>
+                        ))}
+                    </div>
+                </div>
+            </section>
 
-            {/* Sponsor Section */}
-            {/* Sponsor Section */}
-            <SponsorSection />
-            <CommunityPartners />
-            <SocialMediaSection />
-            <NoticeSection />
+            {/* Community Partners */}
+            <section className="py-20 bg-white">
+                <div className="container mx-auto px-6">
+                    <div className="mb-12">
+                        <h2 className="text-5xl font-black mb-2">
+                            <span className="text-black">COMMUNITY</span>
+                            <span className="text-[#0061FE]">partners</span>
+                        </h2>
+                        <p className="text-[#00D9A3] font-medium uppercase tracking-wider text-sm">● GROWING TOGETHER</p>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                        {[
+                            { name: "Chennai React.JS", logo: "https://res.cloudinary.com/druvxcll9/image/upload/v1761122531/users_cme79i2lk00qls401ar5qxqnc_tYvYry0ll1qJY9Cr-sZlcWmpyKLCEVr3R-WhatsApp25202025-08-10252015.15.02_25567a3d_c0frk5_dpl25k.jpg", link: "https://www.meetup.com/chennai-react-js/" },
+                            { name: "D3 Community", logo: "https://res.cloudinary.com/dqudvximt/image/upload/v1759740834/users_cme79i2lk00qls401ar5qxqnc_OadwAYSr5ySuegEn-IMG-20250914-WA0012_gvyeye.jpg", link: "https://d3community.in" },
+                            { name: "Namma Flutter", logo: "https://res.cloudinary.com/dqudvximt/image/upload/v1759740764/width_800_pmtms3.webp", link: "https://www.meetup.com/namma-flutter/" }
+                        ].map((partner, i) => (
+                            <a
+                                key={i}
+                                href={partner.link}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                            >
+                                <motion.div
+                                    initial={{ opacity: 0, scale: 0.95 }}
+                                    whileInView={{ opacity: 1, scale: 1 }}
+                                    viewport={{ once: true }}
+                                    transition={{ delay: i * 0.1 }}
+                                    className="bg-[#FAFAFA] rounded-2xl p-10 shadow-sm hover:shadow-lg transition-all duration-300 border border-gray-100 group cursor-pointer h-full"
+                                >
+                                    <div className="aspect-square flex items-center justify-center mb-4 bg-white rounded-xl p-6 group-hover:scale-105 transition-transform duration-300">
+                                        <img src={partner.logo} alt={partner.name} className="w-full h-full object-contain" />
+                                    </div>
+                                    <p className="text-center text-base font-semibold text-gray-800 group-hover:text-[#0061FE] transition-colors">{partner.name}</p>
+                                </motion.div>
+                            </a>
+                        ))}
+                    </div>
+                </div>
+            </section>
+
+            {/* Social Links */}
+            <section className="py-20 bg-[#FAFAFA]">
+                <div className="container mx-auto px-6">
+                    <div className="mb-12">
+                        <h2 className="text-5xl font-black mb-2">
+                            <span className="text-black">SOCIAL</span>
+                            <span className="text-[#0061FE]">links</span>
+                        </h2>
+                        <p className="text-[#0061FE] font-medium uppercase tracking-wider text-sm">● CONNECT WITH US</p>
+                    </div>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                        <motion.a
+                            href="https://www.linkedin.com/company/codesapiens"
+                            target="_blank"
+                            rel="noreferrer"
+                            initial={{ opacity: 0, y: 20 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }}
+                            className="bg-[#0077B5] rounded-2xl p-8 flex flex-col items-center justify-center gap-4 hover:scale-105 transition-transform shadow-lg group aspect-square"
+                        >
+                            <Linkedin size={48} className="text-white" />
+                            <span className="text-white font-bold text-sm">@codesapiens-community</span>
+                        </motion.a>
+
+                        <motion.a
+                            href="https://lu.ma/codesapiens"
+                            target="_blank"
+                            rel="noreferrer"
+                            initial={{ opacity: 0, y: 20 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ delay: 0.1 }}
+                            className="bg-gradient-to-br from-[#FF6B6B] via-[#FFD93D] to-[#6BCF7F] rounded-2xl p-8 flex flex-col items-center justify-center gap-4 hover:scale-105 transition-transform shadow-lg aspect-square"
+                        >
+                            <Calendar size={48} className="text-white" />
+                            <span className="text-white font-bold text-sm">Luma Events</span>
+                        </motion.a>
+
+                        <motion.a
+                            href="https://chat.whatsapp.com/codesapiens"
+                            target="_blank"
+                            rel="noreferrer"
+                            initial={{ opacity: 0, y: 20 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ delay: 0.2 }}
+                            className="bg-[#25D366] rounded-2xl p-8 flex flex-col items-center justify-center gap-4 hover:scale-105 transition-transform shadow-lg aspect-square"
+                        >
+                            <svg width="48" height="48" viewBox="0 0 24 24" fill="white">
+                                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z" />
+                            </svg>
+                            <span className="text-white font-bold text-sm">WhatsApp</span>
+                        </motion.a>
+
+                        <motion.a
+                            href="https://www.instagram.com/codesapiens.in"
+                            target="_blank"
+                            rel="noreferrer"
+                            initial={{ opacity: 0, y: 20 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ delay: 0.3 }}
+                            className="bg-gradient-to-br from-[#833AB4] via-[#FD1D1D] to-[#F77737] rounded-2xl p-8 flex flex-col items-center justify-center gap-4 hover:scale-105 transition-transform shadow-lg aspect-square"
+                        >
+                            <svg width="48" height="48" viewBox="0 0 24 24" fill="white">
+                                <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" />
+                            </svg>
+                            <span className="text-white font-bold text-sm">@Codesapiens.in</span>
+                        </motion.a>
+
+                        <motion.a
+                            href="https://twitter.com/codesapiens_in"
+                            target="_blank"
+                            rel="noreferrer"
+                            initial={{ opacity: 0, y: 20 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ delay: 0.4 }}
+                            className="bg-[#1DA1F2] rounded-2xl p-8 flex flex-col items-center justify-center gap-4 hover:scale-105 transition-transform shadow-lg aspect-square"
+                        >
+                            <svg width="48" height="48" viewBox="0 0 24 24" fill="white">
+                                <path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z" />
+                            </svg>
+                            <span className="text-white font-bold text-sm">@codesapiens_in</span>
+                        </motion.a>
+
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ delay: 0.5 }}
+                            className="bg-[#FFE66D] rounded-2xl p-8 flex flex-col items-center justify-center gap-4 hover:scale-105 transition-transform shadow-lg aspect-square border-4 border-dashed border-gray-800"
+                        >
+                            <Users size={48} className="text-gray-800" />
+                            <span className="text-gray-800 font-black text-sm">VOLUNTEERS NEEDED</span>
+                        </motion.div>
+
+                        <motion.a
+                            href="https://github.com/codesapiensin"
+                            target="_blank"
+                            rel="noreferrer"
+                            initial={{ opacity: 0, y: 20 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ delay: 0.6 }}
+                            className="bg-[#181717] rounded-2xl p-8 flex flex-col items-center justify-center gap-4 hover:scale-105 transition-transform shadow-lg aspect-square"
+                        >
+                            <Github size={48} className="text-white" />
+                            <span className="text-white font-bold text-sm">@Codesapiens-in</span>
+                        </motion.a>
+
+                        <motion.a
+                            href="https://www.youtube.com/@CodeSapiens"
+                            target="_blank"
+                            rel="noreferrer"
+                            initial={{ opacity: 0, y: 20 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ delay: 0.7 }}
+                            className="bg-[#FF0000] rounded-2xl p-8 flex flex-col items-center justify-center gap-4 hover:scale-105 transition-transform shadow-lg aspect-square"
+                        >
+                            <Youtube size={48} className="text-white" />
+                            <span className="text-white font-bold text-sm">@Codesapiens</span>
+                        </motion.a>
+                    </div>
+                </div>
+            </section>
+
+            {/* Latest Updates Section */}
+            <section className="py-20 bg-white">
+                <div className="container mx-auto px-6">
+                    <div className="mb-12">
+                        <h2 className="text-5xl font-black mb-2">
+                            <span className="text-black">LATEST</span>
+                            <span className="text-[#0061FE]">updates</span>
+                        </h2>
+                        <p className="text-gray-600 font-medium uppercase tracking-wider text-sm">● WHAT'S NEW</p>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <motion.div
+                            initial={{ opacity: 0, x: -20 }}
+                            whileInView={{ opacity: 1, x: 0 }}
+                            viewport={{ once: true }}
+                            className="bg-gradient-to-br from-[#667eea] to-[#764ba2] rounded-2xl p-8 text-white shadow-lg hover:shadow-2xl transition-all duration-300"
+                        >
+                            <div className="flex items-start gap-4">
+                                <div className="bg-white/20 rounded-full p-3 backdrop-blur-sm">
+                                    <Calendar size={24} />
+                                </div>
+                                <div className="flex-1">
+                                    <h3 className="text-2xl font-bold mb-3">Speakers Call Open!</h3>
+                                    <p className="text-white/90 mb-4 leading-relaxed">
+                                        Got something cool in tech to share? Whether you're a student, dev, or tech enthusiast, come teach what you know!
+                                    </p>
+                                    <ul className="space-y-2 mb-4">
+                                        <li className="flex items-center gap-2">
+                                            <span className="text-white/80">✓</span>
+                                            <span className="text-sm">Any tech topic</span>
+                                        </li>
+                                        <li className="flex items-center gap-2">
+                                            <span className="text-white/80">✓</span>
+                                            <span className="text-sm">Open to all</span>
+                                        </li>
+                                    </ul>
+                                    <a
+                                        href="https://codesapiens.in"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="inline-flex items-center gap-2 bg-white text-[#667eea] px-6 py-3 rounded-lg font-bold hover:bg-gray-100 transition-colors"
+                                    >
+                                        Apply Now
+                                        <ArrowRight size={18} />
+                                    </a>
+                                </div>
+                            </div>
+                        </motion.div>
+
+                        <motion.div
+                            initial={{ opacity: 0, x: 20 }}
+                            whileInView={{ opacity: 1, x: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ delay: 0.1 }}
+                            className="bg-gradient-to-br from-[#f093fb] to-[#f5576c] rounded-2xl p-8 text-white shadow-lg hover:shadow-2xl transition-all duration-300"
+                        >
+                            <div className="flex items-start gap-4">
+                                <div className="bg-white/20 rounded-full p-3 backdrop-blur-sm">
+                                    <Users size={24} />
+                                </div>
+                                <div className="flex-1">
+                                    <h3 className="text-2xl font-bold mb-3">Call for Sponsors & Venue</h3>
+                                    <p className="text-white/90 mb-4 leading-relaxed">
+                                        We're looking for venues and sponsors for our inter-college events! Help us bring the student community together.
+                                    </p>
+                                    <p className="text-sm text-white/80 mb-4">
+                                        Contact us to support student growth, innovation, and community impact.
+                                    </p>
+                                    <a
+                                        href="mailto:contact@codesapiens.in"
+                                        className="inline-flex items-center gap-2 bg-white text-[#f5576c] px-6 py-3 rounded-lg font-bold hover:bg-gray-100 transition-colors"
+                                    >
+                                        Get in Touch
+                                        <ArrowRight size={18} />
+                                    </a>
+                                </div>
+                            </div>
+                        </motion.div>
+                    </div>
+                </div>
+            </section>
 
             {/* Hall of Fame */}
             <section className="py-32 bg-[#0061FE] text-white overflow-hidden relative">
@@ -882,23 +914,23 @@ const CodeSapiensHero = () => {
             </section>
 
             {/* Team / Mafia Gang */}
-            <section id="community" className="py-8 md:py-16 bg-[#F7F5F2] text-[#1E1919]">
+            <section id="community" className="py-24 md:py-32 bg-[#F7F5F2] text-[#1E1919]">
                 <div className="container mx-auto px-6 text-center">
-                    <span className="text-[#0061FE] font-bold tracking-widest uppercase text-xs md:text-sm text-golden-1 mb-2 block">Community</span>
-                    <h2 className="text-2xl md:text-4xl text-golden-2 md:text-golden-3 font-bold mb-3">The Mafia Gang</h2>
-                    <p className="text-golden-1 text-gray-600 text-sm md:text-base max-w-2xl mx-auto mb-8">
-                        Meet the core members who run the community. We are students, just like you.
+                    <span className="text-[#0061FE] font-bold tracking-widest uppercase text-golden-1 mb-4 block">Our Team</span>
+                    <h2 className="text-golden-2 md:text-golden-3 font-bold mb-6">Meet the Core Team</h2>
+                    <p className="text-golden-1 text-gray-600 max-w-2xl mx-auto mb-20">
+                        A passionate student team building experiences, opportunities, and a stronger tech community for everyone.
                     </p>
 
-                    <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-y-6 gap-x-2 md:gap-x-4">
+                    <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-y-12 gap-x-8">
                         {/* Founder */}
                         <div className="col-span-2 md:col-span-1 flex flex-col items-center group">
-                            <div className="w-20 h-20 md:w-24 md:h-24 rounded-full overflow-hidden mb-3 border-4 border-[#FA5D00] shadow-lg group-hover:scale-105 transition-transform">
+                            <div className="w-40 h-40 rounded-full overflow-hidden mb-6 border-4 border-[#FA5D00] shadow-lg group-hover:scale-105 transition-transform">
                                 <img src="https://res.cloudinary.com/druvxcll9/image/upload/v1761122517/1679197646322_n1svjq_s5w42a.jpg" alt="Thiyaga B" className="w-full h-full object-cover" />
                             </div>
-                            <h3 className="font-bold text-golden-2 mb-0.5 text-sm md:text-base">Thiyaga B</h3>
-                            <p className="text-[#FA5D00] text-golden-1 font-bold uppercase tracking-widest text-[10px] md:text-xs mb-1">Founder</p>
-                            <a href="https://www.linkedin.com/in/thiyagab/" target="_blank" rel="noreferrer" className="text-gray-400 hover:text-[#0061FE] transition-colors"><Linkedin size={14} /></a>
+                            <h3 className="font-bold text-golden-2 mb-1">Thiyaga B</h3>
+                            <p className="text-[#FA5D00] text-golden-1 font-bold uppercase tracking-widest mb-3">Founder</p>
+                            <a href="https://www.linkedin.com/in/thiyagab/" target="_blank" rel="noreferrer" className="text-gray-400 hover:text-[#0061FE] transition-colors"><Linkedin size={20} /></a>
                         </div>
                         {volunteers.map((vol, i) => (
                             <motion.div
@@ -908,13 +940,13 @@ const CodeSapiensHero = () => {
                                 transition={{ delay: i * 0.05 }}
                                 className="flex flex-col items-center group"
                             >
-                                <div className="w-16 h-16 md:w-20 md:h-20 rounded-full overflow-hidden mb-2 grayscale group-hover:grayscale-0 transition-all duration-500 border-2 border-transparent group-hover:border-[#0061FE] shadow-md">
+                                <div className="w-32 h-32 rounded-full overflow-hidden mb-5 grayscale group-hover:grayscale-0 transition-all duration-500 border-2 border-transparent group-hover:border-[#0061FE] shadow-md">
                                     <img src={vol.photo} alt={vol.name} className="w-full h-full object-cover" />
                                 </div>
-                                <h3 className="font-bold text-golden-1 mb-0.5 text-xs md:text-sm">{vol.name}</h3>
+                                <h3 className="font-bold text-golden-1 mb-1">{vol.name}</h3>
                                 {vol.link && (
-                                    <a href={vol.link} target="_blank" rel="noreferrer" className="text-gray-400 hover:text-[#0061FE] transition-colors mt-1">
-                                        <Linkedin size={12} />
+                                    <a href={vol.link} target="_blank" rel="noreferrer" className="text-gray-400 hover:text-[#0061FE] transition-colors mt-2">
+                                        <Linkedin size={18} />
                                     </a>
                                 )}
                             </motion.div>
@@ -923,13 +955,21 @@ const CodeSapiensHero = () => {
                 </div>
             </section>
 
-            {/* Tagline Section */}
-            <section className="py-20 bg-black flex items-center justify-center">
-                <div className="container mx-auto px-6 text-center">
-                    <h2 className="text-golden-2 md:text-golden-3 font-black text-white tracking-tighter uppercase leading-none">
-                        Building Community <br />
-                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#0061FE] to-[#00C6F7]">Since 2023</span>
-                    </h2>
+            {/* Big Tagline Section */}
+            <section className="py-24 bg-gradient-to-br from-[#0061FE] to-[#0050d6] text-white text-center relative overflow-hidden">
+                <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(circle, #fff 2px, transparent 2px)', backgroundSize: '40px 40px' }}></div>
+                <div className="container mx-auto px-6 relative z-10">
+                    <motion.h2
+                        initial={{ opacity: 0, y: 30 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        className="text-4xl md:text-6xl font-black mb-6 leading-tight"
+                    >
+                        Built by Students.<br />Powered by Ambition.
+                    </motion.h2>
+                    <p className="text-xl text-white/80 max-w-2xl mx-auto">
+                        Join a community where learning meets opportunity, and ambition turns into achievement.
+                    </p>
                 </div>
             </section>
 
