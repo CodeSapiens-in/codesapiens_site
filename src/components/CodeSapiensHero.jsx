@@ -415,11 +415,61 @@ const SocialMediaSection = () => {
                     </div>
                 </div>
 
-                <div className="relative flex justify-center items-center h-[500px] w-full max-w-5xl mx-auto">
+                {/* Mobile: Simple icon grid */}
+                <div className="md:hidden flex flex-col items-center gap-8 w-full">
+                    {/* Mini Globe */}
+                    <motion.div
+                        initial={{ scale: 0, opacity: 0 }}
+                        whileInView={{ scale: 1, opacity: 1 }}
+                        transition={{ duration: 1, type: "spring", bounce: 0.4 }}
+                    >
+                        <div className="w-28 h-28 rounded-full bg-gradient-to-br from-[#0061FE] via-[#3B82F6] to-[#60A5FA] flex items-center justify-center shadow-[0_0_60px_rgba(0,97,254,0.4)] relative overflow-hidden border-4 border-white/20">
+                            <motion.div
+                                animate={{ opacity: [0.4, 0.6, 0.4], scale: [1, 1.1, 1] }}
+                                transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                                className="absolute inset-0 bg-[radial-gradient(circle_at_30%_30%,#fff_0%,transparent_70%)]"
+                            />
+                            <motion.div
+                                animate={{ rotate: 360 }}
+                                transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
+                                className="relative z-10 text-white"
+                            >
+                                <Globe size={52} strokeWidth={1} />
+                            </motion.div>
+                        </div>
+                    </motion.div>
+
+                    {/* 2×3 Social Grid */}
+                    <div className="grid grid-cols-2 gap-3 w-full max-w-xs">
+                        {socials.map((social, idx) => (
+                            <motion.a
+                                key={idx}
+                                href={social.link}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                initial={{ opacity: 0, y: 16 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true }}
+                                transition={{ delay: idx * 0.07, duration: 0.5 }}
+                                className="flex items-center gap-3 pl-2 pr-4 py-2.5 rounded-full bg-white border-2 border-gray-100 shadow-sm hover:border-[#0061FE] hover:shadow-md transition-all duration-300 group"
+                            >
+                                <div className={`${social.color} w-9 h-9 rounded-full flex items-center justify-center text-white shadow-sm transition-transform duration-500 group-hover:rotate-[360deg] flex-shrink-0`}>
+                                    {React.cloneElement(social.icon, { size: 16 })}
+                                </div>
+                                <span className="text-[10px] font-black text-gray-800 uppercase tracking-[0.08em] truncate">
+                                    {social.name}
+                                </span>
+                            </motion.a>
+                        ))}
+                    </div>
+                </div>
+
+                {/* Desktop: Orbit layout */}
+                <div className="hidden md:flex relative justify-center items-center h-[500px] w-full max-w-5xl mx-auto">
                     {/* Decorative Orbit Rings */}
                     <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                        <div className="w-[350px] h-[350px] md:w-[480px] md:h-[480px] border border-blue-50 rounded-full animate-[spin_60s_linear_infinite] opacity-50"></div>
-                        <div className="w-[200px] h-[200px] md:w-[320px] md:h-[320px] border border-blue-50/50 rounded-full animate-[spin_40s_linear_infinite_reverse] opacity-50"></div>
+                        <div className="w-[480px] h-[480px] border border-blue-50 rounded-full animate-[spin_60s_linear_infinite] opacity-50"></div>
+                        <div className="w-[320px] h-[320px] border border-blue-50/50 rounded-full animate-[spin_40s_linear_infinite_reverse] opacity-50"></div>
                     </div>
 
                     {/* Central Globe */}
@@ -429,18 +479,12 @@ const SocialMediaSection = () => {
                         transition={{ duration: 1, type: "spring", bounce: 0.4 }}
                         className="relative z-20"
                     >
-                        <div className="w-56 h-56 md:w-72 md:h-72 rounded-full bg-gradient-to-br from-[#0061FE] via-[#3B82F6] to-[#60A5FA] flex items-center justify-center shadow-[0_0_100px_rgba(0,97,254,0.4)] relative group cursor-pointer overflow-hidden border-8 border-white/20">
-                            {/* Dynamic Glow Effect */}
+                        <div className="w-72 h-72 rounded-full bg-gradient-to-br from-[#0061FE] via-[#3B82F6] to-[#60A5FA] flex items-center justify-center shadow-[0_0_100px_rgba(0,97,254,0.4)] relative group cursor-pointer overflow-hidden border-8 border-white/20">
                             <motion.div
-                                animate={{
-                                    opacity: [0.4, 0.6, 0.4],
-                                    scale: [1, 1.1, 1]
-                                }}
+                                animate={{ opacity: [0.4, 0.6, 0.4], scale: [1, 1.1, 1] }}
                                 transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
                                 className="absolute inset-0 bg-[radial-gradient(circle_at_30%_30%,#fff_0%,transparent_70%)]"
                             />
-
-                            {/* Rotating Globe Icon */}
                             <motion.div
                                 animate={{ rotate: 360 }}
                                 transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
@@ -448,8 +492,6 @@ const SocialMediaSection = () => {
                             >
                                 <Globe size={100} strokeWidth={1} />
                             </motion.div>
-
-                            {/* Scanning Effect */}
                             <div className="absolute inset-0 bg-gradient-to-t from-transparent via-white/10 to-transparent h-1/2 w-full animate-[scan_3s_linear_infinite]"></div>
                         </div>
                     </motion.div>
@@ -457,9 +499,8 @@ const SocialMediaSection = () => {
                     {/* Orbiting Social Badges */}
                     {socials.map((social, idx) => {
                         const angle = (idx * (360 / socials.length)) * (Math.PI / 180);
-                        const radiusX = window.innerWidth < 768 ? 140 : 280;
-                        const radiusY = window.innerWidth < 768 ? 140 : 220;
-
+                        const radiusX = 280;
+                        const radiusY = 220;
                         return (
                             <motion.a
                                 key={idx}
@@ -473,11 +514,7 @@ const SocialMediaSection = () => {
                                     y: Math.sin(angle) * radiusY
                                 }}
                                 whileHover={{ scale: 1.05, zIndex: 30 }}
-                                transition={{
-                                    delay: 0.05 * idx,
-                                    duration: 1,
-                                    type: "spring"
-                                }}
+                                transition={{ delay: 0.05 * idx, duration: 1, type: "spring" }}
                                 className="absolute z-10 pl-2 pr-6 py-2 rounded-full bg-white border-2 border-gray-100 shadow-[0_10px_25px_rgba(0,0,0,0.04)] flex items-center gap-4 group hover:border-[#0061FE] hover:shadow-[0_20px_40px_rgba(0,97,254,0.12)] transition-all duration-500"
                             >
                                 <div className={`${social.color} w-10 h-10 rounded-full flex items-center justify-center text-white shadow-sm transition-transform duration-500 group-hover:rotate-[360deg]`}>
