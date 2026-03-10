@@ -9,7 +9,7 @@ import {
 import { BACKEND_URL } from '../config';
 import { authFetch } from '../lib/authFetch';
 import LandingPopup from './LandingPopup';
-import { useCustomCursor } from '../hooks/useCustomCursor';
+import CustomCursor from './CustomCursor';
 import { useScrollProgress } from '../hooks/useScrollProgress';
 import { useAurora } from '../hooks/useAurora';
 import { useCountUp } from '../hooks/useCountUp';
@@ -172,7 +172,7 @@ const cardVariants = {
 
 // ─── SpotlightCard wrapper ────────────────────────────────────────────────────
 const SpotlightCard = ({ children, className = '', index = 0, tilt = false, style = {} }) => {
-  const { ref, spotlightStyle, tiltStyle, onMouseMove, onMouseLeave } = useSpotlightCard(tilt ? 8 : 0);
+  const { ref, spotlightStyle, tiltStyle, innerParallax, onMouseMove, onMouseLeave } = useSpotlightCard(tilt ? 8 : 0);
   const inviewRef = useRef(null);
   const inView = useInView(inviewRef, { once: true, amount: 0.15 });
 
@@ -180,7 +180,8 @@ const SpotlightCard = ({ children, className = '', index = 0, tilt = false, styl
     <motion.div
       ref={(el) => { inviewRef.current = el; ref.current = el; }}
       className={`cs-card ${className}`}
-      style={{ ...style, ...(tilt ? tiltStyle : {}) }}
+      data-cursor="card"
+      style={{ ...style, ...(tilt ? tiltStyle : {}), transformStyle: tilt ? 'preserve-3d' : undefined }}
       variants={cardVariants}
       custom={index}
       initial="hidden"
@@ -189,10 +190,11 @@ const SpotlightCard = ({ children, className = '', index = 0, tilt = false, styl
       onMouseLeave={onMouseLeave}
     >
       <div style={spotlightStyle} />
-      {children}
+      {typeof children === 'function' ? children({ innerParallax }) : children}
     </motion.div>
   );
 };
+
 
 // ─── StatsSection ─────────────────────────────────────────────────────────────
 const StatsSection = () => {
@@ -232,17 +234,29 @@ const StatsSection = () => {
               { varName: 'colleges', val: count2, suffix: '+' },
             ].map((item, i) => (
               <SpotlightCard key={i} index={i} tilt>
-                <p className="text-xs font-mono mb-1" style={{ color: 'var(--text-muted)' }}>
-                  <span style={{ color: '#a855f7' }}>const</span>{' '}
-                  <span style={{ color: '#22d3ee' }}>{item.varName}</span>{' '}
-                  <span style={{ color: 'var(--text-muted)' }}>=</span>
-                </p>
-                <h3 className="text-4xl md:text-5xl font-extrabold mb-1 grad-text" style={{ letterSpacing: '-0.04em', lineHeight: 1.1 }}>
-                  {item.val}{item.suffix}
-                </h3>
-                <p className="text-xs uppercase tracking-widest font-semibold" style={{ color: 'var(--text-muted)', letterSpacing: '0.08em' }}>
-                  {item.varName === 'members' ? 'Active Members' : 'Colleges Reached'}
-                </p>
+                {({ innerParallax }) => (
+                  <>
+                    <div style={innerParallax(0.3)}>
+                      <p className="text-xs font-mono mb-1" style={{ color: 'var(--text-muted)' }}>
+                        <span style={{ color: '#a855f7' }}>const</span>{' '}
+                        <span style={{ color: '#22d3ee' }}>{item.varName}</span>{' '}
+                        <span style={{ color: 'var(--text-muted)' }}>=</span>
+                      </p>
+                    </div>
+                    <div style={innerParallax(0.8)}>
+                      <h3 className="text-4xl md:text-5xl font-extrabold mb-1 grad-text"
+                        style={{ letterSpacing: '-0.04em', lineHeight: 1.1 }}>
+                        {item.val}{item.suffix}
+                      </h3>
+                    </div>
+                    <div style={innerParallax(0.2)}>
+                      <p className="text-xs uppercase tracking-widest font-semibold"
+                        style={{ color: 'var(--text-muted)', letterSpacing: '0.08em' }}>
+                        {item.varName === 'members' ? 'Active Members' : 'Colleges Reached'}
+                      </p>
+                    </div>
+                  </>
+                )}
               </SpotlightCard>
             ))}
           </div>
@@ -417,7 +431,6 @@ const CodeSapiensHero = () => {
   const canvasRef = useRef(null);
   const heroRef   = useRef(null);
 
-  const { dotRef, ringRef, trailRefs } = useCustomCursor(wrapRef);
   const scrollProgress = useScrollProgress();
   useAurora(canvasRef);
   const { text: typedText } = useTypewriter(
@@ -463,17 +476,7 @@ const CodeSapiensHero = () => {
       style={{ background:'var(--bg-base)', color:'var(--text-primary)', fontFamily:"'Inter',sans-serif" }}>
       <style>{LANDING_STYLES}</style>
 
-      {/* Cursor */}
-      {!isMobile && (
-        <>
-          <div ref={dotRef} id="cs-cursor-dot" />
-          <div ref={ringRef} id="cs-cursor-ring" />
-          {[0,1,2,3,4,5].map(i => (
-            <div key={i} ref={el => { trailRefs.current[i] = el; }} className="cs-trail"
-              style={{ width:[4,3,2,1.5,1,0.5][i], height:[4,3,2,1.5,1,0.5][i] }} />
-          ))}
-        </>
-      )}
+      <CustomCursor />
 
       {/* Scroll progress */}
       <motion.div id="cs-scroll-bar" style={{ scaleX, transformOrigin:'left' }} />
