@@ -134,6 +134,8 @@ const AnimatedRoutes = () => {
     </AnimatePresence>
   );
 };
+import SmoothScroll from './components/SmoothScroll';
+
 function Root() {
   const session = useSession();
   const { isLoading } = useSessionContext();
@@ -153,24 +155,26 @@ function Root() {
   if (!session) {
     return (
       <div className="flex flex-col min-h-screen">
-        <Routes>
-          <Route path="/" element={<CodeSapiensHero />} />
-          <Route path="/auth" element={<AuthForm />} />
-          <Route path="/admin/hall-of-fame" element={<AdminHallOfFame />} />
-          <Route path="/admin/community-photos" element={<AdminCommunityPhotos />} />
-          <Route path="/admin/feedback" element={<AdminFeedbackList />} />
-          <Route path="/profile/:username" element={<PublicProfile />} />
-          <Route path="/meetup/:id" element={<PublicMeetupPage />} />
-          <Route path="/meetups" element={<UserMeetupsList />} />
+        <SmoothScroll>
+          <Routes>
+            <Route path="/" element={<CodeSapiensHero />} />
+            <Route path="/auth" element={<AuthForm />} />
+            <Route path="/admin/hall-of-fame" element={<AdminHallOfFame />} />
+            <Route path="/admin/community-photos" element={<AdminCommunityPhotos />} />
+            <Route path="/admin/feedback" element={<AdminFeedbackList />} />
+            <Route path="/profile/:username" element={<PublicProfile />} />
+            <Route path="/meetup/:id" element={<PublicMeetupPage />} />
+            <Route path="/meetups" element={<UserMeetupsList />} />
 
-          <Route path="/programs" element={<UserProgramsList />} />
-          <Route path="/programs/:id" element={<UserFormView />} />
+            <Route path="/programs" element={<UserProgramsList />} />
+            <Route path="/programs/:id" element={<UserFormView />} />
 
-          <Route path="/forgot-password" element={<ResetPassword />} />
-          <Route path="/reset-password" element={<ResetPasswordConfirm />} />
-          <Route path="/test-analytics" element={<AdminLayout><AnalyticsPage /></AdminLayout>} />
-          <Route path="*" element={<NotFoundPage />} />
-        </Routes>
+            <Route path="/forgot-password" element={<ResetPassword />} />
+            <Route path="/reset-password" element={<ResetPasswordConfirm />} />
+            <Route path="/test-analytics" element={<AdminLayout><AnalyticsPage /></AdminLayout>} />
+            <Route path="*" element={<NotFoundPage />} />
+          </Routes>
+        </SmoothScroll>
       </div>
     );
   }
@@ -179,14 +183,17 @@ function Root() {
   return (
     <div className="flex flex-col min-h-screen">
       <main className="flex-grow">
-        <NavBar />
-        <AnimatedRoutes />
+        <SmoothScroll>
+          <NavBar />
+          <AnimatedRoutes />
+        </SmoothScroll>
       </main>
     </div>
   );
 }
 
 import { LoadingProvider, useAppLoading } from "./context/LoadingContext";
+// import { ReactLenis } from 'lenis/react'; // Temporarily disabled for debugging
 
 // Root Component wrapped in LoadingProvider context consumer
 const RootWithLoading = () => {

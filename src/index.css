@@ -1,129 +1,202 @@
-@import url('https://fonts.googleapis.com/css2?family=Google+Sans+Flex:opsz,wght@6..144,1..1000&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Archivo+Black&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@300;400;500;600;700;800&display=swap');
 @import "tailwindcss";
 
-/* THEME CONFIGURATION
-   Tailwind v4 detects these variables and automatically creates 
-   utility classes like 'text-golden-1', 'text-golden-2', etc.
-*/
-@theme {
+:root {
     /* Golden Ratio Scale (Base: 1rem) */
     --text-golden-1: 1rem;
-    /* Body Text (approx 16px) */
     --text-golden-2: 1.618rem;
-    /* Subheadings (approx 26px) */
     --text-golden-3: 2.618rem;
-    /* Main Headings (approx 42px) */
-}
-
-:root {
-    --brand-blue: #0061FE;
-    --brand-dark: #1E1919;
-    --brand-cream: #F7F5F2;
-    --brand-orange: #9B0032;
-    --brand-yellow: #FA5D00;
+    --text-golden-4: 4.236rem;
+    
+    /* Quantum Light Palette - Professional & Airy */
+    --quantum-blue: #0055FF;         /* Dynamic Cobalt */
+    --quantum-cyan: #00D1FF;         /* Bright Sky Blue */
+    --quantum-deep: #0F172A;         /* Slate Navy for text */
+    --quantum-bg: #FFFFFF;           /* Pristine White */
+    --quantum-surface: #F8FAFC;      /* Lightest Gray Surface */
+    --luxury-gold: #B45309;          /* Amber Gold for professional accents */
+    
+    /* Quantum Light Glass - Sophisticated Transparency */
+    --glass-border: rgba(15, 23, 42, 0.06);
+    --glass-surface: rgba(255, 255, 255, 0.7);
 }
 
 @layer base {
-
     html,
     body {
-        cursor: url('/cursor.png'), auto !important;
-        font-family: "Google Sans Flex", sans-serif;
+        cursor: none !important; /* Custom Cursor implementation */
+        background-color: var(--quantum-bg);
+        color: var(--quantum-deep);
+        font-family: "Inter", sans-serif;
         font-optical-sizing: auto;
         font-style: normal;
-        font-variation-settings:
-            "slnt" 0,
-            "wdth" 100,
-            "GRAD" 0,
-            "ROND" 0;
+        overflow-x: clip;
+        -webkit-font-smoothing: antialiased;
+        letter-spacing: -0.011em;
     }
 
-    a,
-    button,
-    [role="button"],
-    input[type="submit"],
-    input[type="button"],
-    label {
-        cursor: url('/hover-cursor.png'), pointer !important;
+    /* Fixed Noise Grain Overlay (Subtle Professional Texture) */
+    body::before {
+        content: "";
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 9999;
+        opacity: 0.02; /* Extremely subtle for light mode */
+        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
     }
 
-    /* HEADINGS: Applying the new Golden Ratio sizes */
-    h1 {
-        @apply text-golden-3 font-bold mb-4 leading-tight;
+    h1, h2, h3, .font-display {
+        font-family: "Outfit", sans-serif;
+        font-weight: 700;
+        letter-spacing: -0.02em;
     }
 
-    h2 {
-        /* Scales from golden-2 on mobile to golden-3 on desktop */
-        @apply text-golden-2 md:text-golden-3 font-bold mb-3 leading-tight;
+    /* Selection */
+    ::selection {
+        background: rgba(0, 85, 255, 0.1);
+        color: var(--quantum-blue);
     }
-
-    h3 {
-        @apply text-golden-2 font-bold mb-3 leading-snug;
-    }
-
-    h4 {
-        @apply text-golden-1 md:text-golden-2 font-bold mb-2;
-    }
-
-    h5,
-    h6 {
-        @apply text-golden-1 font-bold mb-2;
-    }
-
-
 }
 
 @layer utilities {
-    .bg-brand-blue {
-        background-color: var(--brand-blue);
+    .bg-quantum-surface { background-color: var(--quantum-surface); }
+    .text-quantum-blue { color: var(--quantum-blue); }
+    .text-quantum-cyan { color: var(--quantum-cyan); }
+    .text-luxury-gold { color: var(--luxury-gold); }
+
+    /* --- Premium Light Theme Utilities --- */
+
+    .glass-morphism-premium {
+        background: var(--glass-surface);
+        -webkit-backdrop-filter: blur(20px);
+        backdrop-filter: blur(20px);
+        border: 1px solid var(--glass-border);
+        box-shadow: 
+            0 4px 6px -1px rgba(0, 0, 0, 0.03),
+            0 2px 4px -2px rgba(0, 0, 0, 0.03),
+            inset 0 0 20px rgba(255, 255, 255, 0.5);
     }
 
-    .text-brand-blue {
-        color: var(--brand-blue);
+    .text-reveal-overflow {
+        overflow: hidden;
+        display: block;
     }
 
-    .bg-brand-dark {
-        background-color: var(--brand-dark);
+    .text-gradient-blue {
+        background: linear-gradient(135deg, #0055FF 0%, #00D1FF 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
     }
 
-    .text-brand-dark {
-        color: var(--brand-dark);
+    .soft-shadow-premium {
+        box-shadow:
+            0 1px 3px 0 rgba(0, 0, 0, 0.1),
+            0 1px 2px -1px rgba(0, 0, 0, 0.1);
     }
 
-    .bg-brand-cream {
-        background-color: var(--brand-cream);
+    .soft-elevation-shadow {
+        box-shadow:
+            0 10px 15px -3px rgba(15, 23, 42, 0.05),
+            0 4px 6px -4px rgba(15, 23, 42, 0.05);
     }
 
-    .text-brand-cream {
-        color: var(--brand-cream);
+    .sponsor-card-hover {
+        transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
-    /* Custom Scrollbar */
-    ::-webkit-scrollbar {
-        width: 8px;
-        height: 8px;
+    .sponsor-card-hover:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 10px 25px -5px rgba(0, 85, 255, 0.1);
     }
 
-    ::-webkit-scrollbar-track {
-        background: var(--brand-cream);
+    /* Scroll progress bar */
+    .scroll-progress {
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 2px;
+        background: linear-gradient(90deg, #0055FF, #00D1FF);
+        z-index: 10000;
+        transform-origin: left;
     }
 
-    ::-webkit-scrollbar-thumb {
-        background: #cbd5e1;
-        border-radius: 4px;
+    /* Professional Grid Background */
+    .light-grid-bg {
+        background-color: var(--quantum-bg);
+        background-image: 
+            radial-gradient(circle at 2px 2px, rgba(15, 23, 42, 0.03) 1px, transparent 0);
+        background-size: 32px 32px;
     }
 
-    ::-webkit-scrollbar-thumb:hover {
-        background: #94a3b8;
+    /* --- MeritFirst Inspired Animations --- */
+    @keyframes beam-spin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
     }
 
-    .hide-scrollbar::-webkit-scrollbar {
-        display: none;
+    .beam-container {
+        position: relative;
+        overflow: hidden;
     }
 
-    .hide-scrollbar {
-        -ms-overflow-style: none;
-        scrollbar-width: none;
+    .beam-spin {
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: conic-gradient(
+            transparent,
+            rgba(0, 85, 255, 0.3),
+            rgba(0, 209, 255, 0.5),
+            rgba(0, 85, 255, 0.3),
+            transparent 60%
+        );
+        animation: beam-spin 4s linear infinite;
+        pointer-events: none;
+        z-index: 0;
     }
+
+    @keyframes blur-reveal {
+        0% {
+            filter: blur(12px);
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        100% {
+            filter: blur(0);
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .animate-blur-reveal {
+        animation: blur-reveal 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+    }
+}
+
+/* Lenis Smooth Scroll Base Styles */
+html.lenis, html.lenis body {
+  height: auto;
+}
+
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+
+.lenis.lenis-stopped {
+  overflow: clip; /* Using clip instead of hidden to protect sticky elements */
+}
+
+.lenis.lenis-smooth iframe {
+  pointer-events: none;
 }
