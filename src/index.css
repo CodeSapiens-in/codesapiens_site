@@ -1,6 +1,39 @@
 @import url('https://fonts.googleapis.com/css2?family=Google+Sans+Flex:opsz,wght@6..144,1..1000&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Archivo+Black&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Archivo:ital,wdth,wght@0,75..125,100..900;1,75..125,100..900&display=swap');
 @import "tailwindcss";
+
+@keyframes marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+@keyframes orb-drift-1 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(60px, -40px) scale(1.1); }
+  66% { transform: translate(-30px, 30px) scale(0.95); }
+}
+@keyframes orb-drift-2 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(-80px, 50px) scale(1.05); }
+  66% { transform: translate(40px, -60px) scale(1.1); }
+}
+@keyframes orb-drift-3 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(50px, 30px) scale(0.9); }
+}
+.animate-marquee { animation: marquee 28s linear infinite; }
+.animate-orb-1 { animation: orb-drift-1 18s ease-in-out infinite; }
+.animate-orb-2 { animation: orb-drift-2 22s ease-in-out infinite; }
+.animate-orb-3 { animation: orb-drift-3 16s ease-in-out infinite; }
+.font-archivo { font-family: 'Archivo', sans-serif; }
+.font-archivo-wide {
+  font-family: 'Archivo', sans-serif;
+  font-variation-settings: 'wdth' 112.5;
+}
+.font-archivo-ultra {
+  font-family: 'Archivo', sans-serif;
+  font-variation-settings: 'wdth' 125;
+  font-weight: 900;
+}
 
 /* THEME CONFIGURATION
    Tailwind v4 detects these variables and automatically creates 
@@ -63,12 +96,16 @@
     }
 
     h4 {
-        @apply text-golden-1 md:text-golden-2 font-bold mb-2;
+        @apply text-golden-1 md:text-golden-2 font-bold mb-2 tracking-tight;
     }
 
     h5,
     h6 {
-        @apply text-golden-1 font-bold mb-2;
+        @apply text-golden-1 font-bold mb-2 tracking-tight;
+    }
+
+    p {
+        @apply leading-relaxed;
     }
 
 
@@ -97,6 +134,23 @@
 
     .text-brand-cream {
         color: var(--brand-cream);
+    }
+
+    /* Modern UI Utils */
+    .glass-nav {
+        @apply bg-zinc-950/70 backdrop-blur-xl border-b border-white/5;
+    }
+
+    .glass-card {
+        @apply bg-white/5 backdrop-blur-sm border border-white/10 shadow-2xl;
+    }
+
+    .btn-primary {
+        @apply bg-gradient-to-r from-[#0061FE] to-[#0050d6] text-white px-8 py-4 font-bold rounded-full hover:shadow-[0_0_20px_rgba(0,97,254,0.4)] hover:scale-[1.02] active:scale-[0.98] transition-all duration-300;
+    }
+
+    .btn-secondary {
+        @apply bg-white text-black px-6 py-3 font-bold rounded-full hover:bg-zinc-100 hover:shadow-lg active:scale-[0.98] transition-all duration-300;
     }
 
     /* Custom Scrollbar */
