@@ -684,6 +684,337 @@ const ServiceCard = ({ index, service, total, targetScale, range, progress }) =>
     );
 };
 
+
+// --- Extracted Top Level Components to Fix Production Hooks Rule ---
+
+                // Individual tile that clips a portion of the full-screen image
+                const ShatterTile = ({ scrollYProgress, row, col, cols, rows, startOffset, imgSrc }) => {
+                    const end = Math.min(startOffset + 0.3, 1);
+                    const seed = (row * cols + col + 1) * 137.5;
+                    const randX = Math.sin(seed) * 180;
+                    const randY = Math.cos(seed) * 120;
+                    const randRot = Math.sin(seed * 0.7) * 35;
+
+                    return (
+                        <motion.div
+                            style={{
+                                position: 'absolute',
+                                left: `${(col / cols) * 100}%`,
+                                top: `${(row / rows) * 100}%`,
+                                width: `${(100 / cols) + 0.5}%`,
+                                height: `${(100 / rows) + 0.5}%`,
+                                x: useTransform(scrollYProgress, [startOffset, end], [0, randX]),
+                                y: useTransform(scrollYProgress, [startOffset, end], [0, randY]),
+                                scale: useTransform(scrollYProgress, [startOffset, end], [1, 0]),
+                                opacity: useTransform(scrollYProgress, [startOffset, end], [1, 0]),
+                                rotate: useTransform(scrollYProgress, [startOffset, end], [0, randRot]),
+                                transformOrigin: 'center center',
+                                overflow: 'hidden',
+                            }}
+                        >
+                            <div style={{
+                                position: 'absolute',
+                                left: `${-(col / cols) * 100 * cols}%`,
+                                top: `${-(row / rows) * 100 * rows}%`,
+                                width: `${cols * 100}%`,
+                                height: `${rows * 100}%`,
+                                backgroundImage: `url(${imgSrc})`,
+                                backgroundSize: 'cover',
+                                backgroundPosition: 'center',
+                            }} />
+                        </motion.div>
+                    );
+                };
+
+                // A single stacking event card with shatter exit
+                const EventStackCard = ({ photo, index, total, sectionProgress }) => {
+                    const COLS = 8;
+                    const ROWS = 5;
+
+                    // Each card's scroll range within the overall section
+                    const cardStart = index / total;
+                    const cardEnd = (index + 1) / total;
+                    const cardProgress = useTransform(sectionProgress, [cardStart, cardEnd], [0, 1]);
+
+                    // Sticky offset for stacking
+                    const topOffset = 80 + index * 4;
+
+                    // Scale down slightly as cards stack  
+                    const targetScale = 1 - ((total - index) * 0.02);
+                    const cardScale = useTransform(sectionProgress, [cardStart, cardEnd], [1, targetScale]);
+
+                    // Generate shatter tiles with center-outward stagger
+                    const tiles = [];
+                    const maxDist = Math.sqrt(((COLS - 1) / 2) ** 2 + ((ROWS - 1) / 2) ** 2);
+                    for (let r = 0; r < ROWS; r++) {
+                        for (let c = 0; c < COLS; c++) {
+                            const dx = c - (COLS - 1) / 2;
+                            const dy = r - (ROWS - 1) / 2;
+                            const dist = Math.sqrt(dx * dx + dy * dy);
+                            const startOffset = 0.35 + (dist / maxDist) * 0.3;
+
+                            tiles.push(
+                                <ShatterTile
+                                    key={`${r}-${c}`}
+                                    scrollYProgress={cardProgress}
+                                    row={r} col={c}
+                                    cols={COLS} rows={ROWS}
+                                    startOffset={startOffset}
+                                    imgSrc={photo.image_url}
+                                />
+                            );
+                        }
+                    }
+
+                    return (
+                        <div
+                            className="sticky w-full"
+                            style={{
+                                top: `${topOffset}px`,
+                                height: 'calc(100vh - 100px)',
+                                zIndex: total + index,
+                            }}
+                        >
+                            <motion.div
+                                style={{ scale: cardScale }}
+                                className="relative w-full h-full rounded-2xl md:rounded-3xl overflow-hidden shadow-2xl shadow-slate-200/50"
+                            >
+                                {/* Background gradient for when tiles shatter */}
+                                <div className="absolute inset-0 bg-gradient-to-br from-slate-50 via-white to-blue-50/30" />
+
+                                {/* Ghost title visible behind shatter */}
+                                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                                    <div className="text-center px-8">
+                                        <motion.h3
+                                            className="text-3xl md:text-6xl lg:text-7xl font-display font-black text-slate-900/[0.06] uppercase tracking-tighter"
+                                            style={{
+                                                opacity: useTransform(cardProgress, [0.3, 0.5], [0, 1]),
+                                                scale: useTransform(cardProgress, [0.3, 0.6], [0.9, 1]),
+                                            }}
+                                        >
+                                            {photo.title}
+                                        </motion.h3>
+                                    </div>
+                                </div>
+
+                                {/* Shatter tiles */}
+                                <div className="absolute inset-0 z-10">
+                                    {tiles}
+                                </div>
+
+                                {/* Bottom info bar — fades out as shatter begins */}
+                                <motion.div
+                                    className="absolute bottom-0 left-0 right-0 z-20 p-5 md:p-8"
+                                    style={{
+                                        opacity: useTransform(cardProgress, [0, 0.3], [1, 0])
+                                    }}
+                                >
+                                    <div className="bg-white/80 backdrop-blur-xl rounded-2xl p-5 md:p-6 border border-slate-100/80 shadow-lg">
+                                        <div className="flex items-end justify-between gap-4">
+                                            <div>
+                                                <h4 className="text-lg md:text-xl font-display font-bold text-slate-900">{photo.title}</h4>
+                                                <p className="text-slate-400 text-xs font-bold uppercase tracking-widest mt-1">{photo.date || "Past Event"}</p>
+                                            </div>
+                                            <motion.div
+                                                animate={{ y: [0, 6, 0] }}
+                                                transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+                                                className="text-quantum-blue/40"
+                                            >
+                                                <ChevronDown size={20} />
+                                            </motion.div>
+                                        </div>
+                                    </div>
+                                </motion.div>
+                            </motion.div>
+                        </div>
+                    );
+                };
+
+                // Main orchestrator component  
+                const EventsStack = ({ communityPhotos }) => {
+                    const sectionRef = useRef(null);
+                    const photos = communityPhotos.slice(0, 5);
+                    const { scrollYProgress: sectionProgress } = useScroll({
+                        target: sectionRef,
+                        offset: ['start start', 'end end']
+                    });
+
+                    return (
+                        <section id="events" className="relative bg-white">
+                            {/* Header */}
+                            <div className="pt-32 pb-12 px-6 md:px-14 max-w-[1400px] mx-auto">
+                                <motion.div
+                                    initial={{ opacity: 0, y: 30, filter: 'blur(10px)' }}
+                                    whileInView={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+                                    viewport={{ once: true }}
+                                    transition={{ duration: 0.8, ease: [0.25, 1, 0.5, 1] }}
+                                    className="flex flex-col md:flex-row items-end justify-between gap-8"
+                                >
+                                    <div>
+                                        <span className="text-quantum-blue font-bold tracking-[0.3em] uppercase text-xs mb-4 block">Archive</span>
+                                        <h2 className="text-5xl md:text-7xl font-display font-black tracking-tighter uppercase text-slate-900">Community<br /><span className="text-quantum-blue italic">Moments</span></h2>
+                                    </div>
+                                    <button className="px-8 py-4 bg-white border border-slate-200 rounded-full hover:bg-slate-50 transition-all text-xs font-bold uppercase tracking-widest text-slate-600 shadow-sm">
+                                        View All Events
+                                    </button>
+                                </motion.div>
+                            </div>
+
+                            {/* Stack container — tall enough for all cards to scroll through */}
+                            <div
+                                ref={sectionRef}
+                                className="relative px-3 md:px-6"
+                                style={{ height: `${photos.length * 100}vh` }}
+                            >
+                                {photos.map((photo, i) => (
+                                    <EventStackCard
+                                        key={photo.id || i}
+                                        photo={photo}
+                                        index={i}
+                                        total={photos.length}
+                                        sectionProgress={sectionProgress}
+                                    />
+                                ))}
+                            </div>
+                        </section>
+                    );
+                };
+
+                
+
+                    const members = [
+                        { name: "Thiyaga B", role: "Founder", photo: "https://res.cloudinary.com/druvxcll9/image/upload/v1761122517/1679197646322_n1svjq_s5w42a.jpg", link: "https://www.linkedin.com/in/thiyaga-b" },
+                        { name: "Keerthana M G", role: "", photo: "https://res.cloudinary.com/druvxcll9/image/upload/v1761122516/2ABMHfqOsrpoL3OV-WhatsApp202025-08-312010.33.52_a8a27bbd_vzcgzq_1_bm8zch.jpg", link: "https://in.linkedin.com/in/keerthana-m-g-12ba59256" },
+                        { name: "Mahaveer A", role: "", photo: "https://res.cloudinary.com/druvxcll9/image/upload/v1761122517/iAckgTxMcALuPbEx-IMG-20250112-WA0012_1_fwyhoa_oxegdx.jpg", link: "https://www.linkedin.com/in/mahaveer1013" },
+                        { name: "Justin Benito", role: "", photo: "https://res.cloudinary.com/druvxcll9/image/upload/v1761122517/4SrLYdwh0tpuLlkt-team_2.a2a0c6917be79e15dc29_wjosq7_ftgm6j.jpg", link: "https://www.linkedin.com/in/justinbenito" },
+                        { name: "Koushik ram", role: "", photo: "https://res.cloudinary.com/druvxcll9/image/upload/v1761122517/nLDGxnsr6bZkCx0A-team_3.d2fd9099126beb0b86a1_vxhpxo_z3eods.jpg", link: "https://www.linkedin.com/in/koushik-ram-118495239" },
+                        { name: "Athiram R S", role: "", photo: "https://res.cloudinary.com/druvxcll9/image/upload/v1761122517/Tlgueu6loMYMKJMs-team_1.150894ea4376f6423091_vrf0fr_weljyi.jpg", link: "https://www.linkedin.com/in/athi-ram-rs" },
+                        { name: "Pranav Vikraman", role: "", photo: "https://res.cloudinary.com/druvxcll9/image/upload/v1761122516/5NmVUZRZI8sRCrZA-1735300455766_h8dhm2_dnully.jpg", link: "https://www.linkedin.com/in/pranav-vikraman-322020242" },
+                        { name: "Vignesh R", role: "", photo: "https://res.cloudinary.com/druvxcll9/image/upload/v1761122531/JWz1OvtKurqSRsC7-WhatsApp202025-08-312011.22.52_bff7c8bd_mrok7q_b6meyd.jpg", link: "https://www.linkedin.com/in/vignesh-r-7727582b7" },
+                        { name: "Anand S", role: "", photo: "https://res.cloudinary.com/druvxcll9/image/upload/v1761122532/3S8YnOu77Rt2wDJD-WhatsApp202025-08-312010.32.42_9b5cee10_puasao_zekkfa.jpg", link: "https://codesapiens-management-website.vercel.app" },
+                        { name: "Subhaharini P", role: "", photo: "https://res.cloudinary.com/druvxcll9/image/upload/v1761122531/q5tsA3KUOwgSOpIa-team_5.efc764325a5ffbaf1b6e_1_sidv9r_fhxmqv.jpg", link: "https://www.linkedin.com/in/subhaharini-p-938568254" },
+                        { name: "Jayasurya R", role: "", photo: "https://res.cloudinary.com/druvxcll9/image/upload/v1761122531/1732031130575_b834gr_1_slc9fw.jpg", link: "https://www.linkedin.com/in/jayasurya-r-b37997279/" }
+                    ];
+
+                    // Create a ref and mapping container right here to track the whole section progress like AIVIXR
+                    const MappedCards = () => {
+                        const sectionRef = useRef(null);
+                        const { scrollYProgress: sectionProgress } = useScroll({
+                            target: sectionRef,
+                            offset: ['start start', 'end end']
+                        });
+
+                        return (
+                            <div ref={sectionRef} className="relative">
+                                {members.map((member, index) => {
+                                    const targetScale = 1 - ((members.length - index) * 0.03); // More subtle scale drop like AIVIXR
+                                    return (
+                                        <ServiceCard
+                                            key={index}
+                                            index={index}
+                                            service={{
+                                                title: member.name,
+                                                description: member.role,
+                                                icon: member.photo,
+                                                color: index % 2 === 0 ? "#F8FAFC" : "#F1F5F9",
+                                                link: member.link
+                                            }}
+                                            total={members.length}
+                                            targetScale={targetScale}
+                                            range={[index * (1 / members.length), 1]}
+                                            progress={sectionProgress}
+                                        />
+                                    );
+                                })}
+                            </div>
+                        );
+                    };
+
+                    
+
+                const ScrollColorText = () => {
+                    const sectionRef = useRef(null);
+                    const { scrollYProgress } = useScroll({
+                        target: sectionRef,
+                        offset: ['start 0.9', 'start 0.3']
+                    });
+
+                    const text1 = "Building Community";
+                    const text2 = "Since 2023";
+
+                    return (
+                        <section ref={sectionRef} className="bg-white relative overflow-hidden min-h-[60vh] flex items-center justify-center py-32">
+                            {/* Background decorative elements */}
+                            <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-quantum-blue/5 blur-[120px] rounded-full -translate-y-1/2 translate-x-1/3" />
+                            <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-quantum-cyan/[0.02] blur-[120px] rounded-full translate-y-1/2 -translate-x-1/3" />
+
+                            <div className="relative w-full px-6 text-center leading-none">
+                                {/* Line 1: Building Community */}
+                                <h2 className="font-display font-black tracking-[-0.04em] leading-[0.95] text-[clamp(2.5rem,8vw,10rem)] uppercase mb-2 md:mb-4">
+                                    {text1.split('').map((char, i) => {
+                                        const totalChars = text1.length + text2.length;
+                                        const charProgress = i / totalChars;
+                                        const charEnd = (i + 1) / totalChars;
+                                        return (
+                                            <motion.span
+                                                key={`t1-${i}`}
+                                                className="inline-block"
+                                                style={{
+                                                    whiteSpace: 'pre',
+                                                    color: useTransform(
+                                                        scrollYProgress,
+                                                        [charProgress, charEnd],
+                                                        ['#cbd5e1', '#0f172a']
+                                                    ),
+                                                    translateY: useTransform(
+                                                        scrollYProgress,
+                                                        [charProgress, charEnd],
+                                                        [20, 0]
+                                                    ),
+                                                }}
+                                            >
+                                                {char === ' ' ? '\u00A0' : char}
+                                            </motion.span>
+                                        );
+                                    })}
+                                </h2>
+
+                                {/* Line 2: Since 2023 */}
+                                <h3 className="font-display font-black tracking-[-0.04em] leading-[0.95] text-4xl md:text-6xl lg:text-[clamp(4rem,8vw,8rem)] uppercase italic">
+                                    {text2.split('').map((char, i) => {
+                                        const totalChars = text1.length + text2.length;
+                                        const offset = text1.length;
+                                        const charProgress = (offset + i) / totalChars;
+                                        const charEnd = (offset + i + 1) / totalChars;
+                                        return (
+                                            <motion.span
+                                                key={`t2-${i}`}
+                                                className="inline-block"
+                                                style={{
+                                                    whiteSpace: 'pre',
+                                                    color: useTransform(
+                                                        scrollYProgress,
+                                                        [charProgress, charEnd],
+                                                        ['#cbd5e1', '#2563eb']
+                                                    ),
+                                                    translateY: useTransform(
+                                                        scrollYProgress,
+                                                        [charProgress, charEnd],
+                                                        [20, 0]
+                                                    ),
+                                                }}
+                                            >
+                                                {char === ' ' ? '\u00A0' : char}
+                                            </motion.span>
+                                        );
+                                    })}
+                                </h3>
+                            </div>
+                        </section>
+                    );
+                };
+                
+
 // --- Main Hero Component ---
 const CodeSapiensHero = () => {
     const [navScrolled, setNavScrolled] = useState(false);
@@ -1009,202 +1340,7 @@ const CodeSapiensHero = () => {
             </section>
 
             {/* Events Section — Sticky Stack + Grid-Shatter (Light Theme, Motion-Design Skill) */}
-            {(() => {
-                // Individual tile that clips a portion of the full-screen image
-                const ShatterTile = ({ scrollYProgress, row, col, cols, rows, startOffset, imgSrc }) => {
-                    const end = Math.min(startOffset + 0.3, 1);
-                    const seed = (row * cols + col + 1) * 137.5;
-                    const randX = Math.sin(seed) * 180;
-                    const randY = Math.cos(seed) * 120;
-                    const randRot = Math.sin(seed * 0.7) * 35;
-
-                    return (
-                        <motion.div
-                            style={{
-                                position: 'absolute',
-                                left: `${(col / cols) * 100}%`,
-                                top: `${(row / rows) * 100}%`,
-                                width: `${(100 / cols) + 0.5}%`,
-                                height: `${(100 / rows) + 0.5}%`,
-                                x: useTransform(scrollYProgress, [startOffset, end], [0, randX]),
-                                y: useTransform(scrollYProgress, [startOffset, end], [0, randY]),
-                                scale: useTransform(scrollYProgress, [startOffset, end], [1, 0]),
-                                opacity: useTransform(scrollYProgress, [startOffset, end], [1, 0]),
-                                rotate: useTransform(scrollYProgress, [startOffset, end], [0, randRot]),
-                                transformOrigin: 'center center',
-                                overflow: 'hidden',
-                            }}
-                        >
-                            <div style={{
-                                position: 'absolute',
-                                left: `${-(col / cols) * 100 * cols}%`,
-                                top: `${-(row / rows) * 100 * rows}%`,
-                                width: `${cols * 100}%`,
-                                height: `${rows * 100}%`,
-                                backgroundImage: `url(${imgSrc})`,
-                                backgroundSize: 'cover',
-                                backgroundPosition: 'center',
-                            }} />
-                        </motion.div>
-                    );
-                };
-
-                // A single stacking event card with shatter exit
-                const EventStackCard = ({ photo, index, total, sectionProgress }) => {
-                    const COLS = 8;
-                    const ROWS = 5;
-
-                    // Each card's scroll range within the overall section
-                    const cardStart = index / total;
-                    const cardEnd = (index + 1) / total;
-                    const cardProgress = useTransform(sectionProgress, [cardStart, cardEnd], [0, 1]);
-
-                    // Sticky offset for stacking
-                    const topOffset = 80 + index * 4;
-
-                    // Scale down slightly as cards stack  
-                    const targetScale = 1 - ((total - index) * 0.02);
-                    const cardScale = useTransform(sectionProgress, [cardStart, cardEnd], [1, targetScale]);
-
-                    // Generate shatter tiles with center-outward stagger
-                    const tiles = [];
-                    const maxDist = Math.sqrt(((COLS - 1) / 2) ** 2 + ((ROWS - 1) / 2) ** 2);
-                    for (let r = 0; r < ROWS; r++) {
-                        for (let c = 0; c < COLS; c++) {
-                            const dx = c - (COLS - 1) / 2;
-                            const dy = r - (ROWS - 1) / 2;
-                            const dist = Math.sqrt(dx * dx + dy * dy);
-                            const startOffset = 0.35 + (dist / maxDist) * 0.3;
-
-                            tiles.push(
-                                <ShatterTile
-                                    key={`${r}-${c}`}
-                                    scrollYProgress={cardProgress}
-                                    row={r} col={c}
-                                    cols={COLS} rows={ROWS}
-                                    startOffset={startOffset}
-                                    imgSrc={photo.image_url}
-                                />
-                            );
-                        }
-                    }
-
-                    return (
-                        <div
-                            className="sticky w-full"
-                            style={{
-                                top: `${topOffset}px`,
-                                height: 'calc(100vh - 100px)',
-                                zIndex: total + index,
-                            }}
-                        >
-                            <motion.div
-                                style={{ scale: cardScale }}
-                                className="relative w-full h-full rounded-2xl md:rounded-3xl overflow-hidden shadow-2xl shadow-slate-200/50"
-                            >
-                                {/* Background gradient for when tiles shatter */}
-                                <div className="absolute inset-0 bg-gradient-to-br from-slate-50 via-white to-blue-50/30" />
-
-                                {/* Ghost title visible behind shatter */}
-                                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                                    <div className="text-center px-8">
-                                        <motion.h3
-                                            className="text-3xl md:text-6xl lg:text-7xl font-display font-black text-slate-900/[0.06] uppercase tracking-tighter"
-                                            style={{
-                                                opacity: useTransform(cardProgress, [0.3, 0.5], [0, 1]),
-                                                scale: useTransform(cardProgress, [0.3, 0.6], [0.9, 1]),
-                                            }}
-                                        >
-                                            {photo.title}
-                                        </motion.h3>
-                                    </div>
-                                </div>
-
-                                {/* Shatter tiles */}
-                                <div className="absolute inset-0 z-10">
-                                    {tiles}
-                                </div>
-
-                                {/* Bottom info bar — fades out as shatter begins */}
-                                <motion.div
-                                    className="absolute bottom-0 left-0 right-0 z-20 p-5 md:p-8"
-                                    style={{
-                                        opacity: useTransform(cardProgress, [0, 0.3], [1, 0])
-                                    }}
-                                >
-                                    <div className="bg-white/80 backdrop-blur-xl rounded-2xl p-5 md:p-6 border border-slate-100/80 shadow-lg">
-                                        <div className="flex items-end justify-between gap-4">
-                                            <div>
-                                                <h4 className="text-lg md:text-xl font-display font-bold text-slate-900">{photo.title}</h4>
-                                                <p className="text-slate-400 text-xs font-bold uppercase tracking-widest mt-1">{photo.date || "Past Event"}</p>
-                                            </div>
-                                            <motion.div
-                                                animate={{ y: [0, 6, 0] }}
-                                                transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
-                                                className="text-quantum-blue/40"
-                                            >
-                                                <ChevronDown size={20} />
-                                            </motion.div>
-                                        </div>
-                                    </div>
-                                </motion.div>
-                            </motion.div>
-                        </div>
-                    );
-                };
-
-                // Main orchestrator component  
-                const EventsStack = () => {
-                    const sectionRef = useRef(null);
-                    const photos = communityPhotos.slice(0, 5);
-                    const { scrollYProgress: sectionProgress } = useScroll({
-                        target: sectionRef,
-                        offset: ['start start', 'end end']
-                    });
-
-                    return (
-                        <section id="events" className="relative bg-white">
-                            {/* Header */}
-                            <div className="pt-32 pb-12 px-6 md:px-14 max-w-[1400px] mx-auto">
-                                <motion.div
-                                    initial={{ opacity: 0, y: 30, filter: 'blur(10px)' }}
-                                    whileInView={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-                                    viewport={{ once: true }}
-                                    transition={{ duration: 0.8, ease: [0.25, 1, 0.5, 1] }}
-                                    className="flex flex-col md:flex-row items-end justify-between gap-8"
-                                >
-                                    <div>
-                                        <span className="text-quantum-blue font-bold tracking-[0.3em] uppercase text-xs mb-4 block">Archive</span>
-                                        <h2 className="text-5xl md:text-7xl font-display font-black tracking-tighter uppercase text-slate-900">Community<br /><span className="text-quantum-blue italic">Moments</span></h2>
-                                    </div>
-                                    <button className="px-8 py-4 bg-white border border-slate-200 rounded-full hover:bg-slate-50 transition-all text-xs font-bold uppercase tracking-widest text-slate-600 shadow-sm">
-                                        View All Events
-                                    </button>
-                                </motion.div>
-                            </div>
-
-                            {/* Stack container — tall enough for all cards to scroll through */}
-                            <div
-                                ref={sectionRef}
-                                className="relative px-3 md:px-6"
-                                style={{ height: `${photos.length * 100}vh` }}
-                            >
-                                {photos.map((photo, i) => (
-                                    <EventStackCard
-                                        key={photo.id || i}
-                                        photo={photo}
-                                        index={i}
-                                        total={photos.length}
-                                        sectionProgress={sectionProgress}
-                                    />
-                                ))}
-                            </div>
-                        </section>
-                    );
-                };
-
-                return <EventsStack />;
-            })()}
+            <EventsStack communityPhotos={communityPhotos} />
 
             {/* Re-wiring high-priority original sections */}
             <StatsSection />
@@ -1264,144 +1400,11 @@ const CodeSapiensHero = () => {
                     </motion.div>
                 </div>
 
-                {(() => {
-                    const members = [
-                        { name: "Thiyaga B", role: "Founder", photo: "https://res.cloudinary.com/druvxcll9/image/upload/v1761122517/1679197646322_n1svjq_s5w42a.jpg", link: "https://www.linkedin.com/in/thiyaga-b" },
-                        { name: "Keerthana M G", role: "", photo: "https://res.cloudinary.com/druvxcll9/image/upload/v1761122516/2ABMHfqOsrpoL3OV-WhatsApp202025-08-312010.33.52_a8a27bbd_vzcgzq_1_bm8zch.jpg", link: "https://in.linkedin.com/in/keerthana-m-g-12ba59256" },
-                        { name: "Mahaveer A", role: "", photo: "https://res.cloudinary.com/druvxcll9/image/upload/v1761122517/iAckgTxMcALuPbEx-IMG-20250112-WA0012_1_fwyhoa_oxegdx.jpg", link: "https://www.linkedin.com/in/mahaveer1013" },
-                        { name: "Justin Benito", role: "", photo: "https://res.cloudinary.com/druvxcll9/image/upload/v1761122517/4SrLYdwh0tpuLlkt-team_2.a2a0c6917be79e15dc29_wjosq7_ftgm6j.jpg", link: "https://www.linkedin.com/in/justinbenito" },
-                        { name: "Koushik ram", role: "", photo: "https://res.cloudinary.com/druvxcll9/image/upload/v1761122517/nLDGxnsr6bZkCx0A-team_3.d2fd9099126beb0b86a1_vxhpxo_z3eods.jpg", link: "https://www.linkedin.com/in/koushik-ram-118495239" },
-                        { name: "Athiram R S", role: "", photo: "https://res.cloudinary.com/druvxcll9/image/upload/v1761122517/Tlgueu6loMYMKJMs-team_1.150894ea4376f6423091_vrf0fr_weljyi.jpg", link: "https://www.linkedin.com/in/athi-ram-rs" },
-                        { name: "Pranav Vikraman", role: "", photo: "https://res.cloudinary.com/druvxcll9/image/upload/v1761122516/5NmVUZRZI8sRCrZA-1735300455766_h8dhm2_dnully.jpg", link: "https://www.linkedin.com/in/pranav-vikraman-322020242" },
-                        { name: "Vignesh R", role: "", photo: "https://res.cloudinary.com/druvxcll9/image/upload/v1761122531/JWz1OvtKurqSRsC7-WhatsApp202025-08-312011.22.52_bff7c8bd_mrok7q_b6meyd.jpg", link: "https://www.linkedin.com/in/vignesh-r-7727582b7" },
-                        { name: "Anand S", role: "", photo: "https://res.cloudinary.com/druvxcll9/image/upload/v1761122532/3S8YnOu77Rt2wDJD-WhatsApp202025-08-312010.32.42_9b5cee10_puasao_zekkfa.jpg", link: "https://codesapiens-management-website.vercel.app" },
-                        { name: "Subhaharini P", role: "", photo: "https://res.cloudinary.com/druvxcll9/image/upload/v1761122531/q5tsA3KUOwgSOpIa-team_5.efc764325a5ffbaf1b6e_1_sidv9r_fhxmqv.jpg", link: "https://www.linkedin.com/in/subhaharini-p-938568254" },
-                        { name: "Jayasurya R", role: "", photo: "https://res.cloudinary.com/druvxcll9/image/upload/v1761122531/1732031130575_b834gr_1_slc9fw.jpg", link: "https://www.linkedin.com/in/jayasurya-r-b37997279/" }
-                    ];
-
-                    // Create a ref and mapping container right here to track the whole section progress like AIVIXR
-                    const MappedCards = () => {
-                        const sectionRef = useRef(null);
-                        const { scrollYProgress: sectionProgress } = useScroll({
-                            target: sectionRef,
-                            offset: ['start start', 'end end']
-                        });
-
-                        return (
-                            <div ref={sectionRef} className="relative">
-                                {members.map((member, index) => {
-                                    const targetScale = 1 - ((members.length - index) * 0.03); // More subtle scale drop like AIVIXR
-                                    return (
-                                        <ServiceCard
-                                            key={index}
-                                            index={index}
-                                            service={{
-                                                title: member.name,
-                                                description: member.role,
-                                                icon: member.photo,
-                                                color: index % 2 === 0 ? "#F8FAFC" : "#F1F5F9",
-                                                link: member.link
-                                            }}
-                                            total={members.length}
-                                            targetScale={targetScale}
-                                            range={[index * (1 / members.length), 1]}
-                                            progress={sectionProgress}
-                                        />
-                                    );
-                                })}
-                            </div>
-                        );
-                    };
-
-                    return <MappedCards />;
-                })()}
+                <MappedCards />
             </section>
 
             {/* Building Community Banner - MeritFirst "Hire on Merit" Style Scroll Color Transition */}
-            {(() => {
-                const ScrollColorText = () => {
-                    const sectionRef = useRef(null);
-                    const { scrollYProgress } = useScroll({
-                        target: sectionRef,
-                        offset: ['start 0.9', 'start 0.3']
-                    });
-
-                    const text1 = "Building Community";
-                    const text2 = "Since 2023";
-
-                    return (
-                        <section ref={sectionRef} className="bg-white relative overflow-hidden min-h-[60vh] flex items-center justify-center py-32">
-                            {/* Background decorative elements */}
-                            <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-quantum-blue/5 blur-[120px] rounded-full -translate-y-1/2 translate-x-1/3" />
-                            <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-quantum-cyan/[0.02] blur-[120px] rounded-full translate-y-1/2 -translate-x-1/3" />
-
-                            <div className="relative w-full px-6 text-center leading-none">
-                                {/* Line 1: Building Community */}
-                                <h2 className="font-display font-black tracking-[-0.04em] leading-[0.95] text-[clamp(2.5rem,8vw,10rem)] uppercase mb-2 md:mb-4">
-                                    {text1.split('').map((char, i) => {
-                                        const totalChars = text1.length + text2.length;
-                                        const charProgress = i / totalChars;
-                                        const charEnd = (i + 1) / totalChars;
-                                        return (
-                                            <motion.span
-                                                key={`t1-${i}`}
-                                                className="inline-block"
-                                                style={{
-                                                    whiteSpace: 'pre',
-                                                    color: useTransform(
-                                                        scrollYProgress,
-                                                        [charProgress, charEnd],
-                                                        ['#cbd5e1', '#0f172a']
-                                                    ),
-                                                    translateY: useTransform(
-                                                        scrollYProgress,
-                                                        [charProgress, charEnd],
-                                                        [20, 0]
-                                                    ),
-                                                }}
-                                            >
-                                                {char === ' ' ? '\u00A0' : char}
-                                            </motion.span>
-                                        );
-                                    })}
-                                </h2>
-
-                                {/* Line 2: Since 2023 */}
-                                <h3 className="font-display font-black tracking-[-0.04em] leading-[0.95] text-4xl md:text-6xl lg:text-[clamp(4rem,8vw,8rem)] uppercase italic">
-                                    {text2.split('').map((char, i) => {
-                                        const totalChars = text1.length + text2.length;
-                                        const offset = text1.length;
-                                        const charProgress = (offset + i) / totalChars;
-                                        const charEnd = (offset + i + 1) / totalChars;
-                                        return (
-                                            <motion.span
-                                                key={`t2-${i}`}
-                                                className="inline-block"
-                                                style={{
-                                                    whiteSpace: 'pre',
-                                                    color: useTransform(
-                                                        scrollYProgress,
-                                                        [charProgress, charEnd],
-                                                        ['#cbd5e1', '#2563eb']
-                                                    ),
-                                                    translateY: useTransform(
-                                                        scrollYProgress,
-                                                        [charProgress, charEnd],
-                                                        [20, 0]
-                                                    ),
-                                                }}
-                                            >
-                                                {char === ' ' ? '\u00A0' : char}
-                                            </motion.span>
-                                        );
-                                    })}
-                                </h3>
-                            </div>
-                        </section>
-                    );
-                };
-                return <ScrollColorText />;
-            })()}
+            <ScrollColorText />
 
             {/* "Next When?" CTA Section — Premium Motion Design */}
             <section className="relative bg-white overflow-hidden py-32 md:py-48">
