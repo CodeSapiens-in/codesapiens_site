@@ -447,21 +447,9 @@ const LANDING_STYLES = `
     border-color: rgba(99, 102, 241, 0.4);
     box-shadow: inset 0 0 40px rgba(99, 102, 241, 0.08), 0 10px 30px rgba(0,0,0,0.3);
   }
-  .impact-stat-gutter {
-    width: 40px;
-    background: #020817;
-    border-right: 1px solid #1e293b;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 1.5rem 0;
-    font-size: 0.75rem;
-    color: #475569;
-    user-select: none;
-  }
   .impact-stat-content {
     flex: 1;
-    padding: 1.5rem;
+    padding: 2rem;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -473,7 +461,7 @@ const LANDING_STYLES = `
     flex-wrap: wrap;
     line-height: 1.4;
   }
-  .code-line .const { color: #a855f7; font-weight: 700; }
+  .code-line .const { color: #10b981; font-weight: 700; }
   .code-line .var { color: var(--text-primary); }
   .code-line .op { color: var(--text-muted); font-weight: 500; }
   .code-line .val { 
@@ -494,7 +482,7 @@ const LANDING_STYLES = `
   .stat-glow {
     position: absolute;
     top: 50%;
-    left: 40px;
+    left: 20px;
     width: 60%;
     height: 40%;
     background: radial-gradient(circle, rgba(99, 102, 241, 0.08), transparent 70%);
@@ -1097,10 +1085,6 @@ const StatsSection = () => {
                 animate={inView ? { opacity: 1, x: 0 } : { opacity: 0, x: -20 }}
                 transition={{ type: 'spring', stiffness: 100, damping: 15, delay: i * 0.1 }}
               >
-                <div className="impact-stat-gutter">
-                  <span>0{i + 1}</span>
-                  <span className="opacity-20 mt-1">.</span>
-                </div>
                 <div className="impact-stat-content">
                   <div className="code-line">
                     <span className="const">const</span>
@@ -1962,9 +1946,8 @@ const CodeSapiensHero = () => {
                   alt="CodeSapiens" className="w-7 h-7 rounded-full object-cover" style={{border:'1px solid #6366f140'}}/>
                 <span className="font-bold text-sm" style={{color:'var(--text-primary)'}}>CodeSapiens</span>
               </div>
-              <p className="font-mono text-xs mb-6 max-w-xs" style={{color:'var(--text-muted)',lineHeight:1.7}}>
-                {'// Empowering students to build, learn, and grow.'}<br/>
-                {"// Tamil Nadu's largest student tech community."}
+              <p className="font-mono text-xs mb-6 max-w-sm" style={{color:'var(--text-muted)',lineHeight:1.7}}>
+                {'// Empowering students to build, learn, and grow. — Tamil Nadu\'s largest student tech community.'}
               </p>
               <div className="flex gap-5">
                 {[
