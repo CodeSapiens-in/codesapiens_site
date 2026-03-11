@@ -102,6 +102,30 @@ const LANDING_STYLES = `
     box-shadow: 0 0 20px #6366f130, 0 0 40px #6366f110;
   }
 
+  /* ── Mafia Gang Carousel ── */
+  .mafia-carousel-container {
+    padding: 3rem 0;
+    overflow: hidden;
+    position: relative;
+    width: 100%;
+  }
+  .mafia-track {
+    display: flex;
+    gap: 1.5rem;
+    width: max-content;
+    padding: 1rem 0;
+  }
+  .mafia-track:hover {
+    animation-play-state: paused;
+  }
+  @keyframes mafia-marquee {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+  .mafia-marquee-anim {
+    animation: mafia-marquee 40s linear infinite;
+  }
+
   /* ── Blinking footer cursor ── */
   @keyframes cursor-blink { 0%,100%{opacity:1} 50%{opacity:0} }
   .blink-cur { animation: cursor-blink 1s step-end infinite; }
@@ -1326,10 +1350,13 @@ const SocialMediaSection = () => {
   );
 };
 
-// ─── FoundersSection (Daniel1227k card style) ──────────────────────────────────
+// ─── FoundersSection (Mafia Gang Carousel) ──────────────────────────────────
 const FoundersSection = ({ founders }) => {
   const sectionRef = useRef(null);
-  const inView = useInView(sectionRef, { once: true, amount: 0.2 });
+  const inView = useInView(sectionRef, { once: true, amount: 0.1 });
+
+  // Triple founders for safer infinite effect
+  const displayFounders = [...founders, ...founders, ...founders];
 
   return (
     <motion.section id="community" ref={sectionRef} className="py-24 relative"
@@ -1338,14 +1365,17 @@ const FoundersSection = ({ founders }) => {
       transition={{ type:'spring', stiffness:60, damping:20 }} viewport={{ once:true, amount:0.1 }}>
       <div className="max-w-7xl mx-auto px-6">
         <div className="ide-label mb-10"><span className="ide-prompt">$</span><span>ls --team --mafia-gang</span></div>
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 justify-items-center">
-          {founders.map((founder, i) => (
-            <motion.div
-              key={i}
-              className="founder-card"
-              initial={{ opacity: 0, y: 60, scale: 0.9 }}
-              animate={inView ? { opacity: 1, y: 0, scale: 1 } : { opacity: 0, y: 60, scale: 0.9 }}
-              transition={{ type: 'spring', stiffness: 70, damping: 18, delay: i * 0.15 }}
+      </div>
+
+      <div className="mafia-carousel-container">
+        <motion.div 
+          className="mafia-track mafia-marquee-anim"
+          style={{ paddingLeft: '2rem' }}
+        >
+          {displayFounders.map((founder, i) => (
+            <div
+              key={`${founder.name}-${i}`}
+              className="founder-card shrink-0"
             >
               <b />
               <img src={founder.photo} alt={founder.name} />
@@ -1360,9 +1390,9 @@ const FoundersSection = ({ founders }) => {
                   <li><a href={founder.instagram} target="_blank" rel="noopener noreferrer" aria-label="Instagram"><Instagram size={16} /></a></li>
                 </ul>
               </div>
-            </motion.div>
+            </div>
           ))}
-        </div>
+        </motion.div>
       </div>
     </motion.section>
   );
