@@ -979,26 +979,25 @@ const StatsSection = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-10 items-start">
-          <div className="impact-tilt-grid">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 h-full">
             {statCards.map((item, i) => (
-              <div key={i} className="impact-tilt-card-wrap">
-                <motion.div
-                  className="impact-stat-card impact-tilt-card-inner"
-                  initial={{ opacity: 0, scale: 0.7 }}
-                  animate={inView ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.7 }}
-                  transition={{ type: 'spring', stiffness: 100, damping: 12, delay: i * 0.1 }}
-                >
-                  <p className="stat-label">
-                    <span className="const">const</span> {item.varName}
-                  </p>
-                  <p className="stat-number mb-1">
-                    = {item.val}{item.suffix};
-                  </p>
-                  <p className="stat-desc">
-                    <span className="comment">// {item.desc}</span>
-                  </p>
-                </motion.div>
-              </div>
+              <motion.div
+                key={i}
+                className="impact-stat-card h-full flex flex-col justify-center"
+                initial={{ opacity: 0, y: 16 }}
+                animate={inView ? { opacity: 1, y: 0 } : { opacity: 0, y: 16 }}
+                transition={{ type: 'spring', stiffness: 100, damping: 12, delay: i * 0.1 }}
+              >
+                <p className="stat-label mb-2">
+                  <span className="const">const</span> {item.varName}
+                </p>
+                <p className="stat-number mb-2" style={{ fontSize: '3.5rem', lineHeight: 1 }}>
+                  = {item.val}{item.suffix};
+                </p>
+                <p className="stat-desc mt-auto">
+                  <span className="comment">// {item.desc}</span>
+                </p>
+              </motion.div>
             ))}
           </div>
 
@@ -1008,22 +1007,29 @@ const StatsSection = () => {
               {loading ? (
                 <p className="text-sm font-mono animate-pulse" style={{ color: 'var(--text-muted)' }}>// loading leaderboard...</p>
               ) : stats.topColleges.filter(c => c.name && c.name !== 'Not specified').slice(0, 5).map((c, i) => (
-                <div key={i} className="flex items-center gap-3">
-                  <span className="w-5 text-right text-xs font-mono shrink-0" style={{ color: i === 0 ? '#f59e0b' : 'var(--text-muted)' }}>
-                    {i + 1}
-                  </span>
-                  <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ background: 'var(--bg-elevated)' }}>
+                <div key={i} className="flex flex-col gap-1.5 pt-1">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3 overflow-hidden">
+                      <span className="w-4 text-right text-xs font-mono shrink-0" style={{ color: i === 0 ? '#f59e0b' : 'var(--text-muted)' }}>
+                        {i + 1}.
+                      </span>
+                      <span className="text-sm font-semibold truncate" style={{ color: 'var(--text-primary)' }}>
+                        {c.name}
+                      </span>
+                    </div>
+                    <span className="text-xs font-mono shrink-0 ml-4" style={{ color: 'var(--text-code)' }}>
+                      {c.count} members
+                    </span>
+                  </div>
+                  <div className="w-full h-1.5 rounded-full overflow-hidden ml-7" style={{ background: 'var(--bg-elevated)', width: 'calc(100% - 1.75rem)' }}>
                     <motion.div
                       className="h-full rounded-full"
-                      style={{ background: i === 0 ? 'linear-gradient(90deg,#6366f1,#22d3ee)' : 'var(--border-glow)' }}
+                      style={{ background: i === 0 ? 'linear-gradient(90deg,#6366f1,#22d3ee)' : 'var(--primary-glow)' }}
                       initial={{ width: 0 }}
-                      animate={inView ? { width: `${Math.max(20, (c.count / (stats.topColleges[0]?.count || 1)) * 100)}%` } : { width: 0 }}
+                      animate={inView ? { width: `${Math.max(5, (c.count / (stats.topColleges[0]?.count || 1)) * 100)}%` } : { width: 0 }}
                       transition={{ delay: 0.3 + i * 0.1, duration: 0.8, ease: 'easeOut' }}
                     />
                   </div>
-                  <span className="text-xs font-mono shrink-0 w-16 truncate text-right" style={{ color: 'var(--text-body)' }}>
-                    {c.count}
-                  </span>
                 </div>
               ))}
             </div>
@@ -1755,23 +1761,30 @@ const CodeSapiensHero = () => {
         transition={{ type:'spring', stiffness:60, damping:20 }} viewport={{ once:true, amount:0.1 }}>
         <div className="max-w-7xl mx-auto px-6">
           <div className="ide-label mb-10"><span className="ide-prompt">$</span><span>ls --hall-of-fame</span></div>
-          <div className="tilted-grid">
-            {hallOfFame.map((entry, i) => (
-              <div key={entry.id} className="tilted-card hof">
-                <div className="tilted-card-inner">
-                  <img
-                    src={entry.image_url}
-                    alt={entry.student_name}
-                    className={`tilted-card-img ${i % 2 === 0 ? 'img-odd' : 'img-even'}`}
-                    style={i % 2 === 0
-                      ? { transform: 'translateX(-70%) translateY(-105%) rotateZ(-45deg)' }
-                      : { transform: 'translateX(-30%) translateY(5%) rotateZ(135deg)' }
-                    }
-                  />
-                  <h2 className="tilted-card-label">{entry.student_name}</h2>
+          <div className="overflow-hidden w-full relative group">
+            <motion.div 
+              className="flex gap-8 w-max py-4"
+              animate={{ x: ["0%", "-50%"] }}
+              transition={{ repeat: Infinity, ease: "linear", duration: 30 }}
+              style={{ paddingLeft: '1rem' }}
+            >
+              {[...hallOfFame, ...hallOfFame].map((entry, i) => (
+                <div key={`${entry.id || 'hof'}-${i}`} className="tilted-card hof shrink-0" style={{ width: '260px' }}>
+                  <div className="tilted-card-inner">
+                    <img
+                      src={entry.image_url}
+                      alt={entry.student_name}
+                      className={`tilted-card-img ${i % 2 === 0 ? 'img-odd' : 'img-even'}`}
+                      style={i % 2 === 0
+                        ? { transform: 'translateX(-70%) translateY(-105%) rotateZ(-45deg)' }
+                        : { transform: 'translateX(-30%) translateY(5%) rotateZ(135deg)' }
+                      }
+                    />
+                    <h2 className="tilted-card-label whitespace-normal">{entry.student_name}</h2>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </motion.div>
           </div>
         </div>
       </motion.section>
