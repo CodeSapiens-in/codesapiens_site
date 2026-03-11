@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabaseClient';
 import { Link } from 'react-router-dom';
-import { Calendar, Users, ArrowRight, Loader2, CheckCircle, UserPlus, X, AlertCircle } from 'lucide-react';
+import { Calendar, Users, ArrowRight, Loader2, UserPlus, X, AlertCircle } from 'lucide-react';
 
 const MentorshipLanding = () => {
     const [programs, setPrograms] = useState([]);
@@ -117,16 +117,11 @@ const MentorshipLanding = () => {
 
             if (!m2Input || !m3Input) throw new Error('Please provide usernames for both team members.');
 
-            console.log('[Team Registration] Looking up usernames:', m2Input, m3Input);
-
             // Check if usernames exist using RPC function (bypasses RLS)
             const [res2, res3] = await Promise.all([
                 supabase.rpc('get_user_by_username', { lookup_username: m2Input }),
                 supabase.rpc('get_user_by_username', { lookup_username: m3Input })
             ]);
-
-            console.log('[Team Registration] Response for member2:', res2);
-            console.log('[Team Registration] Response for member3:', res3);
 
             if (res2.error) {
                 console.error('[Team Registration] Error looking up member2:', res2.error);
@@ -139,9 +134,6 @@ const MentorshipLanding = () => {
 
             const member2 = res2.data?.[0];
             const member3 = res3.data?.[0];
-
-            console.log('[Team Registration] Found member2:', member2);
-            console.log('[Team Registration] Found member3:', member3);
 
             const missing = [];
             if (!member2) missing.push(m2Input);

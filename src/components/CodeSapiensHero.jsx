@@ -7,9 +7,9 @@ import {
   Crown, Globe, ArrowUpRight, Instagram, Twitter,
 } from 'lucide-react';
 import { BACKEND_URL } from '../config';
+import monkeyLogo from '../assets/monkey-logo.png';
 import { authFetch } from '../lib/authFetch';
 import LandingPopup from './LandingPopup';
-import CustomCursor from './CustomCursor';
 import FluidCursor from './FluidCursor';
 import { useScrollProgress } from '../hooks/useScrollProgress';
 import { useAurora } from '../hooks/useAurora';
@@ -42,57 +42,6 @@ const LANDING_STYLES = `
   .lp-wrap { cursor: none; }
   .lp-wrap a, .lp-wrap button, .lp-wrap [role="button"] { cursor: none; }
 
-  #cs-cursor-dot {
-    position: fixed; top: 0; left: 0;
-    width: 5px; height: 5px;
-    background: #f1f5f9;
-    border-radius: 50%;
-    pointer-events: none;
-    z-index: 9999;
-    will-change: transform;
-    transition: background 0.2s ease, opacity 0.15s ease;
-  }
-  #cs-cursor-ring {
-    position: fixed; top: 0; left: 0;
-    width: 32px; height: 32px;
-    border: 1.5px solid #6366f1;
-    border-radius: 50%;
-    pointer-events: none;
-    z-index: 9998;
-    will-change: transform;
-    transition: width 0.2s ease, height 0.2s ease,
-                border-color 0.2s ease, background-color 0.2s ease;
-  }
-  .cs-trail {
-    position: fixed; top: 0; left: 0;
-    border-radius: 50%;
-    background: #6366f1;
-    pointer-events: none;
-    z-index: 9997;
-    will-change: transform;
-    transition: opacity 0.12s ease;
-  }
-
-  /* ── Scroll progress ── */
-  #cs-scroll-bar {
-    position: fixed; top: 0; left: 0; right: 0;
-    height: 2px;
-    background: linear-gradient(to right, #6366f1, #22d3ee);
-    transform-origin: left;
-    z-index: 9999;
-  }
-
-  /* ── Typewriter cursor blink ── */
-  @keyframes tw-blink {
-    0%, 100% { opacity: 1; }
-    50%       { opacity: 0; }
-  }
-  .tw-cursor {
-    color: #22d3ee;
-    animation: tw-blink 500ms step-end infinite;
-    font-weight: 400;
-    margin-left: 1px;
-  }
 
   /* ── Card base ── */
   .cs-card {
@@ -363,6 +312,66 @@ const LANDING_STYLES = `
     .mascot-color { display: none !important; }
   }
 
+  /* ── Monkey gradient reveal ── */
+  .monkey-reveal-wrapper {
+    position: relative;
+    width: 320px;
+    height: 320px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 1.5px solid rgba(99,102,241,0.25);
+    box-shadow: 0 0 30px rgba(99,102,241,0.08);
+  }
+  .monkey-ghost {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    filter: brightness(10) grayscale(1) opacity(0.07);
+    z-index: 1;
+    pointer-events: none;
+    user-select: none;
+    -webkit-user-drag: none;
+  }
+  .monkey-color {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    z-index: 2;
+    pointer-events: none;
+    user-select: none;
+    -webkit-user-drag: none;
+    -webkit-mask-image: radial-gradient(circle 0px at 50% 50%, black 0%, transparent 0%);
+    mask-image: radial-gradient(circle 0px at 50% 50%, black 0%, transparent 0%);
+  }
+  .monkey-tint {
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    pointer-events: none;
+    mix-blend-mode: screen;
+    opacity: 0;
+    transition: opacity 0.15s;
+  }
+  .monkey-ring {
+    position: absolute;
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    border: 2px solid rgba(99,102,241,0.55);
+    box-shadow:
+      0 0 16px rgba(99,102,241,0.4),
+      inset 0 0 16px rgba(99,102,241,0.08);
+    pointer-events: none;
+    z-index: 4;
+    transform: translate(-50%, -50%);
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+
   /* ── Navbar restyle ── */
   .nav-lp {
     padding: 1.2rem 2rem;
@@ -376,15 +385,6 @@ const LANDING_STYLES = `
     background: rgba(2, 8, 23, 0.85) !important;
     backdrop-filter: blur(24px) saturate(180%);
     border-bottom: 1px solid #1e293b;
-  }
-  .nav-logo-cursor {
-    color: #22d3ee;
-    font-weight: 700;
-    animation: logo-cursor-blink 1s step-end infinite;
-  }
-  @keyframes logo-cursor-blink {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0; }
   }
   .nav-link-lp {
     font-family: 'Inter', sans-serif;
@@ -454,6 +454,158 @@ const LANDING_STYLES = `
 
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+  }
+
+  /* ── Tilted card grid ── */
+  .tilted-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 3vw;
+    transform-origin: top right;
+    transform: skewY(-4.398705355deg);
+    margin: 0 auto;
+    padding: 2rem;
+  }
+  @media (min-width: 600px) {
+    .tilted-grid { grid-template-columns: repeat(3, 1fr); gap: 2vw; }
+  }
+  @media (min-width: 900px) {
+    .tilted-grid { grid-template-columns: repeat(4, 1fr); gap: 1.5vw; }
+  }
+  @media (min-width: 1200px) {
+    .tilted-grid { grid-template-columns: repeat(5, 1fr); gap: 1vw; }
+  }
+
+  .tilted-card {
+    transform-origin: top left;
+    transform: skewY(4.398705355deg) rotateZ(14.03624deg);
+    padding-top: 120%;
+    position: relative;
+    z-index: 1;
+    transition: z-index 0.3s;
+    cursor: none;
+  }
+  .tilted-card:hover { z-index: 10; }
+
+  .tilted-card-inner {
+    position: absolute;
+    z-index: 2;
+    width: 98%;
+    height: 95%;
+    top: 0;
+    background: #0f1729;
+    border-radius: 12px;
+    border: 1px solid rgba(99, 102, 241, 0.2);
+    box-shadow:
+      inset 0 0 0 20px #111827,
+      0 4px 24px rgba(0,0,0,0.4);
+    box-sizing: border-box;
+    overflow: hidden;
+    transform: rotate(0deg) translate(0, 0);
+    transition: transform 0.4s cubic-bezier(0.25,0.46,0.45,0.94),
+                border-color 0.4s ease,
+                box-shadow 0.4s ease;
+  }
+  .tilted-card:hover .tilted-card-inner {
+    transform: rotate(-14.03624deg) translate(5.5%, 15%) scale(1.5);
+    border-color: rgba(99, 102, 241, 0.6);
+    box-shadow:
+      inset 0 0 0 20px #111827,
+      0 20px 60px rgba(99, 102, 241, 0.3),
+      0 0 40px rgba(34, 211, 238, 0.1);
+  }
+
+  .tilted-card.hof:hover .tilted-card-inner {
+    border-color: rgba(245, 158, 11, 0.6);
+    box-shadow:
+      inset 0 0 0 20px #111827,
+      0 20px 60px rgba(245, 158, 11, 0.2),
+      0 0 40px rgba(245, 158, 11, 0.1);
+  }
+
+  .tilted-card-inner::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom, transparent 50%, rgba(2, 8, 23, 0.8) 100%);
+    z-index: 3;
+    pointer-events: none;
+  }
+
+  .tilted-card-img {
+    position: absolute;
+    width: 84%;
+    top: 50%;
+    left: 50%;
+    z-index: 4;
+    border-radius: 8px;
+    filter: brightness(0.7) saturate(0.8);
+    transition: width 0.3s ease, transform 0.3s ease, filter 0.3s ease;
+    object-fit: cover;
+  }
+  .tilted-card:hover .tilted-card-img.img-odd {
+    width: 120%;
+    transform: translateX(-65%) translateY(-75%) rotateZ(-45deg) !important;
+    filter: brightness(1) saturate(1.2);
+  }
+  .tilted-card:hover .tilted-card-img.img-even {
+    width: 60%;
+    transform: translateX(-15%) translateY(60%) rotateZ(135deg) !important;
+    filter: brightness(1) saturate(1.2);
+  }
+
+  .tilted-card-label {
+    position: absolute;
+    text-align: center;
+    width: 122%;
+    left: -11%;
+    top: 46%;
+    transform: rotateZ(-45deg);
+    background: linear-gradient(135deg, #6366f1, #22d3ee);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-family: 'Inter', sans-serif;
+    font-weight: 700;
+    font-size: 0.85em;
+    line-height: 140%;
+    transition: top 0.3s ease;
+    z-index: 5;
+    pointer-events: none;
+  }
+  .tilted-card.hof .tilted-card-label {
+    background: linear-gradient(135deg, #f59e0b, #fcd34d);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .tilted-card:hover .tilted-card-label { top: 64%; }
+
+  /* Impact stat mild tilt */
+  .impact-tilt-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+    transform-origin: top right;
+    transform: skewY(-2deg);
+  }
+  .impact-tilt-card-wrap {
+    transform-origin: top left;
+    transform: skewY(2deg) rotateZ(6deg);
+    position: relative;
+    z-index: 1;
+    transition: z-index 0.3s;
+    cursor: none;
+  }
+  .impact-tilt-card-wrap:hover { z-index: 10; }
+  .impact-tilt-card-inner {
+    transform: rotate(0deg) translate(0,0);
+    transition: transform 0.4s cubic-bezier(0.25,0.46,0.45,0.94),
+                box-shadow 0.4s ease;
+  }
+  .impact-tilt-card-wrap:hover .impact-tilt-card-inner {
+    transform: rotate(-6deg) translate(3%, 8%) scale(1.3);
+    box-shadow: 0 20px 60px rgba(99,102,241,0.3), 0 0 40px rgba(34,211,238,0.1);
   }
 `;
 
@@ -526,25 +678,26 @@ const StatsSection = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-10 items-start">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="impact-tilt-grid">
             {statCards.map((item, i) => (
-              <motion.div
-                key={i}
-                className="impact-stat-card"
-                initial={{ opacity: 0, scale: 0.7 }}
-                animate={inView ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.7 }}
-                transition={{ type: 'spring', stiffness: 100, damping: 12, delay: i * 0.1 }}
-              >
-                <p className="stat-label">
-                  <span className="const">const</span> {item.varName}
-                </p>
-                <p className="stat-number mb-1">
-                  = {item.val}{item.suffix};
-                </p>
-                <p className="stat-desc">
-                  <span className="comment">// {item.desc}</span>
-                </p>
-              </motion.div>
+              <div key={i} className="impact-tilt-card-wrap">
+                <motion.div
+                  className="impact-stat-card impact-tilt-card-inner"
+                  initial={{ opacity: 0, scale: 0.7 }}
+                  animate={inView ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.7 }}
+                  transition={{ type: 'spring', stiffness: 100, damping: 12, delay: i * 0.1 }}
+                >
+                  <p className="stat-label">
+                    <span className="const">const</span> {item.varName}
+                  </p>
+                  <p className="stat-number mb-1">
+                    = {item.val}{item.suffix};
+                  </p>
+                  <p className="stat-desc">
+                    <span className="comment">// {item.desc}</span>
+                  </p>
+                </motion.div>
+              </div>
             ))}
           </div>
 
@@ -770,6 +923,10 @@ const CodeSapiensHero = () => {
   const wrapRef   = useRef(null);
   const canvasRef = useRef(null);
   const heroRef   = useRef(null);
+  const monkeyContainerRef = useRef(null);
+  const monkeyColorRef = useRef(null);
+  const monkeyTintRef = useRef(null);
+  const monkeyRingRef = useRef(null);
 
   const scrollProgress = useScrollProgress();
   useAurora(canvasRef);
@@ -791,6 +948,46 @@ const CodeSapiensHero = () => {
   useEffect(() => {
     setIsMobile(typeof window !== 'undefined' && window.matchMedia('(hover: none)').matches);
   }, []);
+
+  const MONKEY_SPOTLIGHT_RADIUS = 160;
+
+  const handleMonkeyMove = (e) => {
+    const container = monkeyContainerRef.current;
+    const colorImg = monkeyColorRef.current;
+    const tint = monkeyTintRef.current;
+    const ring = monkeyRingRef.current;
+    if (!container || !colorImg || !tint || !ring) return;
+
+    const rect = container.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+
+    const r = MONKEY_SPOTLIGHT_RADIUS;
+    const mask = `radial-gradient(circle ${r}px at ${x}px ${y}px, black 0%, black 55%, transparent 100%)`;
+    colorImg.style.webkitMaskImage = mask;
+    colorImg.style.maskImage = mask;
+
+    tint.style.background = `radial-gradient(circle ${r}px at ${x}px ${y}px,
+      #6366f1cc 0%, #a855f7aa 40%, #22d3ee55 75%, transparent 100%)`;
+    tint.style.opacity = '1';
+
+    ring.style.left = `${x}px`;
+    ring.style.top = `${y}px`;
+    ring.style.opacity = '1';
+  };
+
+  const handleMonkeyLeave = () => {
+    const colorImg = monkeyColorRef.current;
+    const tint = monkeyTintRef.current;
+    const ring = monkeyRingRef.current;
+    if (!colorImg || !tint || !ring) return;
+
+    const hideMask = 'radial-gradient(circle 0px at 50% 50%, black 0%, transparent 0%)';
+    colorImg.style.webkitMaskImage = hideMask;
+    colorImg.style.maskImage = hideMask;
+    tint.style.opacity = '0';
+    ring.style.opacity = '0';
+  };
 
   useEffect(() => {
     const load = async () => {
@@ -821,7 +1018,6 @@ const CodeSapiensHero = () => {
       <style>{LANDING_STYLES}</style>
 
       <FluidCursor />
-      <CustomCursor />
 
       {/* Navbar */}
       <nav className={`fixed top-0 inset-x-0 z-50 nav-lp ${navScrolled ? 'scrolled' : ''}`}>
@@ -830,7 +1026,7 @@ const CodeSapiensHero = () => {
             <img src="https://res.cloudinary.com/dqudvximt/image/upload/v1756797708/WhatsApp_Image_2025-09-02_at_12.45.18_b15791ea_rnlwrz.jpg"
               alt="CodeSapiens" className="w-8 h-8 rounded-full object-cover" style={{ border:'1px solid #6366f140' }} />
             <span className="font-bold text-sm tracking-tight" style={{ fontFamily:"'JetBrains Mono',monospace", color:'var(--text-primary)' }}>
-              CodeSapiens<span className="nav-logo-cursor">▋</span>
+              CodeSapiens
             </span>
           </div>
           <div className="hidden md:flex items-center gap-8">
@@ -900,7 +1096,7 @@ const CodeSapiensHero = () => {
         <motion.canvas ref={canvasRef} className="absolute inset-0 w-full h-full pointer-events-none" style={{zIndex:0, y:canvasY}} />
 
         <div className="max-w-7xl mx-auto px-6 w-full relative pt-24" style={{zIndex:2}}>
-          <div className="grid lg:grid-cols-[1fr_480px] gap-16 items-center">
+          <div className="grid lg:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)] gap-12 items-center">
             {/* Left */}
             <motion.div style={{y:headlineY, opacity:heroOpacity}}>
               <motion.div className="ide-label mb-6"
@@ -923,7 +1119,6 @@ const CodeSapiensHero = () => {
                 <span className="font-mono font-medium" style={{fontSize:'clamp(1rem,2.2vw,1.35rem)',color:'var(--text-body)',letterSpacing:'-0.01em'}}>
                   {typedText}
                 </span>
-                <span className="tw-cursor font-mono" style={{fontSize:'clamp(1rem,2.2vw,1.35rem)'}}>|</span>
               </motion.div>
 
               <motion.p className="mb-10 max-w-xl" style={{color:'var(--text-body)',fontSize:'1rem',lineHeight:1.7,letterSpacing:'-0.01em'}}
@@ -945,32 +1140,37 @@ const CodeSapiensHero = () => {
               </motion.div>
             </motion.div>
 
-            {/* Right: Mascot — flashlight spotlight reveal */}
+            {/* Right: Monkey spotlight reveal */}
             <motion.div
-              className="mascot-wrapper flex justify-center items-center py-8 lg:py-0 w-full min-h-[256px] lg:min-h-[420px]"
+              className="flex justify-center items-center py-8 lg:py-0 w-full min-h-[256px] lg:min-h-[420px]"
               style={{ y: mascotParallaxY, position: 'relative' }}
               initial={{opacity:0,x:32}} animate={{opacity:1,x:0}}
               transition={{delay:0.3,type:'spring',stiffness:60,damping:20}}
-              onMouseMove={(e) => {
-                const rect = e.currentTarget.getBoundingClientRect();
-                const x = ((e.clientX - rect.left) / rect.width * 100).toFixed(2);
-                const y = ((e.clientY - rect.top) / rect.height * 100).toFixed(2);
-                const colorImg = e.currentTarget.querySelector('.mascot-color');
-                if (colorImg) {
-                  colorImg.style.webkitMaskImage = `radial-gradient(circle 100px at ${x}% ${y}%, black 0%, transparent 80%)`;
-                  colorImg.style.maskImage = `radial-gradient(circle 100px at ${x}% ${y}%, black 0%, transparent 80%)`;
-                }
-              }}
-              onMouseLeave={(e) => {
-                const colorImg = e.currentTarget.querySelector('.mascot-color');
-                if (colorImg) {
-                  colorImg.style.webkitMaskImage = 'radial-gradient(circle 0px at 50% 50%, black 0%, transparent 100%)';
-                  colorImg.style.maskImage = 'radial-gradient(circle 0px at 50% 50%, black 0%, transparent 100%)';
-                }
-              }}
             >
-              <img src="/assets/mascot.png" alt="CodeSapiens mascot" className="mascot-dark w-64 h-64 lg:w-[420px] lg:h-[420px]" />
-              <img src="/assets/mascot.png" aria-hidden="true" className="mascot-color w-64 h-64 lg:w-[420px] lg:h-[420px]" />
+              <div
+                ref={monkeyContainerRef}
+                className="monkey-reveal-wrapper shadow-2xl"
+                onMouseMove={handleMonkeyMove}
+                onMouseLeave={handleMonkeyLeave}
+              >
+                {/* Layer 1 — always-visible ghost silhouette */}
+                <img
+                  src={monkeyLogo}
+                  alt="CodeSapiens mascot"
+                  className="monkey-ghost"
+                />
+                {/* Layer 2 — colour image revealed under spotlight */}
+                <img
+                  ref={monkeyColorRef}
+                  src={monkeyLogo}
+                  alt=""
+                  className="monkey-color"
+                />
+                {/* Gradient tint layer that follows cursor */}
+                <div ref={monkeyTintRef} className="monkey-tint" />
+                {/* Visible spotlight ring that follows cursor */}
+                <div ref={monkeyRingRef} className="monkey-ring" />
+              </div>
             </motion.div>
           </div>
         </div>
@@ -1015,26 +1215,29 @@ const CodeSapiensHero = () => {
         </div>
       </motion.section>
 
-      {/* ── Events ── */}
+          {/* ── Events / Community Moments ── */}
       <motion.section id="events" className="py-24 relative"
         style={{background:'var(--bg-base)',borderTop:'1px solid var(--border)'}}
         initial={{opacity:0,y:32}} whileInView={{opacity:1,y:0}}
         transition={{type:'spring',stiffness:60,damping:20}} viewport={{once:true,amount:0.1}}>
         <div className="max-w-7xl mx-auto px-6">
           <div className="ide-label mb-10"><span className="ide-prompt">$</span><span>ls --events --community-moments</span></div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          <div className="tilted-grid">
             {communityPhotos.slice(0,6).map((photo, i) => (
-              <SpotlightCard key={photo.id} index={i} className="p-0 overflow-hidden group" style={{padding:0}}>
-                <div className="relative overflow-hidden" style={{aspectRatio:'4/3'}}>
-                  <img src={photo.image_url} alt={photo.title}
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"/>
-                  <div className="absolute inset-0" style={{background:'linear-gradient(to top, #0f1729 0%, transparent 60%)'}}/>
-                  <div className="absolute bottom-0 left-0 p-5">
-                    <h4 className="font-bold text-base mb-0.5" style={{color:'var(--text-primary)'}}>{photo.title}</h4>
-                    <p className="font-mono text-xs" style={{color:'var(--text-muted)'}}>{photo.description||photo.date}</p>
-                  </div>
+              <div key={photo.id} className="tilted-card">
+                <div className="tilted-card-inner">
+                  <img
+                    src={photo.image_url}
+                    alt={photo.title}
+                    className={`tilted-card-img ${i % 2 === 0 ? 'img-odd' : 'img-even'}`}
+                    style={i % 2 === 0
+                      ? { transform: 'translateX(-70%) translateY(-105%) rotateZ(-45deg)' }
+                      : { transform: 'translateX(-30%) translateY(5%) rotateZ(135deg)' }
+                    }
+                  />
+                  <h2 className="tilted-card-label">{photo.title}</h2>
                 </div>
-              </SpotlightCard>
+              </div>
             ))}
           </div>
         </div>
@@ -1053,23 +1256,26 @@ const CodeSapiensHero = () => {
         transition={{ type:'spring', stiffness:60, damping:20 }} viewport={{ once:true, amount:0.1 }}>
         <div className="max-w-7xl mx-auto px-6">
           <div className="ide-label mb-10"><span className="ide-prompt">$</span><span>ls --hall-of-fame</span></div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+          <div className="tilted-grid">
             {hallOfFame.map((entry, i) => (
-              <SpotlightCard key={entry.id} index={i} tilt className="p-0 overflow-hidden group" style={{padding:0}}>
-                <div className="h-52 overflow-hidden">
-                  <img src={entry.image_url} alt={entry.student_name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"/>
+              <div key={entry.id} className="tilted-card hof">
+                <div className="tilted-card-inner">
+                  <img
+                    src={entry.image_url}
+                    alt={entry.student_name}
+                    className={`tilted-card-img ${i % 2 === 0 ? 'img-odd' : 'img-even'}`}
+                    style={i % 2 === 0
+                      ? { transform: 'translateX(-70%) translateY(-105%) rotateZ(-45deg)' }
+                      : { transform: 'translateX(-30%) translateY(5%) rotateZ(135deg)' }
+                    }
+                  />
+                  <h2 className="tilted-card-label">{entry.student_name}</h2>
                 </div>
-                <div className="p-4">
-                  <h3 className="font-bold text-base mb-2" style={{color:'var(--text-primary)'}}>{entry.student_name}</h3>
-                  <div className="h-px mb-3" style={{background:'var(--border)'}}/>
-                  <p className="text-xs leading-relaxed" style={{color:'var(--text-body)'}}>"{entry.description}"</p>
-                </div>
-              </SpotlightCard>
+              </div>
             ))}
           </div>
         </div>
       </motion.section>
-
       {/* ── Team (Founder cards) ── */}
       <FoundersSection founders={[
         { photo:'https://res.cloudinary.com/druvxcll9/image/upload/v1761122517/1679197646322_n1svjq_s5w42a.jpg', name:'Thiyaga B', role:'Founder', linkedin:'https://www.linkedin.com/company/codesapiens-community/', github:'https://github.com/Codesapiens-in', instagram:'https://www.instagram.com/codesapiens/' },
