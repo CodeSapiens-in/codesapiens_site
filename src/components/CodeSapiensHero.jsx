@@ -1033,48 +1033,6 @@ const LANDING_STYLES = `
   .vision-corners span:nth-child(3) { bottom: 0; left: 0; border-right: 0; border-top: 0; border-bottom-left-radius: 12px; }
   .vision-corners span:nth-child(4) { bottom: 0; right: 0; border-left: 0; border-top: 0; border-bottom-right-radius: 12px; }
   
-  .vision-scan-line {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 2px;
-    background: linear-gradient(90deg, transparent, var(--secondary), transparent);
-    box-shadow: 0 0 15px var(--secondary);
-    opacity: 0.5;
-    z-index: 4;
-    animation: vision-scan 4s linear infinite;
-  }
-  @keyframes vision-scan {
-    0% { top: 0; }
-    100% { top: 100%; }
-  }
-  
-  .vision-status-badge {
-    position: absolute;
-    top: 24px;
-    left: 24px;
-    background: rgba(15, 23, 41, 0.8);
-    backdrop-filter: blur(8px);
-    border: 1px solid rgba(34, 211, 238, 0.4);
-    color: var(--secondary);
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 10px;
-    padding: 4px 10px;
-    border-radius: 4px;
-    z-index: 6;
-    letter-spacing: 0.1em;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
-  .vision-status-dot {
-    width: 6px;
-    height: 6px;
-    background: var(--secondary);
-    border-radius: 50%;
-    animation: pulse 1.5s infinite;
-  }
 
   @media (max-width: 640px) {
     .podium-container { gap: 0.5rem; }
@@ -1903,11 +1861,6 @@ const CodeSapiensHero = () => {
             >
               <div className="vision-corners">
                 <span/><span/><span/><span/>
-              </div>
-              <div className="vision-scan-line" />
-              <div className="vision-status-badge">
-                <div className="vision-status-dot" />
-                LIVE_FEED::VISION_V2.1
               </div>
               <SpotlightCard tilt={true} className="border-0 bg-transparent p-0 overflow-hidden" style={{padding:0, aspectRatio:'4/3', borderRadius: '8px'}}>
                 <img 
