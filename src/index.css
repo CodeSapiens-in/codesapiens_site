@@ -28,7 +28,6 @@
 
     html,
     body {
-        cursor: url('/cursor.png'), auto !important;
         font-family: "Google Sans Flex", sans-serif;
         font-optical-sizing: auto;
         font-style: normal;
@@ -39,13 +38,45 @@
             "ROND" 0;
     }
 
-    a,
-    button,
-    [role="button"],
-    input[type="submit"],
-    input[type="button"],
-    label {
-        cursor: url('/hover-cursor.png'), pointer !important;
+    /* Neon cursor dot (Monkey logo) inside the ring */
+    #neon-cursor-dot {
+        width: 24px;
+        height: 24px;
+        pointer-events: none;
+        transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1), filter 0.3s ease;
+        mix-blend-mode: normal;
+        filter: drop-shadow(0 0 8px rgba(0,204,255,0.4));
+    }
+
+    #neon-cursor-ring {
+        position: fixed;
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        pointer-events: none;
+        z-index: 99998;
+        transform: translate(-50%, -50%);
+        transition: transform 0.2s ease-out, box-shadow 0.3s ease;
+        mix-blend-mode: normal;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: transparent;
+        --grad-1: rgba(255,255,255,0.4);
+        --grad-2: rgba(255,255,255,0.1);
+    }
+
+    #neon-cursor-ring::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        border-radius: 50%;
+        padding: 1.5px; /* thin border */
+        background: linear-gradient(135deg, var(--grad-1), var(--grad-2));
+        -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+        -webkit-mask-composite: xor;
+        mask-composite: exclude;
+        transition: background 0.3s ease;
     }
 
     /* HEADINGS: Applying the new Golden Ratio sizes */

@@ -6,24 +6,27 @@
  * Disabled on mobile/touch devices per spec.
  */
 import React, { useEffect, useRef, useCallback } from 'react';
+import monkeyLogo from '../assets/monkey-logo.png';
 
 const SITE_PALETTE = [
-  [0.388, 0.4, 0.945],    // indigo #6366f1
-  [0.133, 0.827, 0.933],  // cyan #22d3ee
-  [0.659, 0.333, 0.969],  // purple #a855f7
-  [0.063, 0.725, 0.506],  // teal #10b981
+  [0.0,   0.8,   1.0],    // electric cyan  #00ccff
+  [1.0,   0.0,   0.8],    // hot magenta    #ff00cc
+  [0.4,   1.0,   0.0],    // neon lime      #66ff00
+  [1.0,   0.4,   0.0],    // neon orange    #ff6600
+  [0.6,   0.0,   1.0],    // electric violet #9900ff
+  [0.0,   1.0,   0.5],    // neon green     #00ff80
 ];
 
 const CONFIG = {
   SIM_RESOLUTION: 128,
   DYE_RESOLUTION: 1024,
-  DENSITY_DISSIPATION: 0.97,
-  VELOCITY_DISSIPATION: 0.98,
+  DENSITY_DISSIPATION: 0.985,  // slower fade → longer vivid trails
+  VELOCITY_DISSIPATION: 0.99,
   PRESSURE: 0.8,
   PRESSURE_ITERATIONS: 25,
-  CURL: 30,
-  SPLAT_RADIUS: 0.003,
-  SPLAT_FORCE: 6000,
+  CURL: 40,                    // more swirl
+  SPLAT_RADIUS: 0.006,         // wider neon splat
+  SPLAT_FORCE: 9000,           // stronger kick
   SHADING: true,
   TRANSPARENT: true,
 };
@@ -41,7 +44,7 @@ const FluidCursor = () => {
   const getNextColor = useCallback(() => {
     const col = SITE_PALETTE[colorIndexRef.current % SITE_PALETTE.length];
     colorIndexRef.current++;
-    return { r: col[0] * 0.2, g: col[1] * 0.2, b: col[2] * 0.2 };
+    return { r: col[0] * 1.0, g: col[1] * 1.0, b: col[2] * 1.0 }; // full neon brightness
   }, []);
 
   useEffect(() => {
@@ -56,8 +59,8 @@ const FluidCursor = () => {
       height: 100%;
       pointer-events: none;
       z-index: 9999;
-      opacity: 0.85;
-      mix-blend-mode: screen;
+      opacity: 1.0;
+      mix-blend-mode: normal;
     `;
     document.body.insertBefore(canvas, document.body.firstChild);
 
@@ -78,11 +81,11 @@ const FluidCursor = () => {
 
     fluidRef.current = { sim, canvas };
 
-    // Initial 6 random splats
-    for (let i = 0; i < 6; i++) {
+    // Initial 8 random neon splats
+    for (let i = 0; i < 8; i++) {
       const color = getNextColor();
-      const r = { r: color.r * 8, g: color.g * 8, b: color.b * 8 };
-      sim.splat(Math.random(), Math.random(), 500 * (Math.random() - 0.5), 500 * (Math.random() - 0.5), r);
+      const r = { r: color.r * 12, g: color.g * 12, b: color.b * 12 };
+      sim.splat(Math.random(), Math.random(), 800 * (Math.random() - 0.5), 800 * (Math.random() - 0.5), r);
     }
 
     let prevX = null, prevY = null;
@@ -150,7 +153,130 @@ const FluidCursor = () => {
     };
   }, [getNextColor]);
 
+  // ── Neon cursor dot + ring (always visible, all sections) ──────────────
+  useEffect(() => {
+
+    if (isMobile()) return;
+
+    // hide native cursor everywhere
+    const styleEl = document.createElement('style');
+    styleEl.id = 'neon-cursor-hide';
+    styleEl.textContent = `* { cursor: none !important; }`;
+    document.head.appendChild(styleEl);
+
+    const ring = document.createElement('div');
+    ring.id = 'neon-cursor-ring';
+    document.body.appendChild(ring);
+
+    const dot = document.createElement('img');
+    dot.id = 'neon-cursor-dot';
+    dot.src = monkeyLogo;
+    ring.appendChild(dot); // append dot INSIDE the ring
+
+    // Theme colors: Indigo, Purple, Cyan, Emerald
+    const themeColors = [
+      { dot: '#6366f1' }, // Primary
+      { dot: '#a855f7' }, // Accent
+      { dot: '#22d3ee' }, // Secondary
+      { dot: '#10b981' }, // Success
+    ];
+    let colorIdx = 0;
+    
+    // Default resting colors matching the site's gradient text
+    ring.style.setProperty('--grad-1', '#6366f1');
+    ring.style.setProperty('--grad-2', '#a855f7');
+
+    let ringX = window.innerWidth / 2;
+    let ringY = window.innerHeight / 2;
+    let mouseX = ringX;
+    let mouseY = ringY;
+    let rafRing;
+    let isHovering = false;
+
+    const updateRing = () => {
+      // Spring physics for sticky lag
+      const dx = mouseX - ringX;
+      const dy = mouseY - ringY;
+      
+      ringX += dx * 0.15;
+      ringY += dy * 0.15;
+      
+      // Calculate velocity and angle for the "goofy sticky elongated" effect
+      const distance = Math.sqrt(dx * dx + dy * dy);
+      const angle = Math.atan2(dy, dx) * (180 / Math.PI);
+      
+      // Squish factor: more distance = more stretched (elongated)
+      // Max stretch is capped to avoid it breaking entirely
+      const stretch = Math.min(distance * 0.02, 1.2); 
+      
+      const scaleX = isHovering ? 1.4 : 1 + stretch;
+      const scaleY = isHovering ? 1.4 : 1 - (stretch * 0.4);
+
+      ring.style.left = `${ringX}px`;
+      ring.style.top  = `${ringY}px`;
+      
+      // We apply rotation in the direction of movement, and scale X (length) up while scale Y (width) down.
+      // If hovering, we just do a uniform scale.
+      if (!isHovering && distance > 1) {
+        ring.style.transform = `translate(-50%,-50%) rotate(${angle}deg) scale(${scaleX}, ${scaleY})`;
+      } else {
+        // Reset rotation gracefully when stopped or hovering
+        ring.style.transform = `translate(-50%,-50%) scale(${isHovering ? 1.15 : 1})`;
+      }
+
+      rafRing = requestAnimationFrame(updateRing);
+    };
+    rafRing = requestAnimationFrame(updateRing);
+
+    const onMove = (e) => {
+      mouseX = e.clientX;
+      mouseY = e.clientY;
+    };
+
+    const onEnterLink = () => {
+      isHovering = true;
+      colorIdx = (colorIdx + 1) % themeColors.length;
+      const c1 = themeColors[colorIdx].dot;
+      const c2 = themeColors[(colorIdx + 1) % themeColors.length].dot;
+      
+      ring.style.setProperty('--grad-1', c1);
+      ring.style.setProperty('--grad-2', c2);
+      ring.style.boxShadow = `0 0 16px ${c1}60`;
+    };
+    const onLeaveLink = () => {
+      isHovering = false;
+      ring.style.setProperty('--grad-1', '#6366f1');
+      ring.style.setProperty('--grad-2', '#a855f7');
+      ring.style.boxShadow = 'none';
+    };
+
+    document.addEventListener('mousemove', onMove);
+
+    const links = () => document.querySelectorAll('a, button, [role="button"]');
+    const addLinkListeners = () => {
+      links().forEach(el => {
+        el.addEventListener('mouseenter', onEnterLink);
+        el.addEventListener('mouseleave', onLeaveLink);
+      });
+    };
+    addLinkListeners();
+
+    // re-attach on DOM changes (page navigation renders new buttons)
+    const observer = new MutationObserver(addLinkListeners);
+    observer.observe(document.body, { childList: true, subtree: true });
+
+    return () => {
+      cancelAnimationFrame(rafRing);
+      document.removeEventListener('mousemove', onMove);
+      observer.disconnect();
+      dot.remove();
+      ring.remove();
+      styleEl.remove();
+    };
+  }, []);
+
   return null;
+
 };
 
 function initFluidSimulation(gl, canvas, getColor) {

@@ -79,13 +79,25 @@ export function useAurora(canvasRef) {
           const dx = c * DOT_SPACING - mxPx;
           const dy = r * DOT_SPACING - myPx;
           const dist = Math.sqrt(dx*dx + dy*dy);
-          const bright = dist < 80 ? 0.12 + (1 - dist/80) * 0.10 : 0.025;
-          ctx.fillStyle = `rgba(255,255,255,${bright})`;
+          
           ctx.beginPath();
-          ctx.arc(c * DOT_SPACING, r * DOT_SPACING, 1, 0, Math.PI * 2);
+          ctx.arc(c * DOT_SPACING, r * DOT_SPACING, 1.5, 0, Math.PI * 2);
+          
+          if (dist < 150) {
+            const intensity = Math.max(0, 1 - dist / 150);
+            // Reduced brightness from full cyan glowing to a softer glowing cyan 
+            ctx.fillStyle = `rgba(0, 204, 255, ${0.15 + intensity * 0.35})`;
+            ctx.shadowBlur = intensity * 10;
+            ctx.shadowColor = '#00ccff';
+          } else {
+            ctx.fillStyle = `rgba(255, 255, 255, 0.04)`;
+            ctx.shadowBlur = 0;
+          }
+          
           ctx.fill();
         }
       }
+      ctx.shadowBlur = 0; // reset for next passes
 
       // ── Aurora blobs ──────────────────────────────────────────────────────
       BLOBS.forEach(blob => {

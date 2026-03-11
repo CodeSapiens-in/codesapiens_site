@@ -1227,7 +1227,7 @@ const FoundersSection = ({ founders }) => {
 
   return (
     <motion.section id="community" ref={sectionRef} className="py-24 relative"
-      style={{ background:'var(--bg-base)', borderTop:'1px solid var(--border)' }}
+      style={{ borderTop:'1px solid var(--border)', position: 'relative', zIndex: 1 }}
       initial={{ opacity:0, y:32 }} whileInView={{ opacity:1, y:0 }}
       transition={{ type:'spring', stiffness:60, damping:20 }} viewport={{ once:true, amount:0.1 }}>
       <div className="max-w-7xl mx-auto px-6">
@@ -1483,6 +1483,13 @@ const CodeSapiensHero = () => {
       <style>{LANDING_STYLES}</style>
 
       <FluidCursor />
+      
+      {/* ── Global Aurora & Neon Dot Grid Background ── */}
+      <motion.canvas 
+        ref={canvasRef} 
+        className="fixed inset-0 w-full h-full pointer-events-none" 
+        style={{zIndex: 0, opacity: 0.8}} 
+      />
 
       {/* Navbar */}
       <nav className={`fixed top-0 inset-x-0 z-50 nav-lp ${navScrolled ? 'scrolled' : ''}`}>
@@ -1557,8 +1564,7 @@ const CodeSapiensHero = () => {
       </AnimatePresence>
 
       {/* ── Hero ── */}
-      <section ref={heroRef} className="relative min-h-screen flex items-center overflow-hidden" style={{background:'var(--bg-base)'}}>
-        <motion.canvas ref={canvasRef} className="absolute inset-0 w-full h-full pointer-events-none" style={{zIndex:0, y:canvasY}} />
+      <section ref={heroRef} className="relative min-h-screen flex items-center overflow-hidden" style={{ zIndex: 1, borderBottom: '1px solid var(--border)' }}>
 
         <div className="max-w-7xl mx-auto px-6 w-full relative pt-24" style={{zIndex:2}}>
           <div className="grid lg:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)] gap-12 items-center">
@@ -1648,7 +1654,7 @@ const CodeSapiensHero = () => {
 
       {/* ── Vision ── */}
       <motion.section id="vision" className="py-24 relative"
-        style={{background:'var(--bg-base)',borderTop:'1px solid var(--border)'}}
+        style={{ background: 'var(--bg-base)', borderTop: '1px solid var(--border)' }}
         initial={{opacity:0,y:32}} whileInView={{opacity:1,y:0}}
         transition={{type:'spring',stiffness:60,damping:20}} viewport={{once:true,amount:0.2}}>
         <div className="max-w-7xl mx-auto px-6">
@@ -1682,7 +1688,7 @@ const CodeSapiensHero = () => {
 
       {/* ── Events / Community Moments ── */}
       <motion.section id="events" className="py-24 relative"
-        style={{background:'var(--bg-base)',borderTop:'1px solid var(--border)'}}
+        style={{ background: 'var(--bg-base)', borderTop: '1px solid var(--border)' }}
         initial={{opacity:0,y:32}} whileInView={{opacity:1,y:0}}
         transition={{type:'spring',stiffness:60,damping:20}} viewport={{once:true,amount:0.1}}>
         <div className="max-w-7xl mx-auto px-6">
@@ -1744,7 +1750,7 @@ const CodeSapiensHero = () => {
 
       {/* ── Hall of Fame ── */}
       <motion.section className="py-24 relative"
-        style={{ background:'var(--bg-base)', borderTop:'1px solid var(--border)' }}
+        style={{ background: 'var(--bg-base)', borderTop: '1px solid var(--border)' }}
         initial={{ opacity:0, y:32 }} whileInView={{ opacity:1, y:0 }}
         transition={{ type:'spring', stiffness:60, damping:20 }} viewport={{ once:true, amount:0.1 }}>
         <div className="max-w-7xl mx-auto px-6">
@@ -1776,7 +1782,7 @@ const CodeSapiensHero = () => {
       ]} />
 
       {/* ── Tagline ── */}
-      <section className="py-32 relative overflow-hidden" style={{background:'var(--bg-base)',borderTop:'1px solid var(--border)'}}>
+      <section className="py-32 relative overflow-hidden" style={{ borderTop: '1px solid var(--border)', position: 'relative', zIndex: 1 }}>
         <div className="absolute inset-0 pointer-events-none" style={{background:'radial-gradient(ellipse at center, #6366f108 0%, transparent 70%)'}}/>
         <div className="max-w-7xl mx-auto px-6 text-center relative z-10">
           <motion.p className="font-mono text-xs uppercase mb-4" style={{color:'var(--text-muted)',letterSpacing:'0.08em'}}
@@ -1795,7 +1801,7 @@ const CodeSapiensHero = () => {
       </section>
 
       {/* ── Footer ── */}
-      <footer className="py-16" style={{background:'var(--bg-base)',borderTop:'1px solid var(--border)'}}>
+      <footer className="py-16" style={{ borderTop: '1px solid var(--border)', position: 'relative', zIndex: 1 }}>
         <div className="max-w-7xl mx-auto px-6">
           <div className="grid md:grid-cols-[1fr_auto] gap-12 items-start mb-12">
             <div>
