@@ -1003,6 +1003,79 @@ const LANDING_STYLES = `
   .rank-3 .podium-step { height: 110px; border-top: 2px solid #b45309; padding-bottom: 0.5rem; }
 
 
+  /* ── Cyber Vision Frame ── */
+  .vision-cyber-frame {
+    position: relative;
+    padding: 12px;
+    background: #020817;
+    border: 1px solid rgba(99, 102, 241, 0.2);
+    border-radius: 16px;
+    box-shadow: 0 0 40px rgba(0,0,0,0.5);
+    overflow: hidden;
+  }
+  .vision-cyber-frame::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.05), transparent);
+    z-index: 1;
+    pointer-events: none;
+  }
+  .vision-corners span {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--primary);
+    z-index: 5;
+  }
+  .vision-corners span:nth-child(1) { top: 0; left: 0; border-right: 0; border-bottom: 0; border-top-left-radius: 12px; }
+  .vision-corners span:nth-child(2) { top: 0; right: 0; border-left: 0; border-bottom: 0; border-top-right-radius: 12px; }
+  .vision-corners span:nth-child(3) { bottom: 0; left: 0; border-right: 0; border-top: 0; border-bottom-left-radius: 12px; }
+  .vision-corners span:nth-child(4) { bottom: 0; right: 0; border-left: 0; border-top: 0; border-bottom-right-radius: 12px; }
+  
+  .vision-scan-line {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--secondary), transparent);
+    box-shadow: 0 0 15px var(--secondary);
+    opacity: 0.5;
+    z-index: 4;
+    animation: vision-scan 4s linear infinite;
+  }
+  @keyframes vision-scan {
+    0% { top: 0; }
+    100% { top: 100%; }
+  }
+  
+  .vision-status-badge {
+    position: absolute;
+    top: 24px;
+    left: 24px;
+    background: rgba(15, 23, 41, 0.8);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(34, 211, 238, 0.4);
+    color: var(--secondary);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    padding: 4px 10px;
+    border-radius: 4px;
+    z-index: 6;
+    letter-spacing: 0.1em;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .vision-status-dot {
+    width: 6px;
+    height: 6px;
+    background: var(--secondary);
+    border-radius: 50%;
+    animation: pulse 1.5s infinite;
+  }
+
   @media (max-width: 640px) {
     .podium-container { gap: 0.5rem; }
     .podium-name { font-size: 0.6rem; }
@@ -1517,6 +1590,7 @@ const NoticeSection = () => (
 const CodeSapiensHero = () => {
   const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen]     = useState(false);
+  const [communityPhotos, setCommunity]     = useState([]);
   const [communityLoading, setCommunityLoading] = useState(true);
   const wrapRef   = useRef(null);
   const canvasRef = useRef(null);
@@ -1822,10 +1896,28 @@ const CodeSapiensHero = () => {
                 ))}
               </div>
             </div>
-            <SpotlightCard className="p-0 overflow-hidden" style={{padding:0,aspectRatio:'4/3'}}>
-              <img src="https://res.cloudinary.com/dqudvximt/image/upload/v1767535873/1760365837828_vyrmco.jpg"
-                className="w-full h-full object-cover" alt="CodeSapiens community"/>
-            </SpotlightCard>
+            <motion.div 
+              className="vision-cyber-frame group"
+              whileHover={{ scale: 1.02 }}
+              transition={{ type: 'spring', stiffness: 100, damping: 20 }}
+            >
+              <div className="vision-corners">
+                <span/><span/><span/><span/>
+              </div>
+              <div className="vision-scan-line" />
+              <div className="vision-status-badge">
+                <div className="vision-status-dot" />
+                LIVE_FEED::VISION_V2.1
+              </div>
+              <SpotlightCard tilt={true} className="border-0 bg-transparent p-0 overflow-hidden" style={{padding:0, aspectRatio:'4/3', borderRadius: '8px'}}>
+                <img 
+                  src="https://res.cloudinary.com/dqudvximt/image/upload/v1767535873/1760365837828_vyrmco.jpg"
+                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" 
+                  alt="CodeSapiens community"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#020817] to-transparent opacity-40" />
+              </SpotlightCard>
+            </motion.div>
           </div>
         </div>
       </motion.section>
