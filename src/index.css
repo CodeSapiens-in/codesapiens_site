@@ -1,6 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Google+Sans+Flex:opsz,wght@6..144,1..1000&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Archivo+Black&display=swap');
 @import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&family=Sora:wght@100..800&display=swap?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap');
 
 /* THEME CONFIGURATION
    Tailwind v4 detects these variables and automatically creates 
@@ -22,11 +23,33 @@
     --brand-cream: #F7F5F2;
     --brand-orange: #9B0032;
     --brand-yellow: #FA5D00;
+
+     /* PRIMARY SYSTEM */
+    --primary: #27187E;
+    --primary-hover: #1F1366;
+    --primary-light: #4F3DB8;
+    --primary-soft: #E4E2FF;
+
+    /* BACKGROUND SYSTEM */
+    --bg-main: #F7F7FF;
+    --bg-section: #EEF0FF;
+    --bg-card: #FFFFFF;
+
+    /* TEXT SYSTEM */
+    --text-main: #0F1021;
+    --text-soft: #4B4E6D;
+
+    /* MUTED SYSTEM */
+    --muted-1: #5B5F7A;
+    --muted-2: #8A8FB0;
+
+    /* BORDERS */
+    --border-soft: #27187e80;
+    --divider: #D7DBEF;
 }
 
 @layer base {
-
-    html,
+   html,
     body {
         cursor: url('/cursor.png'), auto !important;
         font-family: "Google Sans Flex", sans-serif;
@@ -52,60 +75,61 @@
     h1 {
         @apply text-golden-3 font-bold mb-4 leading-tight;
     }
-
-    h2 {
-        /* Scales from golden-2 on mobile to golden-3 on desktop */
-        @apply text-golden-2 md:text-golden-3 font-bold mb-3 leading-tight;
-    }
-
-    h3 {
-        @apply text-golden-2 font-bold mb-3 leading-snug;
-    }
-
-    h4 {
-        @apply text-golden-1 md:text-golden-2 font-bold mb-2;
-    }
-
-    h5,
-    h6 {
-        @apply text-golden-1 font-bold mb-2;
-    }
-
-
 }
 
 @layer utilities {
-    .bg-brand-blue {
-        background-color: var(--brand-blue);
+    .bg-main {
+    background-color: var(--bg-main);
     }
 
-    .text-brand-blue {
-        color: var(--brand-blue);
+    .bg-section {
+        background-color: var(--bg-section);
     }
 
-    .bg-brand-dark {
-        background-color: var(--brand-dark);
+    .bg-card {
+        background-color: var(--bg-card);
     }
 
-    .text-brand-dark {
-        color: var(--brand-dark);
+    .bg-primary {
+        background-color: var(--primary);
     }
 
-    .bg-brand-cream {
-        background-color: var(--brand-cream);
+    .text-primary {
+        color: var(--primary);
     }
 
-    .text-brand-cream {
-        color: var(--brand-cream);
+    .text-main {
+        color: var(--text-main);
     }
 
+    .text-soft {
+        color: var(--text-soft);
+    }
+
+    .border-soft {
+        border-color: var(--border-soft);
+    }
+    .font-inter{
+        font-family: "Inter",sans-serif;
+    }
+    .font-pjs{
+        font-family: "Plus Jakarta Sans", sans-serif;
+    }
+    .font-google-sans{
+        font-family: "Google Sans",sans-serif;
+    }
+    .font-sora{
+        font-family: "Sora",sans-serif;
+    }
+    .font-dm-sans{
+        font-family: "DM Sans",sans-serif;
+    }
     /* Custom Scrollbar */
     ::-webkit-scrollbar {
         width: 8px;
         height: 8px;
     }
-
-    ::-webkit-scrollbar-track {
+     ::-webkit-scrollbar-track {
         background: var(--brand-cream);
     }
 

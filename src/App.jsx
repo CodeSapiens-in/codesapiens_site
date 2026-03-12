@@ -13,7 +13,7 @@ import { Loader2 } from 'lucide-react';
 import PageTransition from './components/PageTransition';
 import AdminLayout from './components/AdminLayout';
 import { Toaster } from 'react-hot-toast';
-
+import 'lenis/dist/lenis.css'
 
 
 import Hero from './components/ui/Hero';
@@ -67,6 +67,7 @@ import UserProgramsList from './pages/user/UserProgramsList';
 import UserFormView from './pages/user/UserFormView';
 import AdminProgramSubmissions from './pages/admin/AdminProgramSubmissions';
 import AdminProgramsList from './pages/admin/AdminProgramsList';
+
 
 
 const AnimatedRoutes = () => {
