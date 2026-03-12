@@ -1319,91 +1319,50 @@ const CodeSapiensHero = () => {
           transition={{ staggerChildren: 0.12 }}
           className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5"
         >
-          {(communityPhotos.length > 0
-            ? communityPhotos.slice(0, 6)
-            : [
-                {
-                  id: 1,
-                  image_url:
-                    "https://res.cloudinary.com/dqudvximt/image/upload/v1767535873/1760365837828_vyrmco.jpg",
-                  title: "HackSapiens 2.0",
-                  description: "24-hour hackathon with 200+ participants",
-                },
-                {
-                  id: 2,
-                  image_url:
-                    "https://res.cloudinary.com/dqudvximt/image/upload/v1767877162/users_cme79i2lk00qls401ar5qxqnc_N0bIjmMP0Ybxoznz-1753684368888_jda3us.jpg",
-                  title: "Tech Talk — AI & ML",
-                  description: "Industry experts sharing real-world insights",
-                },
-                {
-                  id: 3,
-                  image_url:
-                    "https://res.cloudinary.com/dqudvximt/image/upload/v1767877178/users_cme79i2lk00qls401ar5qxqnc_KB4hFvAzhyqJF0xf-3a61cb74-01c9-4880-be04-a4036f32c4f9_t64kt9.jpg",
-                  title: "Open Source Day",
-                  description:
-                    "Students contributing to real open-source projects",
-                },
-                {
-                  id: 4,
-                  image_url:
-                    "https://res.cloudinary.com/dqudvximt/image/upload/v1767876038/users_cme79i2lk00qls401ar5qxqnc_Hg7Si3j52FVfpQRN-image_x8wghd.png",
-                  title: "Community Meetup #5",
-                  description: "Networking and knowledge sharing session",
-                },
-                {
-                  id: 5,
-                  image_url:
-                    "https://res.cloudinary.com/dqudvximt/image/upload/v1767875075/users_cme79i2lk00qls401ar5qxqnc_WI6Z0HVxNMCrvfgn-ETzJoQJr1aCFL2r7-rrDC9gCyIJ77RqVW-luma_cqxcny.jpg",
-                  title: "Workshop — Web Dev",
-                  description: "Hands-on React & Tailwind workshop",
-                },
-                {
-                  id: 6,
-                  image_url:
-                    "https://res.cloudinary.com/dqudvximt/image/upload/v1767874220/users_cme79i2lk00qls401ar5qxqnc_n74cMGsKIBuvEzzj-users_cme5bsukl01binm014j8ioh2j_2SNEHA31eEqsxFRS-original-33f53dcd2f48e068523d32df0e5cc92f_xkirvh.gif",
-                  title: "LinkedIn Live",
-                  description: "Career guidance session with 500+ viewers",
-                },
-              ]
-          ).map((photo) => (
-            <motion.div
-              key={photo.id}
-              variants={{
-                hidden: { opacity: 0, y: 40, scale: 0.96 },
-                show: {
-                  opacity: 1,
-                  y: 0,
-                  scale: 1,
-                  transition: {
-                    duration: 0.7,
-                    ease: [0.22, 1, 0.36, 1],
+          {communityPhotos.length > 0 ? (
+            communityPhotos.slice(0, 6).map((photo) => (
+              <motion.div
+                key={photo.id}
+                variants={{
+                  hidden: { opacity: 0, y: 40, scale: 0.96 },
+                  show: {
+                    opacity: 1,
+                    y: 0,
+                    scale: 1,
+                    transition: {
+                      duration: 0.7,
+                      ease: [0.22, 1, 0.36, 1],
+                    },
                   },
-                },
-              }}
-              className="group relative overflow-hidden rounded-lg"
-            >
-              <div className="aspect-[4/3] overflow-hidden">
-                <img
-                  src={photo.image_url}
-                  alt={photo.title}
-                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                />
-                {/* Overlay */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-              </div>
+                }}
+                className="group relative overflow-hidden rounded-lg"
+              >
+                <div className="aspect-[4/3] overflow-hidden">
+                  <img
+                    src={photo.image_url}
+                    alt={photo.title}
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  />
+                  {/* Overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                </div>
 
-              {/* Content — visible on hover */}
-              <div className="absolute bottom-0 left-0 w-full p-4 sm:p-5 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
-                <h4 className="text-white font-dm-sans font-medium text-base sm:text-lg leading-tight">
-                  {photo.title}
-                </h4>
-                <p className="text-white/70 text-sm font-dm-sans mt-1">
-                  {photo.description || photo.date}
-                </p>
-              </div>
-            </motion.div>
-          ))}
+                {/* Content — visible on hover */}
+                <div className="absolute bottom-0 left-0 w-full p-4 sm:p-5 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
+                  <h4 className="text-white font-dm-sans font-medium text-base sm:text-lg leading-tight">
+                    {photo.title}
+                  </h4>
+                  <p className="text-white/70 text-sm font-dm-sans mt-1">
+                    {photo.description || photo.date}
+                  </p>
+                </div>
+              </motion.div>
+            ))
+          ) : (
+            <p className="text-gray-400 text-center col-span-full font-dm-sans">
+              Photos coming soon
+            </p>
+          )}
         </motion.div>
       </section>
       {/* Stats Section */}
@@ -1468,35 +1427,7 @@ const CodeSapiensHero = () => {
           }}
           className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5"
         >
-          {(hallOfFameEntries.length > 0
-            ? hallOfFameEntries
-            : [
-                {
-                  id: 1,
-                  image_url:
-                    "https://res.cloudinary.com/druvxcll9/image/upload/v1761122517/4SrLYdwh0tpuLlkt-team_2.a2a0c6917be79e15dc29_wjosq7_ftgm6j.jpg",
-                  student_name: "Justin Benito",
-                  description:
-                    "Built an open-source CLI tool that got 500+ GitHub stars in a week.",
-                },
-                {
-                  id: 2,
-                  image_url:
-                    "https://res.cloudinary.com/druvxcll9/image/upload/v1761122517/iAckgTxMcALuPbEx-IMG-20250112-WA0012_1_fwyhoa_oxegdx.jpg",
-                  student_name: "Mahaveer A",
-                  description:
-                    "Selected for Google Summer of Code 2025 — contributed to TensorFlow.",
-                },
-                {
-                  id: 3,
-                  image_url:
-                    "https://res.cloudinary.com/druvxcll9/image/upload/v1761122516/2ABMHfqOsrpoL3OV-WhatsApp202025-08-312010.33.52_a8a27bbd_vzcgzq_1_bm8zch.jpg",
-                  student_name: "Keerthana M G",
-                  description:
-                    "Won 1st place at HackSapiens 2.0 with an AI-powered accessibility tool.",
-                },
-              ]
-          ).map((entry, i) => (
+          {hallOfFameEntries.map((entry, i) => (
             <motion.div
               key={entry.id}
               variants={{
@@ -1793,7 +1724,7 @@ const CodeSapiensHero = () => {
           <p>
             Designed & Built by Students /{" "}
             <a
-              href="https://www.linkedin.com/in/prakash"
+              href="https://www.linkedin.com/in/prakash-kumar-b26183330/"
               target="_blank"
               rel="noopener noreferrer"
               className="text-primary hover:underline"
