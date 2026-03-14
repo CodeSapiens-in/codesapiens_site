@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Codesapiens Management Website
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -405,3 +406,6 @@ See [LICENSE](./LICENSE) for details.
 [⬆ Back to Top](#codesapiens-management-website)
 
 </div>
+=======
+# codesapiens_site
+>>>>>>> 9d0e2a042371eceba8c13fcae32853f300934420
