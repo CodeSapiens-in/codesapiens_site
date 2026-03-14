@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { motion, useScroll, useTransform } from 'framer-motion';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { motion, AnimatePresence, useMotionValue, useTransform, useSpring } from 'framer-motion';
 import { supabase } from '../lib/supabaseClient';
 import { useNavigate } from 'react-router-dom';
 import { ArrowRight, ChevronDown, Menu, X, Github, Linkedin, Youtube, Users, Calendar, Code, Award, Crown, Rocket, Zap, Globe, Cpu, Handshake, Heart, ArrowUpRight, Instagram, Twitter, MessageCircle, Megaphone, Sparkles } from 'lucide-react';
@@ -571,28 +571,36 @@ const NoticeSection = () => {
 const CodeSapiensHero = () => {
     const navigate = useNavigate();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
-    const [hallOfFameEntries, setHallOfFameEntries] = useState([]);
+
+    // Fallback community photos when Supabase credentials are missing
+    const fallbackCommunityPhotos = [
+        { id: 'fb-1', title: 'November 2025 Meetup', description: 'Monthly community gathering', image_url: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=600&h=450&fit=crop', order_number: 1 },
+        { id: 'fb-2', title: 'October 2025 Meetup', description: 'Tech talks & networking', image_url: 'https://images.unsplash.com/photo-1523580494863-6f3031224c94?w=600&h=450&fit=crop', order_number: 2 },
+        { id: 'fb-3', title: 'September 2025 Meetup', description: 'Workshop & collaboration', image_url: 'https://images.unsplash.com/photo-1517048676732-d65bc937f952?w=600&h=450&fit=crop', order_number: 3 },
+        { id: 'fb-4', title: 'August 2025 Meetup', description: 'Hackathon kickoff', image_url: 'https://images.unsplash.com/photo-1505373877841-8d25f7d46678?w=600&h=450&fit=crop', order_number: 4 },
+        { id: 'fb-5', title: 'May 2025 Meetup', description: 'Community celebration', image_url: 'https://images.unsplash.com/photo-1475721027785-f74eccf877e2?w=600&h=450&fit=crop', order_number: 5 },
+        { id: 'fb-6', title: 'June 2024 Meetup', description: 'First anniversary meetup', image_url: 'https://images.unsplash.com/photo-1528605248644-14dd04022da1?w=600&h=450&fit=crop', order_number: 6 },
+    ];
+
+    // Fallback hall of fame entries when Supabase credentials are missing
+    const fallbackHallOfFame = [
+        { id: 'hof-1', name: 'Sample Achiever', achievement: 'Outstanding contributor', photo_url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&h=200&fit=crop', is_active: true },
+    ];
+
     const [communityPhotos, setCommunityPhotos] = useState([]);
+    const [hallOfFameEntries, setHallOfFameEntries] = useState([]);
 
     // Data Fetching
     useEffect(() => {
         const fetchData = async () => {
             const { data: hof } = await supabase.from('hall_of_fame').select('*').eq('is_active', true).order('created_at', { ascending: false });
-            if (hof) setHallOfFameEntries(hof);
+            setHallOfFameEntries(hof && hof.length > 0 ? hof : fallbackHallOfFame);
 
             const { data: photos } = await supabase.from('community_photos').select('*').eq('is_active', true).order('order_number', { ascending: true });
-            if (photos) setCommunityPhotos(photos);
+            setCommunityPhotos(photos && photos.length > 0 ? photos : fallbackCommunityPhotos);
         };
         fetchData();
     }, []);
-
-    // Scroll Progress
-    const { scrollY } = useScroll();
-
-    // Geometric Shape Animation
-    const shapeScale = useTransform(scrollY, [0, 600], [1, 0.2]);
-    const shapeY = useTransform(scrollY, [0, 600], [0, 200]);
-    const shapeOpacity = useTransform(scrollY, [0, 400], [0.8, 0]);
 
     // Content for Sticky Scroll
 
@@ -610,152 +618,511 @@ const CodeSapiensHero = () => {
         { photo: "https://res.cloudinary.com/druvxcll9/image/upload/v1761122531/1732031130575_b834gr_1_slc9fw.jpg", name: "Jayasurya R", link: "https://www.linkedin.com/in/jayasurya-r-b37997279/" }
     ];
 
+    // Mouse-tracking aurora for hero
+    const heroRef = useRef(null);
+    const mouseX = useMotionValue(0);
+    const mouseY = useMotionValue(0);
+    const smoothX = useSpring(mouseX, { stiffness: 50, damping: 20 });
+    const smoothY = useSpring(mouseY, { stiffness: 50, damping: 20 });
+    const auroraX = useTransform(smoothX, [0, 1], ['-20%', '20%']);
+    const auroraY = useTransform(smoothY, [0, 1], ['-15%', '15%']);
+
+    const handleMouseMove = useCallback((e) => {
+        if (!heroRef.current) return;
+        const rect = heroRef.current.getBoundingClientRect();
+        mouseX.set((e.clientX - rect.left) / rect.width);
+        mouseY.set((e.clientY - rect.top) / rect.height);
+    }, [mouseX, mouseY]);
+
+    // Stagger animation variant for words
+    const wordReveal = {
+        hidden: { opacity: 0, y: 40, rotateX: -40 },
+        visible: (i) => ({
+            opacity: 1, y: 0, rotateX: 0,
+            transition: { delay: 0.3 + i * 0.08, duration: 0.6, ease: [0.22, 1, 0.36, 1] }
+        })
+    };
+
+    const navLinks = [
+        { label: 'Vision', href: '#vision' },
+        { label: 'Programs', href: '/programs' },
+        { label: 'Meetups', href: '/meetups' },
+        { label: 'Events', href: '#events' },
+        { label: 'Community', href: '#community' },
+    ];
+
     return (
         <div className="bg-[#F7F5F2] text-[#1E1919] min-h-screen font-sans overflow-x-hidden selection:bg-[#0061FE] selection:text-white">
-            {/* Navigation - Dark Mode for Hero */}
-            <nav className="fixed top-0 w-full z-50 bg-[#101010]/90 backdrop-blur-md text-white border-b border-white/10">
-                <div className="container mx-auto px-6 py-6 flex justify-between items-center">
-                    <div className="flex items-center gap-2">
-                        <img src="https://res.cloudinary.com/dqudvximt/image/upload/v1756797708/WhatsApp_Image_2025-09-02_at_12.45.18_b15791ea_rnlwrz.jpg" alt="CodeSapiens Logo" className="w-10 h-10 rounded-full object-cover" />
-                        <span className="text-xl font-bold tracking-tight">CodeSapiens</span>
-                    </div>
-                    <div className="hidden md:flex items-center gap-8 font-medium text-golden-1">
-                        <a href="#vision" className="hover:text-[#0061FE] transition-colors">Vision</a>
-                        <a href="/programs" className="hover:text-[#0061FE] transition-colors">Programs</a>
-                        <a href="/meetups" className="hover:text-[#0061FE] transition-colors">Meetups</a>
-                        <a href="#events" className="hover:text-[#0061FE] transition-colors">Events</a>
-                        <a href="#community" className="hover:text-[#0061FE] transition-colors">Community</a>
-                        <button onClick={() => navigate('/auth')} className="hover:text-[#0061FE]">Log in</button>
-                        <button onClick={() => navigate('/auth')} className="bg-white text-black px-5 py-2.5 rounded-sm hover:bg-gray-200 transition-colors font-bold">
-                            Get Started
-                        </button>
-                    </div>
-                    <button className="md:hidden text-white" onClick={() => setIsMenuOpen(!isMenuOpen)}>
-                        {isMenuOpen ? <X /> : <Menu />}
-                    </button>
-                </div>
-            </nav>
+            {/* ─── Premium Navigation ─── */}
+            <motion.nav
+                initial={{ y: -100 }}
+                animate={{ y: 0 }}
+                transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+                className="fixed top-0 w-full z-50 border-b border-white/[0.04]"
+            >
+                <div className="absolute inset-0 bg-[#060611]/60 backdrop-blur-2xl" />
+                <div className="container mx-auto px-6 relative z-10">
+                    <div className="flex justify-between items-center h-16 md:h-[72px]">
+                        {/* Logo */}
+                        <motion.div className="flex items-center gap-2.5" whileHover={{ scale: 1.02 }}>
+                            <div className="relative">
+                                <div className="absolute -inset-1 bg-gradient-to-r from-[#0061FE] to-[#00C6F7] rounded-full opacity-0 group-hover:opacity-40 blur-sm transition-opacity" />
+                                <img src="https://res.cloudinary.com/dqudvximt/image/upload/v1756797708/WhatsApp_Image_2025-09-02_at_12.45.18_b15791ea_rnlwrz.jpg" alt="CodeSapiens Logo" className="w-9 h-9 rounded-full object-cover ring-2 ring-white/10 relative" />
+                                <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-emerald-400 rounded-full ring-2 ring-[#060611]" />
+                            </div>
+                            <span className="text-lg font-bold tracking-tight text-white">CodeSapiens</span>
+                        </motion.div>
 
-            {/* Mobile Menu */}
-            {isMenuOpen && (
-                <div className="fixed inset-0 z-40 bg-[#101010] text-white pt-24 px-6 md:hidden">
-                    <div className="flex flex-col gap-6 text-golden-2 font-bold">
-                        <a href="#vision" onClick={() => setIsMenuOpen(false)}>Vision</a>
-                        <a href="/programs" onClick={() => setIsMenuOpen(false)}>Programs</a>
-                        <a href="/meetups" onClick={() => setIsMenuOpen(false)}>Meetups</a>
-                        <a href="#events" onClick={() => setIsMenuOpen(false)}>Events</a>
-                        <a href="#community" onClick={() => setIsMenuOpen(false)}>Community</a>
-                        <button onClick={() => navigate('/auth')} className="text-left text-[#0061FE]">Log in</button>
-                    </div>
-                </div>
-            )}
+                        {/* Desktop Nav — pill container */}
+                        <div className="hidden md:flex items-center">
+                            <div className="flex items-center gap-0.5 px-1.5 py-1 rounded-full border border-white/[0.06] bg-white/[0.03] mr-4">
+                                {navLinks.map((link) => (
+                                    <a
+                                        key={link.label}
+                                        href={link.href}
+                                        className="relative px-4 py-1.5 text-sm font-medium text-gray-400 hover:text-white rounded-full hover:bg-white/[0.08] transition-all duration-200"
+                                    >
+                                        {link.label}
+                                    </a>
+                                ))}
+                            </div>
+                            <div className="flex items-center gap-3">
+                                <button onClick={() => navigate('/auth')} className="text-sm font-medium text-gray-400 hover:text-white transition-colors px-3 py-1.5">Log in</button>
+                                <motion.button
+                                    onClick={() => navigate('/auth')}
+                                    whileHover={{ scale: 1.04, y: -1 }}
+                                    whileTap={{ scale: 0.97 }}
+                                    className="relative group px-5 py-2.5 rounded-full text-sm font-bold text-white overflow-hidden"
+                                >
+                                    {/* Animated gradient border */}
+                                    <span className="absolute inset-0 rounded-full bg-gradient-to-r from-[#0061FE] via-[#00C6F7] to-[#0061FE] bg-[length:200%_100%] animate-[shimmer_3s_linear_infinite]" />
+                                    <span className="absolute inset-[1.5px] rounded-full bg-[#0a0a1a]" />
+                                    <span className="absolute inset-[1.5px] rounded-full bg-gradient-to-r from-[#0061FE] to-[#00C6F7] opacity-90" />
+                                    <span className="relative z-10">Get Started</span>
+                                </motion.button>
+                            </div>
+                        </div>
 
-            {/* Hero Section */}
-            <section className="relative min-h-screen bg-[#101010] text-white flex items-center overflow-hidden">
-                <div className="absolute inset-0 z-0 opacity-20"
-                    style={{
-                        backgroundImage: 'linear-gradient(#333 1px, transparent 1px), linear-gradient(90deg, #333 1px, transparent 1px)',
-                        backgroundSize: '50px 50px'
-                    }}>
-                </div>
-                <motion.div
-                    className="absolute inset-0 md:right-0 md:left-auto md:w-1/2 h-full pointer-events-none z-0 flex items-center justify-center md:justify-end"
-                    style={{ scale: shapeScale, y: shapeY, opacity: shapeOpacity }}
-                >
-                    <svg viewBox="0 0 800 800" className="w-full h-full md:w-full md:h-full opacity-40 md:opacity-60">
-                        <motion.path
-                            d="M400,200 L600,300 L400,400 L200,300 Z"
-                            fill="none" stroke="#0061FE" strokeWidth="1.5"
-                            initial={{ pathLength: 0, opacity: 0 }}
-                            animate={{ pathLength: 1, opacity: 1 }}
-                            transition={{ duration: 2, ease: "easeInOut" }}
-                        />
-                        <motion.path
-                            d="M400,400 L600,500 L400,600 L200,500 Z"
-                            fill="none" stroke="#F7F5F2" strokeWidth="1.5"
-                            initial={{ pathLength: 0, opacity: 1 }}
-                            animate={{ pathLength: 1, opacity: 1 }}
-                            transition={{ duration: 2, delay: 0.5, ease: "easeInOut" }}
-                        />
-                        <motion.path
-                            d="M400,600 L600,700 L400,800 L200,700 Z"
-                            fill="none" stroke="#9B0032" strokeWidth="1.5"
-                            initial={{ pathLength: 0, opacity: 0 }}
-                            animate={{ pathLength: 1, opacity: 1 }}
-                            transition={{ duration: 2, delay: 1, ease: "easeInOut" }}
-                        />
-                        <motion.line x1="200" y1="300" x2="200" y2="700" stroke="#333" strokeWidth="1" initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 1.5, delay: 1 }} />
-                        <motion.line x1="600" y1="300" x2="600" y2="700" stroke="#333" strokeWidth="1" initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 1.5, delay: 1 }} />
-                        <motion.line x1="400" y1="400" x2="400" y2="600" stroke="#333" strokeWidth="1" initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 1.5, delay: 1 }} />
-                    </svg>
-                </motion.div>
-
-                <div className="container mx-auto px-6 relative z-10 pt-20">
-                    <div className="grid lg:grid-cols-2 gap-12 items-center">
-                        <motion.div
-                            initial={{ opacity: 0, y: 30 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.8, delay: 0.2 }}
-                            className="max-w-4xl"
+                        {/* Mobile burger */}
+                        <motion.button
+                            whileTap={{ scale: 0.9 }}
+                            className="md:hidden relative w-10 h-10 flex items-center justify-center rounded-xl bg-white/[0.06] text-white"
+                            onClick={() => setIsMenuOpen(!isMenuOpen)}
                         >
-                            <h1 className="text-5xl md:text-7xl font-extrabold leading-[1] tracking-tighter mb-8 font-archivo-black">
-                                CodeSapiens<span className="text-[#0061FE]">.</span>
-                            </h1>
-                            <p className="text-golden-1 text-gray-400 max-w-2xl leading-relaxed mb-10 font-light">
-                                The Biggest Student-Run Tech Community in TN.<br />
-                                <span className="text-white block mt-2">The only 'Inter-college students community' by the students for the students</span>
-                                <span className="text-gray-400 block mt-4 text-golden-1 italic">
-                                    We are here to help students build a career in Tech who say, <br />
-                                    <span className="text-white not-italic">“Perusa Pannanum, but enna Pannanum Therla”</span> <br />
-                                    ("Want to do something big, but don't know what to do").
-                                </span>
-                            </p>
-                            <div className="flex flex-col sm:flex-row gap-6">
-                                <button onClick={() => navigate('/auth')} className="bg-[#0061FE] text-white px-8 py-4 text-golden-1 font-bold rounded-sm hover:bg-[#0050d6] transition-all flex items-center justify-center gap-3 group">
-                                    Join Now <ArrowRight className="group-hover:translate-x-1 transition-transform" />
+                            {isMenuOpen ? <X size={20} /> : <Menu size={20} />}
+                        </motion.button>
+                    </div>
+                </div>
+            </motion.nav>
+
+            {/* ─── Mobile Menu ─── */}
+            <AnimatePresence>
+                {isMenuOpen && (
+                    <motion.div
+                        initial={{ opacity: 0, clipPath: 'circle(0% at 95% 5%)' }}
+                        animate={{ opacity: 1, clipPath: 'circle(150% at 95% 5%)' }}
+                        exit={{ opacity: 0, clipPath: 'circle(0% at 95% 5%)' }}
+                        transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+                        className="fixed inset-0 z-40 bg-[#060611] text-white pt-24 px-8 md:hidden"
+                    >
+                        {/* Decorative gradient */}
+                        <div className="absolute top-0 right-0 w-[300px] h-[300px] bg-[#0061FE]/20 rounded-full blur-[120px] pointer-events-none" />
+                        <div className="relative z-10 flex flex-col h-[calc(100%-6rem)]">
+                            <div className="flex flex-col gap-2 flex-1">
+                                {navLinks.map((item, i) => (
+                                    <motion.a
+                                        key={item.label}
+                                        href={item.href}
+                                        initial={{ opacity: 0, x: -40 }}
+                                        animate={{ opacity: 1, x: 0 }}
+                                        exit={{ opacity: 0, x: -40 }}
+                                        transition={{ delay: 0.1 + i * 0.06, ease: [0.22, 1, 0.36, 1] }}
+                                        onClick={() => setIsMenuOpen(false)}
+                                        className="text-3xl font-extrabold tracking-tight py-3 px-4 rounded-2xl hover:bg-white/[0.05] transition-colors"
+                                    >
+                                        {item.label}
+                                        <span className="text-[#0061FE]">.</span>
+                                    </motion.a>
+                                ))}
+                            </div>
+                            <motion.div
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: 0.5 }}
+                                className="pb-8 space-y-3"
+                            >
+                                <button onClick={() => navigate('/auth')} className="block text-gray-400 font-medium text-lg px-4 py-2">Log in</button>
+                                <button onClick={() => navigate('/auth')} className="w-full bg-gradient-to-r from-[#0061FE] to-[#00C6F7] text-white px-6 py-4 rounded-2xl text-lg font-bold shadow-[0_0_40px_rgba(0,97,254,0.3)]">
+                                    Get Started
                                 </button>
+                            </motion.div>
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
 
+            {/* ═══════════════════ HERO SECTION ═══════════════════ */}
+            <section
+                ref={heroRef}
+                onMouseMove={handleMouseMove}
+                className="relative min-h-screen bg-[#040410] text-white flex items-center overflow-hidden"
+            >
+                {/* ── BACKGROUND: Layered for depth ── */}
+                <div className="absolute inset-0 z-0">
+                    {/* 1. Subtle dot matrix */}
+                    <div className="absolute inset-0 opacity-[0.06]" style={{
+                        backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.35) 1px, transparent 1px)',
+                        backgroundSize: '32px 32px'
+                    }} />
+
+                    {/* 2. Constellation SVG lines */}
+                    <svg className="absolute inset-0 w-full h-full opacity-[0.06]" xmlns="http://www.w3.org/2000/svg">
+                        <motion.line x1="10%" y1="20%" x2="35%" y2="15%" stroke="#0061FE" strokeWidth="0.5"
+                            initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 3, delay: 1 }} />
+                        <motion.line x1="35%" y1="15%" x2="50%" y2="40%" stroke="#00C6F7" strokeWidth="0.5"
+                            initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 3, delay: 1.5 }} />
+                        <motion.line x1="50%" y1="40%" x2="75%" y2="25%" stroke="#0061FE" strokeWidth="0.5"
+                            initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 3, delay: 2 }} />
+                        <motion.line x1="75%" y1="25%" x2="90%" y2="55%" stroke="#00C6F7" strokeWidth="0.5"
+                            initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 3, delay: 2.5 }} />
+                        <motion.line x1="20%" y1="70%" x2="45%" y2="80%" stroke="#0061FE" strokeWidth="0.5"
+                            initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 3, delay: 3 }} />
+                        <motion.line x1="45%" y1="80%" x2="65%" y2="60%" stroke="#00C6F7" strokeWidth="0.5"
+                            initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 3, delay: 3.5 }} />
+                        {/* Constellation dots */}
+                        {['10%,20%', '35%,15%', '50%,40%', '75%,25%', '90%,55%', '20%,70%', '45%,80%', '65%,60%'].map((pos, i) => {
+                            const [cx, cy] = pos.split(',');
+                            return <motion.circle key={i} cx={cx} cy={cy} r="2" fill="#0061FE" opacity="0.4"
+                                initial={{ scale: 0 }} animate={{ scale: [0, 1, 0.8] }} transition={{ delay: 1 + i * 0.3, duration: 0.5 }} />;
+                        })}
+                    </svg>
+
+                    {/* 3. Mouse-tracking aurora glow */}
+                    <motion.div
+                        className="absolute w-[800px] h-[800px] rounded-full pointer-events-none"
+                        style={{
+                            x: auroraX,
+                            y: auroraY,
+                            left: '20%',
+                            top: '-10%',
+                            background: 'radial-gradient(circle, rgba(0,97,254,0.15) 0%, rgba(0,198,247,0.08) 40%, transparent 70%)',
+                            filter: 'blur(80px)',
+                        }}
+                    />
+                    <motion.div
+                        className="absolute w-[600px] h-[600px] rounded-full pointer-events-none"
+                        style={{
+                            x: useTransform(smoothX, [0, 1], ['10%', '-10%']),
+                            y: useTransform(smoothY, [0, 1], ['5%', '-5%']),
+                            right: '-5%',
+                            bottom: '0%',
+                            background: 'radial-gradient(circle, rgba(0,198,247,0.12) 0%, rgba(0,97,254,0.06) 40%, transparent 70%)',
+                            filter: 'blur(80px)',
+                        }}
+                    />
+                </div>
+
+                {/* Floating geometric shapes */}
+                <motion.div
+                    animate={{ rotate: 360 }}
+                    transition={{ duration: 30, repeat: Infinity, ease: 'linear' }}
+                    className="absolute top-[15%] right-[12%] w-16 h-16 border border-[#0061FE]/15 rounded-lg pointer-events-none"
+                />
+                <motion.div
+                    animate={{ rotate: -360 }}
+                    transition={{ duration: 25, repeat: Infinity, ease: 'linear' }}
+                    className="absolute bottom-[20%] left-[8%] w-10 h-10 border border-[#00C6F7]/12 rounded-full pointer-events-none"
+                />
+                <motion.div
+                    animate={{ y: [0, -20, 0], rotate: [0, 90, 0] }}
+                    transition={{ duration: 15, repeat: Infinity, ease: 'easeInOut' }}
+                    className="absolute top-[60%] right-[6%] w-5 h-5 bg-[#0061FE]/10 rounded-sm pointer-events-none"
+                />
+                <motion.div
+                    animate={{ y: [0, 15, 0], x: [0, -10, 0] }}
+                    transition={{ duration: 12, repeat: Infinity, ease: 'easeInOut', delay: 2 }}
+                    className="absolute top-[25%] left-[15%] w-3 h-3 bg-[#00C6F7]/15 rounded-full pointer-events-none"
+                />
+
+                {/* ── CONTENT ── */}
+                <div className="container mx-auto px-6 relative z-10 pt-32 pb-24">
+                    <div className="grid lg:grid-cols-2 gap-16 lg:gap-24 items-center">
+                        {/* Left — Copy with kinetic typography */}
+                        <div className="max-w-2xl" style={{ perspective: '1000px' }}>
+                            {/* Animated badge with gradient border spin */}
+                            <motion.div
+                                initial={{ opacity: 0, scale: 0.8 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+                                className="inline-flex items-center gap-2.5 mb-10 relative"
+                            >
+                                <div className="absolute -inset-[1px] rounded-full bg-gradient-to-r from-[#0061FE] via-[#00C6F7] to-[#0061FE] bg-[length:200%_100%] animate-[shimmer_3s_linear_infinite] opacity-60" />
+                                <div className="relative flex items-center gap-2.5 px-5 py-2 rounded-full bg-[#0a0a1a]/90 backdrop-blur-xl">
+                                    <span className="relative flex h-2 w-2">
+                                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                                        <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400" />
+                                    </span>
+                                    <span className="text-sm text-gray-300 font-medium">Biggest Student-Run Tech Community in TN</span>
+                                </div>
+                            </motion.div>
+
+                            {/* Kinetic heading — word by word reveal with 3D */}
+                            <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-[5.5rem] font-extrabold leading-[0.98] tracking-[-0.04em] mb-8">
+                                <span className="block overflow-hidden">
+                                    <motion.span
+                                        initial={{ y: 80, rotateX: -40, opacity: 0 }}
+                                        animate={{ y: 0, rotateX: 0, opacity: 1 }}
+                                        transition={{ duration: 0.7, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
+                                        className="inline-block"
+                                    >
+                                        Code
+                                    </motion.span>
+                                    <motion.span
+                                        initial={{ y: 80, rotateX: -40, opacity: 0 }}
+                                        animate={{ y: 0, rotateX: 0, opacity: 1 }}
+                                        transition={{ duration: 0.7, delay: 0.35, ease: [0.22, 1, 0.36, 1] }}
+                                        className="inline-block text-transparent bg-clip-text bg-gradient-to-r from-[#0061FE] via-[#3389FF] to-[#00C6F7]"
+                                    >
+                                        Sapiens
+                                    </motion.span>
+                                    <motion.span
+                                        initial={{ scale: 0 }}
+                                        animate={{ scale: 1 }}
+                                        transition={{ delay: 0.8, type: 'spring', stiffness: 400, damping: 10 }}
+                                        className="inline-block text-[#00C6F7] ml-0.5"
+                                    >
+                                        .
+                                    </motion.span>
+                                </span>
+                            </h1>
+
+                            {/* Subtitle with stagger */}
+                            <div className="space-y-3 mb-12">
+                                <motion.p
+                                    initial={{ opacity: 0, x: -30 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    transition={{ duration: 0.6, delay: 0.5, ease: [0.22, 1, 0.36, 1] }}
+                                    className="text-lg sm:text-xl text-gray-400 leading-relaxed max-w-xl"
+                                >
+                                    The only <span className="text-white font-semibold relative">
+                                        inter-college students community
+                                        <motion.span
+                                            initial={{ scaleX: 0 }}
+                                            animate={{ scaleX: 1 }}
+                                            transition={{ delay: 1.2, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+                                            className="absolute -bottom-1 left-0 right-0 h-[2px] bg-gradient-to-r from-[#0061FE] to-[#00C6F7] origin-left"
+                                        />
+                                    </span> — by the students, for the students.
+                                </motion.p>
+                                <motion.p
+                                    initial={{ opacity: 0, x: -30 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    transition={{ duration: 0.6, delay: 0.65, ease: [0.22, 1, 0.36, 1] }}
+                                    className="text-sm sm:text-base text-gray-500 leading-relaxed max-w-lg"
+                                >
+                                    We help students who say{' '}
+                                    <span className="text-white/80 font-medium">"Perusa Pannanum, but enna Pannanum Therla"</span>{' '}
+                                    <span className="text-gray-600">— "Want to do something big, but don't know what to do."</span>
+                                </motion.p>
                             </div>
-                        </motion.div>
 
-                        {/* Right: Dashboard Preview Image */}
+                            {/* Premium CTAs */}
+                            <motion.div
+                                initial={{ opacity: 0, y: 30 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.6, delay: 0.75, ease: [0.22, 1, 0.36, 1] }}
+                                className="flex flex-col sm:flex-row gap-4"
+                            >
+                                <motion.button
+                                    onClick={() => navigate('/auth')}
+                                    whileHover={{ scale: 1.03, y: -2 }}
+                                    whileTap={{ scale: 0.98 }}
+                                    className="group relative inline-flex items-center justify-center gap-3 px-9 py-4.5 rounded-2xl text-base font-bold text-white overflow-hidden"
+                                >
+                                    {/* Animated rotating gradient border */}
+                                    <span className="absolute inset-0 rounded-2xl bg-gradient-to-r from-[#0061FE] via-[#00C6F7] to-[#0061FE] bg-[length:200%_100%] animate-[shimmer_3s_linear_infinite]" />
+                                    <span className="absolute inset-[2px] rounded-[14px] bg-gradient-to-r from-[#0061FE] to-[#0080FF]" />
+                                    {/* Glow layer */}
+                                    <span className="absolute inset-0 rounded-2xl shadow-[0_0_40px_rgba(0,97,254,0.35)] group-hover:shadow-[0_0_60px_rgba(0,97,254,0.5)] transition-shadow duration-300" />
+                                    <span className="relative z-10 flex items-center gap-3">
+                                        Join Now
+                                        <ArrowRight size={18} className="transition-transform group-hover:translate-x-1.5" />
+                                    </span>
+                                    {/* Shine sweep */}
+                                    <span className="absolute inset-0 rounded-2xl overflow-hidden pointer-events-none z-20">
+                                        <span className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 bg-gradient-to-r from-transparent via-white/30 to-transparent" />
+                                    </span>
+                                </motion.button>
+                                <motion.button
+                                    onClick={() => { const el = document.getElementById('vision'); el && el.scrollIntoView({ behavior: 'smooth' }); }}
+                                    whileHover={{ scale: 1.03 }}
+                                    whileTap={{ scale: 0.98 }}
+                                    className="group inline-flex items-center justify-center gap-2 px-8 py-4.5 text-base font-semibold rounded-2xl border border-white/[0.08] bg-white/[0.03] backdrop-blur-sm text-gray-300 hover:bg-white/[0.07] hover:border-white/[0.15] transition-all duration-300"
+                                >
+                                    Explore
+                                    <ChevronDown size={16} className="transition-transform group-hover:translate-y-0.5" />
+                                </motion.button>
+                            </motion.div>
+
+                            {/* Social-proof counters with animated separator */}
+                            <motion.div
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: 1, duration: 0.6 }}
+                                className="flex items-center gap-0 mt-14"
+                            >
+                                {[
+                                    { value: '2,000+', label: 'Members', icon: Users },
+                                    { value: '50+', label: 'Colleges', icon: Globe },
+                                    { value: '15+', label: 'Events', icon: Calendar },
+                                ].map((s, i) => (
+                                    <React.Fragment key={i}>
+                                        {i > 0 && <div className="w-px h-10 bg-gradient-to-b from-transparent via-white/10 to-transparent mx-6 sm:mx-8" />}
+                                        <motion.div
+                                            initial={{ opacity: 0, y: 15 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            transition={{ delay: 1.1 + i * 0.12 }}
+                                            className="text-left group cursor-default"
+                                        >
+                                            <div className="flex items-center gap-2 mb-1">
+                                                <s.icon size={14} className="text-[#0061FE] opacity-60" />
+                                                <p className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">{s.value}</p>
+                                            </div>
+                                            <p className="text-[11px] text-gray-500 uppercase tracking-[0.2em] font-semibold">{s.label}</p>
+                                        </motion.div>
+                                    </React.Fragment>
+                                ))}
+                            </motion.div>
+                        </div>
+
+                        {/* Right — 3D Tilt Dashboard Preview */}
                         <motion.div
-                            initial={{ opacity: 0, x: 50 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            transition={{ duration: 1, delay: 0.4 }}
-                            className="relative mt-12 lg:mt-0"
+                            initial={{ opacity: 0, y: 60 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 1, delay: 0.4, ease: [0.22, 1, 0.36, 1] }}
+                            className="relative mt-8 lg:mt-0"
+                            style={{ perspective: '1200px' }}
                         >
-                            <div className="relative rounded-xl overflow-hidden shadow-2xl border border-gray-800 group transition-transform duration-500">
-                                <div className="absolute inset-0 bg-gradient-to-tr from-[#0061FE]/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-10 pointer-events-none"></div>
-                                <img
-                                    src="https://res.cloudinary.com/dqudvximt/image/upload/v1771005975/Gemini_Generated_Image_il0qzjil0qzjil0q_1_cfh7ix.png"
-                                    alt="CodeSapiens Dashboard"
-                                    className="w-full h-auto object-cover"
-                                />
-                            </div>
-                            {/* Decorative Elements */}
-                            <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-[#0061FE] rounded-full blur-[80px] opacity-30"></div>
-                            <div className="absolute -top-10 -left-10 w-40 h-40 bg-[#9B0032] rounded-full blur-[80px] opacity-30"></div>
+                            {/* 3D tilt card */}
+                            <motion.div
+                                style={{
+                                    rotateY: useTransform(smoothX, [0, 1], [4, -4]),
+                                    rotateX: useTransform(smoothY, [0, 1], [-3, 3]),
+                                }}
+                                className="relative group"
+                            >
+                                {/* Animated gradient border ring */}
+                                <div className="absolute -inset-[2px] rounded-3xl bg-gradient-to-br from-[#0061FE]/40 via-transparent to-[#00C6F7]/40 opacity-60 group-hover:opacity-100 transition-opacity duration-500" />
+                                <div className="relative rounded-[22px] overflow-hidden border border-white/[0.06] bg-[#0a0a1a]/80 backdrop-blur-md shadow-[0_20px_80px_-20px_rgba(0,97,254,0.2)]">
+                                    {/* Hover gradient overlay */}
+                                    <div className="absolute inset-0 bg-gradient-to-tr from-[#0061FE]/10 via-transparent to-[#00C6F7]/10 opacity-0 group-hover:opacity-100 transition-opacity duration-700 z-10 pointer-events-none" />
+                                    {/* Reflection highlight */}
+                                    <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+                                    <img
+                                        src="https://res.cloudinary.com/dqudvximt/image/upload/v1771005975/Gemini_Generated_Image_il0qzjil0qzjil0q_1_cfh7ix.png"
+                                        alt="CodeSapiens Dashboard"
+                                        className="w-full h-auto object-cover transition-transform duration-700 group-hover:scale-[1.02]"
+                                    />
+                                </div>
+                            </motion.div>
 
-                            {/* Badge Text */}
-                            <p className="text-gray-400 text-golden-1 italic text-right mt-4">Designed and built by students, for students.</p>
+                            {/* Floating feature cards */}
+                            <motion.div
+                                initial={{ opacity: 0, x: -30, y: 20 }}
+                                animate={{ opacity: 1, x: 0, y: 0 }}
+                                transition={{ delay: 1.2, duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+                                className="absolute -top-5 -left-3 sm:-left-6 z-20"
+                            >
+                                <motion.div
+                                    animate={{ y: [0, -6, 0] }}
+                                    transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
+                                    className="flex items-center gap-3 px-4 py-3 rounded-2xl border border-white/[0.08] bg-[#0d0d20]/85 backdrop-blur-2xl shadow-[0_8px_32px_rgba(0,0,0,0.4)]"
+                                >
+                                    <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#0061FE] to-[#3389FF] flex items-center justify-center shrink-0 shadow-[0_0_20px_rgba(0,97,254,0.3)]">
+                                        <Code size={16} className="text-white" />
+                                    </div>
+                                    <div>
+                                        <p className="text-xs font-bold text-white leading-tight">DSA Practice</p>
+                                        <p className="text-[10px] text-gray-500 font-medium">200+ problems</p>
+                                    </div>
+                                </motion.div>
+                            </motion.div>
+
+                            <motion.div
+                                initial={{ opacity: 0, x: 30, y: -20 }}
+                                animate={{ opacity: 1, x: 0, y: 0 }}
+                                transition={{ delay: 1.4, duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+                                className="absolute -bottom-3 -right-2 sm:-right-5 z-20"
+                            >
+                                <motion.div
+                                    animate={{ y: [0, -8, 0] }}
+                                    transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut', delay: 1 }}
+                                    className="flex items-center gap-3 px-4 py-3 rounded-2xl border border-white/[0.08] bg-[#0d0d20]/85 backdrop-blur-2xl shadow-[0_8px_32px_rgba(0,0,0,0.4)]"
+                                >
+                                    <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#00C6F7] to-[#0061FE] flex items-center justify-center shrink-0 shadow-[0_0_20px_rgba(0,198,247,0.3)]">
+                                        <Rocket size={16} className="text-white" />
+                                    </div>
+                                    <div>
+                                        <p className="text-xs font-bold text-white leading-tight">Mentorship</p>
+                                        <p className="text-[10px] text-gray-500 font-medium">1-on-1 guidance</p>
+                                    </div>
+                                </motion.div>
+                            </motion.div>
+
+                            <motion.div
+                                initial={{ opacity: 0, y: 30 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: 1.6, duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+                                className="absolute top-1/2 -right-4 sm:-right-10 -translate-y-1/2 z-20 hidden sm:block"
+                            >
+                                <motion.div
+                                    animate={{ y: [0, -10, 0] }}
+                                    transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut', delay: 0.5 }}
+                                    className="flex items-center gap-3 px-4 py-3 rounded-2xl border border-white/[0.08] bg-[#0d0d20]/85 backdrop-blur-2xl shadow-[0_8px_32px_rgba(0,0,0,0.4)]"
+                                >
+                                    <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#0061FE] to-[#00C6F7] flex items-center justify-center shrink-0 shadow-[0_0_20px_rgba(0,97,254,0.2)]">
+                                        <Calendar size={16} className="text-white" />
+                                    </div>
+                                    <div>
+                                        <p className="text-xs font-bold text-white leading-tight">Live Events</p>
+                                        <p className="text-[10px] text-gray-500 font-medium">Every month</p>
+                                    </div>
+                                </motion.div>
+                            </motion.div>
+
+                            {/* Decorative blurs */}
+                            <div className="absolute -bottom-20 -right-20 w-56 h-56 bg-[#0061FE] rounded-full blur-[120px] opacity-15 pointer-events-none" />
+                            <div className="absolute -top-20 -left-20 w-56 h-56 bg-[#00C6F7] rounded-full blur-[120px] opacity-10 pointer-events-none" />
                         </motion.div>
                     </div>
                 </div>
+
+                {/* Scroll indicator — capsule mouse */}
                 <motion.div
-                    animate={{ y: [0, 10, 0] }}
-                    transition={{ repeat: Infinity, duration: 2 }}
-                    className="absolute bottom-10 left-1/2 -translate-x-1/2 text-gray-500"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 2 }}
+                    className="absolute bottom-10 left-1/2 -translate-x-1/2 z-10"
                 >
-                    <ChevronDown size={32} />
+                    <div className="w-7 h-11 rounded-full border-2 border-white/15 flex justify-center pt-2">
+                        <motion.div
+                            animate={{ y: [0, 14, 0], opacity: [1, 0.2, 1] }}
+                            transition={{ repeat: Infinity, duration: 2, ease: 'easeInOut' }}
+                            className="w-1.5 h-2.5 rounded-full bg-gradient-to-b from-[#0061FE] to-[#00C6F7]"
+                        />
+                    </div>
                 </motion.div>
+
+                {/* Bottom fade */}
+                <div className="absolute bottom-0 left-0 right-0 h-40 bg-gradient-to-t from-[#F7F5F2] to-transparent z-[5] pointer-events-none" />
             </section>
+
 
 
 
             {/* Vision Section */}
             <section id="vision" className="bg-[#F7F5F2] text-[#1E1919] py-12 md:py-16 relative">
-                <div className="absolute top-0 left-1/2 -translate-x-1/2 h-32 w-px bg-gradient-to-b from-[#101010] to-[#0061FE]"></div>
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 h-32 w-px bg-gradient-to-b from-[#060611] to-[#0061FE]"></div>
                 <div className="container mx-auto px-6">
                     <div className="grid md:grid-cols-2 gap-16 items-start">
                         <div className="relative md:sticky md:top-32">
