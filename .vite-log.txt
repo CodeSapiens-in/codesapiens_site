@@ -1,0 +1,10 @@
+
+> codesapiens-frontend@0.0.0 dev
+> vite
+
+
+  [32m[1mVITE[22m v7.2.6[39m  [2mready in [0m[1m264[22m[2m[0m ms[22m
+
+  [32mΓ₧£[39m  [1mLocal[22m:   [36mhttp://localhost:[1m5173[22m/[39m
+  [32mΓ₧£[39m  [1mNetwork[22m: [36mhttp://192.168.1.9:[1m5173[22m/[39m
+[2m[32m  Γ₧£[39m[22m[2m  press [22m[1mh + enter[22m[2m to show help[22m
