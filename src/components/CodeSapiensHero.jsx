@@ -1,11 +1,40 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { motion, useScroll, useTransform } from 'framer-motion';
+import { motion, useScroll, useTransform, animate } from 'framer-motion';
 import { supabase } from '../lib/supabaseClient';
 import { useNavigate } from 'react-router-dom';
 import { ArrowRight, ChevronDown, Menu, X, Github, Linkedin, Youtube, Users, Calendar, Code, Award, Crown, Rocket, Zap, Globe, Cpu, Handshake, Heart, ArrowUpRight, Instagram, Twitter, MessageCircle, Megaphone, Sparkles } from 'lucide-react';
 import { BACKEND_URL } from '../config';
 import { authFetch } from '../lib/authFetch';
 import LandingPopup from './LandingPopup';
+
+const AnimatedCounter = ({ from, to, suffix, label }) => {
+    const nodeRef = useRef(null);
+    useEffect(() => {
+        const node = nodeRef.current;
+        if (!node) return;
+        const controls = animate(from, to, {
+            duration: 2.5,
+            ease: "easeOut",
+            onUpdate(value) {
+                node.textContent = Math.round(value) + suffix + " " + label;
+            }
+        });
+        return () => controls.stop();
+    }, [from, to, suffix, label]);
+    return <span ref={nodeRef} />;
+};
+
+// --- Fallback Data ---
+const fallbackStats = {
+    totalUsers: 2000,
+    totalColleges: 50,
+    topColleges: [
+        { name: "Rajalakshmi Engineering College", count: 51 },
+        { name: "Sri Sairam Engineering College", count: 46 },
+        { name: "Panimalar Engineering College", count: 41 },
+        { name: "Mazharul Uloom College,Ambur -635 802", count: 11 }
+    ]
+};
 
 // --- Stats Section ---
 const StatsSection = () => {
@@ -18,179 +47,185 @@ const StatsSection = () => {
             .then(data => {
                 if (data.success) {
                     setStats(data.stats);
+                } else {
+                    setStats(fallbackStats);
                 }
             })
-            .catch(err => console.error("Stats fetch error:", err))
+            .catch(err => {
+                console.error("Stats fetch error, using fallback:", err);
+                setStats(fallbackStats);
+            })
             .finally(() => setLoading(false));
     }, []);
 
+    const colleges = stats.topColleges.filter(c => c.name && c.name !== "Not specified");
+
     return (
-        <section className="py-12 bg-gradient-to-br from-[#101010] via-[#050505] to-[#001a45] text-white relative overflow-hidden">
-            {/* Background Elements */}
+        <section className="py-24 bg-[#0a0a0a] text-white relative overflow-hidden">
+            {/* Background Gradient Glow */}
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[600px] bg-blue-600/10 blur-[120px] rounded-full pointer-events-none"></div>
 
-            <div className="container mx-auto px-4 md:px-6 relative z-10">
-                <div className="mb-8 text-center">
-                    <span className="text-[#0061FE] font-bold tracking-widest uppercase text-golden-1 mb-4 block">Impact</span>
-                    <h2 className="text-golden-2 md:text-golden-3 font-bold mb-6">By The Numbers</h2>
-                    <p className="text-golden-1 text-gray-400 max-w-2xl mx-auto">
-                        We are growing fast. Join the movement.
-                    </p>
-                </div>
+            <div className="container mx-auto px-6 relative z-10 font-['Inter']">
+                <div className="max-w-6xl xl:max-w-[1200px] mx-auto">
+                    <div className="flex flex-col md:flex-row items-center md:items-end justify-between gap-12 mb-20 text-center md:text-left">
+                        <div className="max-w-xl">
+                            <motion.span
+                                initial={{ opacity: 0, y: 10 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true }}
+                                className="text-[#0061FE] font-bold tracking-[0.2em] uppercase text-xs md:text-sm mb-4 block"
+                            >
+                                Impact & Growth
+                            </motion.span>
+                            <motion.h2
+                                initial={{ opacity: 0, y: 20 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true }}
+                                transition={{ delay: 0.1 }}
+                                className="text-5xl md:text-7xl font-black mb-6 tracking-tighter"
+                            >
+                                By The <span className="text-[#0061FE]">Numbers</span>
+                            </motion.h2>
+                            <motion.p
+                                initial={{ opacity: 0 }}
+                                whileInView={{ opacity: 1 }}
+                                viewport={{ once: true }}
+                                transition={{ delay: 0.2 }}
+                                className="text-gray-400 italic font-medium"
+                            >
+                                "We are growing fast. Join the movement to shape the future of tech."
+                            </motion.p>
+                        </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-16 items-start md:items-center">
-                    {/* Left: Big Numbers */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-8">
-
+                        {/* Unified Key Stats - Right Column */}
                         <motion.div
-                            initial={{ opacity: 0, scale: 0.5 }}
+                            initial={{ opacity: 0, scale: 0.9 }}
                             whileInView={{ opacity: 1, scale: 1 }}
                             viewport={{ once: true }}
-                            className="bg-black/40 backdrop-blur-3xl p-4 md:p-6 rounded-2xl border border-white/10 text-center shadow-[0_8px_32px_0_rgba(0,0,0,0.37)] relative overflow-hidden group"
+                            transition={{ delay: 0.3 }}
+                            className="flex flex-row items-center justify-center gap-12 md:gap-16"
                         >
-                            {/* Specular Highlight */}
-                            <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
-
-                            <h3 className="text-golden-2 md:text-golden-3 font-black text-white mb-2 drop-shadow-lg">
-                                {/* {stats.totalUsers > 0 ? stats.totalUsers : "1500+"} */}
-                                2000+
-                            </h3>
-                            <p className="text-gray-400 font-medium uppercase tracking-normal md:tracking-wider text-golden-1">Total Members</p>
-                        </motion.div>
-
-                        <motion.div
-                            initial={{ opacity: 0, scale: 0.5 }}
-                            whileInView={{ opacity: 1, scale: 1 }}
-                            viewport={{ once: true }}
-                            transition={{ delay: 0.1 }}
-                            className="bg-black/40 backdrop-blur-3xl p-4 md:p-6 rounded-2xl border border-white/10 text-center shadow-[0_8px_32px_0_rgba(0,0,0,0.37)] relative overflow-hidden group"
-                        >
-                            {/* Specular Highlight */}
-                            <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
-
-                            <h3 className="text-golden-2 md:text-golden-3 font-black text-white mb-2 drop-shadow-lg">
-                                {/* {stats.totalColleges > 0 ? stats.totalColleges : "50+"} */}
-                                50+
-                            </h3>
-                            <p className="text-gray-400 font-medium uppercase tracking-normal md:tracking-wider text-golden-1">Colleges Reached</p>
+                            <div className="flex flex-col items-center md:items-end">
+                                <span className="text-5xl md:text-6xl font-black text-white mb-2 drop-shadow-[0_0_15px_rgba(255,255,255,0.1)]">
+                                    2000+
+                                </span>
+                                <span className="text-gray-500 text-xs font-bold uppercase tracking-[0.2em]">Total Members</span>
+                            </div>
+                            <div className="h-16 w-px bg-white/10 hidden sm:block"></div>
+                            <div className="flex flex-col items-center md:items-end">
+                                <span className="text-5xl md:text-6xl font-black text-white mb-2 drop-shadow-[0_0_15_rgba(255,255,255,0.1)]">
+                                    50+
+                                </span>
+                                <span className="text-gray-500 text-xs font-bold uppercase tracking-[0.2em]">Colleges Reached</span>
+                            </div>
                         </motion.div>
                     </div>
 
-                    {/* Right: Top Colleges Chart */}
-                    <div className="col-span-1 h-full w-full overflow-hidden">
-                        <div className="bg-black/40 backdrop-blur-3xl p-6 rounded-2xl border border-white/10 h-full flex flex-col relative overflow-hidden group shadow-[0_8px_32px_0_rgba(0,0,0,0.37)]">
-                            {/* Specular Highlight */}
-                            <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent pointer-events-none"></div>
+                    {/* Top Colleges Section */}
+                    <div className="max-w-5xl mx-auto">
+                        <motion.div
+                            initial={{ opacity: 0, y: 40 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ duration: 0.8 }}
+                            className="bg-[#111111] backdrop-blur-3xl rounded-[3rem] border border-white/5 p-8 md:p-16 shadow-[0_20px_50px_rgba(0,0,0,0.5)] relative overflow-hidden"
+                        >
+                            <div className="absolute inset-0 bg-gradient-to-br from-white/[0.02] to-transparent pointer-events-none"></div>
 
-                            <h4 className="text-golden-2 font-bold mb-4 flex items-center gap-3">
-                                Top Active Colleges
-                            </h4>
-
-                            <div className="flex-1 flex flex-col justify-center">
-                                {loading ? (
-                                    <div className="text-center text-gray-500 py-10 animate-pulse">Loading leaderboards...</div>
-                                ) : stats.topColleges.filter(c => c.name && c.name !== "Not specified").length > 0 ? (
-                                    <div className="space-y-8">
-                                        {/* Top 3 Podium - Only show if we have enough data, else fallback to list */}
-                                        {stats.topColleges.filter(c => c.name && c.name !== "Not specified").length >= 3 ? (
-                                            <div className="flex items-end justify-center gap-2 md:gap-4 mb-4 min-h-[140px]">
-                                                {/* 2nd Place */}
-                                                <motion.div
-                                                    initial={{ opacity: 0, y: 50 }}
-                                                    whileInView={{ opacity: 1, y: 0 }}
-                                                    transition={{ delay: 0.2 }}
-                                                    className="flex flex-col items-center w-1/3"
-                                                >
-                                                    <div className="text-center mb-2">
-                                                        <span className="text-gray-300 font-bold block text-sm sm:text-base line-clamp-2 min-h-[2.5em] leading-tight">
-                                                            {stats.topColleges.filter(c => c.name && c.name !== "Not specified")[1].name}
-                                                        </span>
-                                                        <span className="text-gray-500 text-xs font-mono mt-1 block">{stats.topColleges.filter(c => c.name && c.name !== "Not specified")[1].count} Students</span>
-                                                    </div>
-                                                    <div className="w-full bg-gradient-to-t from-gray-800 to-gray-600/50 rounded-t-lg relative border-t border-x border-gray-600 h-24 flex items-end justify-center pb-2">
-                                                        <span className="text-3xl font-black text-gray-400/20 absolute top-2">2</span>
-                                                        <div className="w-8 h-8 rounded-full bg-gray-400 flex items-center justify-center text-black font-bold text-sm shadow-[0_0_15px_rgba(156,163,175,0.5)]">2</div>
-                                                    </div>
-                                                </motion.div>
-
-                                                {/* 1st Place */}
-                                                <motion.div
-                                                    initial={{ opacity: 0, y: 50 }}
-                                                    whileInView={{ opacity: 1, y: 0 }}
-                                                    transition={{ delay: 0.1 }}
-                                                    className="flex flex-col items-center w-1/3 -mt-4 z-10"
-                                                >
-                                                    <div className="text-center mb-2">
-                                                        <span className="text-yellow-400 font-bold block text-sm sm:text-lg line-clamp-2 min-h-[2.5em] leading-tight drop-shadow-[0_0_10px_rgba(250,204,21,0.3)]">
-                                                            {stats.topColleges.filter(c => c.name && c.name !== "Not specified")[0].name}
-                                                        </span>
-                                                        <span className="text-yellow-500/80 text-xs font-mono mt-1 block font-bold">{stats.topColleges.filter(c => c.name && c.name !== "Not specified")[0].count} Students</span>
-                                                    </div>
-                                                    <div className="w-full bg-gradient-to-t from-yellow-900/40 to-yellow-600/40 rounded-t-lg relative border-t border-x border-yellow-500 h-32 flex items-end justify-center pb-4 overflow-hidden">
-                                                        <div className="absolute inset-0 bg-yellow-400/10 animate-pulse"></div>
-                                                        <span className="text-4xl font-black text-yellow-400/20 absolute top-2">1</span>
-                                                        <div className="w-10 h-10 rounded-full bg-yellow-400 flex items-center justify-center text-black font-bold text-lg shadow-[0_0_20px_rgba(250,204,21,0.6)] relative z-10">
-                                                            <Crown size={20} />
-                                                        </div>
-                                                    </div>
-                                                </motion.div>
-
-                                                {/* 3rd Place */}
-                                                <motion.div
-                                                    initial={{ opacity: 0, y: 50 }}
-                                                    whileInView={{ opacity: 1, y: 0 }}
-                                                    transition={{ delay: 0.3 }}
-                                                    className="flex flex-col items-center w-1/3"
-                                                >
-                                                    <div className="text-center mb-2">
-                                                        <span className="text-amber-700 font-bold block text-sm sm:text-base line-clamp-2 min-h-[2.5em] leading-tight">
-                                                            {stats.topColleges.filter(c => c.name && c.name !== "Not specified")[2].name}
-                                                        </span>
-                                                        <span className="text-gray-500 text-xs font-mono mt-1 block">{stats.topColleges.filter(c => c.name && c.name !== "Not specified")[2].count} Students</span>
-                                                    </div>
-                                                    <div className="w-full bg-gradient-to-t from-amber-900/40 to-amber-700/40 rounded-t-lg relative border-t border-x border-amber-800 h-20 flex items-end justify-center pb-2">
-                                                        <span className="text-3xl font-black text-amber-800/20 absolute top-2">3</span>
-                                                        <div className="w-8 h-8 rounded-full bg-amber-700 flex items-center justify-center text-white font-bold text-sm shadow-[0_0_15px_rgba(180,83,9,0.5)]">3</div>
-                                                    </div>
-                                                </motion.div>
-                                            </div>
-                                        ) : null}
-
-                                        {/* Remaining List (4th and 5th) */}
-                                        <div className="space-y-3 mt-4">
-                                            {stats.topColleges
-                                                .filter(c => c.name && c.name !== "Not specified")
-                                                .slice(stats.topColleges.filter(c => c.name && c.name !== "Not specified").length >= 3 ? 3 : 0, 5) // Skip top 3 if we showed podium, else show all
-                                                .map((college, index) => {
-                                                    const actualIndex = stats.topColleges.filter(c => c.name && c.name !== "Not specified").length >= 3 ? index + 3 : index;
-                                                    return (
-                                                        <motion.div
-                                                            key={index}
-                                                            initial={{ opacity: 0, x: -20 }}
-                                                            whileInView={{ opacity: 1, x: 0 }}
-                                                            transition={{ delay: 0.4 + (index * 0.1) }}
-                                                            className="flex items-center gap-4 p-3 rounded-xl bg-white/5 hover:bg-white/10 transition-colors border border-white/5"
-                                                        >
-                                                            <div className="w-8 h-8 rounded-full bg-[#1E1919] border border-gray-700 flex items-center justify-center text-gray-400 font-bold text-sm">
-                                                                {actualIndex + 1}
-                                                            </div>
-                                                            <div className="flex-1 min-w-0">
-                                                                <h5 className="font-medium text-gray-200 truncate">{college.name}</h5>
-                                                            </div>
-                                                            <div className="px-3 py-1 rounded-full bg-[#0061FE]/10 text-[#0061FE] text-xs font-bold">
-                                                                {college.count}
-                                                            </div>
-                                                        </motion.div>
-                                                    );
-                                                })}
-                                        </div>
-                                    </div>
-                                ) : (
-                                    <div className="text-center text-gray-500 py-10">
-                                        <p>Stats will update soon</p>
-                                    </div>
-                                )}
+                            <div className="flex flex-col items-center mb-16">
+                                <h4 className="text-2xl font-bold text-gray-200 mb-2">Top Active Colleges</h4>
+                                <div className="h-1 w-12 bg-[#0061FE] rounded-full"></div>
                             </div>
-                        </div>
+
+                            {loading ? (
+                                <div className="text-center text-gray-500 py-20 animate-pulse font-medium">Updating community leaderboards...</div>
+                            ) : colleges.length > 0 ? (
+                                <div className="flex flex-col gap-16">
+                                    {/* Podium Staircase (3-2-1 Layout) */}
+                                    {colleges.length >= 3 && (
+                                        <div className="flex items-end justify-center gap-4 md:gap-8 min-h-[300px]">
+                                            {/* 3rd Place - Left */}
+                                            <motion.div
+                                                initial={{ opacity: 0, height: 0 }}
+                                                whileInView={{ opacity: 1, height: "auto" }}
+                                                viewport={{ once: true }}
+                                                transition={{ duration: 1, delay: 0.4 }}
+                                                className="flex flex-col items-center w-1/3 max-w-[180px]"
+                                            >
+                                                <div className="text-center mb-6">
+                                                    <h5 className="text-gray-400 font-bold text-sm mb-1 leading-tight line-clamp-2 px-1">{colleges[2].name}</h5>
+                                                    <p className="text-[#B45309] text-[10px] font-black uppercase tracking-widest">{colleges[2].count} Students</p>
+                                                </div>
+                                                <div className="w-full bg-gradient-to-t from-[#B45309]/30 to-[#B45309]/10 rounded-t-3xl border-t border-x border-[#B45309]/20 h-28 flex items-center justify-center relative overflow-hidden group/bar transition-all hover:bg-[#B45309]/20">
+                                                    <span className="text-4xl font-black text-amber-700/30">3</span>
+                                                </div>
+                                            </motion.div>
+
+                                            {/* 2nd Place - Center */}
+                                            <motion.div
+                                                initial={{ opacity: 0, height: 0 }}
+                                                whileInView={{ opacity: 1, height: "auto" }}
+                                                viewport={{ once: true }}
+                                                transition={{ duration: 1, delay: 0.2 }}
+                                                className="flex flex-col items-center w-1/3 max-w-[200px]"
+                                            >
+                                                <div className="text-center mb-6">
+                                                    <h5 className="text-gray-200 font-bold text-base mb-1 leading-tight line-clamp-2 px-1">{colleges[1].name}</h5>
+                                                    <p className="text-gray-400 text-[10px] font-black uppercase tracking-widest">{colleges[1].count} Students</p>
+                                                </div>
+                                                <div className="w-full bg-gradient-to-t from-gray-500/30 to-gray-500/10 rounded-t-3xl border-t border-x border-gray-500/20 h-44 flex items-center justify-center relative overflow-hidden group/bar transition-all hover:bg-gray-500/20">
+                                                    <span className="text-5xl font-black text-gray-400/30">2</span>
+                                                </div>
+                                            </motion.div>
+
+                                            {/* 1st Place - Right */}
+                                            <motion.div
+                                                initial={{ opacity: 0, height: 0 }}
+                                                whileInView={{ opacity: 1, height: "auto" }}
+                                                viewport={{ once: true }}
+                                                transition={{ duration: 1 }}
+                                                className="flex flex-col items-center w-1/3 max-w-[220px]"
+                                            >
+                                                <div className="text-center mb-6">
+                                                    <h5 className="text-yellow-400 font-black text-xl mb-1 leading-tight line-clamp-2 px-1 drop-shadow-[0_0_10px_rgba(250,204,21,0.4)]">{colleges[0].name}</h5>
+                                                    <p className="text-yellow-500/80 text-[12px] font-black uppercase tracking-[0.15em]">{colleges[0].count} Students</p>
+                                                </div>
+                                                <div className="w-full bg-gradient-to-t from-yellow-600/40 to-yellow-400/20 rounded-t-3xl border-t border-x border-yellow-500/40 h-64 flex flex-col items-center justify-center relative overflow-hidden group/bar shadow-[0_-10px_40px_rgba(250,204,21,0.1)] transition-all hover:from-yellow-600/50">
+                                                    <div className="absolute inset-0 bg-yellow-400/5 animate-pulse"></div>
+                                                    <Crown className="text-yellow-400 mb-2 drop-shadow-[0_0_15px_rgba(250,204,21,0.8)]" size={40} />
+                                                    <span className="text-7xl font-black text-yellow-400/20">1</span>
+                                                </div>
+                                            </motion.div>
+                                        </div>
+                                    )}
+
+                                    {/* Other Rankings Toggle/List */}
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-8">
+                                        {colleges.slice(colleges.length >= 3 ? 3 : 0, 8).map((college, idx) => (
+                                            <motion.div
+                                                key={idx}
+                                                initial={{ opacity: 0, scale: 0.95 }}
+                                                whileInView={{ opacity: 1, scale: 1 }}
+                                                viewport={{ once: true }}
+                                                className="flex items-center gap-4 p-5 rounded-[1.5rem] bg-white/[0.02] border border-white/5 hover:bg-white/[0.05] transition-all group/item"
+                                            >
+                                                <div className="w-12 h-12 rounded-2xl bg-black/40 flex items-center justify-center text-gray-500 font-black text-lg border border-white/5 group-hover/item:text-[#0061FE] group-hover/item:border-[#0061FE]/30 transition-all">
+                                                    {idx + (colleges.length >= 3 ? 4 : 1)}
+                                                </div>
+                                                <div className="flex-1 min-w-0">
+                                                    <h5 className="text-gray-200 font-bold truncate group-hover/item:text-white transition-colors">{college.name}</h5>
+                                                    <p className="text-gray-500 text-[10px] font-black uppercase tracking-widest mt-0.5">{college.count} Members</p>
+                                                </div>
+                                            </motion.div>
+                                        ))}
+                                    </div>
+                                </div>
+                            ) : (
+                                <div className="text-center text-gray-500 py-10">
+                                    <p>Stats will update soon</p>
+                                </div>
+                            )}
+                        </motion.div>
                     </div>
                 </div>
             </div>
@@ -198,10 +233,9 @@ const StatsSection = () => {
     );
 };
 
-// --- Sponsor Section with Spotlight Effect ---
+// --- Sponsor Section with Clean Grid Style ---
 const SponsorSection = () => {
     const sponsors = [
-
         {
             name: "Mako IT Lab",
             link: "https://www.makoitlab.com/",
@@ -232,53 +266,53 @@ const SponsorSection = () => {
             link: "https://interviewbuddy.net/",
             image: "https://res.cloudinary.com/dqudvximt/image/upload/v1771508422/WhatsApp_Image_2026-02-19_at_4.28.12_PM_xxalgw.jpg",
         },
-        
     ];
 
     return (
-        <section className="py-12 bg-[#FFFFF0] relative overflow-hidden">
-            <div className="container mx-auto px-6 relative z-10">
-                <div className="text-left mb-8">
-                    <div className="flex items-center gap-2 mb-4">
-                        <h2 className="text-4xl md:text-6xl font-black text-black tracking-tight leading-none">OUR</h2>
-                        <h2 className="text-4xl md:text-6xl font-script text-[#2563ea] font-bold italic leading-none pt-2">sponsors</h2>
-                        <div className="h-px bg-gray-200 flex-1 ml-4 self-center mt-2"></div>
-                    </div>
-                    {/* <span className="text-[#0061FE] font-bold tracking-widest uppercase text-golden-1 mb-2 block">Our Partners</span> */}
-                    <div className="flex items-center gap-2 mb-8">
-                        <span className="w-3 h-3 rounded-full bg-green-400 animate-pulse"></span>
-                        <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">BACKING THE FUTURE</span>
-                    </div>
+        <section className="py-24 bg-[#f8faff] relative overflow-hidden font-['Inter']">
+            <div className="container mx-auto px-6 relative z-10 max-w-7xl">
+                <div className="text-center mb-16">
+                    <motion.span
+                        initial={{ opacity: 0, y: 10 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        className="text-[#0061FE] font-bold tracking-[0.2em] uppercase text-xs md:text-sm mb-4 block"
+                    >
+                        Our Partners
+                    </motion.span>
+                    <motion.h2
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ delay: 0.1 }}
+                        className="text-4xl md:text-6xl font-black text-[#1E1919] tracking-tight"
+                    >
+                        Backed by <span className="text-[#0061FE]">Industry Leaders</span>
+                    </motion.h2>
                 </div>
 
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 w-full mx-auto">
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-6 md:gap-8">
                     {sponsors.map((sponsor, idx) => (
-                        <a
+                        <motion.a
                             key={idx}
                             href={sponsor.link}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="relative group bg-white border border-gray-100 rounded-3xl p-4 md:p-6 w-full aspect-square flex flex-col justify-between hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 block"
+                            initial={{ opacity: 0, scale: 0.9 }}
+                            whileInView={{ opacity: 1, scale: 1 }}
+                            viewport={{ once: true }}
+                            transition={{ delay: idx * 0.05 }}
+                            whileHover={{ y: -5, boxShadow: "0 15px 30px -10px rgba(0,0,0,0.1)" }}
+                            className="bg-white rounded-xl md:rounded-2xl shadow-sm border border-gray-100 border-t-[3px] border-t-[#0061FE] p-6 h-32 md:h-40 flex items-center justify-center group transition-all duration-300 overflow-hidden"
                         >
-                            {/* Top Right Arrow */}
-                            <div className="self-end p-2 bg-gray-50 rounded-full text-gray-400 group-hover:bg-[#0061FE] group-hover:text-white transition-colors">
-                                <ArrowUpRight size={18} />
-                            </div>
-
-                            {/* Centered Image */}
-                            <div className="flex-1 flex items-center justify-center p-2">
-                                <img
-                                    src={sponsor.image}
-                                    alt={sponsor.name}
-                                    className="max-w-[85%] max-h-[85%] object-contain drop-shadow-sm transition-all duration-500"
-                                />
-                            </div>
-
-                            {/* Name Badge */}
-                            <div className="self-start px-3 py-1 bg-gray-50 border border-gray-100 rounded-lg">
-                                <span className="font-bold text-gray-800 text-xs">{sponsor.name}</span>
-                            </div>
-                        </a>
+                            <motion.img
+                                src={sponsor.image}
+                                alt={sponsor.name}
+                                whileHover={{ scale: 1.05 }}
+                                transition={{ type: "spring", stiffness: 400, damping: 10 }}
+                                className="max-w-full max-h-full object-contain transition-all duration-500"
+                            />
+                        </motion.a>
                     ))}
                 </div>
             </div>
@@ -308,35 +342,42 @@ const CommunityPartners = () => {
     ];
 
     return (
-        <section className="py-12 bg-white relative overflow-hidden border-t border-gray-100">
-            <div className="container mx-auto px-6 relative z-10">
-                <div className="text-left mb-8">
-                    <div className="flex items-center gap-2 mb-4">
-                        <h2 className="text-3xl md:text-6xl font-black text-black tracking-tight leading-none">COMMUNITY</h2>
-                        <h2 className="text-3xl md:text-6xl font-script text-[#2563ea] font-bold italic leading-none pt-2">partners</h2>
-                        <div className="h-px bg-gray-200 flex-1 ml-4 self-center mt-2"></div>
+        <section className="py-24 bg-gray-50 relative overflow-hidden font-['Inter']">
+            <div className="container mx-auto px-6 relative z-10 max-w-7xl">
+                <div className="text-center mb-16">
+                    <div className="flex flex-col items-center gap-2 mb-4">
+                        <div className="flex items-center gap-3">
+                            <h2 className="text-4xl md:text-6xl font-black text-black tracking-tight leading-none ">Community</h2>
+                            <h2 className="text-4xl md:text-6xl font-script text-[#0061FE] font-black leading-none">Partners</h2>
+                        </div>
+                        <div className="h-1.5 w-24 bg-[#0061FE] rounded-full mt-4"></div>
                     </div>
-                    <div className="flex items-center gap-2 mb-8">
-                        <span className="w-3 h-3 rounded-full bg-green-400 animate-pulse"></span>
-                        <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">GROWING TOGETHER</span>
+                    <div className="flex items-center justify-center gap-2 mb-8 mt-6">
+                        <span className="w-3 h-3 rounded-full bg-green-500 animate-pulse"></span>
+                        <span className="text-xs font-black text-gray-600 uppercase tracking-widest">GROWING TOGETHER</span>
                     </div>
                 </div>
 
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 w-full mx-auto">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10 max-w-6xl mx-auto">
                     {partners.map((partner, idx) => (
-                        <div
+                        <motion.a
                             key={idx}
-                            className="relative group bg-white border border-gray-100 rounded-3xl p-4 md:p-6 w-full aspect-square flex flex-col justify-center items-center hover:shadow-lg transition-all duration-300"
+                            href={partner.link}
+                            initial={{ opacity: 0, y: 20 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ delay: idx * 0.1 }}
+                            className="bg-white rounded-[2.5rem] p-5 shadow-[0_10px_40px_rgba(0,0,0,0.03)] border-2 border-gray-100 flex flex-col hover:shadow-[0_20px_50px_rgba(0,0,0,0.08)] hover:border-blue-100 transition-all duration-500 group relative"
                         >
-                            {/* Centered Image */}
-                            <div className="flex-1 flex items-center justify-center p-2 w-full">
+                            {/* Inner Logo Container */}
+                            <div className="bg-[#f5f9ff] rounded-[2rem] p-10 h-64 flex flex-col items-center justify-center relative overflow-hidden transition-all duration-500 group-hover:bg-[#ebf5ff]">
                                 <img
                                     src={partner.image}
                                     alt="Community Partner"
-                                    className="max-w-[85%] max-h-[85%] object-contain drop-shadow-sm"
+                                    className="max-w-[75%] max-h-[75%] object-contain drop-shadow-sm group-hover:scale-110 transition-transform duration-500 z-10"
                                 />
                             </div>
-                        </div>
+                        </motion.a>
                     ))}
                 </div>
             </div>
@@ -347,179 +388,144 @@ const CommunityPartners = () => {
 // --- Social Media Bento Grid ---
 const SocialMediaSection = () => {
     const socials = [
-        {
-            name: "LinkedIn",
-            icon: <Linkedin size={40} />,
-            link: "https://www.linkedin.com/company/codesapiens-community/posts/",
-            color: "bg-[#0077b5]",
-            textColor: "text-white",
-            span: "col-span-1",
-            badge: "@codesapiens-community",
-            isLarge: true,
-            backgroundImage: "url('https://res.cloudinary.com/dqudvximt/image/upload/v1767874220/users_cme79i2lk00qls401ar5qxqnc_n74cMGsKIBuvEzzj-users_cme5bsukl01binm014j8ioh2j_2SNEHA31eEqsxFRS-original-33f53dcd2f48e068523d32df0e5cc92f_xkirvh.gif') center/cover no-repeat"
-        },
-        {
-            name: "Luma",
-            icon: null,
-            link: "https://lu.ma/codesapiens",
-            color: "bg-black",
-            textColor: "text-white",
-            span: "col-span-1",
-            badge: null,
-            backgroundImage: "url('https://res.cloudinary.com/dqudvximt/image/upload/v1767875075/users_cme79i2lk00qls401ar5qxqnc_WI6Z0HVxNMCrvfgn-ETzJoQJr1aCFL2r7-rrDC9gCyIJ77RqVW-luma_cqxcny.jpg') center/cover no-repeat"
-        },
-        {
-            name: "WhatsApp",
-            icon: null,
-            link: "https://chat.whatsapp.com/LLtoddmQx5rIRNb8WE6rqC?mode=ems_copy_t",
-            color: "bg-[#25D366]",
-            textColor: "text-white",
-            span: "col-span-1",
-            badge: null,
-            customContent: (
-                <div className="relative w-full h-full flex items-center justify-center">
-                    <img src="https://res.cloudinary.com/dqudvximt/image/upload/v1767875047/410201-PD391H-802_h7tcfj.jpg" alt="WhatsApp" className="w-24 h-24 object-contain rounded-xl" />
-                </div>
-            )
-        },
-        {
-            name: "Instagram",
-            icon: <Instagram size={32} />,
-            link: "https://www.instagram.com/codesapiens/",
-            color: "bg-white",
-            textColor: "text-black",
-            span: "col-span-1",
-            badge: null,
-            border: "border-gray-100 border",
-            customContent: (
-                <div className="relative w-full h-full flex items-center justify-center">
-                    <div className="absolute inset-0 flex items-center justify-center pb-6">
-                        <img src="https://res.cloudinary.com/dqudvximt/image/upload/v1767874489/users_cme79i2lk00qls401ar5qxqnc_3o1XM7ID2mXVDk6e-XeFzd3iFtoytJqTv-1497553304-104_84834_allkph.png" alt="Instagram" className="w-84 h-84 object-contain drop-shadow-xl" />
-                    </div>
-                    <div className="absolute bottom-0 left-0">
-                        <span className="inline-block px-3 py-1.5 rounded-lg text-xs font-bold bg-gray-100 text-gray-800">
-                            @Codesapiens.in
-                        </span>
-                    </div>
-                </div>
-            )
-        },
-        {
-            name: "Twitter",
-            icon: <Twitter size={32} className="text-[#1DA1F2]" />,
-            link: "https://twitter.com/codesapiens",
-            color: "bg-white",
-            textColor: "text-black",
-            span: "col-span-1",
-            badge: null,
-            border: "border-gray-100 border",
-            customContent: (
-                <div className="relative w-full h-full flex items-center justify-center">
-                    <div className="absolute inset-0 flex items-center justify-center pb-6">
-                        <img src="https://res.cloudinary.com/dqudvximt/image/upload/v1767874490/users_cme79i2lk00qls401ar5qxqnc_XgLMxxPTSSuuRKu5-users_cme5bsukl01binm014j8ioh2j_XQ7ryCBwyUFzFg6v-CLIPLY_372109260_TWITTER_LOGO_400_ptqbvv.gif" alt="Twitter" className="w-32 h-32 object-contain" />
-                    </div>
-                    <div className="absolute bottom-0 left-0">
-                        <span className="inline-block px-3 py-1.5 rounded-lg text-xs font-bold bg-gray-100 text-gray-800">
-                            @codesapiens_in
-                        </span>
-                    </div>
-                </div>
-            )
-        },
-        {
-            name: "Volunteers Needed",
-            icon: null,
-            link: "https://forms.gle/volunteer", // Placeholder link
-            color: "bg-black",
-            textColor: "text-white",
-            span: "col-span-1",
-            badge: null,
-            isLarge: false,
-            backgroundImage: "url('https://res.cloudinary.com/dqudvximt/image/upload/v1767876038/users_cme79i2lk00qls401ar5qxqnc_Hg7Si3j52FVfpQRN-image_x8wghd.png') center/cover no-repeat"
-        },
-        {
-            name: "GitHub",
-            icon: <Github size={40} />,
-            link: "https://github.com/Codesapiens-in",
-            color: "bg-black",
-            textColor: "text-white",
-            span: "col-span-1",
-            badge: "@Codesapiens-in",
-            isLarge: true,
-            backgroundImage: "url('https://res.cloudinary.com/dqudvximt/image/upload/v1767874482/users_cme79i2lk00qls401ar5qxqnc_MOSc1bv3RXu0WL5z-users_cme5bsukl01binm014j8ioh2j_7dOv2cTCX8B86u82-users_clylc5w1v070to301jatq0e85_AdzvY5ioFqaF37x5-github_dsjpx6.gif') center/cover no-repeat"
-        },
-        {
-            name: "YouTube",
-            icon: <Youtube size={40} className="text-red-600" />,
-            link: "https://youtube.com/@codesapiens-in?si=90EaPMYHcSZIHtMi",
-            color: "bg-white",
-            textColor: "text-black",
-            span: "col-span-1",
-            badge: "@Codesapiens",
-            border: "border-gray-100 border",
-            isLarge: true,
-            backgroundImage: "url('https://res.cloudinary.com/dqudvximt/image/upload/v1767874488/users_cme79i2lk00qls401ar5qxqnc_Ov9Ygh4NAQfPGktu-users_cme5bsukl01binm014j8ioh2j_5JQAosdeiVappI2y-users_clylc5w1v070to301jatq0e85_CCuEsN5SSMlu4LAN-youtube_aky1f3.gif') center/cover no-repeat"
-        }
+        { name: "LinkedIn", icon: <Linkedin size={24} />, link: "https://linkedin.com/company/codesapiens-community", color: "bg-[#0077b5]", delay: 0 },
+        { name: "Instagram", icon: <Instagram size={24} />, link: "https://instagram.com/codesapiens", color: "bg-[#E4405F]", delay: 0.1 },
+        { name: "Twitter", icon: <Twitter size={24} />, link: "https://twitter.com/codesapiens", color: "bg-[#1DA1F2]", delay: 0.2 },
+        { name: "GitHub", icon: <Github size={24} />, link: "https://github.com/Codesapiens-in", color: "bg-[#333]", delay: 0.3 },
+        { name: "YouTube", icon: <Youtube size={24} />, link: "https://youtube.com/@codesapiens-in", color: "bg-[#FF0000]", delay: 0.4 },
+        { name: "WhatsApp", icon: <MessageCircle size={24} />, link: "https://chat.whatsapp.com/LLtoddmQx5rIRNb8WE6rqC", color: "bg-[#25D366]", delay: 0.5 },
     ];
 
     return (
-        <section className="py-20 bg-[#FAF9F6] relative overflow-hidden text-left">
-            <div className="container mx-auto px-6 relative z-10">
-                <div className="text-left mb-8">
-                    <div className="flex items-center gap-2 mb-4">
-                        <h2 className="text-4xl md:text-6xl font-black text-black tracking-tight leading-none">SOCIAL</h2>
-                        <h2 className="text-4xl md:text-6xl font-script text-[#2563ea] font-bold italic leading-none pt-2">links</h2>
-                        <div className="h-px bg-gray-200 flex-1 ml-4 self-center mt-2"></div>
-                    </div>
-                    <div className="flex items-center gap-2 mb-8">
-                        <Globe size={16} className="text-[#0061FE] animate-pulse" />
-                        <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">CONNECT WITH US</span>
+        <section className="py-32 bg-white relative overflow-hidden font-['Inter']">
+            {/* Background Decorative Elements */}
+            <div className="absolute top-0 left-0 w-full h-full opacity-[0.03] pointer-events-none">
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] border border-blue-600 rounded-full animate-[spin_60s_linear_infinite]"></div>
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] border border-blue-400 rounded-full animate-[spin_40s_linear_infinite_reverse]"></div>
+            </div>
+
+            <div className="container mx-auto px-6 relative z-10 max-w-7xl">
+                <div className="text-center mb-24">
+                    <div className="flex flex-col items-center gap-2">
+                        <div className="flex items-center gap-3">
+                            <h2 className="text-4xl md:text-6xl font-black text-black tracking-tight leading-none ">Social</h2>
+                            <h2 className="text-4xl md:text-6xl font-script text-[#0061FE] font-black leading-none">Links</h2>
+                        </div>
+                        <div className="h-1.5 w-24 bg-[#0061FE] rounded-full mt-4"></div>
                     </div>
                 </div>
 
-                <div className="grid grid-cols-2 md:grid-cols-4 auto-rows-[200px] gap-4 md:gap-6 w-full mx-auto">
-                    {socials.map((social, idx) => (
-                        <motion.a
-                            key={idx}
-                            href={social.link}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            initial={{ opacity: 0, y: 20 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            whileHover={{ scale: 1.02 }}
-                            transition={{ delay: idx * 0.05 }}
-                            className={`${social.span} ${social.color} ${social.textColor} ${social.border} rounded-3xl p-6 relative overflow-hidden group shadow-sm hover:shadow-xl flex flex-col justify-between transition-all`}
-                            style={social.backgroundImage ? { backgroundImage: social.color.includes('gradient') ? social.color : undefined } : {}}
-                        >
-                            {/* Custom Background Image if any */}
-                            {social.backgroundImage && (
-                                <div className="absolute inset-0" style={{ background: social.backgroundImage }}></div>
-                            )}
+                {/* Mobile: Simple icon grid */}
+                <div className="md:hidden flex flex-col items-center gap-8 w-full">
+                    {/* Mini Globe */}
+                    <motion.div
+                        initial={{ scale: 0, opacity: 0 }}
+                        whileInView={{ scale: 1, opacity: 1 }}
+                        transition={{ duration: 1, type: "spring", bounce: 0.4 }}
+                    >
+                        <div className="w-28 h-28 rounded-full bg-gradient-to-br from-[#0061FE] via-[#3B82F6] to-[#60A5FA] flex items-center justify-center shadow-[0_0_60px_rgba(0,97,254,0.4)] relative overflow-hidden border-4 border-white/20">
+                            <motion.div
+                                animate={{ opacity: [0.4, 0.6, 0.4], scale: [1, 1.1, 1] }}
+                                transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                                className="absolute inset-0 bg-[radial-gradient(circle_at_30%_30%,#fff_0%,transparent_70%)]"
+                            />
+                            <motion.div
+                                animate={{ rotate: 360 }}
+                                transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
+                                className="relative z-10 text-white"
+                            >
+                                <Globe size={52} strokeWidth={1} />
+                            </motion.div>
+                        </div>
+                    </motion.div>
 
-                            {/* Top Right Arrow */}
-                            <div className={`absolute top-4 right-4 p-2 rounded-full ${social.textColor === 'text-white' ? 'bg-white/20 text-white' : 'bg-gray-100 text-gray-500'} opacity-0 group-hover:opacity-100 transition-opacity`}>
-                                <ArrowUpRight size={16} />
-                            </div>
+                    {/* 2×3 Social Grid */}
+                    <div className="grid grid-cols-2 gap-3 w-full max-w-xs">
+                        {socials.map((social, idx) => (
+                            <motion.a
+                                key={idx}
+                                href={social.link}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                initial={{ opacity: 0, y: 16 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true }}
+                                transition={{ delay: idx * 0.07, duration: 0.5 }}
+                                className="flex items-center gap-3 pl-2 pr-4 py-2.5 rounded-full bg-white border-2 border-gray-100 shadow-sm hover:border-[#0061FE] hover:shadow-md transition-all duration-300 group"
+                            >
+                                <div className={`${social.color} w-9 h-9 rounded-full flex items-center justify-center text-white shadow-sm transition-transform duration-500 group-hover:rotate-[360deg] flex-shrink-0`}>
+                                    {React.cloneElement(social.icon, { size: 16 })}
+                                </div>
+                                <span className="text-[10px] font-black text-gray-800 uppercase tracking-[0.08em] truncate">
+                                    {social.name}
+                                </span>
+                            </motion.a>
+                        ))}
+                    </div>
+                </div>
 
-                            {/* Content */}
-                            {social.customContent ? (
-                                social.customContent
-                            ) : (
-                                <>
-                                    <div className="mb-auto">
-                                        {social.customIcon || social.icon}
-                                    </div>
-                                    <div className="z-10 mt-auto">
-                                        {social.badge && (
-                                            <span className={`inline-block px-3 py-1.5 rounded-lg text-xs font-bold ${social.textColor === 'text-white' ? 'bg-white text-black' : 'bg-gray-100 text-gray-800'}`}>
-                                                {social.badge}
-                                            </span>
-                                        )}
-                                    </div>
-                                </>
-                            )}
-                        </motion.a>
-                    ))}
+                {/* Desktop: Orbit layout */}
+                <div className="hidden md:flex relative justify-center items-center h-[500px] w-full max-w-5xl mx-auto">
+                    {/* Decorative Orbit Rings */}
+                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                        <div className="w-[480px] h-[480px] border border-blue-50 rounded-full animate-[spin_60s_linear_infinite] opacity-50"></div>
+                        <div className="w-[320px] h-[320px] border border-blue-50/50 rounded-full animate-[spin_40s_linear_infinite_reverse] opacity-50"></div>
+                    </div>
+
+                    {/* Central Globe */}
+                    <motion.div
+                        initial={{ scale: 0, opacity: 0 }}
+                        whileInView={{ scale: 1, opacity: 1 }}
+                        transition={{ duration: 1, type: "spring", bounce: 0.4 }}
+                        className="relative z-20"
+                    >
+                        <div className="w-72 h-72 rounded-full bg-gradient-to-br from-[#0061FE] via-[#3B82F6] to-[#60A5FA] flex items-center justify-center shadow-[0_0_100px_rgba(0,97,254,0.4)] relative group cursor-pointer overflow-hidden border-8 border-white/20">
+                            <motion.div
+                                animate={{ opacity: [0.4, 0.6, 0.4], scale: [1, 1.1, 1] }}
+                                transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                                className="absolute inset-0 bg-[radial-gradient(circle_at_30%_30%,#fff_0%,transparent_70%)]"
+                            />
+                            <motion.div
+                                animate={{ rotate: 360 }}
+                                transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
+                                className="relative z-10 text-white drop-shadow-2xl"
+                            >
+                                <Globe size={100} strokeWidth={1} />
+                            </motion.div>
+                            <div className="absolute inset-0 bg-gradient-to-t from-transparent via-white/10 to-transparent h-1/2 w-full animate-[scan_3s_linear_infinite]"></div>
+                        </div>
+                    </motion.div>
+
+                    {/* Orbiting Social Badges */}
+                    {socials.map((social, idx) => {
+                        const angle = (idx * (360 / socials.length)) * (Math.PI / 180);
+                        const radiusX = 280;
+                        const radiusY = 220;
+                        return (
+                            <motion.a
+                                key={idx}
+                                href={social.link}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                initial={{ opacity: 0 }}
+                                whileInView={{
+                                    opacity: 1,
+                                    x: Math.cos(angle) * radiusX,
+                                    y: Math.sin(angle) * radiusY
+                                }}
+                                whileHover={{ scale: 1.05, zIndex: 30 }}
+                                transition={{ delay: 0.05 * idx, duration: 1, type: "spring" }}
+                                className="absolute z-10 pl-2 pr-6 py-2 rounded-full bg-white border-2 border-gray-100 shadow-[0_10px_25px_rgba(0,0,0,0.04)] flex items-center gap-4 group hover:border-[#0061FE] hover:shadow-[0_20px_40px_rgba(0,97,254,0.12)] transition-all duration-500"
+                            >
+                                <div className={`${social.color} w-10 h-10 rounded-full flex items-center justify-center text-white shadow-sm transition-transform duration-500 group-hover:rotate-[360deg]`}>
+                                    {React.cloneElement(social.icon, { size: 18 })}
+                                </div>
+                                <span className="text-[11px] font-black text-gray-800 uppercase tracking-[0.1em]">
+                                    {social.name}
+                                </span>
+                            </motion.a>
+                        );
+                    })}
                 </div>
             </div>
         </section>
@@ -529,57 +535,17 @@ const SocialMediaSection = () => {
 
 // --- Notice Section (Call for Speakers/Sponsors) ---
 // --- Notice Section (Call for Speakers/Sponsors) ---
-const NoticeSection = () => {
-    return (
-        <section className="py-4 bg-[#FFF8DC] relative overflow-hidden text-left">
-            <div className="container mx-auto px-6 relative z-10">
-                <div className="grid grid-cols-1 md:grid-cols-[auto_1fr] gap-4 md:gap-8 items-center max-w-4xl mx-auto">
-                    {/* Title (Left Side on Desktop) */}
-                    <div className="flex items-center gap-2 shrink-0">
-                        <h2 className="text-xl md:text-2xl font-black text-black tracking-tight leading-none">LATEST</h2>
-                        <h2 className="text-xl md:text-2xl font-script text-[#2563ea] font-bold italic leading-none pt-1">updates</h2>
-                        <div className="h-px bg-gray-200 w-12 self-center mt-1 md:hidden"></div>
-                    </div>
 
-                    {/* Images Grid */}
-                    <div className="grid grid-cols-2 gap-3 w-full">
-                        {/* Call for Speakers */}
-                        <div className="relative group bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300">
-                            <img
-                                src="https://res.cloudinary.com/dqudvximt/image/upload/v1767877162/users_cme79i2lk00qls401ar5qxqnc_N0bIjmMP0Ybxoznz-1753684368888_jda3us.jpg"
-                                alt="Call for Speakers"
-                                className="w-full h-auto object-cover"
-                            />
-                        </div>
-
-                        {/* Sponsors & Venue */}
-                        <div className="relative group bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300">
-                            <img
-                                src="https://res.cloudinary.com/dqudvximt/image/upload/v1767877178/users_cme79i2lk00qls401ar5qxqnc_KB4hFvAzhyqJF0xf-3a61cb74-01c9-4880-be04-a4036f32c4f9_t64kt9.jpg"
-                                alt="Call for Sponsors and Venue"
-                                className="w-full h-auto object-cover"
-                            />
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-    );
-};
 
 // --- Main Hero Component ---
 const CodeSapiensHero = () => {
     const navigate = useNavigate();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
-    const [hallOfFameEntries, setHallOfFameEntries] = useState([]);
     const [communityPhotos, setCommunityPhotos] = useState([]);
 
     // Data Fetching
     useEffect(() => {
         const fetchData = async () => {
-            const { data: hof } = await supabase.from('hall_of_fame').select('*').eq('is_active', true).order('created_at', { ascending: false });
-            if (hof) setHallOfFameEntries(hof);
-
             const { data: photos } = await supabase.from('community_photos').select('*').eq('is_active', true).order('order_number', { ascending: true });
             if (photos) setCommunityPhotos(photos);
         };
@@ -613,26 +579,38 @@ const CodeSapiensHero = () => {
     return (
         <div className="bg-[#F7F5F2] text-[#1E1919] min-h-screen font-sans overflow-x-hidden selection:bg-[#0061FE] selection:text-white">
             {/* Navigation - Dark Mode for Hero */}
-            <nav className="fixed top-0 w-full z-50 bg-[#101010]/90 backdrop-blur-md text-white border-b border-white/10">
-                <div className="container mx-auto px-6 py-6 flex justify-between items-center">
-                    <div className="flex items-center gap-2">
-                        <img src="https://res.cloudinary.com/dqudvximt/image/upload/v1756797708/WhatsApp_Image_2025-09-02_at_12.45.18_b15791ea_rnlwrz.jpg" alt="CodeSapiens Logo" className="w-10 h-10 rounded-full object-cover" />
-                        <span className="text-xl font-bold tracking-tight">CodeSapiens</span>
-                    </div>
-                    <div className="hidden md:flex items-center gap-8 font-medium text-golden-1">
+            <nav className="fixed top-0 w-full z-50 bg-[#101010]/90 backdrop-blur-md text-white border-b border-white/10 font-['Inter']">
+                <div className="container mx-auto px-6 py-5 flex justify-between items-center relative">
+
+                    {/* Desktop Left Links */}
+                    <div className="hidden md:flex flex-1 items-center justify-end gap-10 lg:gap-14 font-medium text-golden-1 pr-14">
                         <a href="#vision" className="hover:text-[#0061FE] transition-colors">Vision</a>
                         <a href="/programs" className="hover:text-[#0061FE] transition-colors">Programs</a>
                         <a href="/meetups" className="hover:text-[#0061FE] transition-colors">Meetups</a>
+                    </div>
+
+                    {/* Centered Logo - Contained inside the nav block now instead of protruding entirely */}
+                    <div className="flex-shrink-0 flex items-center justify-center relative z-[60]">
+                        <img
+                            src="https://res.cloudinary.com/dqudvximt/image/upload/v1756797708/WhatsApp_Image_2025-09-02_at_12.45.18_b15791ea_rnlwrz.jpg"
+                            alt="CodeSapiens Logo"
+                            className="w-12 h-12 md:w-14 md:h-14 lg:w-14 lg:h-14 rounded-full object-cover border border-white/20 shadow-lg hover:scale-105 transition-transform duration-300"
+                        />
+                    </div>
+
+                    {/* Desktop Right Links */}
+                    <div className="hidden md:flex flex-1 items-center justify-start gap-10 lg:gap-14 font-medium text-golden-1 pl-14">
                         <a href="#events" className="hover:text-[#0061FE] transition-colors">Events</a>
                         <a href="#community" className="hover:text-[#0061FE] transition-colors">Community</a>
                         <button onClick={() => navigate('/auth')} className="hover:text-[#0061FE]">Log in</button>
-                        <button onClick={() => navigate('/auth')} className="bg-white text-black px-5 py-2.5 rounded-sm hover:bg-gray-200 transition-colors font-bold">
-                            Get Started
+                    </div>
+
+                    {/* Mobile Menu Button - positioned absolutely on mobile to keep logo centered natively */}
+                    <div className="md:hidden absolute right-6 z-[60]">
+                        <button className="text-white bg-white/5 p-2 rounded-lg" onClick={() => setIsMenuOpen(!isMenuOpen)}>
+                            {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
                         </button>
                     </div>
-                    <button className="md:hidden text-white" onClick={() => setIsMenuOpen(!isMenuOpen)}>
-                        {isMenuOpen ? <X /> : <Menu />}
-                    </button>
                 </div>
             </nav>
 
@@ -662,83 +640,118 @@ const CodeSapiensHero = () => {
                     className="absolute inset-0 md:right-0 md:left-auto md:w-1/2 h-full pointer-events-none z-0 flex items-center justify-center md:justify-end"
                     style={{ scale: shapeScale, y: shapeY, opacity: shapeOpacity }}
                 >
-                    <svg viewBox="0 0 800 800" className="w-full h-full md:w-full md:h-full opacity-40 md:opacity-60">
+                    <motion.svg
+                        viewBox="0 0 800 800"
+                        className="w-full h-full md:w-full md:h-full opacity-40 md:opacity-60"
+                        animate={{ y: [-20, 20, -20] }}
+                        transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+                    >
                         <motion.path
                             d="M400,200 L600,300 L400,400 L200,300 Z"
                             fill="none" stroke="#0061FE" strokeWidth="1.5"
                             initial={{ pathLength: 0, opacity: 0 }}
                             animate={{ pathLength: 1, opacity: 1 }}
-                            transition={{ duration: 2, ease: "easeInOut" }}
+                            transition={{ duration: 2, repeat: Infinity, repeatType: "reverse", ease: "easeInOut" }}
                         />
                         <motion.path
                             d="M400,400 L600,500 L400,600 L200,500 Z"
                             fill="none" stroke="#F7F5F2" strokeWidth="1.5"
-                            initial={{ pathLength: 0, opacity: 1 }}
+                            initial={{ pathLength: 0, opacity: 0 }}
                             animate={{ pathLength: 1, opacity: 1 }}
-                            transition={{ duration: 2, delay: 0.5, ease: "easeInOut" }}
+                            transition={{ duration: 2, delay: 0.5, repeat: Infinity, repeatType: "reverse", ease: "easeInOut" }}
                         />
                         <motion.path
                             d="M400,600 L600,700 L400,800 L200,700 Z"
                             fill="none" stroke="#9B0032" strokeWidth="1.5"
                             initial={{ pathLength: 0, opacity: 0 }}
                             animate={{ pathLength: 1, opacity: 1 }}
-                            transition={{ duration: 2, delay: 1, ease: "easeInOut" }}
+                            transition={{ duration: 2, delay: 1, repeat: Infinity, repeatType: "reverse", ease: "easeInOut" }}
                         />
-                        <motion.line x1="200" y1="300" x2="200" y2="700" stroke="#333" strokeWidth="1" initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 1.5, delay: 1 }} />
-                        <motion.line x1="600" y1="300" x2="600" y2="700" stroke="#333" strokeWidth="1" initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 1.5, delay: 1 }} />
-                        <motion.line x1="400" y1="400" x2="400" y2="600" stroke="#333" strokeWidth="1" initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 1.5, delay: 1 }} />
-                    </svg>
+                        <motion.line x1="200" y1="300" x2="200" y2="700" stroke="#333" strokeWidth="1" initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 1.5, delay: 1, repeat: Infinity, repeatType: "reverse", ease: "easeInOut" }} />
+                        <motion.line x1="600" y1="300" x2="600" y2="700" stroke="#333" strokeWidth="1" initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 1.5, delay: 1, repeat: Infinity, repeatType: "reverse", ease: "easeInOut" }} />
+                        <motion.line x1="400" y1="400" x2="400" y2="600" stroke="#333" strokeWidth="1" initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 1.5, delay: 1, repeat: Infinity, repeatType: "reverse", ease: "easeInOut" }} />
+                    </motion.svg>
                 </motion.div>
 
-                <div className="container mx-auto px-6 relative z-10 pt-20">
-                    <div className="grid lg:grid-cols-2 gap-12 items-center">
-                        <motion.div
-                            initial={{ opacity: 0, y: 30 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.8, delay: 0.2 }}
-                            className="max-w-4xl"
-                        >
-                            <h1 className="text-5xl md:text-7xl font-extrabold leading-[1] tracking-tighter mb-8 font-archivo-black">
-                                CodeSapiens<span className="text-[#0061FE]">.</span>
-                            </h1>
-                            <p className="text-golden-1 text-gray-400 max-w-2xl leading-relaxed mb-10 font-light">
-                                The Biggest Student-Run Tech Community in TN.<br />
-                                <span className="text-white block mt-2">The only 'Inter-college students community' by the students for the students</span>
-                                <span className="text-gray-400 block mt-4 text-golden-1 italic">
-                                    We are here to help students build a career in Tech who say, <br />
-                                    <span className="text-white not-italic">“Perusa Pannanum, but enna Pannanum Therla”</span> <br />
-                                    ("Want to do something big, but don't know what to do").
-                                </span>
-                            </p>
-                            <div className="flex flex-col sm:flex-row gap-6">
-                                <button onClick={() => navigate('/auth')} className="bg-[#0061FE] text-white px-8 py-4 text-golden-1 font-bold rounded-sm hover:bg-[#0050d6] transition-all flex items-center justify-center gap-3 group">
-                                    Join Now <ArrowRight className="group-hover:translate-x-1 transition-transform" />
-                                </button>
+                <div className="container mx-auto px-6 relative z-10 flex flex-col items-center justify-center min-h-[90vh] pt-10">
 
+                    {/* Top Badges (New unified pill style with animated counters) */}
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.6, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
+                        className="flex items-center justify-center mb-6 md:mb-8"
+                    >
+                        <div className="bg-[#1a1a1a]/80 backdrop-blur-md border border-white/10 rounded-full p-1.5 flex items-center gap-2 shadow-[0_0_20px_rgba(255,255,255,0.05)] cursor-default transition-transform hover:scale-105 duration-300">
+                            <div className="pl-3 pr-2 py-1.5 flex items-center gap-2 text-gray-300 font-['Inter'] font-medium text-sm">
+                                <Users size={14} className="text-[#0061FE]" />
+                                <AnimatedCounter from={0} to={2000} suffix="+" label="Members" />
                             </div>
+                            <div className="bg-[#0061FE]/20 text-[#0061FE] px-5 py-1.5 rounded-full font-['Inter'] font-semibold text-sm flex items-center gap-2">
+                                <Rocket size={14} />
+                                <AnimatedCounter from={0} to={15} suffix="+" label="Events" />
+                            </div>
+                        </div>
+                    </motion.div>
+
+                    {/* Main Content */}
+                    <div className="text-center max-w-5xl w-full mx-auto relative z-20">
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            transition={{ duration: 0.8, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
+                            className="relative inline-block"
+                        >
+                            <h1 className="text-[10vw] md:text-[8rem] lg:text-[140px] font-black leading-none tracking-normal md:tracking-tight mb-2 uppercase text-white drop-shadow-2xl" style={{ fontFamily: "'Viva Sans', Impact, sans-serif" }}>
+                                CODESAPIENS<span className="text-[#0061FE]">.</span>
+                            </h1>
                         </motion.div>
 
-                        {/* Right: Dashboard Preview Image */}
-                        <motion.div
-                            initial={{ opacity: 0, x: 50 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            transition={{ duration: 1, delay: 0.4 }}
-                            className="relative mt-12 lg:mt-0"
+                        <motion.p
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.8, delay: 0.4, ease: [0.22, 1, 0.36, 1] }}
+                            className="text-gray-300 text-lg md:text-2xl lg:text-3xl font-['Inter'] italic font-medium max-w-3xl mx-auto leading-relaxed mb-10 drop-shadow-md"
                         >
-                            <div className="relative rounded-xl overflow-hidden shadow-2xl border border-gray-800 group transition-transform duration-500">
-                                <div className="absolute inset-0 bg-gradient-to-tr from-[#0061FE]/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-10 pointer-events-none"></div>
-                                <img
-                                    src="https://res.cloudinary.com/dqudvximt/image/upload/v1771005975/Gemini_Generated_Image_il0qzjil0qzjil0q_1_cfh7ix.png"
-                                    alt="CodeSapiens Dashboard"
-                                    className="w-full h-auto object-cover"
-                                />
-                            </div>
-                            {/* Decorative Elements */}
-                            <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-[#0061FE] rounded-full blur-[80px] opacity-30"></div>
-                            <div className="absolute -top-10 -left-10 w-40 h-40 bg-[#9B0032] rounded-full blur-[80px] opacity-30"></div>
+                            Tamil Nadu's largest student-run tech community<br className="hidden md:block" /> built by students, for students.
+                        </motion.p>
 
-                            {/* Badge Text */}
-                            <p className="text-gray-400 text-golden-1 italic text-right mt-4">Designed and built by students, for students.</p>
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.8, delay: 0.5, ease: [0.22, 1, 0.36, 1] }}
+                            className="flex justify-center mt-4"
+                        >
+                            <button onClick={() => navigate('/auth')} className="bg-[#0061FE] text-white px-8 py-4 text-lg font-['Inter'] font-bold rounded-xl hover:bg-[#0050d6] transition-all duration-300 flex items-center justify-center gap-3 group shadow-[0_0_30px_rgba(0,97,254,0.3)] hover:shadow-[0_0_40px_rgba(0,97,254,0.5)] active:scale-95">
+                                Join now <ArrowRight className="group-hover:translate-x-1 transition-transform duration-300" />
+                            </button>
+                        </motion.div>
+                    </div>
+                </div>
+
+                {/* Infinite Scrolling Marquee */}
+                <div className="absolute bottom-0 left-0 w-full overflow-hidden bg-black/40 border-t border-white/5 py-4 backdrop-blur-sm z-20">
+                    <div className="flex whitespace-nowrap overflow-hidden items-center group">
+                        <motion.div
+                            className="flex items-center gap-6"
+                            animate={{ x: [0, -1000] }}
+                            transition={{
+                                repeat: Infinity,
+                                ease: "linear",
+                                duration: 20
+                            }}
+                        >
+                            {/* Duplicate the text to create a seamless loop */}
+                            {[...Array(20)].map((_, i) => (
+                                <div key={i} className="flex items-center gap-12 text-2xl md:text-3xl font-['Inter'] italic font-bold text-white/40 uppercase tracking-[0.2em] px-6">
+                                    <span className="hover:text-white transition-colors cursor-default">EXPLORE</span>
+                                    <Rocket size={20} className="text-[#0061FE]" />
+                                    <span className="hover:text-white transition-colors cursor-default">EVOLVE</span>
+                                    <Rocket size={20} className="text-[#0061FE]" />
+                                    <span className="hover:text-white transition-colors cursor-default">ENGINEER</span>
+                                    <Rocket size={20} className="text-[#0061FE]" />
+                                </div>
+                            ))}
                         </motion.div>
                     </div>
                 </div>
@@ -754,83 +767,131 @@ const CodeSapiensHero = () => {
 
 
             {/* Vision Section */}
-            <section id="vision" className="bg-[#F7F5F2] text-[#1E1919] py-12 md:py-16 relative">
-                <div className="absolute top-0 left-1/2 -translate-x-1/2 h-32 w-px bg-gradient-to-b from-[#101010] to-[#0061FE]"></div>
+            <section id="vision" className="bg-[#FAF9F6] py-16 md:py-24 relative overflow-hidden text-left">
                 <div className="container mx-auto px-6">
-                    <div className="grid md:grid-cols-2 gap-16 items-start">
-                        <div className="relative md:sticky md:top-32">
-                            <span className="text-[#0061FE] font-bold tracking-widest uppercase text-golden-1 mb-4 block">Our Vision</span>
-                            <h2 className="text-golden-2 md:text-golden-3 font-bold mb-8 leading-tight">
-                                <span className="text-[#FF5018]">Non-profit</span> community built by <span className="text-[#0061FE]">students</span>, for <span className="text-[#0061FE]">students</span>.
-                            </h2>
-                            <p className="text-golden-1 text-gray-600 leading-relaxed mb-8">
-                                Our vision is to bring students together to collaborate, share, and grow. We envision a platform managed by students, for students, where you can build your career based on your interests.
-                            </p>
-                            <div className="grid grid-cols-2 gap-8 border-t border-gray-200 pt-8">
-                                <div>
-                                    <h3 className="text-golden-3 font-bold text-[#FF0000] mb-2">2000+</h3>
-                                    <p className="text-golden-1 text-gray-500 uppercase tracking-widest">Active Members</p>
-                                </div>
-                                <div>
-                                    <h3 className="text-golden-3 font-bold text-[#FF0000] mb-2">15+</h3>
-                                    <p className="text-golden-1 text-gray-500 uppercase tracking-widest">Events Hosted</p>
-                                </div>
-                            </div>
-                        </div>
+                    <div className="max-w-6xl xl:max-w-[1200px] mx-auto bg-[#1C1C1C] rounded-[2rem] p-3 md:p-5 shadow-2xl flex flex-col md:flex-row gap-6 md:gap-10 items-stretch border border-black/10">
 
-                        <div className="relative h-72 sm:h-80 md:h-96 w-full rounded-lg overflow-hidden shadow-lg border border-gray-200 mt-8 md:mt-0">
+                        {/* Image Left */}
+                        <div className="w-full md:w-[45%] rounded-[1.5rem] overflow-hidden relative min-h-[350px] md:min-h-full">
                             <img
                                 src="https://res.cloudinary.com/dqudvximt/image/upload/v1767535873/1760365837828_vyrmco.jpg"
-
+                                alt="CodeSapiens Vision"
                                 className="absolute inset-0 w-full h-full object-cover"
                             />
+                            {/* Subtle dark gradient to tie in the dark aesthetic */}
+                            <div className="absolute inset-0 bg-gradient-to-t from-[#1C1C1C]/90 via-black/10 to-transparent"></div>
                         </div>
 
+                        {/* Content Right */}
+                        <div className="w-full md:w-[55%] py-4 md:py-8 pr-4 md:pr-10 flex flex-col justify-center">
+                            <h2 className="text-3xl md:text-5xl font-black mb-6 text-white tracking-tight font-['Inter']">
+                                Our Vision
+                            </h2>
+
+                            <div className="space-y-6 text-gray-400 font-['Inter'] text-base leading-relaxed">
+                                <p className="font-medium text-gray-200 text-lg leading-snug border-l-2 border-[#0061FE] pl-4">
+                                    The only 'Inter-college students community' by the students for the students.
+                                </p>
+
+                                <p className="text-[1.05rem]">
+                                    Our vision is to bring students together to collaborate, share, and grow. We envision a platform managed by students, for students, where you can build your career based on your interests.
+                                </p>
+
+                                <div className="bg-[#262626] p-5 md:p-6 rounded-2xl border border-white/5 relative">
+                                    <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-[#44A05D] rounded-l-2xl"></div>
+                                    <p className="text-gray-300 mb-2 font-medium">
+                                        We are here to help students build a career in Tech who say,
+                                    </p>
+                                    <p className="font-bold text-white text-lg md:text-xl mb-1 leading-tight">
+                                        “Perusa Pannanum, but enna Pannanum Therla”
+                                    </p>
+                                    <p className="text-sm text-gray-500 font-medium mt-2">
+                                        ("Want to do something big, but don't know what to do")
+                                    </p>
+                                </div>
+                            </div>
+
+                            <button onClick={() => navigate('/auth')} className="mt-8 self-start bg-[#4B9C58] hover:bg-[#3f8349] text-white px-8 py-3.5 text-sm md:text-base font-bold rounded-xl transition-all duration-300 flex items-center gap-2 transform active:scale-95 shadow-lg">
+                                Join the Community <ArrowRight size={18} />
+                            </button>
+                        </div>
 
                     </div>
                 </div>
             </section>
 
             {/* Events Section - Community Moments */}
-            <section id="events" className="py-24 md:py-32 bg-white text-[#1E1919]">
-                <div className="container mx-auto px-6">
-
+            <section id="events" className="py-24 md:py-32 bg-white text-[#1E1919] font-['Inter']">
+                <div className="container mx-auto px-6 max-w-7xl">
 
                     {/* Past Events Gallery */}
-                    <div className="flex items-center justify-between mb-12">
-                        <h3 className="text-golden-2 font-bold">Community Moments</h3>
+                    <div className="flex flex-col md:flex-row items-start md:items-center justify-between mx-auto max-w-6xl xl:max-w-[1200px] mb-12">
+                        <h3 className="text-3xl md:text-4xl font-black text-black tracking-tight mb-4 md:mb-0">Community Moments</h3>
                         <div className="flex gap-2">
-                            <button className="p-2 rounded-full border border-gray-700 hover:bg-white hover:text-black transition-colors"><ArrowRight className="rotate-180" /></button>
-                            <button className="p-2 rounded-full border border-gray-700 hover:bg-white hover:text-black transition-colors"><ArrowRight /></button>
+                            <button className="p-3 rounded-full border border-gray-300 hover:bg-black hover:text-white transition-colors"><ArrowRight className="rotate-180" size={20} /></button>
+                            <button className="p-3 rounded-full border border-gray-300 hover:bg-black hover:text-white transition-colors"><ArrowRight size={20} /></button>
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                        {communityPhotos.slice(0, 6).map((photo, i) => (
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4 md:auto-rows-[250px] max-w-6xl xl:max-w-[1200px] mx-auto">
+                        {[
+                            {
+                                id: 1,
+                                title: "November 2025 Meetup",
+                                image_url: "https://res.cloudinary.com/dhtyd2r5f/image/upload/v1767537704/community-photos/halloffame-1767537703902-874266878.jpg",
+                                className: "md:col-span-2 md:row-span-2"
+                            },
+                            {
+                                id: 2,
+                                title: "October 2025 Meetup",
+                                image_url: "https://res.cloudinary.com/dhtyd2r5f/image/upload/v1767537734/community-photos/halloffame-1767537734721-286693940.jpg",
+                                className: "md:col-span-1 md:row-span-1"
+                            },
+                            {
+                                id: 3,
+                                title: "September 2025 Meetup",
+                                image_url: "https://res.cloudinary.com/dhtyd2r5f/image/upload/v1767537671/community-photos/halloffame-1767537671015-511535149.jpg",
+                                className: "md:col-span-1 md:row-span-1"
+                            },
+                            {
+                                id: 4,
+                                title: "August 2025 Meetup",
+                                image_url: "https://res.cloudinary.com/dhtyd2r5f/image/upload/v1767537766/community-photos/halloffame-1767537766115-282602891.jpg",
+                                className: "md:col-span-2 md:row-span-1"
+                            },
+                            {
+                                id: 5,
+                                title: "May 2024 Meetup",
+                                image_url: "https://res.cloudinary.com/dhtyd2r5f/image/upload/v1767538223/community-photos/halloffame-1767538223035-53933069.jpg",
+                                className: "md:col-span-2 md:row-span-1"
+                            },
+                            {
+                                id: 6,
+                                title: "June 2024 Meetup",
+                                image_url: "https://res.cloudinary.com/dhtyd2r5f/image/upload/v1767538197/community-photos/halloffame-1767538197379-764134620.jpg",
+                                className: "md:col-span-2 md:row-span-1"
+                            }
+                        ].map((photo, i) => (
                             <motion.div
                                 key={photo.id}
                                 initial={{ opacity: 0, y: 20 }}
                                 whileInView={{ opacity: 1, y: 0 }}
-                                whileHover={{ y: -5 }}
+                                whileHover={{ scale: 0.98 }}
                                 viewport={{ once: true, margin: "-50px" }}
-                                transition={{ duration: 0.5, delay: i * 0.1 }}
-                                className="group relative overflow-hidden rounded-xl bg-[#2A2A2A] border border-gray-800"
+                                transition={{ duration: 0.4, delay: i * 0.1 }}
+                                className={`group relative overflow-hidden rounded-2xl bg-[#EFEFEF] ${photo.className} min-h-[250px] shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer`}
                             >
                                 {/* Photo */}
-                                <div className="aspect-[4/3] overflow-hidden">
-                                    <img
-                                        src={photo.image_url}
-                                        alt={photo.title}
-                                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                                    />
-                                    {/* Overlay */}
-                                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-60 group-hover:opacity-80 transition-opacity"></div>
-                                </div>
-
-                                {/* Content Overlay */}
-                                <div className="absolute bottom-0 left-0 w-full p-6">
-                                    <h4 className="text-white font-bold text-lg mb-1">{photo.title}</h4>
-                                    <p className="text-gray-300 text-sm">{photo.description || photo.date}</p>
+                                <img
+                                    src={photo.image_url}
+                                    alt={photo.title}
+                                    className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                                />
+                                {/* Content Overlay (Bottom Left Pill Badge) */}
+                                <div className="absolute bottom-5 left-5 transform translate-y-2 group-hover:translate-y-0 transition-transform duration-300">
+                                    <div className="bg-black/70 backdrop-blur-sm px-4 py-2 rounded-full border border-white/20 shadow-lg inline-block">
+                                        <h4 className="text-white font-bold text-sm md:text-base tracking-tight leading-none m-0">{photo.title}</h4>
+                                    </div>
                                 </div>
                             </motion.div>
                         ))}
@@ -847,76 +908,105 @@ const CodeSapiensHero = () => {
             <SponsorSection />
             <CommunityPartners />
             <SocialMediaSection />
-            <NoticeSection />
 
-            {/* Hall of Fame */}
-            <section className="py-32 bg-[#0061FE] text-white overflow-hidden relative">
-                <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(circle, #fff 1px, transparent 1px)', backgroundSize: '30px 30px' }}></div>
-                <div className="container mx-auto px-6 relative z-10">
-                    <div className="text-center mb-20">
-                        <h2 className="text-golden-2 md:text-golden-3 font-bold mb-6">Hall of Fame</h2>
-                        <p className="text-golden-1 text-white/80 max-w-3xl mx-auto">Celebrating the outstanding achievements of our community members.</p>
-                    </div>
 
-                    <div className="flex flex-wrap justify-center gap-10">
-                        {hallOfFameEntries.map((entry, i) => (
-                            <motion.div
-                                key={entry.id}
-                                initial={{ opacity: 0, y: 50 }}
-                                whileInView={{ opacity: 1, y: 0 }}
-                                transition={{ delay: i * 0.1 }}
-                                className="bg-white text-[#1E1919] p-1 rounded-sm shadow-xl w-full max-w-xs transform hover:-translate-y-2 transition-transform duration-300"
-                            >
-                                <div className="h-64 overflow-hidden bg-gray-200 mb-4">
-                                    <img src={entry.image_url} alt={entry.student_name} className="w-full h-full object-cover" />
-                                </div>
-                                <div className="px-6 pb-8 text-center">
-                                    <h3 className="text-golden-2 font-bold mb-2">{entry.student_name}</h3>
-                                    <div className="w-12 h-1 bg-[#0061FE] mx-auto mb-4"></div>
-                                    <p className="text-gray-600 text-golden-1 italic leading-relaxed">"{entry.description}"</p>
-                                </div>
-                            </motion.div>
-                        ))}
-                    </div>
-                </div>
-            </section>
 
             {/* Team / Mafia Gang */}
-            <section id="community" className="py-8 md:py-16 bg-[#F7F5F2] text-[#1E1919]">
-                <div className="container mx-auto px-6 text-center">
-                    <span className="text-[#0061FE] font-bold tracking-widest uppercase text-xs md:text-sm text-golden-1 mb-2 block">Community</span>
-                    <h2 className="text-2xl md:text-4xl text-golden-2 md:text-golden-3 font-bold mb-3">The Mafia Gang</h2>
-                    <p className="text-golden-1 text-gray-600 text-sm md:text-base max-w-2xl mx-auto mb-8">
-                        Meet the core members who run the community. We are students, just like you.
-                    </p>
+            <section id="community" className="py-24 bg-gradient-to-b from-[#101010] to-[#1E1E1E] text-white overflow-hidden relative font-['Inter']">
+                {/* Subtle Background Glows */}
+                <div className="absolute top-0 left-0 w-full h-full pointer-events-none opacity-20">
+                    <div className="absolute top-1/4 -left-20 w-[600px] h-[600px] bg-blue-600/30 blur-[120px] rounded-full"></div>
+                    <div className="absolute bottom-1/4 -right-20 w-[600px] h-[600px] bg-emerald-600/20 blur-[120px] rounded-full"></div>
+                </div>
 
-                    <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-y-6 gap-x-2 md:gap-x-4">
-                        {/* Founder */}
-                        <div className="col-span-2 md:col-span-1 flex flex-col items-center group">
-                            <div className="w-20 h-20 md:w-24 md:h-24 rounded-full overflow-hidden mb-3 border-4 border-[#FA5D00] shadow-lg group-hover:scale-105 transition-transform">
-                                <img src="https://res.cloudinary.com/druvxcll9/image/upload/v1761122517/1679197646322_n1svjq_s5w42a.jpg" alt="Thiyaga B" className="w-full h-full object-cover" />
+                <div className="container mx-auto px-6 relative z-10 max-w-7xl">
+                    <div className="text-center mb-16">
+
+
+                        <motion.h2
+                            initial={{ opacity: 0, y: 20 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ delay: 0.1 }}
+                            className="text-5xl md:text-7xl font-black mb-8 tracking-tighter"
+                        >
+                            Meet the <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#0061FE] to-[#00C6F7]">Mafia Gang</span>
+                        </motion.h2>
+
+                        <motion.p
+                            initial={{ opacity: 0 }}
+                            whileInView={{ opacity: 1 }}
+                            viewport={{ once: true }}
+                            transition={{ delay: 0.2 }}
+                            className="text-gray-400 text-lg md:text-xl max-w-3xl mx-auto font-medium"
+                        >
+                            A diverse group of passionate students building Tamil Nadu's biggest student community.
+                        </motion.p>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8">
+                        {/* Founder Card */}
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.9 }}
+                            whileInView={{ opacity: 1, scale: 1 }}
+                            viewport={{ once: true }}
+                            whileHover={{ y: -10 }}
+                            className="group relative h-[450px] rounded-[2.5rem] overflow-hidden bg-[#1a1a1a] border border-white/10 shadow-2xl transition-all duration-500"
+                        >
+                            <img
+                                src="https://res.cloudinary.com/druvxcll9/image/upload/v1761122517/1679197646322_n1svjq_s5w42a.jpg"
+                                alt="Thiyaga B"
+                                className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                            />
+                            <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent opacity-80 group-hover:opacity-90 transition-opacity"></div>
+
+                            <div className="absolute bottom-0 left-0 w-full p-8 flex flex-col items-start translate-y-2 group-hover:translate-y-0 transition-transform duration-500">
+                                <h3 className="text-2xl font-black mb-1 group-hover:text-blue-400 transition-colors">Thiyaga B</h3>
+                                <p className="text-emerald-400 text-[10px] font-black uppercase tracking-[0.2em] mb-4">Founder & CEO</p>
+
+                                <div className="flex gap-4 opacity-0 group-hover:opacity-100 transition-opacity duration-500 delay-100">
+                                    <a href="https://www.linkedin.com/in/thiyagab/" target="_blank" rel="noreferrer" className="w-9 h-9 rounded-xl bg-white/10 backdrop-blur-md flex items-center justify-center hover:bg-[#0061FE] hover:scale-110 transition-all">
+                                        <Linkedin size={18} />
+                                    </a>
+
+                                    <a href="#" className="w-9 h-9 rounded-xl bg-white/10 backdrop-blur-md flex items-center justify-center hover:bg-[#1DA1F2] hover:scale-110 transition-all">
+                                        <Twitter size={18} />
+                                    </a>
+                                </div>
                             </div>
-                            <h3 className="font-bold text-golden-2 mb-0.5 text-sm md:text-base">Thiyaga B</h3>
-                            <p className="text-[#FA5D00] text-golden-1 font-bold uppercase tracking-widest text-[10px] md:text-xs mb-1">Founder</p>
-                            <a href="https://www.linkedin.com/in/thiyagab/" target="_blank" rel="noreferrer" className="text-gray-400 hover:text-[#0061FE] transition-colors"><Linkedin size={14} /></a>
-                        </div>
+                        </motion.div>
+
+                        {/* Volunteers Cards */}
                         {volunteers.map((vol, i) => (
                             <motion.div
                                 key={i}
-                                initial={{ opacity: 0, scale: 0.8 }}
+                                initial={{ opacity: 0, scale: 0.9 }}
                                 whileInView={{ opacity: 1, scale: 1 }}
+                                viewport={{ once: true }}
                                 transition={{ delay: i * 0.05 }}
-                                className="flex flex-col items-center group"
+                                whileHover={{ y: -10 }}
+                                className="group relative h-[450px] rounded-[2.5rem] overflow-hidden bg-[#1a1a1a] border border-white/5 shadow-xl transition-all duration-500"
                             >
-                                <div className="w-16 h-16 md:w-20 md:h-20 rounded-full overflow-hidden mb-2 grayscale group-hover:grayscale-0 transition-all duration-500 border-2 border-transparent group-hover:border-[#0061FE] shadow-md">
-                                    <img src={vol.photo} alt={vol.name} className="w-full h-full object-cover" />
+                                <img
+                                    src={vol.photo}
+                                    alt={vol.name}
+                                    className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                                />
+                                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent opacity-70 group-hover:opacity-85 transition-opacity"></div>
+
+                                <div className="absolute bottom-0 left-0 w-full p-8 flex flex-col items-start translate-y-2 group-hover:translate-y-0 transition-transform duration-500">
+                                    <h3 className="text-xl font-bold mb-1 truncate w-full group-hover:text-blue-400 transition-colors">{vol.name}</h3>
+                                    <p className="text-gray-400 text-[9px] font-black uppercase tracking-[0.15em] mb-4">Core Member</p>
+
+                                    <div className="flex gap-4 opacity-0 group-hover:opacity-100 transition-opacity duration-500 delay-100">
+                                        {vol.link && (
+                                            <a href={vol.link} target="_blank" rel="noreferrer" className="w-8 h-8 rounded-lg bg-white/10 backdrop-blur-sm flex items-center justify-center hover:bg-[#0061FE] hover:scale-110 transition-all">
+                                                <Linkedin size={16} />
+                                            </a>
+                                        )}
+
+                                    </div>
                                 </div>
-                                <h3 className="font-bold text-golden-1 mb-0.5 text-xs md:text-sm">{vol.name}</h3>
-                                {vol.link && (
-                                    <a href={vol.link} target="_blank" rel="noreferrer" className="text-gray-400 hover:text-[#0061FE] transition-colors mt-1">
-                                        <Linkedin size={12} />
-                                    </a>
-                                )}
                             </motion.div>
                         ))}
                     </div>
@@ -924,7 +1014,7 @@ const CodeSapiensHero = () => {
             </section>
 
             {/* Tagline Section */}
-            <section className="py-20 bg-black flex items-center justify-center">
+            <section className="py-20 bg-black flex items-center justify-center font-['Inter']">
                 <div className="container mx-auto px-6 text-center">
                     <h2 className="text-golden-2 md:text-golden-3 font-black text-white tracking-tighter uppercase leading-none">
                         Building Community <br />
@@ -934,7 +1024,7 @@ const CodeSapiensHero = () => {
             </section>
 
             {/* Footer */}
-            <footer className="bg-[#101010] text-gray-400 py-16 border-t border-gray-900">
+            <footer className="bg-[#101010] text-gray-400 py-16 border-t border-gray-900 font-['Inter']">
                 <div className="container mx-auto px-6">
                     <div className="flex flex-col md:flex-row justify-between items-start gap-12">
                         <div className="max-w-sm">
