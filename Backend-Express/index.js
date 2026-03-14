@@ -295,7 +295,7 @@ let colleges = null;
 
 async function loadCSV() {
   try {
-    const url = "https://res.cloudinary.com/dqudvximt/raw/upload/v1759602659/database_maro0f.csv";
+    const url = "https://res.cloudinary.com/dqudvximt/raw/upload/v1773475106/database_1_alap2y_ihgsxm.csv";
     const response = await fetch(url);
 
     if (!response.ok) {
