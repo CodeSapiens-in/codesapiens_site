@@ -162,7 +162,20 @@ const verifyAuth = async (req, res, next) => {
   }
 };
 
+const verifyClientSource = (req, res, next) => {
+  // 1. Allow preflight requests to pass
+  if (req.method === 'OPTIONS') return next();
 
+  // 2. Allow public health checks
+  if (req.path === '/' || req.path === '/health') return next();
+
+  const clientSource = req.headers['x-client-source'];
+  if (clientSource !== 'codesapiens-web') {
+    console.warn(`[Security] Blocked request from invalid source: ${clientSource}`);
+    return res.status(403).json({ success: false, error: 'Unauthorized Client Source' });
+  }
+  next();
+};
 
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
