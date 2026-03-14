@@ -104,7 +104,8 @@ const allowedOrigins = [
   "http://localhost:3000",
   "https://codesapiens-site.vercel.app",
   "https://www.codesapiens.in",
-  "https://colleges-name-api.vercel.app"
+  "https://colleges-name-api.vercel.app",
+  "https://codesapiens-site-api.vercel.app"
 ];
 
 app.use(cors({
