@@ -6,13 +6,15 @@ import {
   useSessionContext,
   useUser,
 } from '@supabase/auth-helpers-react';
-import { supabase } from './lib/supabaseClient';
+import { supabase, isSupabaseConfigured } from './lib/supabaseClient';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Loader2 } from 'lucide-react';
 import PageTransition from './components/PageTransition';
 import AdminLayout from './components/AdminLayout';
 import { Toaster } from 'react-hot-toast';
+import { LoadingProvider } from './context/LoadingContext';
+
 
 
 
@@ -134,10 +136,28 @@ const AnimatedRoutes = () => {
     </AnimatePresence>
   );
 };
+// Used when Supabase is NOT configured — shows landing page and public routes only
+function RootNoAuth() {
+  return (
+    <div className="flex flex-col min-h-screen">
+      <Routes>
+        <Route path="/" element={<CodeSapiensHero />} />
+        <Route path="/auth" element={<AuthForm />} />
+        <Route path="/meetups" element={<UserMeetupsList />} />
+        <Route path="/programs" element={<UserProgramsList />} />
+        <Route path="/programs/:id" element={<UserFormView />} />
+        <Route path="/profile/:username" element={<PublicProfile />} />
+        <Route path="/meetup/:id" element={<PublicMeetupPage />} />
+        <Route path="*" element={<NotFoundPage />} />
+      </Routes>
+    </div>
+  );
+}
+
+// Used when Supabase IS configured — full auth-aware routing
 function Root() {
   const session = useSession();
   const { isLoading } = useSessionContext();
-
 
   if (isLoading) {
     return (
@@ -186,10 +206,11 @@ function Root() {
   );
 }
 
-import { LoadingProvider, useAppLoading } from "./context/LoadingContext";
-
 // Root Component wrapped in LoadingProvider context consumer
 const RootWithLoading = () => {
+  if (!isSupabaseConfigured) {
+    return <RootNoAuth />;
+  }
   return (
     <AnimatePresence mode="wait">
       <Root />
@@ -198,6 +219,17 @@ const RootWithLoading = () => {
 };
 
 export default function App() {
+  if (!isSupabaseConfigured) {
+    return (
+      <LoadingProvider>
+        <Router>
+          <RootWithLoading />
+          <Toaster position="top-center" />
+        </Router>
+      </LoadingProvider>
+    );
+  }
+
   return (
     <SessionContextProvider supabaseClient={supabase}>
       <LoadingProvider>

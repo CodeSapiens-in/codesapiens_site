@@ -185,7 +185,6 @@ export default function UserDashboard() {
             points: profile.points || 1250,
             college: profile.college, // Keep raw value
             department: profile.department,
-            department: profile.department,
             year: profile.year,
             uid: profile.uid, // Add uid to userData for FeedbackPopup
             last_feedback_at: profile.last_feedback_at
