@@ -32,6 +32,18 @@ export default function AdminMeetupEdit() {
     registration_open_until_meetup_end: false,
   });
 
+  // Helper: Convert UTC ISO string to local datetime-local format
+  const convertUTCToLocalDateTime = (utcDateString) => {
+    if (!utcDateString) return "";
+    const date = new Date(utcDateString);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    return `${year}-${month}-${day}T${hours}:${minutes}`;
+  };
+
   // ---------- Load meetup ----------
   useEffect(() => {
     const fetch = async () => {
@@ -45,15 +57,15 @@ export default function AdminMeetupEdit() {
         toast.error("Meetup not found");
         navigate("/admin/meetups");
       } else {
-        // Slice(0,16) trims seconds/timezone for datetime-local input compatibility
+        // Convert UTC ISO dates to local datetime-local format
         setForm({
           title: data.title,
           description: data.description || "",
           venue: data.venue || "",
-          start_date_time: data.start_date_time ? data.start_date_time.slice(0, 16) : "",
-          end_date_time: data.end_date_time ? data.end_date_time.slice(0, 16) : "",
-          registration_start_time: data.registration_start_time ? data.registration_start_time.slice(0, 16) : "",
-          registration_end_time: data.registration_end_time ? data.registration_end_time.slice(0, 16) : "",
+          start_date_time: convertUTCToLocalDateTime(data.start_date_time),
+          end_date_time: convertUTCToLocalDateTime(data.end_date_time),
+          registration_start_time: convertUTCToLocalDateTime(data.registration_start_time),
+          registration_end_time: convertUTCToLocalDateTime(data.registration_end_time),
           registration_open_until_meetup_end: data.registration_open_until_meetup_end || false,
         });
       }
@@ -84,16 +96,32 @@ export default function AdminMeetupEdit() {
 
     setSaving(true);
     try {
+      // Helper: Convert local datetime-local to UTC ISO format
+      // The datetime-local input returns time in user's local timezone
+      // We need to convert it to UTC ISO format for storage
+      const convertLocalDateTimeToUTC = (localDateTimeStr) => {
+        if (!localDateTimeStr) return null;
+        // datetime-local format: "YYYY-MM-DDTHH:mm"
+        const parts = localDateTimeStr.split('T');
+        const [year, month, day] = parts[0].split('-').map(Number);
+        const [hours, minutes] = parts[1].split(':').map(Number);
+        
+        // Create date in local timezone
+        const localDate = new Date(year, month - 1, day, hours, minutes, 0, 0);
+        // Convert to UTC ISO string
+        return localDate.toISOString();
+      };
+
       const { error } = await supabase
         .from("meetup")
         .update({
           title: form.title.trim(),
           description: form.description.trim() || null,
           venue: form.venue.trim(),
-          start_date_time: form.start_date_time,
-          end_date_time: form.end_date_time,
-          registration_start_time: form.registration_start_time || null,
-          registration_end_time: form.registration_open_until_meetup_end ? null : (form.registration_end_time || null),
+          start_date_time: convertLocalDateTimeToUTC(form.start_date_time),
+          end_date_time: convertLocalDateTimeToUTC(form.end_date_time),
+          registration_start_time: convertLocalDateTimeToUTC(form.registration_start_time),
+          registration_end_time: form.registration_open_until_meetup_end ? null : convertLocalDateTimeToUTC(form.registration_end_time),
           registration_open_until_meetup_end: form.registration_open_until_meetup_end,
           updated_at: new Date().toISOString(),
         })
