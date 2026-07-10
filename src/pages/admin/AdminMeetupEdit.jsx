@@ -84,16 +84,24 @@ export default function AdminMeetupEdit() {
 
     setSaving(true);
     try {
+      // Convert datetime-local format to ISO format with timezone
+      const formatDateTimeToISO = (dateTimeStr) => {
+        if (!dateTimeStr) return null;
+        // datetime-local is in format "YYYY-MM-DDTHH:mm"
+        // Convert to ISO string by adding Z for UTC
+        return new Date(dateTimeStr).toISOString();
+      };
+
       const { error } = await supabase
         .from("meetup")
         .update({
           title: form.title.trim(),
           description: form.description.trim() || null,
           venue: form.venue.trim(),
-          start_date_time: form.start_date_time,
-          end_date_time: form.end_date_time,
-          registration_start_time: form.registration_start_time || null,
-          registration_end_time: form.registration_open_until_meetup_end ? null : (form.registration_end_time || null),
+          start_date_time: formatDateTimeToISO(form.start_date_time),
+          end_date_time: formatDateTimeToISO(form.end_date_time),
+          registration_start_time: formatDateTimeToISO(form.registration_start_time),
+          registration_end_time: form.registration_open_until_meetup_end ? null : formatDateTimeToISO(form.registration_end_time),
           registration_open_until_meetup_end: form.registration_open_until_meetup_end,
           updated_at: new Date().toISOString(),
         })
