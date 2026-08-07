@@ -2,26 +2,37 @@
 @import url('https://fonts.googleapis.com/css2?family=Archivo+Black&display=swap');
 @import "tailwindcss";
 
-/* THEME CONFIGURATION
-   Tailwind v4 detects these variables and automatically creates 
-   utility classes like 'text-golden-1', 'text-golden-2', etc.
-*/
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+   SPACE THEME TOKENS
+   Matches: ResumeAnalyzer, DashboardBlogSection,
+            PageTransition, LumaEmbed, App.jsx
+   â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+
 @theme {
-    /* Golden Ratio Scale (Base: 1rem) */
-    --text-golden-1: 1rem;
-    /* Body Text (approx 16px) */
-    --text-golden-2: 1.618rem;
-    /* Subheadings (approx 26px) */
-    --text-golden-3: 2.618rem;
-    /* Main Headings (approx 42px) */
+    /* Golden Ratio Scale (Base: 1rem) â€” unchanged */
+    --text-golden-1: 1rem;       /* Body Text     ~16px */
+    --text-golden-2: 1.618rem;   /* Subheadings   ~26px */
+    --text-golden-3: 2.618rem;   /* Main Headings ~42px */
 }
 
 :root {
-    --brand-blue: #0061FE;
-    --brand-dark: #1E1919;
-    --brand-cream: #F7F5F2;
-    --brand-orange: #9B0032;
-    --brand-yellow: #FA5D00;
+    /* â”€â”€ Space palette â”€â”€ */
+    --space-void:      #03040A;   /* page background    */
+    --space-card:      #080B14;   /* card background    */
+    --space-border:    #1A2240;   /* nebula rim         */
+    --space-primary:   #4F8EF7;   /* starlight blue     */
+    --space-accent:    #9B6DFF;   /* nebula violet      */
+    --space-teal:      #0FE8B4;   /* pulsar teal        */
+    --space-text:      #C8D6F0;   /* moonlit silver     */
+    --space-muted:     #4A5F80;   /* dim starlight      */
+    --space-deep:      #2A3D60;   /* deep nebula        */
+
+    /* â”€â”€ Legacy brand vars (kept for backwards compat) â”€â”€ */
+    --brand-blue:      #4F8EF7;   /* remapped â†’ space-primary */
+    --brand-dark:      #080B14;   /* remapped â†’ space-card    */
+    --brand-cream:     #03040A;   /* remapped â†’ space-void    */
+    --brand-orange:    #9B6DFF;   /* remapped â†’ space-accent  */
+    --brand-yellow:    #0FE8B4;   /* remapped â†’ space-teal    */
 }
 
 @layer base {
@@ -37,6 +48,12 @@
             "wdth" 100,
             "GRAD" 0,
             "ROND" 0;
+
+        /* â”€â”€ Space base styles â”€â”€ */
+        background-color: var(--space-void);
+        color: var(--space-text);
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
     }
 
     a,
@@ -48,74 +65,117 @@
         cursor: url('/hover-cursor.png'), pointer !important;
     }
 
-    /* HEADINGS: Applying the new Golden Ratio sizes */
+    /* â”€â”€ Headings: Golden Ratio scale, space colors â”€â”€ */
     h1 {
         @apply text-golden-3 font-bold mb-4 leading-tight;
+        color: #ffffff;
     }
 
     h2 {
-        /* Scales from golden-2 on mobile to golden-3 on desktop */
         @apply text-golden-2 md:text-golden-3 font-bold mb-3 leading-tight;
+        color: #ffffff;
     }
 
     h3 {
         @apply text-golden-2 font-bold mb-3 leading-snug;
+        color: var(--space-text);
     }
 
     h4 {
         @apply text-golden-1 md:text-golden-2 font-bold mb-2;
+        color: var(--space-text);
     }
 
     h5,
     h6 {
         @apply text-golden-1 font-bold mb-2;
+        color: var(--space-muted);
     }
 
+    /* â”€â”€ Inputs & textareas: space style â”€â”€ */
+    input,
+    textarea,
+    select {
+        background-color: #04060F;
+        border-color: var(--space-border);
+        color: var(--space-text);
+    }
 
+    input::placeholder,
+    textarea::placeholder {
+        color: var(--space-deep);
+    }
+
+    /* â”€â”€ Selection highlight â”€â”€ */
+    ::selection {
+        background-color: rgba(79, 142, 247, 0.25);
+        color: #ffffff;
+    }
 }
 
 @layer utilities {
-    .bg-brand-blue {
-        background-color: var(--brand-blue);
+
+    /* â”€â”€ Space palette utilities â”€â”€ */
+    .bg-space-void    { background-color: var(--space-void); }
+    .bg-space-card    { background-color: var(--space-card); }
+    .bg-space-border  { background-color: var(--space-border); }
+    .text-space-primary { color: var(--space-primary); }
+    .text-space-accent  { color: var(--space-accent); }
+    .text-space-teal    { color: var(--space-teal); }
+    .text-space-text    { color: var(--space-text); }
+    .text-space-muted   { color: var(--space-muted); }
+    .border-space       { border-color: var(--space-border); }
+
+    /* â”€â”€ Legacy brand utilities (remapped) â”€â”€ */
+    .bg-brand-blue   { background-color: var(--space-primary); }
+    .text-brand-blue { color: var(--space-primary); }
+    .bg-brand-dark   { background-color: var(--space-card); }
+    .text-brand-dark { color: var(--space-text); }
+    .bg-brand-cream  { background-color: var(--space-void); }
+    .text-brand-cream { color: var(--space-text); }
+
+    /* â”€â”€ Nebula shimmer line â”€â”€ */
+    .shimmer-line {
+        background: linear-gradient(
+            90deg,
+            transparent,
+            rgba(79, 142, 247, 0.4),
+            transparent
+        );
+        height: 1px;
     }
 
-    .text-brand-blue {
-        color: var(--brand-blue);
+    /* â”€â”€ Space card glass â”€â”€ */
+    .space-card {
+        background-color: rgba(8, 11, 20, 0.8);
+        backdrop-filter: blur(16px);
+        border: 1px solid var(--space-border);
+        border-radius: 1rem;
+        box-shadow: 0 4px 32px rgba(79, 142, 247, 0.06);
     }
 
-    .bg-brand-dark {
-        background-color: var(--brand-dark);
-    }
+    /* â”€â”€ Glow utilities â”€â”€ */
+    .glow-blue   { box-shadow: 0 0 20px rgba(79, 142, 247, 0.25); }
+    .glow-violet { box-shadow: 0 0 20px rgba(155, 109, 255, 0.25); }
+    .glow-teal   { box-shadow: 0 0 20px rgba(15, 232, 180, 0.25); }
 
-    .text-brand-dark {
-        color: var(--brand-dark);
-    }
-
-    .bg-brand-cream {
-        background-color: var(--brand-cream);
-    }
-
-    .text-brand-cream {
-        color: var(--brand-cream);
-    }
-
-    /* Custom Scrollbar */
+    /* â”€â”€ Scrollbar: space style â”€â”€ */
     ::-webkit-scrollbar {
-        width: 8px;
-        height: 8px;
+        width: 6px;
+        height: 6px;
     }
 
     ::-webkit-scrollbar-track {
-        background: var(--brand-cream);
+        background: var(--space-void);
     }
 
     ::-webkit-scrollbar-thumb {
-        background: #cbd5e1;
+        background: var(--space-border);
         border-radius: 4px;
     }
 
     ::-webkit-scrollbar-thumb:hover {
-        background: #94a3b8;
+        background: var(--space-muted);
     }
 
     .hide-scrollbar::-webkit-scrollbar {

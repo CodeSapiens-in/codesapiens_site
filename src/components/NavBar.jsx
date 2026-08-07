@@ -278,14 +278,14 @@ export default function NavBar() {
         <img
           src={userData.avatar}
           alt={userData.displayName}
-          className={`${size} rounded-full object-cover border border-zinc-200`}
+          className={`${size} rounded-full object-cover border-2 border-[#00C6F7]/40 shadow-[0_0_10px_rgba(0,198,247,0.2)]`}
         />
       );
     }
 
     const gradientClass = isAdmin
-      ? 'bg-gradient-to-br from-red-500 to-orange-600'
-      : 'bg-zinc-900';
+      ? 'bg-gradient-to-br from-[#A855F7] to-[#00C6F7]'
+      : 'bg-gradient-to-br from-[#00C6F7] to-[#0D0D2B]';
 
     return (
       <div className={`${size} ${gradientClass} rounded-full flex items-center justify-center shadow-sm`}>
@@ -308,24 +308,24 @@ export default function NavBar() {
 
     return (
       <div>
-        <div className="font-medium text-zinc-900">
+        <div className="font-medium text-white">
           {userData?.displayName || 'Loading...'}
         </div>
         {showEmail && (
-          <div className="text-sm text-zinc-500 flex items-center space-x-1">
+          <div className="text-sm text-gray-400 flex items-center space-x-1">
             {isAdmin ? (
               <>
-                <Shield className="w-3 h-3 text-red-500" />
+                <Shield className="w-3 h-3 text-[#A855F7]" />
                 <span>Admin • {userData?.email || ''}</span>
               </>
             ) : (
               <>
                 <span>{userData?.email || ''}</span>
                 {userData?.emailVerified && (
-                  <span className="text-green-600">✓</span>
+                  <span className="text-[#00C6F7]">✓</span>
                 )}
                 {!userData?.emailVerified && (
-                  <span className="text-yellow-600">⚠</span>
+                  <span className="text-yellow-500">⚠</span>
                 )}
               </>
             )}
@@ -345,7 +345,7 @@ export default function NavBar() {
             className="w-full h-full object-cover"
           />
         </div>
-        <span className="text-lg sm:text-xl font-light tracking-wider text-zinc-900 group-hover:text-zinc-700 transition-colors">
+        <span className="text-lg sm:text-xl font-light tracking-wider text-white group-hover:text-[#00C6F7] transition-colors">
           {isAdmin ? 'CodeSapiens Admin' : 'CodeSapiens'}
         </span>
       </div>
@@ -353,9 +353,9 @@ export default function NavBar() {
   };
 
   const renderDesktopNavigation = () => {
-    const hoverColor = isAdmin ? 'hover:text-red-600' : 'hover:text-zinc-900';
-    const activeClass = "text-zinc-900 bg-zinc-100";
-    const baseClass = "text-zinc-500 px-3 py-2 rounded-md font-light tracking-wide transition-all duration-300 hover:bg-zinc-50 flex items-center space-x-2";
+    const hoverColor = isAdmin ? 'hover:text-[#A855F7]' : 'hover:text-[#00C6F7]';
+    const activeClass = "text-[#00C6F7] bg-[#00C6F7]/10";
+    const baseClass = "text-gray-400 px-3 py-2 rounded-md font-light tracking-wide transition-all duration-300 hover:bg-[#0D0D2B] hover:border-[#00C6F7]/30 border border-transparent flex items-center space-x-2";
 
     if (isAdmin) {
       return (
@@ -404,14 +404,14 @@ export default function NavBar() {
           exit={{ opacity: 0, scale: 0.95, y: -10 }}
           transition={{ duration: 0.2 }}
           ref={profileDropdownRef}
-          className="bg-white/90 backdrop-blur-xl rounded-xl shadow-2xl border border-zinc-200/50 py-2"
+          className="bg-[#0A0A0F]/98 backdrop-blur-xl rounded-xl shadow-[0_8px_40px_rgba(0,198,247,0.15)] border border-[#00C6F7]/20 py-2"
           style={{
             position: 'fixed',
             zIndex: 9999,
             WebkitOverflowScrolling: 'touch'
           }}
         >
-          <div className="px-4 py-3 border-b border-zinc-100">
+          <div className="px-4 py-3 border-b border-[#00C6F7]/10">
             <div className="flex items-center space-x-3">
               {renderUserAvatar('w-12 h-12', 'text-lg')}
               <div className="min-w-0 flex-1">
@@ -427,73 +427,73 @@ export default function NavBar() {
           <div className="py-2">
             {isAdmin ? (
               <>
-                <button onClick={() => { setIsProfileDropdownOpen(false); navigate('/analytics'); }} className="w-full text-left flex items-center px-4 py-2 text-sm text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900 transition-colors">
+                <button onClick={() => { setIsProfileDropdownOpen(false); navigate('/analytics'); }} className="w-full text-left flex items-center px-4 py-2 text-sm text-gray-400 hover:bg-[#0D0D2B] hover:text-[#00C6F7] transition-colors">
                   <TextSearch className="w-4 h-4 mr-3 flex-shrink-0" />
                   <span>View Analytics</span>
                 </button>
-                <button onClick={() => { setIsProfileDropdownOpen(false); navigate('/mentorship-form'); }} className="w-full text-left flex items-center px-4 py-2 text-sm text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900 transition-colors">
+                <button onClick={() => { setIsProfileDropdownOpen(false); navigate('/mentorship-form'); }} className="w-full text-left flex items-center px-4 py-2 text-sm text-gray-400 hover:bg-[#0D0D2B] hover:text-[#00C6F7] transition-colors">
                   <BrainCircuit className="w-4 h-4 mr-3 flex-shrink-0" />
                   <span>Mentorship Form Submission</span>
                 </button>
-                <button onClick={() => { setIsProfileDropdownOpen(false); navigate('/admin/meetups'); }} className="w-full text-left flex items-center px-4 py-2 text-sm text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900 transition-colors">
+                <button onClick={() => { setIsProfileDropdownOpen(false); navigate('/admin/meetups'); }} className="w-full text-left flex items-center px-4 py-2 text-sm text-gray-400 hover:bg-[#0D0D2B] hover:text-[#00C6F7] transition-colors">
                   <CalendarSearch className="w-4 h-4 mr-3 flex-shrink-0" />
                   <span>Meetups</span>
                 </button>
-                <button onClick={() => { setIsProfileDropdownOpen(false); navigate('/admin/mentorship-programs'); }} className="w-full text-left flex items-center px-4 py-2 text-sm text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900 transition-colors">
+                <button onClick={() => { setIsProfileDropdownOpen(false); navigate('/admin/mentorship-programs'); }} className="w-full text-left flex items-center px-4 py-2 text-sm text-gray-400 hover:bg-[#0D0D2B] hover:text-[#A855F7] transition-colors">
                   <BookPlus className="w-4 h-4 mr-3 flex-shrink-0" />
                   <span>Programs</span>
                 </button>
               </>
             ) : (
               <>
-                <button onClick={() => { setIsProfileDropdownOpen(false); navigate('/profile'); }} className="w-full text-left flex items-center px-4 py-2 text-sm text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900 transition-colors">
+                <button onClick={() => { setIsProfileDropdownOpen(false); navigate('/profile'); }} className="w-full text-left flex items-center px-4 py-2 text-sm text-gray-400 hover:bg-[#0D0D2B] hover:text-[#00C6F7] transition-colors">
                   <User className="w-4 h-4 mr-3 flex-shrink-0" />
                   <span>Profile</span>
                 </button>
-                <button onClick={() => { setIsProfileDropdownOpen(false); navigate('/'); }} className="w-full text-left flex items-center px-4 py-2 text-sm text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900 transition-colors">
+                <button onClick={() => { setIsProfileDropdownOpen(false); navigate('/'); }} className="w-full text-left flex items-center px-4 py-2 text-sm text-gray-400 hover:bg-[#0D0D2B] hover:text-[#00C6F7] transition-colors">
                   <House className="w-4 h-4 mr-3 flex-shrink-0" />
                   <span>Dashboard</span>
                 </button>
-                <button onClick={() => { setIsProfileDropdownOpen(false); navigate('/resource'); }} className="w-full text-left flex items-center px-4 py-2 text-sm text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900 transition-colors">
+                <button onClick={() => { setIsProfileDropdownOpen(false); navigate('/resource'); }} className="w-full text-left flex items-center px-4 py-2 text-sm text-gray-400 hover:bg-[#0D0D2B] hover:text-[#00C6F7] transition-colors">
                   <BookPlus className="w-4 h-4 mr-3 flex-shrink-0" />
                   <span>Resources</span>
                 </button>
 
-                <button onClick={() => { setIsProfileDropdownOpen(false); navigate('/resume-analyzer'); }} className="w-full text-left flex items-center px-4 py-2 text-sm text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900 transition-colors">
+                <button onClick={() => { setIsProfileDropdownOpen(false); navigate('/resume-analyzer'); }} className="w-full text-left flex items-center px-4 py-2 text-sm text-gray-400 hover:bg-[#0D0D2B] hover:text-[#00C6F7] transition-colors">
                   <BrainCircuit className="w-4 h-4 mr-3 flex-shrink-0" />
                   <span>Resume Analyze</span>
                 </button>
 
-                <button onClick={() => { setIsProfileDropdownOpen(false); navigate('/mentorship'); }} className="w-full text-left flex items-center px-4 py-2 text-sm text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900 transition-colors">
+                <button onClick={() => { setIsProfileDropdownOpen(false); navigate('/mentorship'); }} className="w-full text-left flex items-center px-4 py-2 text-sm text-gray-400 hover:bg-[#0D0D2B] hover:text-[#A855F7] transition-colors">
                   <BrainCircuit className="w-4 h-4 mr-3 flex-shrink-0" />
                   <span>Mentorship</span>
                 </button>
-                <button onClick={() => { setIsProfileDropdownOpen(false); navigate('/mentorship-list'); }} className="w-full text-left flex items-center px-4 py-2 text-sm text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900 transition-colors">
+                <button onClick={() => { setIsProfileDropdownOpen(false); navigate('/mentorship-list'); }} className="w-full text-left flex items-center px-4 py-2 text-sm text-gray-400 hover:bg-[#0D0D2B] hover:text-[#00C6F7] transition-colors">
                   <FileCheck2 className="w-4 h-4 mr-3 flex-shrink-0" />
                   <span>My Submissions</span>
                 </button>
-                <button onClick={() => { setIsProfileDropdownOpen(false); navigate('https://luma.com/codesapiens?period=past'); }} className="w-full text-left flex items-center px-4 py-2 text-sm text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900 transition-colors">
+                <button onClick={() => { setIsProfileDropdownOpen(false); navigate('https://luma.com/codesapiens?period=past'); }} className="w-full text-left flex items-center px-4 py-2 text-sm text-gray-400 hover:bg-[#0D0D2B] hover:text-[#00C6F7] transition-colors">
                   <CalendarSearch className="w-4 h-4 mr-3 flex-shrink-0" />
                   <span>Events</span>
                 </button>
-                <button onClick={() => { setIsProfileDropdownOpen(false); navigate('/meetups'); }} className="w-full text-left flex items-center px-4 py-2 text-sm text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900 transition-colors">
+                <button onClick={() => { setIsProfileDropdownOpen(false); navigate('/meetups'); }} className="w-full text-left flex items-center px-4 py-2 text-sm text-gray-400 hover:bg-[#0D0D2B] hover:text-[#00C6F7] transition-colors">
                   <Users className="w-4 h-4 mr-3 flex-shrink-0" />
                   <span>Meetups</span>
                 </button>
-                <button onClick={() => { setIsProfileDropdownOpen(false); navigate('/programs'); }} className="w-full text-left flex items-center px-4 py-2 text-sm text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900 transition-colors">
+                <button onClick={() => { setIsProfileDropdownOpen(false); navigate('/programs'); }} className="w-full text-left flex items-center px-4 py-2 text-sm text-gray-400 hover:bg-[#0D0D2B] hover:text-[#00C6F7] transition-colors">
                   <BookOpen className="w-4 h-4 mr-3 flex-shrink-0" />
                   <span>Programs</span>
                 </button>
 
               </>
             )}
-            <div className="border-t border-zinc-100 mt-2 pt-2">
+            <div className="border-t border-[#00C6F7]/10 mt-2 pt-2">
               <button
                 onClick={() => {
                   setIsProfileDropdownOpen(false);
                   handleSignOut();
                 }}
-                className="w-full text-left flex items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50 active:bg-red-100 transition-colors"
+                className="w-full text-left flex items-center px-4 py-2 text-sm text-red-400 hover:bg-red-950/40 hover:text-red-300 active:bg-red-950/60 transition-colors"
               >
                 Sign Out
               </button>
@@ -507,7 +507,7 @@ export default function NavBar() {
   const renderMobileMenu = () => {
     if (!isMobileMenuOpen) return null;
 
-    const hoverColor = isAdmin ? 'hover:text-red-600' : 'hover:text-zinc-900';
+    const hoverColor = isAdmin ? 'hover:text-[#A855F7]' : 'hover:text-[#00C6F7]';
 
     return (
       <AnimatePresence>
@@ -517,31 +517,31 @@ export default function NavBar() {
           exit={{ height: 0, opacity: 0 }}
           transition={{ duration: 0.3, ease: "easeInOut" }}
           ref={mobileMenuRef}
-          className="md:hidden border-t border-zinc-100 py-4 space-y-2 bg-white/95 backdrop-blur-md overflow-hidden"
+          className="md:hidden border-t border-[#00C6F7]/20 py-4 space-y-2 bg-[#0A0A0F]/98 backdrop-blur-md overflow-hidden"
         >
           {isAdmin && (
             <>
-              <button onClick={() => navigate('/admin')} className={`w-full text-left block px-4 py-2 text-zinc-600 hover:bg-zinc-50 ${hoverColor} rounded-md font-light transition-colors flex items-center space-x-2`}>
+              <button onClick={() => navigate('/admin')} className={`w-full text-left block px-4 py-2 text-gray-400 hover:bg-[#0D0D2B] ${hoverColor} rounded-md font-light transition-colors flex items-center space-x-2`}>
                 <LayoutDashboard className="w-4 h-4" />
                 <span>Dashboard</span>
               </button>
-              <button onClick={() => navigate('/user-list')} className={`w-full text-left block px-4 py-2 text-zinc-600 hover:bg-zinc-50 ${hoverColor} rounded-md font-light transition-colors flex items-center space-x-2`}>
+              <button onClick={() => navigate('/user-list')} className={`w-full text-left block px-4 py-2 text-gray-400 hover:bg-[#0D0D2B] ${hoverColor} rounded-md font-light transition-colors flex items-center space-x-2`}>
                 <Users className="w-4 h-4" />
                 <span>Users</span>
               </button>
-              <button onClick={() => navigate('/analytics')} className={`w-full text-left block px-4 py-2 text-zinc-600 hover:bg-zinc-50 ${hoverColor} rounded-md font-light transition-colors flex items-center space-x-2`}>
+              <button onClick={() => navigate('/analytics')} className={`w-full text-left block px-4 py-2 text-gray-400 hover:bg-[#0D0D2B] ${hoverColor} rounded-md font-light transition-colors flex items-center space-x-2`}>
                 <BarChart3 className="w-4 h-4" />
                 <span>Analytics</span>
               </button>
-              <button onClick={() => navigate('/admin/meetups')} className={`w-full text-left block px-4 py-2 text-zinc-600 hover:bg-zinc-50 ${hoverColor} rounded-md font-light transition-colors flex items-center space-x-2`}>
+              <button onClick={() => navigate('/admin/meetups')} className={`w-full text-left block px-4 py-2 text-gray-400 hover:bg-[#0D0D2B] ${hoverColor} rounded-md font-light transition-colors flex items-center space-x-2`}>
                 <CalendarSearch className="w-4 h-4" />
                 <span>Meetups</span>
               </button>
-              <button onClick={() => navigate('/admin/mentorship-programs')} className={`w-full text-left block px-4 py-2 text-zinc-600 hover:bg-zinc-50 ${hoverColor} rounded-md font-light transition-colors flex items-center space-x-2`}>
+              <button onClick={() => navigate('/admin/mentorship-programs')} className={`w-full text-left block px-4 py-2 text-gray-400 hover:bg-[#0D0D2B] ${hoverColor} rounded-md font-light transition-colors flex items-center space-x-2`}>
                 <BookPlus className="w-4 h-4" />
                 <span>Programs</span>
               </button>
-              <button onClick={() => navigate('/admin/blogs')} className={`w-full text-left block px-4 py-2 text-zinc-600 hover:bg-zinc-50 ${hoverColor} rounded-md font-light transition-colors flex items-center space-x-2`}>
+              <button onClick={() => navigate('/admin/blogs')} className={`w-full text-left block px-4 py-2 text-gray-400 hover:bg-[#0D0D2B] ${hoverColor} rounded-md font-light transition-colors flex items-center space-x-2`}>
                 <FileText className="w-4 h-4" />
                 <span>Blogs</span>
               </button>
@@ -550,7 +550,7 @@ export default function NavBar() {
 
 
           {/* Mobile User Info */}
-          <div className="border-t border-zinc-100 pt-4 mt-4">
+          <div className="border-t border-[#00C6F7]/10 pt-4 mt-4">
             <div className="px-4 py-2">
               <div className="flex items-center space-x-3 mb-3">
                 {renderUserAvatar('w-10 h-10')}
@@ -561,7 +561,7 @@ export default function NavBar() {
               <div className="space-y-2">
                 <button
                   onClick={handleSignOut}
-                  className="w-full text-left block text-sm text-red-600 hover:text-red-700 py-1 font-medium"
+                  className="w-full text-left block text-sm text-red-400 hover:text-red-300 py-1 font-medium"
                 >
                   Sign Out
                 </button>
@@ -576,15 +576,15 @@ export default function NavBar() {
   // Auth checking state
   if (authChecking) {
     return (
-      <nav className="bg-white/80 backdrop-blur-md shadow-sm border-b border-zinc-200/50 sticky top-0 z-50 w-full">
+      <nav className="bg-[#0A0A0F]/95 backdrop-blur-md shadow-sm border-b border-[#00C6F7]/20 sticky top-0 z-50 w-full">
         <div className="w-full px-6 lg:px-8">
           <div className="flex items-center justify-between h-[70px]">
             <div className="flex items-center space-x-3 flex-shrink-0">
-              <div className="w-10 h-10 bg-zinc-200 rounded-full animate-pulse"></div>
-              <div className="w-32 h-6 bg-zinc-200 rounded animate-pulse"></div>
+              <div className="w-10 h-10 bg-[#0D0D2B] rounded-full animate-pulse border border-[#00C6F7]/20"></div>
+              <div className="w-32 h-6 bg-[#0D0D2B] rounded animate-pulse"></div>
             </div>
             <div className="flex items-center space-x-4">
-              <Loader2 className="w-5 h-5 text-zinc-400 animate-spin" />
+              <Loader2 className="w-5 h-5 text-[#00C6F7] animate-spin" />
             </div>
           </div>
         </div>
@@ -604,7 +604,7 @@ export default function NavBar() {
 
   return (
     <>
-      <nav className="bg-white/80 backdrop-blur-md shadow-sm border-b border-zinc-200/50 sticky top-0 z-50 w-full transition-all duration-300">
+      <nav className="bg-[#0A0A0F]/95 backdrop-blur-md border-b border-[#00C6F7]/20 sticky top-0 z-50 w-full transition-all duration-300 shadow-[0_4px_24px_0_rgba(0,198,247,0.07)]">
         <div className="w-full px-6 lg:px-8">
           <div className="flex items-center justify-between h-[70px]">
             {/* Logo Section */}
@@ -620,13 +620,13 @@ export default function NavBar() {
                 <button
                   ref={profileButtonRef}
                   onClick={toggleProfileDropdown}
-                  className="flex items-center space-x-3 p-1.5 rounded-full hover:bg-zinc-100 transition-colors group"
+                  className="flex items-center space-x-3 p-1.5 rounded-full hover:bg-[#0D0D2B] border border-transparent hover:border-[#00C6F7]/30 transition-all duration-200 group"
                   disabled={loading}
                 >
                   {renderUserAvatar()}
                   <div className="hidden lg:flex items-center space-x-1">
                     {renderUserInfo()}
-                    <ChevronDown className={`w-4 h-4 text-zinc-400 ml-1 transition-transform duration-300 ${isProfileDropdownOpen ? 'rotate-180' : ''} group-hover:text-zinc-600`} />
+                    <ChevronDown className={`w-4 h-4 text-gray-500 ml-1 transition-transform duration-300 ${isProfileDropdownOpen ? 'rotate-180' : ''} group-hover:text-[#00C6F7]`} />
                   </div>
                 </button>
               </div>
@@ -634,7 +634,7 @@ export default function NavBar() {
               {/* Mobile Menu Button */}
               <button
                 onClick={toggleMobileMenu}
-                className="md:hidden p-2 text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100 rounded-lg transition-colors"
+                className="md:hidden p-2 text-gray-400 hover:text-[#00C6F7] hover:bg-[#0D0D2B] rounded-lg transition-colors border border-transparent hover:border-[#00C6F7]/30"
               >
                 {isMobileMenuOpen ? (
                   <X className="w-6 h-6" />
@@ -651,8 +651,8 @@ export default function NavBar() {
 
         {/* Error Display */}
         {error && (
-          <div className="bg-red-50 border-b border-red-200 px-6 py-2">
-            <p className="text-red-700 text-sm">
+          <div className="bg-red-950/50 border-b border-red-500/30 px-6 py-2">
+            <p className="text-red-400 text-sm">
               Failed to load user data: {error}
             </p>
           </div>
