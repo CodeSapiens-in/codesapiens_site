@@ -126,4 +126,51 @@
         -ms-overflow-style: none;
         scrollbar-width: none;
     }
+/* gradient animation */
+
+@keyframes gradientMove {
+  0% {background-position:0% 50%;}
+  50% {background-position:100% 50%;}
+  100% {background-position:0% 50%;}
+}
+
+
+/* floating balloons */
+
+.balloon{
+  position:absolute;
+  bottom:-150px;
+  width:120px;
+  height:120px;
+  border-radius:50%;
+  background:rgba(255,255,255,0.05);
+  backdrop-filter: blur(5px);
+  animation: floatUp 18s linear infinite;
+}
+
+.balloon:nth-child(1){ left:10%; animation-duration:18s; }
+.balloon:nth-child(2){ left:30%; animation-duration:22s; width:90px;height:90px;}
+.balloon:nth-child(3){ left:55%; animation-duration:20s;}
+.balloon:nth-child(4){ left:75%; animation-duration:24s;width:80px;height:80px;}
+.balloon:nth-child(5){ left:90%; animation-duration:26s;}
+
+@keyframes floatUp{
+  0%{
+    transform:translateY(0);
+    opacity:0;
+  }
+  20%{
+    opacity:1;
+  }
+  100%{
+    transform:translateY(-120vh);
+    opacity:0;
+  }
+}
+
+@keyframes gradientMove{
+  0% {background-position: 0% 50%;}
+  50% {background-position: 100% 50%;}
+  100% {background-position: 0% 50%;}
+}
 }
