@@ -338,16 +338,13 @@ export default function NavBar() {
   const renderLogo = () => {
     return (
       <div className="flex items-center space-x-3 flex-shrink-0 cursor-pointer group" onClick={() => navigate(isAdmin ? '/admin' : '/')}>
-        <div className="w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center overflow-hidden rounded-full shadow-sm transition-transform duration-300 group-hover:scale-105">
+        <div className="w-10 h-10 sm:w-10 sm:h-10 flex items-center justify-center overflow-hidden rounded-full shadow-sm transition-transform duration-300 group-hover:scale-105">
           <img
             src="https://res.cloudinary.com/druvxcll9/image/upload/v1761122530/WhatsApp_Image_2025-09-02_at_12.45.18_b15791ea_rnlwrz_3_r4kp2u.jpg"
             alt="Logo"
             className="w-full h-full object-cover"
           />
         </div>
-        <span className="text-lg sm:text-xl font-light tracking-wider text-zinc-900 group-hover:text-zinc-700 transition-colors">
-          {isAdmin ? 'CodeSapiens Admin' : 'CodeSapiens'}
-        </span>
       </div>
     );
   };
